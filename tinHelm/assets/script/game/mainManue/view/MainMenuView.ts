@@ -53,7 +53,7 @@ export class MainMenuView extends CCView<MainMenu> {
 
     btnStart() {
         if (this.isBtnStartShow) {
-            console.log("点击继续")
+            this.ent.entryGame();
         } else {
             const btnStart = this.getNode("btnStart");
             TweenAnimUtil.move(btnStart!, -300, 0, 0.5, () => {

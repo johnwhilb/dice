@@ -1,0 +1,101 @@
+// Copyright (c) 2017-2020 Xiamen Yaji Software Co., Ltd.
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        # === 交互变量 (由 TS 实时更新) ===
+        tilt: { value: [0.0, 0.0] }
+        hoverScale: { value: 1.0 }
+
+        # === 变形配置 ===
+        perspective: { value: 0.8, editor: { slide: true, range: [0.0, 2.0], step: 0.1 } }
+        baseScale: { value: 1.3, editor: { slide: true, range: [1.0, 2.0], step: 0.05 } }
+        
+        # === 新增：抗锯齿配置 ===
+        # 控制边缘虚化的宽度，值越大边缘越柔和。通常 0.01 到 0.02 就能完美消除锯齿
+        edgeFeather: { value: 0.015, editor: { tooltip: '边缘抗锯齿羽化度', slide: true, range: [0.001, 0.05], step: 0.001 } }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec4 color;
+  out vec2 uv0;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+    pos = cc_matViewProj * pos; 
+    uv0 = a_texCoord;
+    color = a_color;
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec4 color;
+  in vec2 uv0;
+
+  #pragma builtin(local)
+  layout(set = 2, binding = 12) uniform sampler2D cc_spriteTexture;
+
+  uniform TiltConfig {
+    vec2 tilt;
+    float hoverScale;
+    float perspective;
+    float baseScale;
+    float edgeFeather; // 接收羽化度
+  };
+
+  vec4 frag () {
+    // 1. 将 UV 中心移到 (0,0)
+    vec2 uv = uv0 - 0.5;
+
+    // 2. 【计算虚拟深度 Z 并进行透视除法】
+    // 【终极修复】：将减号改为了加号 + 
+    // 完美适配 Cocos 左上角 UV 坐标系，现在按哪里，哪里就会乖乖下凹！
+    float z = uv.x * tilt.y + uv.y * tilt.x;
+    uv = uv / (1.0 + z * perspective);
+
+    // 3. 【悬浮变大】
+    uv /= hoverScale;
+
+    // 4. 【基础缩放：防止越界】
+    uv *= baseScale;
+
+    // 5. 还原 UV 中心到左下角
+    uv += 0.5;
+
+    // 6. 采样原本的图片
+    vec4 texColor = texture(cc_spriteTexture, uv);
+
+    // 7. 【抗锯齿魔法：平滑边缘遮罩】
+    float maskX = smoothstep(0.0, edgeFeather, uv.x) * smoothstep(1.0, 1.0 - edgeFeather, uv.x);
+    float maskY = smoothstep(0.0, edgeFeather, uv.y) * smoothstep(1.0, 1.0 - edgeFeather, uv.y);
+    
+    // 将遮罩叠加到最终的透明度上
+    texColor.a *= (maskX * maskY);
+
+    return texColor * color;
+  }
+}%

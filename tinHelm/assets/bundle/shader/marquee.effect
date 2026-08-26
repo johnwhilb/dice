@@ -1,0 +1,108 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+
+      rasterizerState:
+        cullMode: none
+
+      properties:
+        speed:
+          value: 100.0
+          target: params.x
+
+        range:
+          value: 500.0
+          target: params.y
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec2 uv0;
+  out vec4 color;
+
+  uniform MoveParams {
+    vec4 params;
+  };
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1.0);
+
+    float speed = params.x;
+    float range = params.y;
+
+    // 0 ~ range 循环
+    float offset = mod(cc_time.x * speed, range);
+
+    // 整个 Label 往右移动
+    pos.x += offset;
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+
+    pos = cc_matViewProj * pos;
+
+    uv0 = a_texCoord;
+    color = a_color;
+
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+
+  #include <builtin/internal/embedded-alpha>
+  #include <builtin/internal/alpha-test>
+
+  in vec2 uv0;
+  in vec4 color;
+
+  #if USE_TEXTURE
+    #pragma builtin(local)
+    layout(set = 2, binding = 11) uniform sampler2D cc_spriteTexture;
+  #endif
+
+  vec4 frag () {
+    vec4 o = vec4(1.0);
+
+    #if USE_TEXTURE
+      // UV 不动
+      o *= CCSampleWithAlphaSeparated(
+        cc_spriteTexture,
+        uv0
+      );
+    #endif
+
+    // 保留 Label 原来的颜色
+    o *= color;
+
+    ALPHA_TEST(o);
+
+    return o;
+  }
+}%
