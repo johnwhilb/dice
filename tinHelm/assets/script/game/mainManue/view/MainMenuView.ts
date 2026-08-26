@@ -5,10 +5,10 @@ import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { smc } from '../../common/SingletonModuleComp';
 import { gui } from 'db://oops-framework/core/gui/Gui';
 import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
-import { TweenAnimUtil } from 'db://oops-framework/core/utils/TweenAnimUtil';
 import { Sprite } from 'cc';
 import { ResPath } from '../../common/config/ResPath';
 import { ProfileEvent } from '../../profile/ProfileEvent';
+import { TweenAnimUtil } from '../../common/util/TweenAnimUtil';
 const { ccclass } = _decorator;
 
 @ccclass("MainMenuView")
@@ -78,7 +78,6 @@ export class MainMenuView extends CCView<MainMenu> {
     }
 
     btnProfile() {
-        this.printResUsage();
         this.ent.openProfileDialog();
     }
 
