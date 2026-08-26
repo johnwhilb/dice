@@ -36,4 +36,8 @@ export class MainMenu extends CCEntity {
         this.getBusiness<MainMenuBll>(MainMenuBll).openProfileDialog();
     }
 
+    entryGame() {
+        this.getBusiness<MainMenuBll>(MainMenuBll).entryGame();
+    }
+
 }

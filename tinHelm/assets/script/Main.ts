@@ -8,6 +8,8 @@ import { smc } from './game/common/SingletonModuleComp';
 import { Initialize } from './game/initialize/Initialize';
 import { MainMenu } from './game/mainManue/MainMenu';
 import { Profile } from './game/profile/Profile';
+import { Player } from './game/player/Player';
+import { GameFlow } from './game/gameFlow/GameFlow';
 
 const { ccclass, property } = _decorator;
 
@@ -34,6 +36,8 @@ export class Main extends Root {
         smc.initialize = ecs.getEntity(Initialize);
         smc.mainMenu = ecs.getEntity(MainMenu);
         smc.profile = ecs.getEntity(Profile);
+        smc.player = ecs.getEntity(Player);
+        smc.gameFlow = ecs.getEntity(GameFlow);
         smc.initialize.load(this.initial);
     }
 }

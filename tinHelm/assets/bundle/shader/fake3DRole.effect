@@ -1,0 +1,124 @@
+// Copyright (c) 2017-2020 Xiamen Yaji Software Co., Ltd.
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        # === 交互变量 (由 TS 实时更新) ===
+        tilt: { value: [0.0, 0.0] }
+        hoverScale: { value: 1.0 }
+
+        # === 变形配置 ===
+        baseScale: { value: 1.3, editor: { slide: true, range: [1.0, 2.0], step: 0.05 } }
+        edgeFeather: { value: 0.015, editor: { tooltip: '边缘抗锯齿羽化度', slide: true, range: [0.001, 0.05], step: 0.001 } }
+
+        # === 新增：动态光影配置 ===
+        shadowColor: { value: [0.0, 0.0, 0.0, 0.5], editor: { type: color, tooltip: '底板落影颜色' } }
+        shadowDistance: { value: 0.1, editor: { tooltip: '阴影最远偏移距离', slide: true, range: [0.0, 0.3], step: 0.01 } }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec4 color;
+  out vec2 uv0;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+    pos = cc_matViewProj * pos; 
+    uv0 = a_texCoord;
+    color = a_color;
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec4 color;
+  in vec2 uv0;
+
+  #pragma builtin(local)
+  layout(set = 2, binding = 12) uniform sampler2D cc_spriteTexture;
+
+  // 严格保证内存对齐的 Uniform 结构
+  uniform TiltConfig {
+    vec4 shadowColor;
+    vec2 tilt;
+    float hoverScale;
+    float baseScale;
+    float edgeFeather;
+    float shadowDistance;
+  };
+
+  vec4 frag () {
+    // 1. 将 UV 中心移到 (0,0)
+    vec2 uv = uv0 - 0.5;
+
+    // 【修改点】：已彻底移除虚拟深度 Z 的计算和透视除法。
+    // 现在图片不会再有任何 3D 倾斜变形，保持纯平面！
+
+    // 2. 【悬浮变大】
+    uv /= hoverScale;
+
+    // 3. 【基础缩放：防止越界】
+    uv *= baseScale;
+
+    // 4. 还原 UV 中心到左下角
+    uv += 0.5;
+
+    // ==========================================
+    // 5. 【核心数学：解析鼠标光源位置】
+    // ==========================================
+    // 虽然去掉了倾斜变形，但 tilt 依然作为光源方向传入
+    vec2 mouseDir = vec2(-tilt.y, tilt.x);
+    float tiltMagnitude = length(mouseDir);
+    
+    // 光源强度：只有悬浮移动时才有光影
+    float lightIntensity = clamp(tiltMagnitude * 4.0, 0.0, 1.0);
+
+    // ==========================================
+    // 6. 【纯粹的动态落影层 (Drop Shadow Only)】
+    // ==========================================
+    // 阴影在物理世界的视觉方向（背离光源）
+    vec2 shadowVisualDir = -mouseDir; 
+    
+    // Y轴反转修正
+    vec2 shadowUVDir = vec2(shadowVisualDir.x, -shadowVisualDir.y);
+    
+    // 乘以距离，得到最终 UV 偏移量
+    vec2 dynamicShadowOffset = shadowUVDir * shadowDistance;
+    vec2 shadowUV = uv - dynamicShadowOffset;
+    
+    vec4 shadowTex = texture(cc_spriteTexture, shadowUV);
+    
+    // 阴影透明度结合光线强度，未悬浮时完全透明消失
+    float shadowA = shadowTex.a * shadowColor.a * color.a * lightIntensity;
+    
+    // 边缘羽化抗锯齿
+    float sMaskX = smoothstep(0.0, edgeFeather, shadowUV.x) * smoothstep(1.0, 1.0 - edgeFeather, shadowUV.x);
+    float sMaskY = smoothstep(0.0, edgeFeather, shadowUV.y) * smoothstep(1.0, 1.0 - edgeFeather, shadowUV.y);
+    shadowA *= (sMaskX * sMaskY);
+    
+    // 直接返回阴影，彻底剔除原本的图片色彩
+    return vec4(shadowColor.rgb, shadowA);
+  }
+}%

@@ -5,8 +5,8 @@ import { smc } from '../../common/SingletonModuleComp';
 
 export class MainMenuBll extends CCBusiness<MainMenu> {
 
-    startGame() {
-        console.log("startGame");
+    entryGame() {
+        smc.gameFlow.entryGameSceneByGameFlowState();
     }
 
     continueGame() {
