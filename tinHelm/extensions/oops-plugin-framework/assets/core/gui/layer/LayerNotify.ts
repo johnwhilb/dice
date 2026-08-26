@@ -1,0 +1,147 @@
+/*
+ * @Author: dgflash
+ * @Date: 2022-08-15 10:06:47
+ * @LastEditors: dgflash
+ * @LastEditTime: 2022-09-02 13:44:12
+ */
+import { BlockInputEvents, Node, instantiate } from 'cc';
+import { EDITOR } from 'cc/env';
+import { ViewUtil } from '../../utils/ViewUtil';
+import { PromptResType } from '../GuiEnum';
+import { Notify } from '../prompt/Notify';
+import { LayerHelper } from './LayerHelper';
+
+/* 滚动消息提示层 */
+export class LayerNotify extends Node {
+    private black!: BlockInputEvents;
+    /** 等待提示资源 */
+    private wait: Node = null!;
+    /** 自定义弹出提示资源 */
+    private notify: Node = null!;
+    /** 自定义弹出提示内容资源 */
+    private notifyItem: Node = null!;
+    /** 标记是否正在打开等待提示中 */
+    private waitOpening: boolean = false;
+    /** 标记是否在打开过程中被请求关闭 */
+    private waitShouldClose: boolean = false;
+
+    constructor(name: string) {
+        super(name);
+        LayerHelper.setFullScreen(this);
+
+        this.black = this.addComponent(BlockInputEvents);
+        this.black.enabled = false;
+    }
+
+    /** 打开等待提示 */
+    async waitOpen() {
+        this.waitOpening = true;
+
+        try {
+            if (this.wait == null) {
+                // 兼容编辑器预览模式
+                if (EDITOR) {
+                    this.wait = await ViewUtil.createPrefabNodeAsync(PromptResType.Wait);
+                }
+                else {
+                    this.wait = ViewUtil.createPrefabNode(PromptResType.Wait);
+                }
+            }
+
+            // 异步操作完成后，检查是否已被请求关闭
+            if (this.waitShouldClose) {
+                this.waitShouldClose = false;
+                this.doWaitClose();
+                return;
+            }
+
+            if (this.wait.parent == null) {
+                this.wait.parent = this;
+                this.black.enabled = true;
+            }
+        } finally {
+            this.waitOpening = false;
+        }
+    }
+
+    /** 关闭等待提示 */
+    waitClose() {
+        // 如果正在打开中，标记应该关闭，等打开完成后再关闭
+        if (this.waitOpening) {
+            this.waitShouldClose = true;
+            return;
+        }
+
+        this.doWaitClose();
+    }
+
+    /** 实际执行关闭等待提示 */
+    private doWaitClose() {
+        if (this.wait && this.wait.parent) {
+            this.wait.parent = null;
+            this.black.enabled = false;
+        }
+        this.waitShouldClose = false;
+    }
+
+    /**
+     * 渐隐飘过提示
+     * @param content 文本表示
+     * @param useI18n 是否使用多语言
+     */
+    async toast(content: string, useI18n: boolean) {
+        if (this.notify == null) {
+            // 兼容编辑器预览模式
+            if (EDITOR) {
+                this.notify = await ViewUtil.createPrefabNodeAsync(PromptResType.Toast);
+            }
+            else {
+                this.notify = ViewUtil.createPrefabNode(PromptResType.Toast);
+            }
+            this.notifyItem = this.notify.children[0];
+            this.notifyItem.parent = null;
+        }
+
+        this.notify.parent = this;
+        const childNode = instantiate(this.notifyItem);
+        const prompt = childNode.getChildByName('prompt')!;
+        const toastCom = prompt.getComponent(Notify)!;
+        childNode.parent = this.notify;
+
+        toastCom.onComplete = () => {
+            if (this.notify.children.length == 0) {
+                this.notify.parent = null;
+            }
+        };
+        toastCom.toast(content, useI18n);
+
+        // 超过3个提示，就释放第一个提示
+        if (this.notify.children.length > 3) {
+            this.notify.children[0].destroy();
+        }
+    }
+
+    /** 销毁时释放资源 */
+    onDestroy() {
+        // 清理等待提示节点
+        if (this.wait) {
+            this.wait.destroy();
+            this.wait = null!;
+        }
+        
+        // 清理通知提示节点
+        if (this.notify) {
+            this.notify.destroy();
+            this.notify = null!;
+        }
+        
+        // 清理通知项模板节点
+        if (this.notifyItem) {
+            this.notifyItem.destroy();
+            this.notifyItem = null!;
+        }
+        
+        // 清理事件阻挡组件
+        this.black = null!;
+    }
+}

@@ -52,10 +52,13 @@ export class MainMenuView extends CCView<MainMenu> {
     }
 
     btnStart() {
+        const btnStart = this.getNode("btnStart");
         if (this.isBtnStartShow) {
             this.ent.entryGame();
+            TweenAnimUtil.move(btnStart!, 300, 0, 0.5, () => {
+                this.isBtnStartShow = false
+            });
         } else {
-            const btnStart = this.getNode("btnStart");
             TweenAnimUtil.move(btnStart!, -300, 0, 0.5, () => {
                 this.isBtnStartShow = true
             });

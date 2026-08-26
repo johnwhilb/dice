@@ -23,8 +23,7 @@ export class nodeRoleItem extends GameComponent {
     }
 
     btnSelect() {
-
-        smc.profile.ProfileAvatarBll.changeCurrentSelectAvatarId(this.currentRoleId);
+        smc.profile.changeCurrentSelectAvatarId(this.currentRoleId);
     }
 
 }

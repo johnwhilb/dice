@@ -7,9 +7,9 @@ import { RoleSelectView } from '../player/view/RoleSelectView';
 
 @ecs.register('GameFlow')
 export class GameFlow extends CCEntity {
-    gameFlowModel!: GameFlowModel
-    gameFlowBll!: GameFlowBll
-    roleSelectView!: RoleSelectView
+    GameFlowModel!: GameFlowModel
+    GameFlowBll!: GameFlowBll
+    RoleSelectView!: RoleSelectView
 
     static create(): GameFlow {
         return ecs.getEntity<GameFlow>(GameFlow);
@@ -22,13 +22,21 @@ export class GameFlow extends CCEntity {
 
     openRoleSelectView() {
         if (this.has(RoleSelectView)) {
-            return Promise.resolve(this.roleSelectView.node);
+            return Promise.resolve(this.RoleSelectView.node);
         }
         this.addUi(RoleSelectView);
     }
 
-    entryGameSceneByGameFlowState() {
-        this.gameFlowBll.entryGameSceneByGameFlowState();
+    closeRoleSelectView() {
+        if (this.has(RoleSelectView)) {
+            this.removeUi(RoleSelectView);
+        }
     }
+
+    entryGameSceneByGameFlowState() {
+        this.GameFlowBll.entryGameSceneByGameFlowState();
+    }
+
+
 
 }
