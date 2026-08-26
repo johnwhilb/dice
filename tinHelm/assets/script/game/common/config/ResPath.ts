@@ -15,6 +15,13 @@ export class ResPath {
         return `texture/roleBody/roleBody${id}/spriteFrame`;
     }
 
+    /**
+     * 角色卡片
+     */
+    static getSpriteRoleCard(id: number): string {
+        return `texture/roleCard/roleCard${id}/spriteFrame`;
+    }
+
 
     /**
      * 道具图标

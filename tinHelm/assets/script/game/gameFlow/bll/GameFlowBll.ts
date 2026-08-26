@@ -5,7 +5,7 @@ import { GameFlowState } from '../model/GameFlowModel';
 export class GameFlowBll extends CCBusiness<GameFlow> {
 
     entryGameSceneByGameFlowState() {
-        switch (this.ent.gameFlowModel.currentGameFlowState) {
+        switch (this.ent.GameFlowModel.currentGameFlowState) {
             case GameFlowState.RoleSelect:
                 this.ent.openRoleSelectView();
                 break;

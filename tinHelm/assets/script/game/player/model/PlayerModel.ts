@@ -4,7 +4,7 @@ import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 @ecs.register('PlayerModel')
 export class PlayerModel extends ecs.Comp {
 
-    roleId: number = 0;
+    roleId: number = 1001;
 
     public reset(): void {
         this.roleId = 1001;

@@ -8,9 +8,9 @@ import { RoleSelectView } from './view/RoleSelectView';
 @ecs.register('Player')
 export class Player extends CCEntity {
 
-    playerModel!: PlayerModel
-    playerBll!: PlayerBll
-    roleSelectView!: RoleSelectView
+    PlayerModel!: PlayerModel
+    PlayerBll!: PlayerBll
+    RoleSelectView!: RoleSelectView
 
 
     static create(): Player {
@@ -22,9 +22,14 @@ export class Player extends CCEntity {
         this.addBusinesss(PlayerBll);
     }
 
-    selectPlayer(roleId: number) {
-        this.playerBll.selectPlayer(roleId);
+    selectRole(roleId: number) {
+        this.PlayerBll.selectRole(roleId);
     }
+
+    getSelectedRoleId() {
+        return this.PlayerModel.roleId;
+    }
+
 
 
 }
