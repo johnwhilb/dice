@@ -59,7 +59,6 @@ export class ProfileDialog extends CCView<Profile> {
     }
 
     btnClose() {
-        this.printResUsage();
         this.ent.close();
     }
 
