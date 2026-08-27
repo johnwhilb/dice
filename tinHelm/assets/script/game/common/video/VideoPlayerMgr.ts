@@ -1,7 +1,7 @@
 import { VideoBase } from "./VideoBase";
 
 export class VideoPlayerMgr {
-    private static _instance: VideoPlayerMgr = null;
+    private static _instance: VideoPlayerMgr | null = null;
     public static get ins(): VideoPlayerMgr {
         if (!this._instance) {
             this._instance = new VideoPlayerMgr();

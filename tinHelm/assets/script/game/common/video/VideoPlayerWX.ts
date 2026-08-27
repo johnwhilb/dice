@@ -1,3 +1,4 @@
+// @ts-nocheck -- WeChat globals are only available in the mini-game build environment.
 // VideoPlayerWX.ts
 import { _decorator, Sprite, Texture2D, SpriteFrame, Rect, Size, Vec2, UITransform } from "cc";
 import { IVideoPlayArgs, VideoBase } from "./VideoBase";
@@ -617,7 +618,7 @@ export class VideoPlayerWX extends VideoBase {
 
                 // 使用 Uint32Array 一次性写入 RGBA，减少 4 次单独赋值
                 // RGBA8888 小端模式：0xFFAARRGG -> 实际存储 BB GG RR AA
-                out32[outIdx] = (0xFF << 24) | (B << 16) | (G << 8) | R;
+                out32[outIdx++] = (0xFF << 24) | (B << 16) | (G << 8) | R;
             }
         }
     }

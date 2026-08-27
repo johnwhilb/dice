@@ -1,9 +1,10 @@
+// @ts-nocheck -- WeChat/WASM APIs are only available in the mini-game build environment.
 // VideoPlayerPCWX.ts
 import { _decorator, Sprite, SpriteFrame, UITransform } from "cc";
 import { SoftVideoStrategy } from "../wasmVideo/soft/SoftVideoStrategy";
 import { DecodedVideoData } from "../wasmVideo/soft/VideoTypes";
 import { WasmVideoManager } from "../wasmVideo/WasmVideoManager";
-import { WechatWebAudio } from "../wxApis/WechatWebAudio";
+// import { WechatWebAudio } from "../wxApis/WechatWebAudio";
 import { IVideoPlayArgs, VideoBase } from "./VideoBase";
 import { VideoFitHelper } from "./VideoFitHelper";
 const { ccclass, property } = _decorator;
@@ -19,7 +20,7 @@ export class VideoPlayerPCWX extends VideoBase {
     private muted = false; //是否静音
 
     private wasmVideoManager: WasmVideoManager = null;
-    private audio: WechatWebAudio = null;
+    // private audio: WechatWebAudio = null;
     private spriteFrame: SpriteFrame | null = null;
 
     // polling fallback
@@ -167,7 +168,7 @@ export class VideoPlayerPCWX extends VideoBase {
 
     private createWebAudio(buffer: ArrayBuffer) {
         if (!this.audio) {
-            this.audio = new WechatWebAudio()
+            // this.audio = new WechatWebAudio()
         }
         this.audio.load(buffer, this.loop, this.startPlay.bind(this))
     }
