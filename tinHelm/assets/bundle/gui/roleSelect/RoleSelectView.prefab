@@ -232,7 +232,7 @@
       "__id__": 1
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 9
@@ -2998,7 +2998,6 @@
     },
     "fileId": "65Pe/9AIJMgIjcSkJv5QHh",
     "instance": null,
-    "targetOverrides": null,
     "nestedPrefabInstanceRoots": [
       {
         "__id__": 26

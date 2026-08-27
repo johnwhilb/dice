@@ -1,0 +1,118 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        chromaParams: { value: [0.28, 0.18, 1.0, 0.01] }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  #if SAMPLE_FROM_RT
+    #include <common/common-define>
+  #endif
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec4 color;
+  out vec2 uv0;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1.0);
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+
+    #if USE_PIXEL_ALIGNMENT
+      pos = cc_matView * pos;
+      pos.xyz = floor(pos.xyz);
+      pos = cc_matProj * pos;
+    #else
+      pos = cc_matViewProj * pos;
+    #endif
+
+    uv0 = a_texCoord;
+
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+
+    color = a_color;
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+
+  #include <builtin/internal/embedded-alpha>
+
+  in vec4 color;
+  in vec2 uv0;
+
+  #pragma builtin(local)
+  layout(set = 2, binding = 11) uniform sampler2D cc_spriteTexture;
+
+  uniform ChromaKeyConstant {
+    // x: threshold   绿色优势达到这个范围后开始抠除
+    // y: softness    边缘过渡宽度
+    // z: despill     去绿边强度 0~1
+    // w: cutoff      alpha 低于此值直接 discard
+    vec4 chromaParams;
+  };
+
+  vec4 frag () {
+    vec4 o = CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
+
+    float threshold = chromaParams.x;
+    float softness  = max(chromaParams.y, 0.0001);
+    float despill   = clamp(chromaParams.z, 0.0, 1.0);
+    float cutoff    = chromaParams.w;
+
+    // Chroma key based on green dominance rather than exact #00FF00.
+    // This handles AI-generated green backgrounds, antialiasing and compression better.
+    float maxRB = max(o.r, o.b);
+    float greenExcess = o.g - maxRB;
+
+    float keyStart = max(0.0, threshold - softness);
+    float keyEnd   = threshold + softness;
+    float keyAmount = smoothstep(keyStart, keyEnd, greenExcess);
+    float matte = 1.0 - keyAmount;
+
+    // De-spill only where the pixel is being identified as green-screen.
+    // Pull green toward the strongest non-green channel to avoid a green halo.
+    float neutralGreen = maxRB;
+    o.g = mix(o.g, neutralGreen, keyAmount * despill);
+
+    o.a *= matte;
+    o *= color;
+
+    if (o.a <= cutoff) {
+      discard;
+    }
+
+    return o;
+  }
+}%

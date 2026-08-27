@@ -3,29 +3,20 @@ CCEffect %{
   - passes:
     - vert: sprite-vs:vert
       frag: sprite-fs:frag
-
       depthStencilState:
         depthTest: false
         depthWrite: false
-
       blendState:
         targets:
         - blend: true
           blendSrc: src_alpha
           blendDst: one_minus_src_alpha
           blendDstAlpha: one_minus_src_alpha
-
       rasterizerState:
         cullMode: none
-
       properties:
-        speed:
-          value: 100.0
-          target: params.x
-
-        range:
-          value: 500.0
-          target: params.y
+        alphaThreshold: { value: 0.5 }
+        speed: { value: 0.2 }
 }%
 
 CCProgram sprite-vs %{
@@ -37,36 +28,38 @@ CCProgram sprite-vs %{
     #include <builtin/uniforms/cc-local>
   #endif
 
+  #if SAMPLE_FROM_RT
+    #include <common/common-define>
+  #endif
+
   in vec3 a_position;
   in vec2 a_texCoord;
   in vec4 a_color;
 
-  out vec2 uv0;
   out vec4 color;
-
-  uniform MoveParams {
-    vec4 params;
-  };
+  out vec2 uv0;
 
   vec4 vert () {
     vec4 pos = vec4(a_position, 1.0);
-
-    float speed = params.x;
-    float range = params.y;
-
-    // 0 ~ range 循环
-    float offset = mod(cc_time.x * speed, range);
-
-    // 整个 Label 往右移动
-    pos.x += offset;
 
     #if USE_LOCAL
       pos = cc_matWorld * pos;
     #endif
 
-    pos = cc_matViewProj * pos;
+    #if USE_PIXEL_ALIGNMENT
+      pos = cc_matView * pos;
+      pos.xyz = floor(pos.xyz);
+      pos = cc_matProj * pos;
+    #else
+      pos = cc_matViewProj * pos;
+    #endif
 
     uv0 = a_texCoord;
+
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+
     color = a_color;
 
     return pos;
@@ -76,29 +69,30 @@ CCProgram sprite-vs %{
 CCProgram sprite-fs %{
   precision highp float;
 
+  #include <builtin/uniforms/cc-global>
   #include <builtin/internal/embedded-alpha>
   #include <builtin/internal/alpha-test>
 
-  in vec2 uv0;
   in vec4 color;
+  in vec2 uv0;
 
-  #if USE_TEXTURE
-    #pragma builtin(local)
-    layout(set = 2, binding = 11) uniform sampler2D cc_spriteTexture;
-  #endif
+  uniform ScrollParams {
+    float speed;
+  };
+
+  #pragma builtin(local)
+  layout(set = 2, binding = 11) uniform sampler2D cc_spriteTexture;
 
   vec4 frag () {
-    vec4 o = vec4(1.0);
+    // 左 -> 右移动
+    vec2 uv = uv0;
+    uv.x = fract(uv.x - cc_time.x * speed);
 
-    #if USE_TEXTURE
-      // UV 不动
-      o *= CCSampleWithAlphaSeparated(
-        cc_spriteTexture,
-        uv0
-      );
-    #endif
+    vec4 o = CCSampleWithAlphaSeparated(
+      cc_spriteTexture,
+      uv
+    );
 
-    // 保留 Label 原来的颜色
     o *= color;
 
     ALPHA_TEST(o);
