@@ -15,8 +15,7 @@ CCEffect %{
       rasterizerState:
         cullMode: none
       properties:
-        alphaThreshold: { value: 0.5 }
-        speed: { value: 0.2 }
+        chromaParams: { value: [0.28, 0.18, 1.0, 0.01] }
 }%
 
 CCProgram sprite-vs %{
@@ -61,7 +60,6 @@ CCProgram sprite-vs %{
     #endif
 
     color = a_color;
-
     return pos;
   }
 }%
@@ -69,33 +67,51 @@ CCProgram sprite-vs %{
 CCProgram sprite-fs %{
   precision highp float;
 
-  #include <builtin/uniforms/cc-global>
   #include <builtin/internal/embedded-alpha>
-  #include <builtin/internal/alpha-test>
 
   in vec4 color;
   in vec2 uv0;
 
-  uniform ScrollParams {
-    float speed;
-  };
-
   #pragma builtin(local)
   layout(set = 2, binding = 11) uniform sampler2D cc_spriteTexture;
 
+  uniform ChromaKeyConstant {
+    // x: threshold   绿色优势达到这个范围后开始抠除
+    // y: softness    边缘过渡宽度
+    // z: despill     去绿边强度 0~1
+    // w: cutoff      alpha 低于此值直接 discard
+    vec4 chromaParams;
+  };
+
   vec4 frag () {
-    // 左 -> 右移动
-    vec2 uv = uv0;
-    uv.x = fract(uv.x - cc_time.x * speed);
+    vec4 o = CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
 
-    vec4 o = CCSampleWithAlphaSeparated(
-      cc_spriteTexture,
-      uv
-    );
+    float threshold = chromaParams.x;
+    float softness  = max(chromaParams.y, 0.0001);
+    float despill   = clamp(chromaParams.z, 0.0, 1.0);
+    float cutoff    = chromaParams.w;
 
+    // Chroma key based on green dominance rather than exact #00FF00.
+    // This handles AI-generated green backgrounds, antialiasing and compression better.
+    float maxRB = max(o.r, o.b);
+    float greenExcess = o.g - maxRB;
+
+    float keyStart = max(0.0, threshold - softness);
+    float keyEnd   = threshold + softness;
+    float keyAmount = smoothstep(keyStart, keyEnd, greenExcess);
+    float matte = 1.0 - keyAmount;
+
+    // De-spill only where the pixel is being identified as green-screen.
+    // Pull green toward the strongest non-green channel to avoid a green halo.
+    float neutralGreen = maxRB;
+    o.g = mix(o.g, neutralGreen, keyAmount * despill);
+
+    o.a *= matte;
     o *= color;
 
-    ALPHA_TEST(o);
+    if (o.a <= cutoff) {
+      discard;
+    }
 
     return o;
   }
