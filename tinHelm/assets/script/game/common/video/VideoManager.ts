@@ -1,11 +1,11 @@
-import { _decorator, Component, Sprite, Texture2D, sys, VideoClip } from "cc";
+import { _decorator, Component, Sprite, sys, VideoClip } from "cc";
 import { VideoPlayerWX } from "./VideoPlayerWX";
 import VideoPlayerWeb from "./VideoPlayerWeb";
 import { IVideoPlayArgs, IVideoPlayerEvent, VideoBase } from "./VideoBase";
 import { VideoPlayerPCWX } from "./VideoPlayerPCWX";
-import { oops } from "../../../oops/core/Oops";
 import { VideoPlayerMgr } from "./VideoPlayerMgr";
 import { isWasmVideoSupported } from "../wasmVideo/soft/Utils";
+import { oops } from "db://oops-framework/core/Oops";
 
 const { ccclass, property } = _decorator;
 
@@ -14,8 +14,8 @@ export class VideoManager extends Component {
     @property(Sprite)
     videoSprite: Sprite | null = null;   // 显示视频的 Sprite
 
-    private player: VideoBase = null;
-    private prePlayer: VideoBase = null;
+    private player: VideoBase | null = null;
+    private prePlayer: VideoBase | null = null;
 
     private videoUrlMap: Map<string, string> = new Map(); //资源映射
     onLoad() {
@@ -30,13 +30,15 @@ export class VideoManager extends Component {
             this.player = null;
         }
         if (!this.player) {
-            this.player = this.createVideo();
-            this.player!.render_sprite = this.videoSprite;
-            VideoPlayerMgr.ins.addPlayer(this.player);
+            const player = this.createVideo();
+            if (!player) return;
+            player.render_sprite = this.videoSprite;
+            this.player = player;
+            VideoPlayerMgr.ins.addPlayer(player);
         }
     }
 
-    private createVideo(): VideoBase {
+    private createVideo(): VideoBase | null {
         switch (sys.platform) {
             case sys.Platform.WECHAT_GAME: {
                 if (isWasmVideoSupported()) { //开发者工具或者pc端小程序
@@ -54,29 +56,36 @@ export class VideoManager extends Component {
         }
     }
 
-    private getVideoUrl(vc: VideoClip) {
+    private getVideoUrl(vc: VideoClip): string | null {
         switch (sys.platform) {
             case sys.Platform.WECHAT_GAME:
-                return (vc as any)["_video"];
+                return (vc as any)["_video"] ?? vc.nativeUrl;
             case sys.Platform.DESKTOP_BROWSER:
             case sys.Platform.MOBILE_BROWSER:
-                return this.processBaseUrl(vc["_video"]["baseURI"]) + vc.nativeUrl
+                const nativeVideo = (vc as any)["_video"] ?? (vc as any)["_nativeAsset"];
+                if (typeof nativeVideo === "string") return nativeVideo;
+                if (nativeVideo?.currentSrc) return nativeVideo.currentSrc;
+                if (nativeVideo?.src) return nativeVideo.src;
+                if (nativeVideo?.baseURI && vc.nativeUrl) {
+                    return new URL(vc.nativeUrl, nativeVideo.baseURI).href;
+                }
+                return vc.nativeUrl || null;
             default:
                 console.warn("当前平台不支持获取视频URL");
                 return null;
         }
     }
 
-    private processBaseUrl(url: string): string {
-        const noQuery = url.split("?")[0];
-        return noQuery.substring(0, noQuery.lastIndexOf("/") + 1);
-    }
-
     public onDestroy() {
         this.stop();
+        if (this.player) {
+            VideoPlayerMgr.ins.removePlayer(this.player);
+            this.player = null;
+        }
+        this.cleanPrePlayer();
         //释放资源
         this._cacheVideos.forEach((vc: VideoClip, url: string) => {
-            oops.res.release(url);
+            oops.res.release(url, "bundle");
         })
         this._cacheVideos.clear();
         this.videoUrlMap.clear();
@@ -97,6 +106,9 @@ export class VideoManager extends Component {
     // -------- 对外接口 --------
 
     play(url: string, args: IVideoPlayArgs, preLoadVideos?: string[]) {
+        if (!this.player) this.initVideo();
+        if (!this.player) return;
+
         let videoUrl = this.videoUrlMap.get(url);
         if (videoUrl) {
             this.player?.play(videoUrl, args);
@@ -104,7 +116,11 @@ export class VideoManager extends Component {
         }
 
         this.loadVideoClip(url, (vc: VideoClip) => {
-            let video_url = this.getVideoUrl(vc);
+            const video_url = this.getVideoUrl(vc);
+            if (!video_url) {
+                console.error(`[VideoManager] 无法取得视频地址: ${url}`);
+                return;
+            }
             this.videoUrlMap.set(url, video_url);
             this.player?.play(video_url, args);
             this.preLoadLinkVideos(preLoadVideos)
@@ -119,7 +135,7 @@ export class VideoManager extends Component {
         }
     }
 
-    preLoadLinkVideos(videos: string[]) {
+    preLoadLinkVideos(videos?: string[]) {
         if (!videos || videos.length <= 0) {
             return;
         }
@@ -144,9 +160,17 @@ export class VideoManager extends Component {
             callback?.(vcc)
             return;
         }
-        oops.res.load(url, VideoClip, (err: Error | null, vc: VideoClip) => {
-            this._cacheVideos.set(url, vc);
-            callback?.(vc)
-        })
+        oops.res.load<VideoClip>("bundle", url, VideoClip)
+            .then((vc) => {
+                if (!this.isValid) {
+                    oops.res.release(url, "bundle");
+                    return;
+                }
+                this._cacheVideos.set(url, vc);
+                callback?.(vc)
+            })
+            .catch((err) => {
+                console.error(`[VideoManager] 视频加载失败: ${url}`, err);
+            });
     }
 }

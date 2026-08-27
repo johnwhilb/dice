@@ -1,6 +1,6 @@
-import { Component, Sprite } from "cc";
+import { Sprite } from "cc";
 
-export abstract class VideoBase extends Component {
+export abstract class VideoBase {
     public render_sprite: Sprite | null = null;
     protected listeners: IVideoPlayerEvent[] = [];
     protected pauseTime = 0;
@@ -56,4 +56,6 @@ export interface IVideoPlayArgs {
     loop: boolean;
     /**视频静音，true:静音 */
     muted?: boolean;
+    /**播放模式：normal 普通播放；forward-reverse 正放结束后倒放，再正放 */
+    playMode?: "normal" | "forward-reverse";
 }

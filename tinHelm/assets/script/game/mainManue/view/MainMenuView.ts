@@ -1,28 +1,48 @@
 import { CCView } from 'db://oops-framework/module/common/CCView';
-import { _decorator } from 'cc';
+import { _decorator, Node, Sprite, UITransform, view } from 'cc';
 import { MainMenu } from '../MainMenu';
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { smc } from '../../common/SingletonModuleComp';
 import { gui } from 'db://oops-framework/core/gui/Gui';
 import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
-import { Sprite } from 'cc';
 import { ResPath } from '../../common/config/ResPath';
 import { ProfileEvent } from '../../profile/ProfileEvent';
 import { TweenAnimUtil } from '../../common/util/TweenAnimUtil';
-const { ccclass } = _decorator;
+import { VideoManager } from '../../common/video/VideoManager';
+const { ccclass, property } = _decorator;
 
 @ccclass("MainMenuView")
 @ecs.register("MainMenuView", false)
 @gui.register('MainMenuView', { layer: LayerType.UI, prefab: 'gui/mainMenu/ui/MainMenuView' })
 export class MainMenuView extends CCView<MainMenu> {
+    private static readonly MENU_VIDEO = 'audios/Wan 2.7_1787812433883';
+
+    @property(Node)
+    private videoNode!: Node;
     private isBtnStartShow = false
     private isCanContinueShow = false
+
+
 
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
         this.refresh();
         this.on(ProfileEvent.currentSelectedAvatarIdChanged, this.refresh, this);
+        this.playMenuVideo();
+    }
+
+    private playMenuVideo() {
+        const videoNode = this.videoNode;
+        const sprite = videoNode.getComponent(Sprite);
+        sprite.sizeMode = Sprite.SizeMode.RAW;
+        let videoManager = videoNode.getComponent(VideoManager);
+        if (!videoManager) {
+            videoManager = videoNode.addComponent(VideoManager);
+        }
+        videoManager.videoSprite = sprite;
+        videoManager.initVideo();
+        videoManager.play(MainMenuView.MENU_VIDEO, { loop: true, muted: true, playMode: "forward-reverse" });
     }
 
     refresh() {
