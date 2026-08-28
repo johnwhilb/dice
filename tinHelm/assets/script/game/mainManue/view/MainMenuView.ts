@@ -15,7 +15,7 @@ const { ccclass, property } = _decorator;
 @ecs.register("MainMenuView", false)
 @gui.register('MainMenuView', { layer: LayerType.UI, prefab: 'gui/mainMenu/ui/MainMenuView' })
 export class MainMenuView extends CCView<MainMenu> {
-    private static readonly MENU_VIDEO = 'audios/Wan 2.7_1787812433883';
+    private static readonly MENU_VIDEO = 'audios/roleVideo2';
 
     @property(Node)
     private videoNode!: Node;
@@ -29,7 +29,7 @@ export class MainMenuView extends CCView<MainMenu> {
         this.setButton();
         this.refresh();
         this.on(ProfileEvent.currentSelectedAvatarIdChanged, this.refresh, this);
-        this.playMenuVideo();
+        // this.playMenuVideo();
     }
 
     private playMenuVideo() {
@@ -42,7 +42,7 @@ export class MainMenuView extends CCView<MainMenu> {
         }
         videoManager.videoSprite = sprite;
         videoManager.initVideo();
-        videoManager.play(MainMenuView.MENU_VIDEO, { loop: true, muted: true, playMode: "forward-reverse" });
+        videoManager.play(MainMenuView.MENU_VIDEO, { loop: true, muted: true, playMode: "normal" });
     }
 
     refresh() {

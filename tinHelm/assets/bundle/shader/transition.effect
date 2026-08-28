@@ -1,0 +1,123 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        tileTexture: { value: white }
+        nodeSize:     { value: [1080.0, 1920.0, 0.0, 0.0] }
+        animParams:   { value: [1.0, 200.0, 0.015, 0.012] }
+        offsetParams: { value: [0.0, 0.0, 0.0, 0.0] }
+        edgeColor:    { value: [1.0, 0.92, 0.18, 1.0], editor: { type: color } }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec2 uv0;
+  out vec4 color;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1.0);
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+
+    pos = cc_matViewProj * pos;
+
+    uv0 = a_texCoord;
+    color = a_color;
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+
+  in vec2 uv0;
+  in vec4 color;
+
+  uniform sampler2D tileTexture;
+
+  // vec4 packing avoids UBO layout surprises:
+  // nodeSize.xy      = overlay width / height in UI units
+  // animParams.x     = reveal progress: 0 = fully covered, 1 = fully revealed
+  // animParams.y     = tile size in UI units (use 200 for a 200x200 tile)
+  // animParams.z     = mask feather width
+  // animParams.w     = highlight edge width
+  // offsetParams.xy  = repeating texture offset in tile units
+  uniform Constant {
+    vec4 nodeSize;
+    vec4 animParams;
+    vec4 offsetParams;
+    vec4 edgeColor;
+  };
+
+  vec4 frag () {
+    float minSide = max(min(nodeSize.x, nodeSize.y), 1.0);
+
+    float progress = clamp(animParams.x, 0.0, 1.0);
+    float tileSize = max(animParams.y, 1.0);
+    float feather = max(animParams.z, 0.0001);
+    float edgeWidth = max(animParams.w, 0.0001);
+
+    // ----- 1. Repeating transition texture -----
+    // Convert UV to UI-space pixels/points first so one tile stays square
+    // on portrait and landscape screens.
+    vec2 pixelPos = uv0 * nodeSize.xy;
+    vec2 tileUV = fract(pixelPos / tileSize + offsetParams.xy);
+
+    // A tiny inset helps linear filtering avoid sampling right on the border.
+    // If you still see seams, set the texture Filter to Nearest in Creator.
+    const float inset = 0.0025;
+    tileUV = mix(vec2(inset), vec2(1.0 - inset), tileUV);
+
+    vec4 bg = texture(tileTexture, tileUV);
+
+    // ----- 2. Analytic aperture mask -----
+    // Aspect-correct coordinate: the short side is normalized to 1.
+    vec2 p = (uv0 - 0.5) * nodeSize.xy / minSide;
+
+    // Radius needed to cover the farthest screen corner.
+    vec2 corner = 0.5 * nodeSize.xy / minSide;
+    float maxRadius = length(corner) + 0.08;
+
+    // Negative radius at progress=0 guarantees there is no half-transparent
+    // center pixel when the screen should be fully covered.
+    float radius = progress * (maxRadius + feather * 2.0) - feather * 2.0;
+    float d = length(p) - radius;
+
+    // cover=1 outside the hole; cover=0 inside the hole.
+    float cover = smoothstep(-feather, feather, d);
+
+    // Thin accent ring on the aperture edge.
+    float ring = 1.0 - smoothstep(edgeWidth, edgeWidth + feather, abs(d));
+
+    vec3 rgb = mix(bg.rgb, edgeColor.rgb, ring * edgeColor.a);
+    float alpha = max(bg.a * cover, ring * edgeColor.a);
+
+    return vec4(rgb, alpha) * color;
+  }
+}%
