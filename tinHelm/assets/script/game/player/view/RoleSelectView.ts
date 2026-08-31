@@ -13,16 +13,24 @@ import { PlayerEvent } from '../PlayerEvent';
 import { GameFlow } from '../../gameFlow/GameFlow';
 import { instantiate } from 'cc';
 import { Label } from 'cc';
+import { tween } from 'cc';
+import { Vec3 } from 'cc';
 
 const { ccclass } = _decorator;
 
 const HP_EVERY_HEART = 20;
+const TABS = {
+    ROLE: 1,
+    CARD: 2,
+}
+
 
 @ccclass("RoleSelectView")
 @ecs.register("RoleSelectView", false)
 @gui.register('RoleSelectView', { layer: LayerType.PopUp, prefab: 'gui/roleSelect/RoleSelectView' })
 export class RoleSelectView extends CCView<GameFlow> {
     private roleList: TableRole[] = [];
+    private currentTab = TABS.ROLE;
 
     start() {
         this.nodeTreeInfoLite();
@@ -33,9 +41,32 @@ export class RoleSelectView extends CCView<GameFlow> {
     }
 
     refresh() {
-        this.updateRoleList();
-        this.updateSpRole();
-        this.updateRoleHp();
+        // this.updateSpRole();
+        // this.updateRoleHp();
+        // this.updateTab();
+    }
+
+    updateTab() {
+        const btnRole = this.getNode('btnRole')!;
+        const btnCard = this.getNode('btnCard')!;
+        const spSelect = this.getNode('spSelect')!;
+        const roleList = this.getNode('roleList')!;
+        const cardList = this.getNode('cardList')!;
+        roleList.active = this.currentTab === TABS.ROLE;
+        cardList.active = this.currentTab === TABS.CARD;
+        if (this.currentTab === TABS.ROLE) {
+            tween(spSelect)
+                .to(0.1, { position: new Vec3(0, btnRole.position.y, 0) })
+                .start();
+            this.updateRoleList();
+        } else if (this.currentTab === TABS.CARD) {
+            tween(spSelect)
+                .to(0.1, { position: new Vec3(0, btnCard.position.y, 0) })
+                .start();
+            this.updateCardList();
+        }
+
+
     }
 
     updateSpRole() {
@@ -65,18 +96,14 @@ export class RoleSelectView extends CCView<GameFlow> {
         }
         const lbtHp = this.getNode('lbtHp')!;
         lbtHp.getComponent(Label).string = `${originHp}/${maxHp}`;
-        // const leftOverHeart = maxHp % HP_EVERY_HEART;
-        // if (leftOverHeart > 0) {
-        //     const hpNode = instantiate(hpLayout.children[0]);
-        //     hpNode.parent = hpLayout;
-        //     const scale=leftOverHeart / HP_EVERY_HEART
-        //     hpNode.setScale(scale ,scale,scale);
-        //     hpNode.active = true;
-        // }
     }
 
     updateRoleList() {
         this.getNode('roleList')!.getComponent(List).numItems = this.roleList.length;
+    }
+
+    updateCardList() {
+        this.getNode('cardList')!.getComponent(List).numItems = this.roleList.length;
     }
 
     updateRoleItem(node: Node, index: number) {
@@ -87,6 +114,17 @@ export class RoleSelectView extends CCView<GameFlow> {
     btnClose() {
         this.ent.closeRoleSelectView();
     }
+
+    btnRole() {
+        this.currentTab = TABS.ROLE;
+        this.updateTab();
+    }
+
+    btnCard() {
+        this.currentTab = TABS.CARD;
+        this.updateTab();
+    }
+
 
     reset(): void {
     }
