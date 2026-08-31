@@ -9,6 +9,8 @@ interface RoleConfigData {
     name: string;
     title: string;
     info: string;
+    originHp: number;
+    maxHp: number;
 }
 
 /**
@@ -134,5 +136,15 @@ export class BaseRole {
     /** 角色信息 */
     get info(): string {
         return this.data.info;
+    }
+
+    /** 初始血量 */
+    get originHp(): number {
+        return this.data.originHp;
+    }
+
+    /** 血量上限 */
+    get maxHp(): number {
+        return this.data.maxHp;
     }
 }

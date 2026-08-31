@@ -1,0 +1,637 @@
+// Effect Syntax Guide: https://docs.cocos.com/creator/manual/zh/shader/index.html
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs:vert
+      frag: fs:frag
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      rasterizerState:
+        cullMode: none
+      properties:
+        mainColor:       { value: [1.0, 1.0, 1.0, 1.0], editor: { type: color } }
+
+        diceColor:       { value: [0.96, 0.92, 0.82, 1.0], editor: { type: color } }
+        sideColor:       { value: [0.68, 0.62, 0.52, 1.0], editor: { type: color } }
+        pipColor:        { value: [0.06, 0.025, 0.015, 1.0], editor: { type: color } }
+        edgeColor:       { value: [1.0, 0.97, 0.82, 1.0], editor: { type: color } }
+
+        rotationSpeed:   { value: 1.0, editor: { range: [0.0, 5.0, 0.01] } }
+        rotationX:       { value: 0.65, editor: { range: [-3.14, 3.14, 0.01] } }
+        rotationY:       { value: 0.35, editor: { range: [-3.14, 3.14, 0.01] } }
+        rotationZ:       { value: 0.0, editor: { range: [-3.14, 3.14, 0.01] } }
+        stopFace:        { value: 1.0, editor: { range: [1.0, 6.0, 1.0] } }
+        stopBlend:       { value: 0.0, editor: { range: [0.0, 1.0, 0.01] } }
+
+        diceSize:        { value: 0.72, editor: { range: [0.2, 1.4, 0.01] } }
+        pipSize:         { value: 0.105, editor: { range: [0.03, 0.25, 0.005] } }
+        cornerRoundness: { value: 0.035, editor: { range: [0.0, 0.12, 0.001] } }
+
+        lightStrength:   { value: 1.15, editor: { range: [0.0, 3.0, 0.01] } }
+        shadowStrength:  { value: 0.45, editor: { range: [0.0, 1.0, 0.01] } }
+        edgeGlow:        { value: 0.45, editor: { range: [0.0, 3.0, 0.01] } }
+
+        aspect:          { value: 1.0, editor: { range: [0.2, 4.0, 0.01] } }
+        alpha:           { value: 1.0, editor: { range: [0.0, 1.0, 0.01] } }
+}%
+
+CCProgram vs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+
+  #if USE_LOCAL
+    in vec4 a_color;
+    out vec4 v_color;
+  #endif
+
+  out vec2 uv;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1.0);
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+      v_color = a_color;
+    #endif
+
+    pos = cc_matViewProj * pos;
+    uv = a_texCoord;
+
+    return pos;
+  }
+}%
+
+CCProgram fs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+  #include <sprite-texture>
+
+  in vec2 uv;
+
+  #if USE_LOCAL
+    in vec4 v_color;
+  #endif
+
+  uniform UBO {
+    vec4 mainColor;
+
+    vec4 diceColor;
+    vec4 sideColor;
+    vec4 pipColor;
+    vec4 edgeColor;
+
+    float rotationSpeed;
+    float rotationX;
+    float rotationY;
+    float rotationZ;
+    float stopFace;
+    float stopBlend;
+    
+
+
+    float diceSize;
+    float pipSize;
+    float cornerRoundness;
+
+    float lightStrength;
+    float shadowStrength;
+    float edgeGlow;
+
+    float aspect;
+    float alpha;
+  };
+
+  #define PI 3.14159265359
+
+  mat3 rotateX(float a) {
+    float s = sin(a);
+    float c = cos(a);
+
+    return mat3(
+      1.0, 0.0, 0.0,
+      0.0, c, -s,
+      0.0, s, c
+    );
+  }
+
+  mat3 rotateY(float a) {
+    float s = sin(a);
+    float c = cos(a);
+
+    return mat3(
+      c, 0.0, s,
+      0.0, 1.0, 0.0,
+      -s, 0.0, c
+    );
+  }
+
+  mat3 rotateZ(float a) {
+    float s = sin(a);
+    float c = cos(a);
+
+    return mat3(
+      c, -s, 0.0,
+      s, c, 0.0,
+      0.0, 0.0, 1.0
+    );
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ // ----------------------------------------------------------
+  // 根据目标点数返回骰子最终旋转角度
+  //
+  // 当前面编号:
+  //   前面 +Z = 1
+  //   后面 -Z = 6
+  //   右面 +X = 2
+  //   左面 -X = 5
+  //   上面 +Y = 3
+  //   底面 -Y = 4
+  // ----------------------------------------------------------
+
+  vec3 getStopAngles(float face) {
+    float halfPI = 1.57079632679;
+
+    vec3 result = vec3(0.0, 0.0, 0.0);
+
+    // 1 点：前面 +Z
+    if (face < 1.5) {
+      result = vec3(0.0, 0.0, 0.0);
+    }
+
+    // 2 点：右面 +X
+    // 修正：由 -halfPI 改为 halfPI
+    else if (face < 2.5) {
+      result = vec3(0.0, halfPI, 0.0);
+    }
+
+    // 3 点：上面 +Y
+    // 修正：由 halfPI 改为 -halfPI
+    else if (face < 3.5) {
+      result = vec3(-halfPI, 0.0, 0.0);
+    }
+
+    // 4 点：底面 -Y
+    // 修正：由 -halfPI 改为 halfPI
+    else if (face < 4.5) {
+      result = vec3(halfPI, 0.0, 0.0);
+    }
+
+    // 5 点：左面 -X
+    // 修正：由 halfPI 改为 -halfPI
+    else if (face < 5.5) {
+      result = vec3(0.0, -halfPI, 0.0);
+    }
+
+
+    // 6 点：后面 -Z
+    else {
+      result = vec3(0.0, PI, 0.0);
+    }
+
+    return result;
+  }
+
+  // GLSL ES 1.00 / WebGL 1 中通常没有 transpose(mat3)
+// 对旋转矩阵而言，转置矩阵就是它的逆矩阵。
+mat3 transposeMat3(mat3 m) {
+  return mat3(
+    m[0][0], m[1][0], m[2][0],
+    m[0][1], m[1][1], m[2][1],
+    m[0][2], m[1][2], m[2][2]
+  );
+}
+
+  // 返回圆形点数 mask
+  float pip(vec2 p, vec2 center, float radius) {
+    float d = length(p - center);
+
+    return 1.0 - smoothstep(
+      radius,
+      radius * 1.22,
+      d
+    );
+  }
+
+  // 根据骰子点数绘制点阵
+  float dicePips(vec2 faceUV, float value, float size) {
+    float result = 0.0;
+    float s = 0.42;
+
+    vec2 topLeft = vec2(-s, s);
+    vec2 topRight = vec2(s, s);
+    vec2 midLeft = vec2(-s, 0.0);
+    vec2 center = vec2(0.0, 0.0);
+    vec2 midRight = vec2(s, 0.0);
+    vec2 bottomLeft = vec2(-s, -s);
+    vec2 bottomRight = vec2(s, -s);
+
+    // 1
+    if (value < 1.5) {
+      result += pip(faceUV, center, size);
+    }
+    // 2
+    else if (value < 2.5) {
+      result += pip(faceUV, topLeft, size);
+      result += pip(faceUV, bottomRight, size);
+    }
+    // 3
+    else if (value < 3.5) {
+      result += pip(faceUV, topLeft, size);
+      result += pip(faceUV, center, size);
+      result += pip(faceUV, bottomRight, size);
+    }
+    // 4
+    else if (value < 4.5) {
+      result += pip(faceUV, topLeft, size);
+      result += pip(faceUV, topRight, size);
+      result += pip(faceUV, bottomLeft, size);
+      result += pip(faceUV, bottomRight, size);
+    }
+    // 5
+    else if (value < 5.5) {
+      result += pip(faceUV, topLeft, size);
+      result += pip(faceUV, topRight, size);
+      result += pip(faceUV, center, size);
+      result += pip(faceUV, bottomLeft, size);
+      result += pip(faceUV, bottomRight, size);
+    }
+    // 6
+    else {
+      result += pip(faceUV, topLeft, size);
+      result += pip(faceUV, midLeft, size);
+      result += pip(faceUV, bottomLeft, size);
+
+      result += pip(faceUV, topRight, size);
+      result += pip(faceUV, midRight, size);
+      result += pip(faceUV, bottomRight, size);
+    }
+
+    return clamp(result, 0.0, 1.0);
+  }
+
+  // 光线与立方体求交
+  bool rayBox(
+    vec3 rayOrigin,
+    vec3 rayDir,
+    vec3 boxSize,
+    out float nearT,
+    out float farT
+  ) {
+    vec3 invDir = 1.0 / rayDir;
+
+    vec3 t0 = (-boxSize - rayOrigin) * invDir;
+    vec3 t1 = ( boxSize - rayOrigin) * invDir;
+
+    vec3 tMin = min(t0, t1);
+    vec3 tMax = max(t0, t1);
+
+    nearT = max(max(tMin.x, tMin.y), tMin.z);
+    farT = min(min(tMax.x, tMax.y), tMax.z);
+
+    return farT > max(nearT, 0.0);
+  }
+
+  // 根据局部空间中的命中点确定骰子面法线
+  vec3 cubeNormal(vec3 p, vec3 halfSize) {
+    vec3 d = abs(abs(p) - halfSize);
+
+    if (d.x < d.y && d.x < d.z) {
+      return vec3(sign(p.x), 0.0, 0.0);
+    }
+
+    if (d.y < d.z) {
+      return vec3(0.0, sign(p.y), 0.0);
+    }
+
+    return vec3(0.0, 0.0, sign(p.z));
+  }
+
+  // 根据命中面计算面坐标和骰子点数
+  void getFaceData(
+    vec3 hitPoint,
+    vec3 normal,
+    out vec2 faceUV,
+    out float faceValue
+  ) {
+    // 前面：1 点
+    if (normal.z > 0.5) {
+      faceUV = hitPoint.xy;
+      faceValue = 1.0;
+    }
+    // 后面：6 点
+    else if (normal.z < -0.5) {
+      faceUV = vec2(-hitPoint.x, hitPoint.y);
+      faceValue = 6.0;
+    }
+    // 右面：2 点
+    else if (normal.x > 0.5) {
+      faceUV = vec2(-hitPoint.z, hitPoint.y);
+      faceValue = 2.0;
+    }
+    // 左面：5 点
+    else if (normal.x < -0.5) {
+      faceUV = vec2(hitPoint.z, hitPoint.y);
+      faceValue = 5.0;
+    }
+    // 上面：3 点
+    else if (normal.y > 0.5) {
+      faceUV = vec2(hitPoint.x, -hitPoint.z);
+      faceValue = 3.0;
+    }
+    // 底面：4 点
+    else {
+      faceUV = vec2(hitPoint.x, hitPoint.z);
+      faceValue = 4.0;
+    }
+  }
+
+  vec4 frag () {
+    float time = cc_time.x;
+
+    // 用原贴图 Alpha 裁剪特效区域。
+    vec4 sourceTex = texture(cc_spriteTexture, uv);
+
+    // 屏幕平面坐标。
+    vec2 screenP = (uv - 0.5) * 2.0;
+    screenP.x *= aspect;
+
+    // ----------------------------------------------------------
+    // 摄像机射线
+    // ----------------------------------------------------------
+
+    vec3 rayOrigin = vec3(0.0, 0.0, 2.8);
+    vec3 rayDir = normalize(vec3(screenP, -1.85));
+
+    // ----------------------------------------------------------
+    // 骰子旋转
+    // ----------------------------------------------------------
+
+    float rotTime = time * rotationSpeed;
+
+    // 正常旋转角度
+    vec3 rollingAngles = vec3(
+      rotationX + rotTime * 0.82,
+      rotationY + rotTime * 1.10,
+      rotationZ + rotTime * 0.48
+    );
+
+    // 目标点数对应的最终角度
+    vec3 stopAngles = getStopAngles(stopFace);
+
+    // 平滑停止进度
+    float stopProgress = clamp(stopBlend, 0.0, 1.0);
+
+    // smoothstep，让停止过程更自然
+    stopProgress = stopProgress * stopProgress *
+                   (3.0 - 2.0 * stopProgress);
+
+    // 从滚动姿态过渡到目标面姿态
+    vec3 finalAngles = mix(
+      rollingAngles,
+      stopAngles,
+      stopProgress
+    );
+
+    float angleX = finalAngles.x;
+    float angleY = finalAngles.y;
+    float angleZ = finalAngles.z;
+
+    mat3 rotation =
+      rotateZ(angleZ) *
+      rotateY(angleY) *
+      rotateX(angleX);
+
+    // 光线转换到骰子局部空间。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    mat3 inverseRotation = transposeMat3(rotation);
+
+    vec3 localRayOrigin = inverseRotation * rayOrigin;
+    vec3 localRayDir = inverseRotation * rayDir;
+
+    float halfDice = diceSize * 0.5;
+    vec3 boxSize = vec3(halfDice);
+
+    float nearT;
+    float farT;
+
+    bool hit = rayBox(
+      localRayOrigin,
+      localRayDir,
+      boxSize,
+      nearT,
+      farT
+    );
+
+    if (!hit) {
+      return vec4(0.0);
+    }
+
+    float hitT = nearT;
+
+    if (hitT < 0.0) {
+      hitT = farT;
+    }
+
+    vec3 hitPoint = localRayOrigin + localRayDir * hitT;
+
+    vec3 localNormal = cubeNormal(hitPoint, boxSize);
+    vec3 worldNormal = normalize(rotation * localNormal);
+
+    // ----------------------------------------------------------
+    // 骰子面数据
+    // ----------------------------------------------------------
+
+    vec2 faceUV;
+    float faceValue;
+
+    getFaceData(
+      hitPoint / max(halfDice, 0.001),
+      localNormal,
+      faceUV,
+      faceValue
+    );
+
+    // 点数面坐标范围大约 -1 ~ 1。
+    float pips = dicePips(
+      faceUV,
+      faceValue,
+      pipSize
+    );
+
+    // ----------------------------------------------------------
+    // 简单圆角 / 边缘高光
+    // ----------------------------------------------------------
+
+    float edgeDistance = min(
+      min(abs(abs(hitPoint.x) - halfDice), abs(abs(hitPoint.y) - halfDice)),
+      abs(abs(hitPoint.z) - halfDice)
+    );
+
+    float edgeMask = 1.0 - smoothstep(
+      0.0,
+      max(cornerRoundness, 0.001),
+      edgeDistance
+    );
+
+    // ----------------------------------------------------------
+    // 光照
+    // ----------------------------------------------------------
+
+    vec3 lightDir = normalize(vec3(-0.45, 0.70, 0.85));
+    vec3 viewDir = normalize(rayOrigin - (rotation * hitPoint));
+
+    float diffuse = max(dot(worldNormal, lightDir), 0.0);
+
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float specular = pow(
+      max(dot(worldNormal, halfDir), 0.0),
+      38.0
+    );
+
+    float ambient = 0.35;
+    float lighting = ambient + diffuse * lightStrength;
+
+    // 骰子面基础颜色。
+    vec3 color = mix(
+      sideColor.rgb,
+      diceColor.rgb,
+      diffuse * 0.72 + 0.25
+    );
+
+    color *= lighting;
+
+    // 高光。
+    color += edgeColor.rgb * specular * 0.75;
+
+    // 骰子棱边亮光。
+    color += edgeColor.rgb * edgeMask * edgeGlow * 0.38;
+
+    // 点数凹陷的暗色与轻微阴影。
+    color = mix(
+      color,
+      pipColor.rgb,
+      pips
+    );
+
+    color *= 1.0 - pips * shadowStrength * 0.28;
+
+    // 让点数边缘有轻微阴影。
+    float pipGlow = 1.0 - smoothstep(
+      pipSize * 0.70,
+      pipSize * 1.30,
+      abs(length(faceUV - vec2(0.0)) - 0.42)
+    );
+
+    // 柔和底部阴影。
+    float floorShadow = 1.0 - smoothstep(
+      0.35,
+      1.20,
+      length(screenP * vec2(0.85, 1.0) + vec2(0.0, 0.58))
+    );
+
+    floorShadow *= smoothstep(
+      -0.98,
+      -0.45,
+      screenP.y
+    );
+
+    color *= 1.0 - floorShadow * shadowStrength * 0.32;
+
+    // ----------------------------------------------------------
+    // Alpha
+    // ----------------------------------------------------------
+
+    float finalAlpha = alpha;
+
+    // 如果承载 Sprite 为完整白色图，保持骰子完整显示。
+    finalAlpha *= max(sourceTex.a, 0.001);
+
+    vec4 outColor = vec4(color, finalAlpha);
+    outColor *= mainColor;
+
+    #if USE_LOCAL
+      outColor *= v_color;
+    #endif
+
+    return outColor;
+  }
+}%
