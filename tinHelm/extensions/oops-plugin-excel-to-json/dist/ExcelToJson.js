@@ -73,6 +73,58 @@ ${fields}}
  * @param name      Excel 文件名
  * @param isClient  是否为客户端数据
  */
+function getCellValue(cell) {
+    return cell.formula ? cell.result : cell.text;
+}
+function parseJsonCellValue(src, key, type, value, cell) {
+    const text = String(value).trim();
+    if (text === "") {
+        return null;
+    }
+    try {
+        return JSON.parse(text);
+    }
+    catch (_a) {
+        console.log("Cell " +
+            cell.address +
+            " has value " +
+            cell.text);
+        console.warn("File [" + src + "] field [" + key + "] type [" + type + "] value [" + value + "] JSON parse error");
+        return null;
+    }
+}
+function parseBooleanCellValue(src, key, value) {
+    if (typeof value === "boolean") {
+        return value;
+    }
+    const text = String(value).trim().toLowerCase();
+    if (text === "true") {
+        return true;
+    }
+    if (text === "false") {
+        return false;
+    }
+    console.warn("File [" + src + "] field [" + key + "] boolean value must be true/false, current value: " + value);
+    return false;
+}
+function getJsonTypeValue(src, key, type, value, cell) {
+    const parsed = parseJsonCellValue(src, key, type, value, cell);
+    if (parsed != null &&
+        !Array.isArray(parsed) &&
+        typeof parsed === "object") {
+        return parsed;
+    }
+    console.warn("File [" + src + "] field [" + key + "] json type must be a valid JSON object");
+    return null;
+}
+function getArrayTypeValue(src, key, type, value, cell) {
+    const parsed = parseJsonCellValue(src, key, type, value, cell);
+    if (Array.isArray(parsed)) {
+        return parsed;
+    }
+    console.warn("File [" + src + "] field [" + key + "] array type must be a valid JSON array");
+    return [];
+}
 async function convert(src, dst, name, isClient) {
     let r = {};
     let names = [];
@@ -117,7 +169,7 @@ async function convert(src, dst, name, isClient) {
             }
             else if (rowNumber > 5) {
                 const index = colNumber - 1;
-                const type = types[index];
+                const type = String(types[index]).trim().toLowerCase();
                 const server = servers[index];
                 const client = clients[index];
                 const isWrite = (isClient && client === "client") ||
@@ -128,18 +180,14 @@ async function convert(src, dst, name, isClient) {
                 const key = keys[index];
                 switch (type) {
                     case "int":
-                        data[key] = cell.formula
-                            ? parseInt(cell.result)
-                            : parseInt(value);
+                        data[key] = parseInt(getCellValue(cell));
                         types_client[key] = {
                             en: "number",
                             zh: names[index]
                         };
                         break;
                     case "float":
-                        data[key] = cell.formula
-                            ? parseFloat(cell.result)
-                            : parseFloat(value);
+                        data[key] = parseFloat(getCellValue(cell));
                         types_client[key] = {
                             en: "number",
                             zh: names[index]
@@ -152,9 +200,30 @@ async function convert(src, dst, name, isClient) {
                             zh: names[index]
                         };
                         break;
+                    case "boolean":
+                        data[key] = parseBooleanCellValue(src, key, getCellValue(cell));
+                        types_client[key] = {
+                            en: "boolean",
+                            zh: names[index]
+                        };
+                        break;
+                    case "json":
+                        data[key] = getJsonTypeValue(src, key, type, getCellValue(cell), cell);
+                        types_client[key] = {
+                            en: "Record<string, any>",
+                            zh: names[index]
+                        };
+                        break;
+                    case "array":
+                        data[key] = getArrayTypeValue(src, key, type, getCellValue(cell), cell);
+                        types_client[key] = {
+                            en: "any[]",
+                            zh: names[index]
+                        };
+                        break;
                     case "any":
                         try {
-                            data[key] = JSON.parse(value);
+                            data[key] = JSON.parse(String(getCellValue(cell)).trim());
                             types_client[key] = {
                                 en: "any",
                                 zh: names[index]
@@ -165,7 +234,7 @@ async function convert(src, dst, name, isClient) {
                                 cell.address +
                                 " has value " +
                                 cell.text);
-                            console.warn(`文件【${src}】的【${key}】字段【${data[key]}】类型数据【${value}】JSON转字段串错误【${client}】`);
+                            console.warn("File [" + src + "] field [" + key + "] value [" + value + "] JSON parse error [" + client + "]");
                         }
                         break;
                 }

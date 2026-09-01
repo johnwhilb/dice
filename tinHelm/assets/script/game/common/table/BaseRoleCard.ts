@@ -1,52 +1,48 @@
 import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
 
 /**
- * Role 配置原始数据。
+ * RoleCard 配置原始数据。
  *
  * 自动生成，请勿手动修改。
  */
-interface RoleConfigData {
-    name: string;
-    title: string;
-    info: string;
-    originHp: number;
-    maxHp: number;
-    originCards: any[];
+interface RoleCardConfigData {
+    roleId: number;
+    cardId: number;
 }
 
 /**
- * BaseRole 派生类构造类型。
+ * BaseRoleCard 派生类构造类型。
  */
-interface BaseRoleConstructor<T extends BaseRole> {
+interface BaseRoleCardConstructor<T extends BaseRoleCard> {
     new (): T;
     TableName: string;
 }
 
 /**
- * Role 配置基类。
+ * RoleCard 配置基类。
  *
  * 自动生成文件，请勿手动修改。
  */
-export class BaseRole {
+export class BaseRoleCard {
 
     /** JsonUtil 中的配置表名称 */
-    static TableName: string = "Role";
+    static TableName: string = "RoleCard";
 
     /** 配置主键 */
     id: number = 0;
 
     /** 当前配置原始数据 */
-    private data: RoleConfigData = null!;
+    private data: RoleCardConfigData = null!;
 
     /**
      * 获取全部配置。
      */
-    static getAllConfig<T extends BaseRole>(
-        this: BaseRoleConstructor<T>
+    static getAllConfig<T extends BaseRoleCard>(
+        this: BaseRoleCardConstructor<T>
     ): T[] {
         const table = JsonUtil.get(
             this.TableName
-        ) as Record<string, RoleConfigData> | null;
+        ) as Record<string, RoleCardConfigData> | null;
 
         if (table == null) {
             return [];
@@ -85,13 +81,13 @@ export class BaseRole {
      *
      * 不存在时返回 null。
      */
-    static getConfigById<T extends BaseRole>(
-        this: BaseRoleConstructor<T>,
+    static getConfigById<T extends BaseRoleCard>(
+        this: BaseRoleCardConstructor<T>,
         id: number
     ): T | null {
         const table = JsonUtil.get(
             this.TableName
-        ) as Record<string, RoleConfigData> | null;
+        ) as Record<string, RoleCardConfigData> | null;
 
         if (table == null) {
             return null;
@@ -118,39 +114,19 @@ export class BaseRole {
      */
     protected setConfig(
         id: number,
-        data: RoleConfigData
+        data: RoleCardConfigData
     ) {
         this.id = id;
         this.data = data;
     }
 
-    /** 角色名 */
-    get name(): string {
-        return this.data.name;
+    /** 角色编号 */
+    get roleId(): number {
+        return this.data.roleId;
     }
 
-    /** 角色称号 */
-    get title(): string {
-        return this.data.title;
-    }
-
-    /** 角色信息 */
-    get info(): string {
-        return this.data.info;
-    }
-
-    /** 初始血量 */
-    get originHp(): number {
-        return this.data.originHp;
-    }
-
-    /** 血量上限 */
-    get maxHp(): number {
-        return this.data.maxHp;
-    }
-
-    /** 初始卡牌 */
-    get originCards(): any[] {
-        return this.data.originCards;
+    /** 卡牌编号 */
+    get cardId(): number {
+        return this.data.cardId;
     }
 }
