@@ -11,6 +11,7 @@ interface RoleConfigData {
     info: string;
     originHp: number;
     maxHp: number;
+    originCards: any[];
 }
 
 /**
@@ -146,5 +147,10 @@ export class BaseRole {
     /** 血量上限 */
     get maxHp(): number {
         return this.data.maxHp;
+    }
+
+    /** 初始卡牌 */
+    get originCards(): any[] {
+        return this.data.originCards;
     }
 }

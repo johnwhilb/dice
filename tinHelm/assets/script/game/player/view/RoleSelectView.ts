@@ -15,6 +15,9 @@ import { instantiate } from 'cc';
 import { Label } from 'cc';
 import { tween } from 'cc';
 import { Vec3 } from 'cc';
+import { UITransform } from 'cc';
+import { nodeCard } from '../../card/nodeCard';
+import { TableCard } from '../../common/table/TableCard';
 
 const { ccclass } = _decorator;
 
@@ -23,7 +26,6 @@ const TABS = {
     ROLE: 1,
     CARD: 2,
 }
-
 
 @ccclass("RoleSelectView")
 @ecs.register("RoleSelectView", false)
@@ -41,9 +43,9 @@ export class RoleSelectView extends CCView<GameFlow> {
     }
 
     refresh() {
-        // this.updateSpRole();
-        // this.updateRoleHp();
-        // this.updateTab();
+        this.updateSpRole();
+        this.updateRoleHp();
+        this.updateTab();
     }
 
     updateTab() {
@@ -52,20 +54,29 @@ export class RoleSelectView extends CCView<GameFlow> {
         const spSelect = this.getNode('spSelect')!;
         const roleList = this.getNode('roleList')!;
         const cardList = this.getNode('cardList')!;
+        const btnLeft = this.getNode('btnLeft')!;
+        const btnRight = this.getNode('btnRight')!;
+        const roleSelectBottomBg = this.getNode('roleSelectBottomBg')!.getComponent(UITransform);
+        const lbtTitle = this.getNode('lbtTitle')!.getComponent(Label);
         roleList.active = this.currentTab === TABS.ROLE;
         cardList.active = this.currentTab === TABS.CARD;
         if (this.currentTab === TABS.ROLE) {
             tween(spSelect)
                 .to(0.1, { position: new Vec3(0, btnRole.position.y, 0) })
                 .start();
+            btnLeft.active = true;
+            btnRight.active = true;
+            lbtTitle.string = 'ROLE SELECT!!   ROLE SELECT!!   ';
             this.updateRoleList();
         } else if (this.currentTab === TABS.CARD) {
             tween(spSelect)
                 .to(0.1, { position: new Vec3(0, btnCard.position.y, 0) })
                 .start();
+            lbtTitle.string = 'CARD PREVIEW!!   CARD PREVIEW!!   ';
+            btnLeft.active = false;
+            btnRight.active = false;
             this.updateCardList();
         }
-
 
     }
 
@@ -103,7 +114,10 @@ export class RoleSelectView extends CCView<GameFlow> {
     }
 
     updateCardList() {
-        this.getNode('cardList')!.getComponent(List).numItems = this.roleList.length;
+        const currentSelectRoleId = smc.player.getSelectedRoleId();
+        const tableRole = TableRole.getConfigById(currentSelectRoleId);
+        const cardList = tableRole!.originCards;
+        this.getNode('cardList')!.getComponent(List).numItems = cardList.length;
     }
 
     updateRoleItem(node: Node, index: number) {
@@ -111,6 +125,16 @@ export class RoleSelectView extends CCView<GameFlow> {
         const currentSelectedRoleId = smc.player.getSelectedRoleId();
         node.getComponent(nodeRoleCard).setData({ tableRole: item, currentSelectedRoleId });
     }
+
+    updateCardItem(node: Node, index: number) {
+        const currentSelectRoleId = smc.player.getSelectedRoleId();
+        const tableRole = TableRole.getConfigById(currentSelectRoleId);
+        const cardList = tableRole!.originCards;
+        const item = TableCard.getConfigById(cardList[index]);
+        node.getComponent(nodeCard).setData(item);
+    }
+
+
     btnClose() {
         this.ent.closeRoleSelectView();
     }
