@@ -30,7 +30,6 @@ export class GameFlow extends CCEntity {
     }
 
 
-
     closeRoleSelectView() {
         if (this.has(RoleSelectView)) {
             this.removeUi(RoleSelectView);

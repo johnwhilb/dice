@@ -6,6 +6,7 @@ import { Profile } from '../profile/Profile';
 import { Player } from '../player/Player';
 import { GameFlow } from '../gameFlow/GameFlow';
 import { RouteSelect } from '../routeSelect/RouteSelect';
+import { Battle } from '../battle/Battle';
 
 /** 游戏单例业务模块 */
 @ecs.register('SingletonModule')
@@ -24,6 +25,8 @@ export class SingletonModuleComp extends ecs.Comp {
     gameFlow: GameFlow = null!;
     /** 游戏事件选择模块 */
     routeSelect: RouteSelect = null!;
+    /** 游戏战斗模块 */
+    battle: Battle = null!;
 
     reset() { }
 }

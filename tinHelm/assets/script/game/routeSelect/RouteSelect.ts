@@ -19,6 +19,14 @@ export class RouteSelect extends CCEntity {
         this.addComponents(RouteSelectModel);
     }
 
+    selectDefaultRoute() {
+        this.getBusiness<RouteSelectBll>(RouteSelectBll).selectDefaultRoute();
+    }
+
+    selectUnknownRoute() {
+        this.getBusiness<RouteSelectBll>(RouteSelectBll).selectUnknownRoute();
+    }
+
     openRouteSelectView() {
         if (this.has(RouteSelectView)) {
             return Promise.resolve(this.RouteSelectView.node);
@@ -26,7 +34,11 @@ export class RouteSelect extends CCEntity {
         this.addUi(RouteSelectView);
     }
 
-
+    closeRouteSelectView() {
+        if (this.has(RouteSelectView)) {
+            this.removeUi(RouteSelectView);
+        }
+    }
 
     getCurrentRoutes() {
         return this.getBusiness<RouteSelectBll>(RouteSelectBll).getCurrentRoutes();
