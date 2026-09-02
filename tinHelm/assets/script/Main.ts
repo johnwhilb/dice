@@ -11,6 +11,7 @@ import { Profile } from './game/profile/Profile';
 import { Player } from './game/player/Player';
 import { GameFlow } from './game/gameFlow/GameFlow';
 import { RouteSelect } from './game/routeSelect/RouteSelect';
+import { Battle } from './game/battle/Battle';
 
 const { ccclass, property } = _decorator;
 
@@ -40,6 +41,7 @@ export class Main extends Root {
         smc.player = ecs.getEntity(Player);
         smc.gameFlow = ecs.getEntity(GameFlow);
         smc.routeSelect = ecs.getEntity(RouteSelect);
+        smc.battle = ecs.getEntity(Battle);
         smc.initialize.load(this.initial);
     }
 }

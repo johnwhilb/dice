@@ -30,7 +30,7 @@ const TABS = {
 
 @ccclass("RoleSelectView")
 @ecs.register("RoleSelectView", false)
-@gui.register('RoleSelectView', { layer: LayerType.PopUp, prefab: 'gui/roleSelect/RoleSelectView' })
+@gui.register('RoleSelectView', { layer: LayerType.UI, prefab: 'gui/roleSelect/RoleSelectView' })
 export class RoleSelectView extends CCView<GameFlow> {
     private roleList: TableRole[] = [];
     private currentTab = TABS.ROLE;
@@ -139,9 +139,8 @@ export class RoleSelectView extends CCView<GameFlow> {
         smc.routeSelect.generateRoutes();
         this.ent.GameFlowBll.setGameFlowState(GameFlowState.RouteSelect);
         this.ent.entryGameSceneByGameFlowState();
-        // this.ent.continueGame();
+        this.ent.closeRoleSelectView();
     }
-
 
     btnClose() {
         this.ent.closeRoleSelectView();
@@ -157,11 +156,6 @@ export class RoleSelectView extends CCView<GameFlow> {
         this.updateTab();
     }
 
-
     reset(): void {
     }
-
-
-
-
 }

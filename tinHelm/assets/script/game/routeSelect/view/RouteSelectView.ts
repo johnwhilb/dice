@@ -12,7 +12,7 @@ const { ccclass } = _decorator;
 
 @ccclass("RouteSelectView")
 @ecs.register("RouteSelectView", false)
-@gui.register('RouteSelectView', { layer: LayerType.PopUp, prefab: 'gui/routeSelect/RouteSelectView' })
+@gui.register('RouteSelectView', { layer: LayerType.UI, prefab: 'gui/routeSelect/RouteSelectView' })
 export class RouteSelectView extends CCView<RouteSelect> {
 
 
@@ -41,6 +41,20 @@ export class RouteSelectView extends CCView<RouteSelect> {
         lbtName2.getComponent(Label).string = routeInfo2!.name;
         lbtDes1.getComponent(Label).string = routeInfo1!.des;
         lbtDes2.getComponent(Label).string = routeInfo2!.des;
+    }
+
+
+    btnClose() {
+        this.ent.closeRouteSelectView();
+    }
+
+    nodeRoute1() {
+        this.ent.selectDefaultRoute();
+        this.ent.closeRouteSelectView();
+    }
+    nodeRoute2() {
+        this.ent.selectUnknownRoute();
+        this.ent.closeRouteSelectView();
     }
 
     reset(): void {
