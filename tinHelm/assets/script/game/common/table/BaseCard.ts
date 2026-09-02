@@ -84,16 +84,28 @@ export class BaseCard {
     static getConfigById<T extends BaseCard>(
         this: BaseCardConstructor<T>,
         id: number
-    ): T {
+    ): T | null {
         const table = JsonUtil.get(
             this.TableName
         ) as Record<string, CardConfigData> | null;
-        const configData = table![String(id)];
+
+        if (table == null) {
+            return null;
+        }
+
+        const configData = table[String(id)];
+
+        if (configData == null) {
+            return null;
+        }
+
         const item = new this();
+
         item.setConfig(
             id,
             configData
         );
+
         return item;
     }
 

@@ -8,6 +8,7 @@ import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
 interface RoleCardConfigData {
     roleId: number;
     cardId: number;
+    unlockLevel: number;
 }
 
 /**
@@ -128,5 +129,10 @@ export class BaseRoleCard {
     /** 卡牌编号 */
     get cardId(): number {
         return this.data.cardId;
+    }
+
+    /** 解锁关卡 （0为初始卡牌） */
+    get unlockLevel(): number {
+        return this.data.unlockLevel;
     }
 }

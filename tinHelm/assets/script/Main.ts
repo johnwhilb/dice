@@ -10,6 +10,7 @@ import { MainMenu } from './game/mainManue/MainMenu';
 import { Profile } from './game/profile/Profile';
 import { Player } from './game/player/Player';
 import { GameFlow } from './game/gameFlow/GameFlow';
+import { RouteSelect } from './game/routeSelect/RouteSelect';
 
 const { ccclass, property } = _decorator;
 
@@ -38,6 +39,7 @@ export class Main extends Root {
         smc.profile = ecs.getEntity(Profile);
         smc.player = ecs.getEntity(Player);
         smc.gameFlow = ecs.getEntity(GameFlow);
+        smc.routeSelect = ecs.getEntity(RouteSelect);
         smc.initialize.load(this.initial);
     }
 }

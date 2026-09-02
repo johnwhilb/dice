@@ -1,6 +1,7 @@
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { GameFlow } from '../GameFlow';
 import { GameFlowState } from '../model/GameFlowModel';
+import { smc } from '../../common/SingletonModuleComp';
 
 export class GameFlowBll extends CCBusiness<GameFlow> {
 
@@ -9,9 +10,16 @@ export class GameFlowBll extends CCBusiness<GameFlow> {
             case GameFlowState.RoleSelect:
                 this.ent.openRoleSelectView();
                 break;
+            case GameFlowState.RouteSelect:
+                smc.routeSelect.openRouteSelectView();
+                break;
             default:
                 this.ent.openRoleSelectView();
                 break;
         }
+    }
+
+    setGameFlowState(state: GameFlowState) {
+        this.ent.GameFlowModel.currentGameFlowState = state;
     }
 }
