@@ -4,6 +4,7 @@ import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 
 export enum GameFlowState {
     RoleSelect,
+    RouteSelect,
 }
 
 @ecs.register('GameFlowModel')

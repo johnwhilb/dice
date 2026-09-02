@@ -1,49 +1,48 @@
 import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
 
 /**
- * RoleCard 配置原始数据。
+ * Event 配置原始数据。
  *
  * 自动生成，请勿手动修改。
  */
-interface RoleCardConfigData {
-    roleId: number;
-    cardId: number;
-    unlockLevel: number;
+interface EventConfigData {
+    name: string;
+    des: string;
 }
 
 /**
- * BaseRoleCard 派生类构造类型。
+ * BaseEvent 派生类构造类型。
  */
-interface BaseRoleCardConstructor<T extends BaseRoleCard> {
+interface BaseEventConstructor<T extends BaseEvent> {
     new (): T;
     TableName: string;
 }
 
 /**
- * RoleCard 配置基类。
+ * Event 配置基类。
  *
  * 自动生成文件，请勿手动修改。
  */
-export class BaseRoleCard {
+export class BaseEvent {
 
     /** JsonUtil 中的配置表名称 */
-    static TableName: string = "RoleCard";
+    static TableName: string = "Event";
 
     /** 配置主键 */
     id: number = 0;
 
     /** 当前配置原始数据 */
-    private data: RoleCardConfigData = null!;
+    private data: EventConfigData = null!;
 
     /**
      * 获取全部配置。
      */
-    static getAllConfig<T extends BaseRoleCard>(
-        this: BaseRoleCardConstructor<T>
+    static getAllConfig<T extends BaseEvent>(
+        this: BaseEventConstructor<T>
     ): T[] {
         const table = JsonUtil.get(
             this.TableName
-        ) as Record<string, RoleCardConfigData> | null;
+        ) as Record<string, EventConfigData> | null;
 
         if (table == null) {
             return [];
@@ -82,13 +81,13 @@ export class BaseRoleCard {
      *
      * 不存在时返回 null。
      */
-    static getConfigById<T extends BaseRoleCard>(
-        this: BaseRoleCardConstructor<T>,
+    static getConfigById<T extends BaseEvent>(
+        this: BaseEventConstructor<T>,
         id: number
     ): T | null {
         const table = JsonUtil.get(
             this.TableName
-        ) as Record<string, RoleCardConfigData> | null;
+        ) as Record<string, EventConfigData> | null;
 
         if (table == null) {
             return null;
@@ -115,24 +114,19 @@ export class BaseRoleCard {
      */
     protected setConfig(
         id: number,
-        data: RoleCardConfigData
+        data: EventConfigData
     ) {
         this.id = id;
         this.data = data;
     }
 
-    /** 角色编号 */
-    get roleId(): number {
-        return this.data.roleId;
+    /** 事件 */
+    get name(): string {
+        return this.data.name;
     }
 
-    /** 卡牌编号 */
-    get cardId(): number {
-        return this.data.cardId;
-    }
-
-    /** 解锁关卡 （0为初始卡牌） */
-    get unlockLevel(): number {
-        return this.data.unlockLevel;
+    /** 卡牌描述 */
+    get des(): string {
+        return this.data.des;
     }
 }

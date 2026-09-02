@@ -18,6 +18,7 @@ import { Vec3 } from 'cc';
 import { UITransform } from 'cc';
 import { nodeCard } from '../../card/nodeCard';
 import { TableCard } from '../../common/table/TableCard';
+import { GameFlowState } from '../../gameFlow/model/GameFlowModel';
 
 const { ccclass } = _decorator;
 
@@ -131,7 +132,14 @@ export class RoleSelectView extends CCView<GameFlow> {
         const tableRole = TableRole.getConfigById(currentSelectRoleId);
         const cardList = tableRole!.originCards;
         const item = TableCard.getConfigById(cardList[index]);
-        node.getComponent(nodeCard).setData(item);
+        node.getComponent(nodeCard).setData(item!);
+    }
+
+    btnNext() {
+        smc.routeSelect.generateRoutes();
+        this.ent.GameFlowBll.setGameFlowState(GameFlowState.RouteSelect);
+        this.ent.entryGameSceneByGameFlowState();
+        // this.ent.continueGame();
     }
 
 
