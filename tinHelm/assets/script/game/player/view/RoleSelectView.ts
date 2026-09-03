@@ -136,9 +136,7 @@ export class RoleSelectView extends CCView<GameFlow> {
     }
 
     btnNext() {
-        smc.routeSelect.generateRoutes();
-        this.ent.GameFlowBll.setGameFlowState(GameFlowState.RouteSelect);
-        this.ent.entryGameSceneByGameFlowState();
+        this.ent.GameFlowBll.AdvanceGameFlowState();
         this.ent.closeRoleSelectView();
     }
 

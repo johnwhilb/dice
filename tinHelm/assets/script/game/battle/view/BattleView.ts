@@ -36,6 +36,7 @@ export class BattleView extends CCView<Battle> {
         switch (this.ent.BattleModel.phase) {
             case BattlePhase.Start:
                 this.startBattlePhase();
+                this.ent.initBattleScene();
                 this.ent.changePhase();
                 break;
             case BattlePhase.PlayerStart:
