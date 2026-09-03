@@ -22,21 +22,22 @@ export class BattleView extends CCView<Battle> {
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
-        this.initView();
+        // this.initView();
         this.refresh();
     }
-
-    initView() {
-        const spRole = this.getNode('spRole')!.getComponent(Sprite);
-        const currentSelectedAvatarId = smc.player.getSelectedRoleId();
-        this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
-    }
+    // initView() {
+    //     const spRole = this.getNode('spRole')!.getComponent(Sprite);
+    //     const currentSelectedAvatarId = smc.player.getSelectedRoleId();
+    //     this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
+    // }
 
     refresh() {
         switch (this.ent.BattleModel.phase) {
             case BattlePhase.Start:
+                this.ent.initBattleSceneInfo();
+                this.initPlayerView()
+                this.initEnemyView()
                 this.startBattlePhase();
-                this.ent.initBattleScene();
                 this.ent.changePhase();
                 break;
             case BattlePhase.PlayerStart:
@@ -45,6 +46,18 @@ export class BattleView extends CCView<Battle> {
             default:
                 break;
         }
+    }
+
+    initPlayerView() {
+            const spRole = this.getNode('spRole')!.getComponent(Sprite);
+            const currentSelectedAvatarId = smc.player.getSelectedRoleId();
+            this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
+    }
+
+    initEnemyView() {
+        const spEnemy = this.getNode('spEnemy')!.getComponent(Sprite);
+        const currentSelectedAvatarId = this.ent.BattleEnemyModel.enemyId;
+        this.setSprite(spEnemy, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
     }
 
     startBattlePhase() {
