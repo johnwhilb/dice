@@ -45,7 +45,7 @@ export class Battle extends CCEntity {
         this.BattleBll.changePhase();
     }
 
-    initBattleScene() {
+    initBattleSceneInfo() {
         this.BattleBll.generateEnemy();
         this.BattleEnemyBll.initEnemy();
         this.BattlePlayerBll.initPlayer();

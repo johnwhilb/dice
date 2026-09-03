@@ -16,6 +16,13 @@ export class ResPath {
     }
 
     /**
+     * 敌人立绘
+     */
+    static getSpriteEnemyBody(id: number): string {
+        return `texture/enemyBody/enemyBody${id}/spriteFrame`;
+    }
+
+    /**
      * 角色卡片
      */
     static getSpriteRoleCard(id: number): string {
