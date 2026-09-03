@@ -10,26 +10,23 @@ import { TweenAnimUtil } from '../../common/util/TweenAnimUtil';
 import { Sprite } from 'cc';
 import { smc } from '../../common/SingletonModuleComp';
 import { ResPath } from '../../common/config/ResPath';
+import { Label } from 'cc';
 
 const { ccclass } = _decorator;
 
 
 @ccclass("BattleView")
 @ecs.register("BattleView", false)
-@gui.register('BattleView', { layer: LayerType.PopUp, prefab: 'gui/battle/BattleView' })
+@gui.register('BattleView', { layer: LayerType.UI, prefab: 'gui/battle/BattleView' })
 export class BattleView extends CCView<Battle> {
 
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
-        // this.initView();
         this.refresh();
+        this.startBattleAnimation();
     }
-    // initView() {
-    //     const spRole = this.getNode('spRole')!.getComponent(Sprite);
-    //     const currentSelectedAvatarId = smc.player.getSelectedRoleId();
-    //     this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
-    // }
+
 
     refresh() {
         switch (this.ent.BattleModel.phase) {
@@ -37,7 +34,8 @@ export class BattleView extends CCView<Battle> {
                 this.ent.initBattleSceneInfo();
                 this.initPlayerView()
                 this.initEnemyView()
-                this.startBattlePhase();
+                this.updatePlayerStatus();
+                this.updateEnemyStatus();
                 this.ent.changePhase();
                 break;
             case BattlePhase.PlayerStart:
@@ -49,18 +47,29 @@ export class BattleView extends CCView<Battle> {
     }
 
     initPlayerView() {
-            const spRole = this.getNode('spRole')!.getComponent(Sprite);
-            const currentSelectedAvatarId = smc.player.getSelectedRoleId();
-            this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
+        const spRole = this.getNode('spRole')!.getComponent(Sprite);
+        const currentSelectedAvatarId = smc.player.getSelectedRoleId();
+        this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
     }
 
     initEnemyView() {
         const spEnemy = this.getNode('spEnemy')!.getComponent(Sprite);
         const currentSelectedAvatarId = this.ent.BattleEnemyModel.enemyId;
-        this.setSprite(spEnemy, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
+        this.setSprite(spEnemy, ResPath.getSpriteEnemyBody(currentSelectedAvatarId));
     }
 
-    startBattlePhase() {
+    updatePlayerStatus() {
+        const lbtPlayerHP = this.getNode('lbtPlayerHP')!.getComponent(Label);
+        lbtPlayerHP.string = this.ent.BattlePlayerModel.hp + "/" + this.ent.BattlePlayerModel.maxHp;
+    }
+
+    updateEnemyStatus() {
+        const lbtEnemyHP = this.getNode('lbtEnemyHP')!.getComponent(Label);
+        lbtEnemyHP.string = this.ent.BattleEnemyModel.hp + "/" + this.ent.BattleEnemyModel.maxHp;
+
+    }
+
+    startBattleAnimation() {
         TweenAnimUtil.move(this.getNode("nodeCurrentPhase")!, 250, 0);
         TweenAnimUtil.move(this.getNode("nodeCurrentRound")!, -250, 0);
     }

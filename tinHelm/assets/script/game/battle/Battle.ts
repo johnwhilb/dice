@@ -26,6 +26,10 @@ export class Battle extends CCEntity {
     init(): void {
         this.addBusinesss(BattleBll);
         this.addComponents(BattleModel);
+        this.addComponents(BattlePlayerModel);
+        this.addComponents(BattleEnemyModel);
+        this.addBusinesss(BattleEnemyBll);
+        this.addBusinesss(BattlePlayerBll);
     }
 
     openBattleView() {
