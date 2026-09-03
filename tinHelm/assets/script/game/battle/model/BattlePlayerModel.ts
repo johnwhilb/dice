@@ -10,6 +10,7 @@ export class BattlePlayerModel extends ecs.Comp {
     drawPile: number[] = [];
     discardPile: number[] = [];
     hp: number = 0;
+    maxHp: number = 0;
     playerId: number = 0;
 
     reset() {

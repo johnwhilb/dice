@@ -6,8 +6,9 @@ import { smc } from '../../common/SingletonModuleComp';
 export class BattlePlayerBll extends CCBusiness<Battle> {
 
     initPlayer() {
-        this.ent.BattlePlayerModel.handCards=smc.player.PlayerModel.handCard
-        this.ent.BattlePlayerModel.hp=smc.player.PlayerModel.hp
+        this.ent.BattlePlayerModel.handCards = smc.player.PlayerModel.handCard
+        this.ent.BattlePlayerModel.hp = smc.player.PlayerModel.hp
+        this.ent.BattlePlayerModel.maxHp = smc.player.PlayerModel.maxHp
     }
 
 }

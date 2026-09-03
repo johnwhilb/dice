@@ -36,9 +36,9 @@ export class GameFlow extends CCEntity {
         }
     }
 
-    // entryGameSceneByGameFlowState() {
-    //     this.GameFlowBll.entryGameSceneByGameFlowState();
-    // }
+    entryGameSceneByGameFlowState() {
+        this.GameFlowBll.entryGameSceneByGameFlowState();
+    }
 
 
 }
