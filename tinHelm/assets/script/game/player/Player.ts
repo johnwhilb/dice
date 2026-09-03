@@ -30,6 +30,10 @@ export class Player extends CCEntity {
         return this.PlayerModel.roleId;
     }
 
+    initPlayer() {
+        this.PlayerBll.initPlayer();
+    }
+
 
 
 }

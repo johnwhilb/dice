@@ -19,6 +19,19 @@ export class GameFlowBll extends CCBusiness<GameFlow> {
         }
     }
 
+    AdvanceGameFlowState() {
+        switch (this.ent.GameFlowModel.currentGameFlowState) {
+            case GameFlowState.RoleSelect:
+                smc.routeSelect.generateRoutes();
+                smc.player.initPlayer();
+                this.setGameFlowState(GameFlowState.RouteSelect);
+                this.entryGameSceneByGameFlowState();
+                break;
+            default:
+                break;
+        }
+    }
+
     setGameFlowState(state: GameFlowState) {
         this.ent.GameFlowModel.currentGameFlowState = state;
     }

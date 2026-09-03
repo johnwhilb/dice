@@ -5,9 +5,13 @@ import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 export class PlayerModel extends ecs.Comp {
 
     roleId: number = 1001;
+    hp: number = 0;
+    maxHp: number = 0;
+    handCard: number[] = [];
 
     public reset(): void {
         this.roleId = 1001;
+        this.hp = 0;
     }
 }
 
