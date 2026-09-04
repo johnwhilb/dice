@@ -136,8 +136,6 @@ CCProgram fs %{
     float rotationZ;
     float stopFace;
     float stopBlend;
-    
-
 
     float diceSize;
     float cornerRoundness;
@@ -191,30 +189,6 @@ CCProgram fs %{
     );
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
  // ----------------------------------------------------------
   // 根据目标点数返回骰子最终旋转角度
   //
@@ -261,7 +235,6 @@ CCProgram fs %{
       result = vec3(0.0, -halfPI, 0.0);
     }
 
-
     // 6 点：后面 -Z
     else {
       result = vec3(0.0, PI, 0.0);
@@ -280,40 +253,7 @@ mat3 transposeMat3(mat3 m) {
   );
 }
 
-
-  // 简单稳定噪声：用于模拟手绘线条的不规则抖动。
-  float hash12(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-  }
-
-  float noise2d(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-
-    float a = hash12(i);
-    float b = hash12(i + vec2(1.0, 0.0));
-    float c = hash12(i + vec2(0.0, 1.0));
-    float d = hash12(i + vec2(1.0, 1.0));
-
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-  }
-
-  float fbm2d(vec2 p) {
-    float v = 0.0;
-    float a = 0.5;
-    v += noise2d(p) * a; p *= 2.03; a *= 0.5;
-    v += noise2d(p) * a; p *= 2.01; a *= 0.5;
-    v += noise2d(p) * a;
-    return v;
-  }
-
-
-  // 2D 圆角矩形 signed distance，负值表示在内部。
-  float sdRoundRect(vec2 p, vec2 halfSize, float radius) {
-    vec2 q = abs(p) - (halfSize - vec2(radius));
-    return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
-  }
+  // 已移除：噪声、手绘纹理、圆角卡片 SDF 等不参与纯图片输出的函数。
 
   // 根据当前面编号采样对应图片。
   vec4 sampleFaceTexture(vec2 faceTexUV, float faceValue) {
@@ -466,45 +406,6 @@ mat3 transposeMat3(mat3 m) {
 
     // 光线转换到骰子局部空间。
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     mat3 inverseRotation = transposeMat3(rotation);
 
     vec3 localRayOrigin = inverseRotation * rayOrigin;
@@ -537,7 +438,6 @@ mat3 transposeMat3(mat3 m) {
     vec3 hitPoint = localRayOrigin + localRayDir * hitT;
 
     vec3 localNormal = cubeNormal(hitPoint, boxSize);
-    vec3 worldNormal = normalize(rotation * localNormal);
 
     // ----------------------------------------------------------
     // 骰子面数据
@@ -558,124 +458,18 @@ mat3 transposeMat3(mat3 m) {
     vec4 faceTex = sampleFaceTexture(faceTexUV, faceValue);
 
     // ----------------------------------------------------------
-    // 简单圆角 / 边缘高光
+    // 纯图片显示模式：
+    // 去除光照、阴影、边框、卡片框、描边、纹理扰动。
+    // 每个骰子面仅显示对应的 faceTexture。
     // ----------------------------------------------------------
 
-    float edgeDistance = min(
-      min(abs(abs(hitPoint.x) - halfDice), abs(abs(hitPoint.y) - halfDice)),
-      abs(abs(hitPoint.z) - halfDice)
-    );
-
-    float edgeMask = 1.0 - smoothstep(
-      0.0,
-      max(cornerRoundness, 0.001),
-      edgeDistance
-    );
-
-    // ----------------------------------------------------------
-    // 角色选择 UI 卡片风格匹配版
-    // ----------------------------------------------------------
-
-    vec3 viewDir = normalize(rayOrigin - (rotation * hitPoint));
-    float facing = clamp(dot(worldNormal, viewDir), 0.0, 1.0);
-
-    // 只保留非常轻的面向差异，让 3D 体块仍然成立，但核心观感来自 UI 卡片。
-    float frontBand = step(0.82, facing);
-    float midBand   = step(0.52, facing);
-
-    float faceTone = sideShade;
-    faceTone = mix(faceTone, midShade, midBand);
-    faceTone = mix(faceTone, 1.0, frontBand);
-
-    // 外壳：接近截图里卡片外部的浅灰/白壳体，而非材质高光。
-    vec3 shellColor = mix(sideColor.rgb, diceColor.rgb, midBand);
-    shellColor = mix(shellColor, diceColor.rgb, frontBand);
-    shellColor *= faceTone;
-
-    vec3 color = shellColor;
-
-    // --- 卡片结构：外框 / 白色内衬 / 浅青底板 ---
-    // 用圆角矩形更贴近截图中的角色选择小卡片。
-    float outerD = sdRoundRect(faceUV, vec2(0.82, 0.82), 0.12);
-    float innerD = sdRoundRect(faceUV, vec2(0.76, 0.76), 0.10);
-    float fillD  = sdRoundRect(faceUV, vec2(0.70, 0.70), 0.08);
-    float artD   = sdRoundRect(faceUV, vec2(0.64, 0.66), 0.06);
-
-    float outerMask = 1.0 - smoothstep(0.0, 0.015, outerD);
-    float innerMask = 1.0 - smoothstep(0.0, 0.015, innerD);
-    float fillMask  = 1.0 - smoothstep(0.0, 0.015, fillD);
-    float artMask   = 1.0 - smoothstep(0.0, 0.015, artD);
-
-    float outerFrame = clamp(outerMask - innerMask, 0.0, 1.0);
-    float innerFrame = clamp(innerMask - fillMask, 0.0, 1.0);
-
-    // 底板稍带上下层次，模仿 UI 卡片里浅青色背景。
-    float yGrad = clamp((faceUV.y + 1.0) * 0.5, 0.0, 1.0);
-    vec3 cardFill = mix(cardShadowColor.rgb, cardFillColor.rgb, yGrad * 0.65 + 0.35);
-    cardFill *= faceTone;
-
-    color = mix(color, cardFrameColor.rgb * faceTone, outerFrame);
-    color = mix(color, cardInnerColor.rgb, innerFrame);
-    color = mix(color, cardFill, fillMask);
-
-    // 底板里再加一点很淡的界面高光条，但必须保持扁平 UI 感。
-    float headerGlow = smoothstep(0.58, 0.84, faceUV.y) * fillMask * 0.12;
-    color += cardInnerColor.rgb * headerGlow;
-
-    // 贴图内容：放到卡片内容区里，透明区显示卡片底色。
-    float printAlpha = smoothstep(0.10, 0.34, faceTex.a);
-
-    // 内容区 UV 略缩放，让图像更像被放在角色卡片里。
-    vec2 artUV = (faceUV / vec2(0.64, 0.66)) * 0.5 + 0.5;
-    artUV = clamp(artUV, 0.0, 1.0);
-    vec4 cardArtTex = sampleFaceTexture(artUV, faceValue);
-    float cardArtAlpha = smoothstep(0.10, 0.34, cardArtTex.a) * artMask;
-
-    vec3 printedColor = cardArtTex.rgb * faceTone;
-
-    // 轻微 UI 纸面感：极弱线稿质感，避免过于“空”。
-    vec2 hatchUV = faceUV * vec2(6.0, 6.0);
-    float hatchNoise = fbm2d(hatchUV * 0.65 + vec2(faceValue * 1.93, faceValue * 1.21));
-    float hatchLine = 1.0 - smoothstep(0.42, 0.49, abs(fract((hatchUV.x + hatchUV.y) * 0.38 + hatchNoise * 0.08) - 0.5));
-    printedColor *= 1.0 - hatchLine * hatchStrength * 0.18 * (1.0 - frontBand);
-
-    vec3 cardPrinted = mix(cardFill, printedColor, cardArtAlpha);
-    color = mix(color, cardPrinted, fillMask);
-
-    // 内容区外沿再加一圈浅青描边，贴近你截图小卡片的“照片框”感。
-    float artFrame = clamp(fillMask - artMask, 0.0, 1.0);
-    color = mix(color, cardFrameColor.rgb * 0.92, artFrame * 0.72);
-
-    // 外轮廓：略深、略稳，少抖动，符合 UI 元素而不是手绘插画主体。
-    float borderDistance = 1.0 - max(abs(faceUV.x), abs(faceUV.y));
-    float lineWidth = max(outlineWidth, 0.001);
-    vec2 noiseUV = faceUV * 6.6 + vec2(faceValue * 2.71, faceValue * 1.49);
-    float jitterNoise = fbm2d(noiseUV) - 0.5;
-    float jitter = jitterNoise * lineJitter * 0.28;
-
-    float borderMask = 1.0 - smoothstep(
-      lineWidth + jitter,
-      lineWidth * 1.40 + jitter,
-      borderDistance
-    );
-
-    color = mix(color, outlineColor.rgb, borderMask * inkStrength * 0.88);
-
-    // 角落只做极轻压暗，防止再次产生玻璃/塑料错觉。
-    float corner = max(abs(faceUV.x), abs(faceUV.y));
-    float cornerMask = smoothstep(0.95, 1.0, corner) * (1.0 - borderMask);
-    color *= 1.0 - cornerMask * 0.015;
-
-    // ----------------------------------------------------------
-    // Alpha
-    // ----------------------------------------------------------
+    vec4 outTex = faceTex;
 
     float finalAlpha = alpha;
-
-    // 如果承载 Sprite 为完整白色图，保持骰子完整显示。
     finalAlpha *= max(sourceTex.a, 0.001);
+    finalAlpha *= outTex.a;
 
-    vec4 outColor = vec4(color, finalAlpha);
+    vec4 outColor = vec4(outTex.rgb, finalAlpha);
     outColor *= mainColor;
 
     #if USE_LOCAL
