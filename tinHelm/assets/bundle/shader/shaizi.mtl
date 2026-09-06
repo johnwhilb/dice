@@ -26,32 +26,33 @@
   "_props": [
     {
       "faceTexture1": {
-        "__uuid__": "77941998-7029-4209-b24b-f0131b0f2250@6c48a",
+        "__uuid__": "fc37efb5-bf2b-4e5a-9566-a4f48b8c3ea7@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "faceTexture2": {
-        "__uuid__": "77941998-7029-4209-b24b-f0131b0f2250@6c48a",
+        "__uuid__": "fc37efb5-bf2b-4e5a-9566-a4f48b8c3ea7@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "faceTexture3": {
-        "__uuid__": "c437e6a2-513f-4315-b4c5-085df81a892e@6c48a",
+        "__uuid__": "fc37efb5-bf2b-4e5a-9566-a4f48b8c3ea7@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "faceTexture4": {
-        "__uuid__": "c437e6a2-513f-4315-b4c5-085df81a892e@6c48a",
+        "__uuid__": "fc37efb5-bf2b-4e5a-9566-a4f48b8c3ea7@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "faceTexture5": {
-        "__uuid__": "1ab35a2a-071d-417d-b872-a750becb4d34@6c48a",
+        "__uuid__": "fc37efb5-bf2b-4e5a-9566-a4f48b8c3ea7@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "faceTexture6": {
-        "__uuid__": "71d3af62-18b4-4487-8a86-f0da68bda30f@6c48a",
+        "__uuid__": "fc37efb5-bf2b-4e5a-9566-a4f48b8c3ea7@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "rotationSpeed": 5,
       "stopFace": 6,
-      "stopBlend": 0.54
+      "stopBlend": 0.54,
+      "imageFitScale": 0.4
     }
   ]
 }

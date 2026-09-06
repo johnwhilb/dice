@@ -1,4 +1,11 @@
 // Effect Syntax Guide: https://docs.cocos.com/creator/manual/zh/shader/index.html
+//
+// 精简版：
+// 1. 只接收 6 张骰子面图片。
+// 2. 只负责立方体映射与旋转 / 停止到指定面。
+// 3. 已移除颜色、描边、光照、阴影、卡片框、噪声等无关参数。
+// 4. 保留 Image Fit Scale，用于控制骰子内容在 Sprite 图片区域内的占比。
+// 5. 骰子立方体尺寸本身继续使用固定视觉比例。
 
 CCEffect %{
   techniques:
@@ -16,50 +23,26 @@ CCEffect %{
       rasterizerState:
         cullMode: none
       properties:
-        mainColor:       { value: [1.0, 1.0, 1.0, 1.0], editor: { type: color } }
+        # 六个骰子面的图片
+        faceTexture1: { value: white, editor: { displayName: "Face 1 / Front (+Z)" } }
+        faceTexture2: { value: white, editor: { displayName: "Face 2 / Right (+X)" } }
+        faceTexture3: { value: white, editor: { displayName: "Face 3 / Top (+Y)" } }
+        faceTexture4: { value: white, editor: { displayName: "Face 4 / Bottom (-Y)" } }
+        faceTexture5: { value: white, editor: { displayName: "Face 5 / Left (-X)" } }
+        faceTexture6: { value: white, editor: { displayName: "Face 6 / Back (-Z)" } }
 
-        # 六个骰子面的自定义图片。把 Texture / SpriteFrame 对应纹理拖到材质属性中。
-        faceTexture1:    { value: white, editor: { displayName: "Face 1 / Front (+Z)" } }
-        faceTexture2:    { value: white, editor: { displayName: "Face 2 / Right (+X)" } }
-        faceTexture3:    { value: white, editor: { displayName: "Face 3 / Top (+Y)" } }
-        faceTexture4:    { value: white, editor: { displayName: "Face 4 / Bottom (-Y)" } }
-        faceTexture5:    { value: white, editor: { displayName: "Face 5 / Left (-X)" } }
-        faceTexture6:    { value: white, editor: { displayName: "Face 6 / Back (-Z)" } }
+        # 旋转参数
+        rotationSpeed: { value: 1.0, editor: { range: [0.0, 5.0, 0.01] } }
+        rotationX:     { value: 0.65, editor: { range: [-3.14, 3.14, 0.01] } }
+        rotationY:     { value: 0.35, editor: { range: [-3.14, 3.14, 0.01] } }
+        rotationZ:     { value: 0.0, editor: { range: [-3.14, 3.14, 0.01] } }
 
-        diceColor:       { value: [0.97, 0.97, 0.97, 1.0], editor: { type: color } }
-        sideColor:       { value: [0.84, 0.86, 0.88, 1.0], editor: { type: color } }
-        edgeColor:       { value: [0.12, 0.13, 0.14, 1.0], editor: { type: color } }
-        outlineColor:    { value: [0.10, 0.12, 0.13, 1.0], editor: { type: color, displayName: "Illustration Outline" } }
-        panelColor:      { value: [0.95, 0.96, 0.96, 1.0], editor: { type: color, displayName: "Face Panel Color" } }
-        panelLineColor:  { value: [0.28, 0.50, 0.50, 1.0], editor: { type: color, displayName: "Face Panel Line" } }
-        cardFrameColor:  { value: [0.38, 0.80, 0.77, 1.0], editor: { type: color, displayName: "Card Frame Color" } }
-        cardInnerColor:  { value: [0.93, 0.98, 0.97, 1.0], editor: { type: color, displayName: "Card Inner Line" } }
-        cardFillColor:   { value: [0.82, 0.93, 0.91, 1.0], editor: { type: color, displayName: "Card Fill Color" } }
-        cardShadowColor: { value: [0.64, 0.78, 0.76, 1.0], editor: { type: color, displayName: "Card Bottom Shade" } }
+        # 停止到指定骰子面
+        stopFace:      { value: 1.0, editor: { range: [1.0, 6.0, 1.0] } }
+        stopBlend:     { value: 0.0, editor: { range: [0.0, 1.0, 0.01] } }
 
-        rotationSpeed:   { value: 1.0, editor: { range: [0.0, 5.0, 0.01] } }
-        rotationX:       { value: 0.65, editor: { range: [-3.14, 3.14, 0.01] } }
-        rotationY:       { value: 0.35, editor: { range: [-3.14, 3.14, 0.01] } }
-        rotationZ:       { value: 0.0, editor: { range: [-3.14, 3.14, 0.01] } }
-        stopFace:        { value: 1.0, editor: { range: [1.0, 6.0, 1.0] } }
-        stopBlend:       { value: 0.0, editor: { range: [0.0, 1.0, 0.01] } }
-
-        diceSize:        { value: 0.72, editor: { range: [0.2, 1.4, 0.01] } }
-        cornerRoundness: { value: 0.035, editor: { range: [0.0, 0.12, 0.001] } }
-        outlineWidth:    { value: 0.034, editor: { range: [0.0, 0.16, 0.001], displayName: "Outline Width" } }
-        sideShade:       { value: 0.92, editor: { range: [0.45, 1.0, 0.01], displayName: "Side Tone" } }
-        midShade:        { value: 0.97, editor: { range: [0.60, 1.0, 0.01], displayName: "Mid Tone" } }
-        lineJitter:      { value: 0.006, editor: { range: [0.0, 0.08, 0.001], displayName: "Line Jitter" } }
-        inkStrength:     { value: 0.76, editor: { range: [0.0, 1.0, 0.01], displayName: "Ink Strength" } }
-        hatchStrength:   { value: 0.03, editor: { range: [0.0, 0.4, 0.01], displayName: "Hatch Strength" } }
-
-        # 兼容旧材质参数；插画版不再使用真实光照/高光。
-        lightStrength:   { value: 0.0, editor: { range: [0.0, 3.0, 0.01] } }
-        shadowStrength:  { value: 0.0, editor: { range: [0.0, 1.0, 0.01] } }
-        edgeGlow:        { value: 0.0, editor: { range: [0.0, 3.0, 0.01] } }
-
-        aspect:          { value: 1.0, editor: { range: [0.2, 4.0, 0.01] } }
-        alpha:           { value: 1.0, editor: { range: [0.0, 1.0, 0.01] } }
+        # 图片适配缩放：越小，骰子在图片范围内显示得越大
+        imageFitScale: { value: 0.30, editor: { range: [0.15, 1.0, 0.01], displayName: "Image Fit Scale" } }
 }%
 
 CCProgram vs %{
@@ -100,7 +83,6 @@ CCProgram fs %{
   precision highp float;
 
   #include <builtin/uniforms/cc-global>
-  #include <sprite-texture>
 
   in vec2 uv;
 
@@ -108,7 +90,7 @@ CCProgram fs %{
     in vec4 v_color;
   #endif
 
-  // 六个面的材质纹理。sampler2D 不能放进 UBO。
+  // 六个面的纹理
   uniform sampler2D faceTexture1;
   uniform sampler2D faceTexture2;
   uniform sampler2D faceTexture3;
@@ -117,44 +99,19 @@ CCProgram fs %{
   uniform sampler2D faceTexture6;
 
   uniform UBO {
-    vec4 mainColor;
-
-    vec4 diceColor;
-    vec4 sideColor;
-    vec4 edgeColor;
-    vec4 outlineColor;
-    vec4 panelColor;
-    vec4 panelLineColor;
-    vec4 cardFrameColor;
-    vec4 cardInnerColor;
-    vec4 cardFillColor;
-    vec4 cardShadowColor;
-
     float rotationSpeed;
     float rotationX;
     float rotationY;
     float rotationZ;
     float stopFace;
     float stopBlend;
-
-    float diceSize;
-    float cornerRoundness;
-    float outlineWidth;
-    float sideShade;
-    float midShade;
-    float lineJitter;
-    float inkStrength;
-    float hatchStrength;
-
-    float lightStrength;
-    float shadowStrength;
-    float edgeGlow;
-
-    float aspect;
-    float alpha;
+    float imageFitScale;
   };
 
   #define PI 3.14159265359
+
+  // 当前视觉比例直接固化，不再暴露为材质参数。
+  #define DICE_SIZE 0.72
 
   mat3 rotateX(float a) {
     float s = sin(a);
@@ -189,73 +146,35 @@ CCProgram fs %{
     );
   }
 
- // ----------------------------------------------------------
-  // 根据目标点数返回骰子最终旋转角度
-  //
-  // 当前面编号:
-  //   前面 +Z = 1
-  //   后面 -Z = 6
-  //   右面 +X = 2
-  //   左面 -X = 5
-  //   上面 +Y = 3
-  //   底面 -Y = 4
-  // ----------------------------------------------------------
-
+  // 根据目标点数返回最终朝向
+  // 1 = +Z, 2 = +X, 3 = +Y, 4 = -Y, 5 = -X, 6 = -Z
   vec3 getStopAngles(float face) {
     float halfPI = 1.57079632679;
 
-    vec3 result = vec3(0.0, 0.0, 0.0);
-
-    // 1 点：前面 +Z
     if (face < 1.5) {
-      result = vec3(0.0, 0.0, 0.0);
+      return vec3(0.0, 0.0, 0.0);
+    } else if (face < 2.5) {
+      return vec3(0.0, halfPI, 0.0);
+    } else if (face < 3.5) {
+      return vec3(-halfPI, 0.0, 0.0);
+    } else if (face < 4.5) {
+      return vec3(halfPI, 0.0, 0.0);
+    } else if (face < 5.5) {
+      return vec3(0.0, -halfPI, 0.0);
     }
 
-    // 2 点：右面 +X
-    // 修正：由 -halfPI 改为 halfPI
-    else if (face < 2.5) {
-      result = vec3(0.0, halfPI, 0.0);
-    }
-
-    // 3 点：上面 +Y
-    // 修正：由 halfPI 改为 -halfPI
-    else if (face < 3.5) {
-      result = vec3(-halfPI, 0.0, 0.0);
-    }
-
-    // 4 点：底面 -Y
-    // 修正：由 -halfPI 改为 halfPI
-    else if (face < 4.5) {
-      result = vec3(halfPI, 0.0, 0.0);
-    }
-
-    // 5 点：左面 -X
-    // 修正：由 halfPI 改为 -halfPI
-    else if (face < 5.5) {
-      result = vec3(0.0, -halfPI, 0.0);
-    }
-
-    // 6 点：后面 -Z
-    else {
-      result = vec3(0.0, PI, 0.0);
-    }
-
-    return result;
+    return vec3(0.0, PI, 0.0);
   }
 
-  // GLSL ES 1.00 / WebGL 1 中通常没有 transpose(mat3)
-// 对旋转矩阵而言，转置矩阵就是它的逆矩阵。
-mat3 transposeMat3(mat3 m) {
-  return mat3(
-    m[0][0], m[1][0], m[2][0],
-    m[0][1], m[1][1], m[2][1],
-    m[0][2], m[1][2], m[2][2]
-  );
-}
+  // 旋转矩阵的转置即逆矩阵
+  mat3 transposeMat3(mat3 m) {
+    return mat3(
+      m[0][0], m[1][0], m[2][0],
+      m[0][1], m[1][1], m[2][1],
+      m[0][2], m[1][2], m[2][2]
+    );
+  }
 
-  // 已移除：噪声、手绘纹理、圆角卡片 SDF 等不参与纯图片输出的函数。
-
-  // 根据当前面编号采样对应图片。
   vec4 sampleFaceTexture(vec2 faceTexUV, float faceValue) {
     if (faceValue < 1.5) {
       return texture(faceTexture1, faceTexUV);
@@ -294,7 +213,6 @@ mat3 transposeMat3(mat3 m) {
     return farT > max(nearT, 0.0);
   }
 
-  // 根据局部空间中的命中点确定骰子面法线
   vec3 cubeNormal(vec3 p, vec3 halfSize) {
     vec3 d = abs(abs(p) - halfSize);
 
@@ -309,139 +227,79 @@ mat3 transposeMat3(mat3 m) {
     return vec3(0.0, 0.0, sign(p.z));
   }
 
-  // 根据命中面计算面坐标和面编号
   void getFaceData(
     vec3 hitPoint,
     vec3 normal,
     out vec2 faceUV,
     out float faceValue
   ) {
-    // 前面：1 点
     if (normal.z > 0.5) {
       faceUV = hitPoint.xy;
       faceValue = 1.0;
-    }
-    // 后面：6 点
-    else if (normal.z < -0.5) {
+    } else if (normal.z < -0.5) {
       faceUV = vec2(-hitPoint.x, hitPoint.y);
       faceValue = 6.0;
-    }
-    // 右面：2 点
-    else if (normal.x > 0.5) {
+    } else if (normal.x > 0.5) {
       faceUV = vec2(-hitPoint.z, hitPoint.y);
       faceValue = 2.0;
-    }
-    // 左面：5 点
-    else if (normal.x < -0.5) {
+    } else if (normal.x < -0.5) {
       faceUV = vec2(hitPoint.z, hitPoint.y);
       faceValue = 5.0;
-    }
-    // 上面：3 点
-    else if (normal.y > 0.5) {
+    } else if (normal.y > 0.5) {
       faceUV = vec2(hitPoint.x, -hitPoint.z);
       faceValue = 3.0;
-    }
-    // 底面：4 点
-    else {
+    } else {
       faceUV = vec2(hitPoint.x, hitPoint.z);
       faceValue = 4.0;
     }
   }
 
   vec4 frag () {
-    float time = cc_time.x;
-
-    // 用原贴图 Alpha 裁剪特效区域。
-    vec4 sourceTex = texture(cc_spriteTexture, uv);
-
-    // 屏幕平面坐标。
+    // 当前 Sprite 区域映射到 -1 ~ 1。
+    // 当前骰子节点按正方形使用，因此不再暴露 aspect 参数。
     vec2 screenP = (uv - 0.5) * 2.0;
-    screenP.x *= aspect;
-
-    // ----------------------------------------------------------
-    // 摄像机射线
-    // ----------------------------------------------------------
+    screenP *= imageFitScale;
 
     vec3 rayOrigin = vec3(0.0, 0.0, 2.8);
     vec3 rayDir = normalize(vec3(screenP, -1.85));
 
-    // ----------------------------------------------------------
-    // 骰子旋转
-    // ----------------------------------------------------------
-
-    float rotTime = time * rotationSpeed;
-
-    // 正常旋转角度
+    // 连续滚动
+    float rotTime = cc_time.x * rotationSpeed;
     vec3 rollingAngles = vec3(
       rotationX + rotTime * 0.82,
       rotationY + rotTime * 1.10,
       rotationZ + rotTime * 0.48
     );
 
-    // 目标点数对应的最终角度
+    // 停止到指定面
     vec3 stopAngles = getStopAngles(stopFace);
-
-    // 平滑停止进度
     float stopProgress = clamp(stopBlend, 0.0, 1.0);
+    stopProgress = stopProgress * stopProgress * (3.0 - 2.0 * stopProgress);
 
-    // smoothstep，让停止过程更自然
-    stopProgress = stopProgress * stopProgress *
-                   (3.0 - 2.0 * stopProgress);
-
-    // 从滚动姿态过渡到目标面姿态
-    vec3 finalAngles = mix(
-      rollingAngles,
-      stopAngles,
-      stopProgress
-    );
-
-    float angleX = finalAngles.x;
-    float angleY = finalAngles.y;
-    float angleZ = finalAngles.z;
+    vec3 finalAngles = mix(rollingAngles, stopAngles, stopProgress);
 
     mat3 rotation =
-      rotateZ(angleZ) *
-      rotateY(angleY) *
-      rotateX(angleX);
-
-    // 光线转换到骰子局部空间。
+      rotateZ(finalAngles.z) *
+      rotateY(finalAngles.y) *
+      rotateX(finalAngles.x);
 
     mat3 inverseRotation = transposeMat3(rotation);
-
     vec3 localRayOrigin = inverseRotation * rayOrigin;
     vec3 localRayDir = inverseRotation * rayDir;
 
-    float halfDice = diceSize * 0.5;
+    float halfDice = DICE_SIZE * 0.5;
     vec3 boxSize = vec3(halfDice);
 
     float nearT;
     float farT;
 
-    bool hit = rayBox(
-      localRayOrigin,
-      localRayDir,
-      boxSize,
-      nearT,
-      farT
-    );
-
-    if (!hit) {
+    if (!rayBox(localRayOrigin, localRayDir, boxSize, nearT, farT)) {
       return vec4(0.0);
     }
 
-    float hitT = nearT;
-
-    if (hitT < 0.0) {
-      hitT = farT;
-    }
-
+    float hitT = nearT < 0.0 ? farT : nearT;
     vec3 hitPoint = localRayOrigin + localRayDir * hitT;
-
     vec3 localNormal = cubeNormal(hitPoint, boxSize);
-
-    // ----------------------------------------------------------
-    // 骰子面数据
-    // ----------------------------------------------------------
 
     vec2 faceUV;
     float faceValue;
@@ -453,24 +311,8 @@ mat3 transposeMat3(mat3 m) {
       faceValue
     );
 
-    // faceUV 范围大约为 -1 ~ 1，转换成纹理坐标 0 ~ 1。
     vec2 faceTexUV = clamp(faceUV * 0.5 + 0.5, 0.0, 1.0);
-    vec4 faceTex = sampleFaceTexture(faceTexUV, faceValue);
-
-    // ----------------------------------------------------------
-    // 纯图片显示模式：
-    // 去除光照、阴影、边框、卡片框、描边、纹理扰动。
-    // 每个骰子面仅显示对应的 faceTexture。
-    // ----------------------------------------------------------
-
-    vec4 outTex = faceTex;
-
-    float finalAlpha = alpha;
-    finalAlpha *= max(sourceTex.a, 0.001);
-    finalAlpha *= outTex.a;
-
-    vec4 outColor = vec4(outTex.rgb, finalAlpha);
-    outColor *= mainColor;
+    vec4 outColor = sampleFaceTexture(faceTexUV, faceValue);
 
     #if USE_LOCAL
       outColor *= v_color;

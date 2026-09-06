@@ -29,6 +29,12 @@ export class ResPath {
         return `texture/roleCard/roleCard${id}/spriteFrame`;
     }
 
+    /**
+     * 骰子
+     */
+    static getSpriteDice(id: number): string {
+        return `texture/dice/dice${id}/spriteFrame`;
+    }
 
     /**
      * 道具图标

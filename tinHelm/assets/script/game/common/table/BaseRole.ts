@@ -12,6 +12,7 @@ interface RoleConfigData {
     originHp: number;
     maxHp: number;
     originCards: any[];
+    originDice: any;
 }
 
 /**
@@ -152,5 +153,10 @@ export class BaseRole {
     /** 初始卡牌 */
     get originCards(): any[] {
         return this.data.originCards;
+    }
+
+    /** 初始骰子数 */
+    get originDice(): any {
+        return this.data.originDice;
     }
 }
