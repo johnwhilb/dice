@@ -5,14 +5,18 @@ import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { gui } from 'db://oops-framework/core/gui/Gui';
 import { Battle } from '../Battle';
 import { BattlePhase } from '../model/BattleModel';
-import { Widget } from 'cc';
 import { TweenAnimUtil } from '../../common/util/TweenAnimUtil';
 import { Sprite } from 'cc';
 import { smc } from '../../common/SingletonModuleComp';
 import { ResPath } from '../../common/config/ResPath';
 import { Label } from 'cc';
+import { nodeDice } from '../../dice/nodeDice';
+import { TableDice } from '../../common/table/TableDice';
+import { TableRole } from '../../common/table/TableRole';
+import { Prefab } from 'cc';
+import { instantiate } from 'cc';
 
-const { ccclass } = _decorator;
+const { ccclass, property } = _decorator;
 
 
 @ccclass("BattleView")
@@ -20,11 +24,15 @@ const { ccclass } = _decorator;
 @gui.register('BattleView', { layer: LayerType.UI, prefab: 'gui/battle/BattleView' })
 export class BattleView extends CCView<Battle> {
 
+    @property({ type: Prefab })
+    prefabDice: Prefab = null!;
+
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
         this.refresh();
         this.startBattleAnimation();
+        this.initDiceView();
     }
 
 
@@ -74,12 +82,53 @@ export class BattleView extends CCView<Battle> {
         TweenAnimUtil.move(this.getNode("nodeCurrentRound")!, -250, 0);
     }
 
+    initDiceView() {
+        const diceLayout = this.getNode('diceLayout')!;
+        diceLayout.destroyAllChildren();
+        const playerId = smc.player.getSelectedRoleId();
+        const diceInfo = TableRole.getConfigById(playerId)!.originDice;
+        for (const item of diceInfo) {
+            const diceNode = instantiate(this.prefabDice);
+            diceNode.parent = diceLayout;
+            const diceView = diceNode.getComponent(nodeDice) || diceNode.addComponent(nodeDice);
+            for (let i = 0; i < item.length; i++) {
+                const face = diceNode.children[i].getChildByName('spIcon')!.getComponent(Sprite);
+                const lbtNum = diceNode.children[i].getChildByName('lbtNum')!.getComponent(Label);
+                lbtNum.string = `${item[i]}`;
+                const diceId = TableDice.getAllConfig().find(dice => dice.role === playerId && dice.diceNum.includes(item[i]))!.id;
+                this.setSprite(face, ResPath.getSpriteDice(diceId));
+            }
+            diceView.syncFaces();
+            diceView.stopAtFace(1);
+        }
+    }
+
+    btnThrow() {
+        const diceLayout = this.getNode('diceLayout');
+        if (!diceLayout || diceLayout.children.length <= 0) {
+            return;
+        }
+
+        const diceIndex = Math.floor(Math.random() * diceLayout.children.length);
+        const face = Math.floor(Math.random() * 6) + 1;
+        this.throwDice(diceIndex, face);
+    }
+
+    throwDice(diceIndex: number, face: number): void {
+        const diceLayout = this.getNode('diceLayout');
+        const dice = diceLayout?.children[diceIndex];
+        const diceView = dice?.getComponent(nodeDice);
+        if (!diceView) {
+            return;
+        }
+
+        diceView.rollToFace(face, 2);
+    }
+
     btnClose() {
         this.ent.closeBattleView();
     }
 
     reset(): void {
     }
-
-
 }

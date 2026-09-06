@@ -1,53 +1,50 @@
 import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
 
 /**
- * Role 配置原始数据。
+ * Dice 配置原始数据。
  *
  * 自动生成，请勿手动修改。
  */
-interface RoleConfigData {
+interface DiceConfigData {
     name: string;
-    title: string;
-    info: string;
-    originHp: number;
-    maxHp: number;
-    originCards: any[];
-    originDice: any;
+    des: string;
+    role: number;
+    diceNum: any[];
 }
 
 /**
- * BaseRole 派生类构造类型。
+ * BaseDice 派生类构造类型。
  */
-interface BaseRoleConstructor<T extends BaseRole> {
+interface BaseDiceConstructor<T extends BaseDice> {
     new (): T;
     TableName: string;
 }
 
 /**
- * Role 配置基类。
+ * Dice 配置基类。
  *
  * 自动生成文件，请勿手动修改。
  */
-export class BaseRole {
+export class BaseDice {
 
     /** JsonUtil 中的配置表名称 */
-    static TableName: string = "Role";
+    static TableName: string = "Dice";
 
     /** 配置主键 */
     id: number = 0;
 
     /** 当前配置原始数据 */
-    private data: RoleConfigData = null!;
+    private data: DiceConfigData = null!;
 
     /**
      * 获取全部配置。
      */
-    static getAllConfig<T extends BaseRole>(
-        this: BaseRoleConstructor<T>
+    static getAllConfig<T extends BaseDice>(
+        this: BaseDiceConstructor<T>
     ): T[] {
         const table = JsonUtil.get(
             this.TableName
-        ) as Record<string, RoleConfigData> | null;
+        ) as Record<string, DiceConfigData> | null;
 
         if (table == null) {
             return [];
@@ -86,13 +83,13 @@ export class BaseRole {
      *
      * 不存在时返回 null。
      */
-    static getConfigById<T extends BaseRole>(
-        this: BaseRoleConstructor<T>,
+    static getConfigById<T extends BaseDice>(
+        this: BaseDiceConstructor<T>,
         id: number
     ): T | null {
         const table = JsonUtil.get(
             this.TableName
-        ) as Record<string, RoleConfigData> | null;
+        ) as Record<string, DiceConfigData> | null;
 
         if (table == null) {
             return null;
@@ -119,44 +116,29 @@ export class BaseRole {
      */
     protected setConfig(
         id: number,
-        data: RoleConfigData
+        data: DiceConfigData
     ) {
         this.id = id;
         this.data = data;
     }
 
-    /** 角色名 */
+    /** 骰子名字 */
     get name(): string {
         return this.data.name;
     }
 
-    /** 角色称号 */
-    get title(): string {
-        return this.data.title;
+    /** 骰子描述 */
+    get des(): string {
+        return this.data.des;
     }
 
-    /** 角色信息 */
-    get info(): string {
-        return this.data.info;
+    /** 所属角色 */
+    get role(): number {
+        return this.data.role;
     }
 
-    /** 初始血量 */
-    get originHp(): number {
-        return this.data.originHp;
-    }
-
-    /** 血量上限 */
-    get maxHp(): number {
-        return this.data.maxHp;
-    }
-
-    /** 初始卡牌 */
-    get originCards(): any[] {
-        return this.data.originCards;
-    }
-
-    /** 初始骰子数 */
-    get originDice(): any {
-        return this.data.originDice;
+    /** 骰子数 */
+    get diceNum(): any[] {
+        return this.data.diceNum;
     }
 }
