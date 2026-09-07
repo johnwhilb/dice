@@ -20,7 +20,7 @@ import { TableCard } from '../../common/table/TableCard';
 import { nodeCard } from '../../card/nodeCard';
 import { BattleEvent } from '../BattleEvent';
 import { EventTouch, ScrollView, UITransform, Vec3 } from 'cc';
-import { BezierCurveUtil } from '../../common/util/BezierCurveUtil';
+import { GraphView } from '../../ui/GraphView';
 
 const { ccclass, property } = _decorator;
 
@@ -29,7 +29,6 @@ enum CardGestureDirection {
     Horizontal,
     Vertical,
 }
-
 
 @ccclass("BattleView")
 @ecs.register("BattleView", false)
@@ -41,15 +40,9 @@ export class BattleView extends CCView<Battle> {
 
     private readonly cardGestureJudgeThreshold: number = 8;
     private readonly cardBezierTriggerThreshold: number = 45;
-    private readonly cardBezierNodeName: string = 'nodeCardBezierCurve';
 
     private cardGestureDirection: CardGestureDirection = CardGestureDirection.None;
     private cardTouchStartPos: Vec3 = new Vec3();
-    private currentTouchCard: Node | null = null;
-    private cardListScrollView: ScrollView | null = null;
-    private cardListOriginalHorizontal: boolean = true;
-    private cardListOriginalVertical: boolean = false;
-    private cardBezierCurve: BezierCurveUtil | null = null;
 
     start() {
         this.nodeTreeInfoLite();
@@ -104,155 +97,43 @@ export class BattleView extends CCView<Battle> {
 
     private onCardTouchStart(event: EventTouch) {
         const touchPos = event.getUILocation();
-
         this.cardTouchStartPos.set(touchPos.x, touchPos.y, 0);
-        this.cardGestureDirection = CardGestureDirection.None;
-        this.currentTouchCard = event.currentTarget as Node;
-
-        this.cardListScrollView =
-            this.getNode('cardList')!.getComponent(ScrollView);
-
-        if (this.cardListScrollView) {
-            // 保存原状态
-            this.cardListOriginalHorizontal = this.cardListScrollView.horizontal;
-            this.cardListOriginalVertical = this.cardListScrollView.vertical;
-
-            // ★ 方向未确定之前，不允许 ScrollView 移动
-            this.cardListScrollView.horizontal = false;
-            this.cardListScrollView.vertical = false;
-        }
-
-        this.getCardBezierCurve().reset();
+        const cardListScrollView = this.getNode('cardList')!.getComponent(ScrollView);
+        cardListScrollView.horizontal = false;
+        cardListScrollView.vertical = false;
     }
 
     private onCardTouchMove(event: EventTouch) {
-        if (!this.currentTouchCard) {
+        if (this.cardGestureDirection === CardGestureDirection.Horizontal) {
             return;
         }
-
         const touchPos = event.getUILocation();
-
         const deltaX = touchPos.x - this.cardTouchStartPos.x;
         const deltaY = touchPos.y - this.cardTouchStartPos.y;
-
         const absX = Math.abs(deltaX);
         const absY = Math.abs(deltaY);
-
-        // =========================
-        // 第一次确定手势方向
-        // =========================
-        if (this.cardGestureDirection === CardGestureDirection.None) {
-
-            if (Math.max(absX, absY) < this.cardGestureJudgeThreshold) {
-                return;
-            }
-
-            // ★ 向上滑
-            if (
-                deltaY > 0 &&
-                absY > absX
-            ) {
-                this.cardGestureDirection = CardGestureDirection.Vertical;
-
-                // 禁止 ScrollView
-                this.lockCardListSlide();
-
-                // ★ 非常重要：不再继续往 ScrollView 传
-                event.propagationStopped = true;
-            }
-            else if (absX > absY) {
-                this.cardGestureDirection = CardGestureDirection.Horizontal;
-                if (this.cardListScrollView) {
-                    this.cardListScrollView.horizontal =
-                        this.cardListOriginalHorizontal;
-                    this.cardListScrollView.vertical =
-                        this.cardListOriginalVertical;
-                }
-                return;
-            }
-
-            // 方向还不明确
-            else {
-                return;
-            }
-        }
-
-        // =========================
-        // 已经锁定横向
-        // =========================
-        if (
-            this.cardGestureDirection ===
-            CardGestureDirection.Horizontal
-        ) {
+        if (Math.max(absX, absY) < this.cardGestureJudgeThreshold) {
             return;
         }
-
-        // =========================
-        // 已经锁定向上
-        // =========================
-        event.propagationStopped = true;
-
-        if (absY >= this.cardBezierTriggerThreshold) {
-            this.drawCardBezierCurve(
-                this.currentTouchCard,
-                new Vec3(touchPos.x, touchPos.y, 0)
-            );
+        if (absY > absX) {
+            this.getNode('cardList')!.getComponent(ScrollView).horizontal = false;
+            this.cardGestureDirection = CardGestureDirection.Vertical;
         } else {
-            this.getCardBezierCurve().reset();
+            this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;
+            this.cardGestureDirection = CardGestureDirection.Horizontal;
+            return;
+        }
+        if (absY >= this.cardBezierTriggerThreshold) {
+            const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
+            graphView.drawBezierCurveByWorldPos(this.cardTouchStartPos, new Vec3(touchPos.x, touchPos.y, 0));
         }
     }
 
     private onCardTouchEnd(event: EventTouch) {
-        if (this.cardGestureDirection === CardGestureDirection.Vertical) {
-            event.propagationStopped = true;
-            this.cardListScrollView?.node.emit('touch-up');
-        }
-        this.getCardBezierCurve().reset();
-        this.unlockCardListSlide();
+        const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
+        graphView.getComponent(GraphView)!.reset();
+        this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;
         this.cardGestureDirection = CardGestureDirection.None;
-        this.currentTouchCard = null;
-        this.cardListScrollView = null;
-    }
-
-    private lockCardListSlide() {
-        if (!this.cardListScrollView) {
-            return;
-        }
-        this.cardListScrollView.horizontal = false;
-        this.cardListScrollView.vertical = false;
-    }
-
-    private unlockCardListSlide() {
-        if (!this.cardListScrollView) {
-            return;
-        }
-        this.cardListScrollView.horizontal = this.cardListOriginalHorizontal;
-        this.cardListScrollView.vertical = this.cardListOriginalVertical;
-    }
-
-    private drawCardBezierCurve(cardNode: Node, touchWorldPos: Vec3) {
-        const cardTransform = cardNode.getComponent(UITransform);
-        if (!cardTransform) {
-            return;
-        }
-        const cardCenterWorldPos = cardTransform.convertToWorldSpaceAR(Vec3.ZERO);
-        this.getCardBezierCurve().drawByWorldPos(cardCenterWorldPos, touchWorldPos);
-    }
-
-    private getCardBezierCurve(): BezierCurveUtil {
-        if (this.cardBezierCurve && this.cardBezierCurve.node.isValid) {
-            return this.cardBezierCurve;
-        }
-
-        let curveNode = this.node.getChildByName(this.cardBezierNodeName);
-        if (!curveNode) {
-            curveNode = new Node(this.cardBezierNodeName);
-            curveNode.parent = this.node;
-            curveNode.addComponent(UITransform);
-        }
-        curveNode.setSiblingIndex(this.node.children.length - 1);
-        this.cardBezierCurve = curveNode.getComponent(BezierCurveUtil) || curveNode.addComponent(BezierCurveUtil);
-        return this.cardBezierCurve;
     }
 
     initPlayerView() {
