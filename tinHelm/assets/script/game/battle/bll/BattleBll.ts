@@ -2,7 +2,7 @@ import { EnumEvent } from '../../common/table/EnumEvent';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
 import { BattlePhase } from '../model/BattleModel';
-import { smc } from '../../common/SingletonModuleComp';
+import { BattleEvent } from '../BattleEvent';
 
 export class BattleBll extends CCBusiness<Battle> {
 
@@ -41,7 +41,7 @@ export class BattleBll extends CCBusiness<Battle> {
             default:
                 break;
         }
-
+        this.dispatchEvent(BattleEvent.refreshBattlePhase);
     }
     generateEnemy() {
         this.ent.BattleEnemyModel.enemyId = 5001
