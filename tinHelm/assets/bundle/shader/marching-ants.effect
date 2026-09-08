@@ -1,0 +1,188 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs:vert
+      frag: fs:frag
+
+      rasterizerState:
+        cullMode: none
+
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: one
+          blendDstAlpha: one_minus_src_alpha
+
+      properties:
+        startEnd: {
+          value: [0.0, 0.0, 0.0, 100.0]
+        }
+
+        marchParams: {
+          value: [20.0, 35.0, 100.0, 2.0]
+        }
+}%
+
+CCProgram vs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+  #include <builtin/uniforms/cc-local>
+
+  in vec3 a_position;
+  in vec4 a_color;
+
+  out vec4 v_color;
+  out vec2 v_localPos;
+
+  vec4 vert () {
+    v_color = a_color;
+    v_localPos = a_position.xy;
+
+    return cc_matViewProj
+         * cc_matWorld
+         * vec4(a_position, 1.0);
+  }
+}%
+
+CCProgram fs %{
+  precision highp float;
+
+  #include <builtin/uniforms/cc-global>
+
+  in vec4 v_color;
+  in vec2 v_localPos;
+
+  uniform MarchingLine {
+    /*
+     * xy = start
+     * zw = end
+     */
+    vec4 startEnd;
+
+    /*
+     * x = 透明段长度
+     * y = 实线段长度
+     * z = 移动速度
+     * w = 羽化宽度
+     */
+    vec4 marchParams;
+  };
+
+  vec4 frag () {
+
+    vec2 startPos = startEnd.xy;
+    vec2 endPos   = startEnd.zw;
+
+    vec2 direction = endPos - startPos;
+
+    float totalLength = length(direction);
+
+    if (totalLength < 0.001) {
+      return v_color;
+    }
+
+    vec2 dir = direction / totalLength;
+
+    /*
+     * 当前像素在 start -> end 轴上的距离。
+     *
+     * start = 0
+     * end   = totalLength
+     */
+    float distanceFromStart =
+      dot(
+        v_localPos - startPos,
+        dir
+      );
+
+    float transparentLength =
+      max(marchParams.x, 1.0);
+
+    float solidLength =
+      max(marchParams.y, 1.0);
+
+    float speed =
+      marchParams.z;
+
+    float feather =
+      max(marchParams.w, 0.01);
+
+    float period =
+      transparentLength
+      + solidLength;
+
+    /*
+     * F(x - vt)
+     *
+     * 意味着 pattern 沿着：
+     *
+     * start ---> end
+     *
+     * 移动
+     */
+    float phase = mod(
+      distanceFromStart
+      - cc_time.x * speed,
+      period
+    );
+
+    /*
+     * GLSL mod 正常情况下返回正数。
+     *
+     * 一个周期：
+     *
+     * 0
+     * |
+     * | 透明
+     * |
+     * transparentLength
+     * |
+     * | 实线
+     * |
+     * period
+     */
+
+    float mask =
+      smoothstep(
+        transparentLength - feather,
+        transparentLength + feather,
+        phase
+      );
+
+    /*
+     * 周期尾部开始渐隐，
+     * 这样连接到下一段透明区域不会硬切。
+     */
+    float wrapMask =
+      1.0 - smoothstep(
+        period - feather,
+        period,
+        phase
+      );
+
+    mask *= wrapMask;
+
+    vec4 color = v_color;
+
+    /*
+     * 核心：
+     * 只改变 alpha。
+     *
+     * mask = 0
+     * 完全透明
+     *
+     * mask = 1
+     * 原始颜色
+     */
+    color.a *= mask;
+
+    return color;
+  }
+}%

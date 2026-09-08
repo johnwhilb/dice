@@ -17,4 +17,8 @@ export class nodeCard extends GameComponent {
         this.getNode("lbtName")!.getComponent(Label)!.string = tableCard.name;
     }
 
+    onBtnClick() {
+        
+    }
+
 }
