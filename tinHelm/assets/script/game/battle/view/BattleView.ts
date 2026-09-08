@@ -24,11 +24,6 @@ import { GraphView } from '../../ui/GraphView';
 
 const { ccclass, property } = _decorator;
 
-enum CardGestureDirection {
-    None,
-    Horizontal,
-    Vertical,
-}
 
 @ccclass("BattleView")
 @ecs.register("BattleView", false)
@@ -39,18 +34,16 @@ export class BattleView extends CCView<Battle> {
     prefabDice: Prefab = null!;
 
     private readonly cardGestureJudgeThreshold: number = 8;
-    private readonly cardBezierTriggerThreshold: number = 45;
 
-    private cardGestureDirection: CardGestureDirection = CardGestureDirection.None;
     private cardTouchStartPos: Vec3 = new Vec3();
 
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
+        this.on(BattleEvent.refreshBattlePhase, this.refresh, this);
         this.refresh();
         this.startBattleAnimation();
         this.initDiceView();
-        this.on(BattleEvent.refreshBattlePhase, this.refresh, this);
     }
 
     refresh() {
@@ -104,9 +97,6 @@ export class BattleView extends CCView<Battle> {
     }
 
     private onCardTouchMove(event: EventTouch) {
-        if (this.cardGestureDirection === CardGestureDirection.Horizontal) {
-            return;
-        }
         const touchPos = event.getUILocation();
         const deltaX = touchPos.x - this.cardTouchStartPos.x;
         const deltaY = touchPos.y - this.cardTouchStartPos.y;
@@ -117,23 +107,28 @@ export class BattleView extends CCView<Battle> {
         }
         if (absY > absX) {
             this.getNode('cardList')!.getComponent(ScrollView).horizontal = false;
-            this.cardGestureDirection = CardGestureDirection.Vertical;
         } else {
             this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;
-            this.cardGestureDirection = CardGestureDirection.Horizontal;
-            return;
+
         }
-        if (absY >= this.cardBezierTriggerThreshold) {
+
+        if (!this.isWorldPosInsideNode(new Vec3(touchPos.x, touchPos.y, 0), this.getNode('cardList')!)) {
             const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
             graphView.drawBezierCurveByWorldPos(this.cardTouchStartPos, new Vec3(touchPos.x, touchPos.y, 0));
         }
+
     }
 
     private onCardTouchEnd(event: EventTouch) {
         const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
         graphView.getComponent(GraphView)!.reset();
         this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;
-        this.cardGestureDirection = CardGestureDirection.None;
+        const touchPos = event.getUILocation();
+        if (this.isWorldPosInsideNode(new Vec3(touchPos.x, touchPos.y, 0), this.getNode('spEnemy')!)) {
+            console.log('点击了敌人');
+        } else {
+            console.log('点击了其他区域');
+        }
     }
 
     initPlayerView() {
@@ -211,5 +206,28 @@ export class BattleView extends CCView<Battle> {
     }
 
     reset(): void {
+    }
+
+
+    isWorldPosInsideNode(worldPos: Vec3, node: Node): boolean {
+        const uiTransform = node.getComponent(UITransform);
+        if (!uiTransform) {
+            return false;
+        }
+        const localPos = uiTransform.convertToNodeSpaceAR(worldPos);
+        const width = uiTransform.width;
+        const height = uiTransform.height;
+        const anchorX = uiTransform.anchorX;
+        const anchorY = uiTransform.anchorY;
+        const minX = -width * anchorX;
+        const maxX = width * (1 - anchorX);
+        const minY = -height * anchorY;
+        const maxY = height * (1 - anchorY);
+        return (
+            localPos.x >= minX &&
+            localPos.x <= maxX &&
+            localPos.y >= minY &&
+            localPos.y <= maxY
+        );
     }
 }

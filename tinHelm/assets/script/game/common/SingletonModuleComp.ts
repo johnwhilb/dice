@@ -28,6 +28,8 @@ export class SingletonModuleComp extends ecs.Comp {
     /** 游戏战斗模块 */
     battle: Battle = null!;
 
+     
+
     reset() { }
 }
 

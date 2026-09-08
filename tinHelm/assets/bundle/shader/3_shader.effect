@@ -1,0 +1,82 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        # 流光颜色，默认土豪金
+        flowColor: { value: [1.0, 0.9, 0.5, 1.0], editor: { type: color } }
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+  out vec4 color;
+  out vec2 uv0;
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1.0);
+    pos = cc_matViewProj * pos;
+    uv0 = a_texCoord;
+    color = a_color;
+    return pos;
+  }
+}%
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  in vec4 color;
+  in vec2 uv0;
+  #pragma builtin(local)
+  layout(set = 2, binding = 12) uniform sampler2D cc_spriteTexture;
+  
+  uniform Constants {
+    vec4 flowColor;
+  };
+
+  vec4 frag () {
+    // 1. 获取原图颜色
+    vec4 mainColor = color * texture(cc_spriteTexture, uv0);
+
+    // 2. 创造斜向渐变场 (范围是 0.0 到 2.0)
+    float diagonal = uv0.x + uv0.y;
+
+    // 3. 让时间变成一个不断循环的扫描线位置
+    // fract() 是取小数部分，比如 fract(1.8) 会变成 0.8。这样时间就会在 0~1 之间无限死循环
+    // 后面乘和减的数学运算，是为了让流光能彻底扫出图片外部再循环，不会突兀地断掉
+    float scanTime = fract(cc_time.x * 0.5) * 3.0 - 0.5;
+
+    // 4. 计算当前像素距离“扫描线”的绝对距离
+    // abs() 是绝对值。如果距离是 0，说明像素刚好在光束的正中心
+    float dist = abs(diagonal - scanTime);
+
+    // 5. 新朋友出场：用 smoothstep 雕刻光束的柔和边缘！
+    // 它的意思是：距离在 0.0 到 0.15 之间的像素，给我平滑地变暗；超过 0.15 的，直接变 0 (死黑)
+    // 注意前面有个 1.0 -，我们把它反过来了：距离越近越亮 (1.0)，远了就变 0.0
+    float lightIntensity = 1.0 - smoothstep(0.0, 0.15, dist);
+
+    // 6. 把光强和颜色乘起来 (* 2.0 是为了让光更亮)
+    vec3 glow = flowColor.rgb * lightIntensity*0.4;
+
+    // 【极其关键的一步！防止“灵异现象”】
+    // 我们必须乘以 mainColor.a，这样流光就只会照亮小猫的身体，而不会把透明的空气也照亮！
+    mainColor.rgb = mainColor.rgb + glow * mainColor.a;
+
+    return mainColor;
+  }
+}%
