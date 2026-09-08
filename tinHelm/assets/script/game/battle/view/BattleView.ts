@@ -37,6 +37,8 @@ export class BattleView extends CCView<Battle> {
 
     private cardTouchStartPos: Vec3 = new Vec3();
 
+    private lineIsMove: boolean = false;
+
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
@@ -107,19 +109,20 @@ export class BattleView extends CCView<Battle> {
         }
         if (absY > absX) {
             this.getNode('cardList')!.getComponent(ScrollView).horizontal = false;
-        } else {
+        } else if (!this.lineIsMove) {
             this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;
-
         }
 
         if (!this.isWorldPosInsideNode(new Vec3(touchPos.x, touchPos.y, 0), this.getNode('cardList')!)) {
             const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
             graphView.drawBezierCurveByWorldPos(this.cardTouchStartPos, new Vec3(touchPos.x, touchPos.y, 0));
+            this.lineIsMove = true;
         }
 
     }
 
     private onCardTouchEnd(event: EventTouch) {
+        this.lineIsMove = false;
         const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
         graphView.getComponent(GraphView)!.reset();
         this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;

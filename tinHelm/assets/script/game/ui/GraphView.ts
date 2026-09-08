@@ -23,7 +23,7 @@ export class GraphView extends Component {
         this.graphics.lineWidth = this.lineWidth;
         this.graphics.lineCap = Graphics.LineCap.ROUND;
         this.graphics.lineJoin = Graphics.LineJoin.ROUND;
-        this.graphics.strokeColor = new Color(255, 255, 255, 255);
+        this.graphics.strokeColor = new Color(178, 192, 73, 255);
     }
 
     syncTransformFrom(target: UITransform) {

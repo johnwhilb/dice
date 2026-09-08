@@ -8,6 +8,9 @@ import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
 interface CardConfigData {
     name: string;
     des: string;
+    numNeed: any[];
+    DiceNeed: any[];
+    numNeedDes: string;
 }
 
 /**
@@ -128,5 +131,20 @@ export class BaseCard {
     /** 卡牌描述 */
     get des(): string {
         return this.data.des;
+    }
+
+    /** 骰子点数触发条件 */
+    get numNeed(): any[] {
+        return this.data.numNeed;
+    }
+
+    /** 骰子Icon触发条件 */
+    get DiceNeed(): any[] {
+        return this.data.DiceNeed;
+    }
+
+    /** 骰子点数触发条件描述 */
+    get numNeedDes(): string {
+        return this.data.numNeedDes;
     }
 }
