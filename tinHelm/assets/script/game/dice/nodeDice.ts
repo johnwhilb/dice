@@ -18,7 +18,6 @@ export class nodeDice extends Component {
     private rolling = false;
     private rollDuration = 2;
     private rollElapsed = 0;
-    private rollRandomElapsed = 0;
     private rollTargetFace = 1;
 
     start() {
@@ -64,7 +63,6 @@ export class nodeDice extends Component {
         this.rollTargetFace = this.clampFace(face);
         this.rollDuration = Math.max(0.1, duration);
         this.rollElapsed = 0;
-        this.rollRandomElapsed = 0;
         this.rolling = true;
 
         const material = this.getDiceMaterial();
@@ -108,12 +106,6 @@ export class nodeDice extends Component {
         }
 
         this.rollElapsed += deltaTime;
-        this.rollRandomElapsed += deltaTime;
-
-        if (this.rollRandomElapsed >= 0.08) {
-            this.rollRandomElapsed = 0;
-            this.randomizeRotation(material);
-        }
 
         const settleDuration = Math.min(0.45, this.rollDuration * 0.35);
         const settleStart = this.rollDuration - settleDuration;
