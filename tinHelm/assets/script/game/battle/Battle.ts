@@ -7,6 +7,7 @@ import { BattlePlayerModel } from './model/BattlePlayerModel';
 import { BattleEnemyModel } from './model/BattleEnemyModel';
 import { BattleEnemyBll } from './bll/BattleEnemyBll';
 import { BattlePlayerBll } from './bll/BattlePlayerBll';
+import { BattleDiceBll } from './bll/BattleDiceBll';
 
 @ecs.register('Battle')
 export class Battle extends CCEntity {
@@ -18,6 +19,7 @@ export class Battle extends CCEntity {
     BattleEnemyModel!: BattleEnemyModel
     BattleEnemyBll!: BattleEnemyBll
     BattlePlayerBll!: BattlePlayerBll
+    BattleDiceBll!: BattleDiceBll
 
     static create(): Battle {
         return ecs.getEntity<Battle>(Battle);
@@ -30,6 +32,7 @@ export class Battle extends CCEntity {
         this.addComponents(BattleEnemyModel);
         this.addBusinesss(BattleEnemyBll);
         this.addBusinesss(BattlePlayerBll);
+        this.addBusinesss(BattleDiceBll);
     }
 
     openBattleView() {
