@@ -167,27 +167,49 @@ export class BattleView extends CCView<Battle> {
         diceLayout.destroyAllChildren();
         const playerId = smc.player.getSelectedRoleId();
         const diceInfo = TableRole.getConfigById(playerId)!.originDice;
-        for (const item of diceInfo) {
+        // for (const item of diceInfo.entries()) {
+        //     const diceNode = instantiate(this.prefabDice);
+        //     diceNode.parent = diceLayout;
+        //     const diceView = diceNode.getComponent(nodeDice)
+        //     for (let i = 0; i < item.length; i++) {
+        //         const face = diceNode.children[i].getChildByName('spIcon')!.getComponent(Sprite);
+        //         const lbtNum = diceNode.children[i].getChildByName('lbtNum')!.getComponent(Label);
+        //         lbtNum.string = `${item[i]}`;
+        //         const diceId = TableDice.getAllConfig().find(dice => dice.role === playerId && dice.diceNum.includes(item[i]))!.id;
+        //         this.setSprite(face, ResPath.getSpriteDice(diceId));
+        //     }
+        //     diceView.syncFaces();
+        //     diceView.stopAtFace(1);
+        // }
+
+
+        for (let i = 0; i < diceInfo.length; i++) {
             const diceNode = instantiate(this.prefabDice);
             diceNode.parent = diceLayout;
-            const diceView = diceNode.getComponent(nodeDice) || diceNode.addComponent(nodeDice);
-            for (let i = 0; i < item.length; i++) {
-                const face = diceNode.children[i].getChildByName('spIcon')!.getComponent(Sprite);
-                const lbtNum = diceNode.children[i].getChildByName('lbtNum')!.getComponent(Label);
-                lbtNum.string = `${item[i]}`;
-                const diceId = TableDice.getAllConfig().find(dice => dice.role === playerId && dice.diceNum.includes(item[i]))!.id;
+            const diceView = diceNode.getComponent(nodeDice)
+            diceView.setIndex(i);
+            for (let j = 0; j < diceInfo[i].length; j++) {
+                const face = diceNode.children[j].getChildByName('spIcon')!.getComponent(Sprite);
+                const lbtNum = diceNode.children[j].getChildByName('lbtNum')!.getComponent(Label);
+                lbtNum.string = `${diceInfo[i][j]}`;
+                const diceId = TableDice.getAllConfig().find(dice => dice.role === playerId && dice.diceNum.includes(diceInfo[i][j]))!.id;
                 this.setSprite(face, ResPath.getSpriteDice(diceId));
             }
+
             diceView.syncFaces();
             diceView.stopAtFace(1);
         }
+
+
+
+
     }
 
     btnThrow() {
         const lockedState = this.ent.BattlePlayerModel.diceLocked.slice();
         const diceValues = this.ent.BattleDiceBll.resetDice();
         diceValues.forEach((diceValue, diceIndex) => {
-            if (!lockedState[diceIndex]) {
+            if (!lockedState.includes(diceIndex)) {
                 this.throwDice(diceIndex, diceValue);
             }
         });

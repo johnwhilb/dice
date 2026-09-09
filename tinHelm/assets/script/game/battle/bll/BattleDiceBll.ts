@@ -4,42 +4,23 @@ import { TableRole } from '../../common/table/TableRole';
 import { Battle } from '../Battle';
 
 export class BattleDiceBll extends CCBusiness<Battle> {
-    lockDice(diceIndex: number): boolean {
-        if (!this.isValidDiceIndex(diceIndex)) {
-            return false;
+    lockDice(diceIndex: number) {
+        const diceLocked = this.ent.BattlePlayerModel.diceLocked;
+        if (!diceLocked.includes(diceIndex)) {
+            diceLocked.push(diceIndex);
         }
-
-        this.ensureLockState();
-        this.ent.BattlePlayerModel.diceLocked[diceIndex] = true;
-        return true;
     }
 
-    unlockDice(diceIndex: number): boolean {
-        if (!this.isValidDiceIndex(diceIndex)) {
-            return false;
-        }
-
-        this.ensureLockState();
-        this.ent.BattlePlayerModel.diceLocked[diceIndex] = false;
-        return true;
-    }
-
-    unlockAllDice(): void {
-        this.ent.BattlePlayerModel.diceLocked = this.ent.BattlePlayerModel.dice.map(() => false);
+    unlockDice(diceIndex: number) {
+        this.ent.BattlePlayerModel.diceLocked = this.ent.BattlePlayerModel.diceLocked.filter(index => index !== diceIndex);
     }
 
     isDiceLocked(diceIndex: number): boolean {
-        return this.ent.BattlePlayerModel.diceLocked[diceIndex] === true;
+        return this.ent.BattlePlayerModel.diceLocked.includes(diceIndex);
     }
 
     getLockedDiceIndexes(): number[] {
-        const result: number[] = [];
-        this.ent.BattlePlayerModel.diceLocked.forEach((locked, index) => {
-            if (locked) {
-                result.push(index);
-            }
-        });
-        return result;
+        return this.ent.BattlePlayerModel.diceLocked.slice();
     }
 
     /**
@@ -58,12 +39,16 @@ export class BattleDiceBll extends CCBusiness<Battle> {
         const currentDice = playerModel.dice;
         const currentLocked = playerModel.diceLocked;
         const nextDice = new Array<number>(diceFaces.length);
-        const nextLocked = diceFaces.map((_, index) =>
-            currentLocked[index] === true && currentDice[index] !== undefined
+        const nextLocked = currentLocked.filter(index =>
+            Number.isInteger(index)
+            && index >= 0
+            && index < diceFaces.length
+            && currentDice[index] !== undefined
         );
+        const nextLockedSet = new Set(nextLocked);
 
         for (let diceIndex = 0; diceIndex < diceFaces.length; diceIndex++) {
-            if (nextLocked[diceIndex]) {
+            if (nextLockedSet.has(diceIndex)) {
                 nextDice[diceIndex] = currentDice[diceIndex];
                 continue;
             }
@@ -130,20 +115,7 @@ export class BattleDiceBll extends CCBusiness<Battle> {
         return candidates[0] ?? [];
     }
 
-    private isValidDiceIndex(diceIndex: number): boolean {
-        return Number.isInteger(diceIndex)
-            && diceIndex >= 0
-            && diceIndex < this.ent.BattlePlayerModel.dice.length;
-    }
 
-    private ensureLockState(): void {
-        const playerModel = this.ent.BattlePlayerModel;
-        if (playerModel.diceLocked.length !== playerModel.dice.length) {
-            playerModel.diceLocked = playerModel.dice.map((_, index) =>
-                playerModel.diceLocked[index] === true
-            );
-        }
-    }
 
     private sumIndexes(indexes: readonly number[]): number {
         return indexes.reduce((total, index) => total + index, 0);
