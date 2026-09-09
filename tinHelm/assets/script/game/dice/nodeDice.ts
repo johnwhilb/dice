@@ -1,5 +1,6 @@
 import { _decorator, Component, Label, Sprite, Texture2D } from 'cc';
 import { diceFace } from './diceFace';
+import { smc } from '../common/SingletonModuleComp';
 const { ccclass } = _decorator;
 
 const DICE_FACE_TEXTURE_PROPERTIES = [
@@ -19,6 +20,7 @@ export class nodeDice extends Component {
     private rollDuration = 2;
     private rollElapsed = 0;
     private rollTargetFace = 1;
+    private index = 0;
 
     start() {
         this.syncFaces();
@@ -29,6 +31,12 @@ export class nodeDice extends Component {
         this.syncFaces();
         this.updateRoll(deltaTime);
     }
+
+
+    setIndex(index: number) {
+        this.index = index;
+    }
+
 
     public syncFaces(): void {
         const sprite = this.node.getComponent(Sprite);
@@ -145,4 +153,14 @@ export class nodeDice extends Component {
     private clampFace(face: number): number {
         return Math.max(1, Math.min(6, Math.floor(face)));
     }
+
+    onBtnClick() {
+        const isLocked = smc.battle.BattlePlayerModel.diceLocked.includes(this.index);
+        if (isLocked) {
+            smc.battle.BattleDiceBll.unlockDice(this.index);
+        } else {
+            smc.battle.BattleDiceBll.lockDice(this.index);
+        }
+    }
+
 }

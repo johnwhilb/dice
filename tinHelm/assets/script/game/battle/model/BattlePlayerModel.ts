@@ -6,7 +6,7 @@ export class BattlePlayerModel extends ecs.Comp {
 
     turn: number = 1;
     dice: number[] = [];
-    diceLocked: boolean[] = [];
+    diceLocked: number[] = [];
     handCards: number[] = [];
     drawPile: number[] = [];
     discardPile: number[] = [];
