@@ -184,16 +184,16 @@ export class BattleView extends CCView<Battle> {
     }
 
     btnThrow() {
-        const diceLayout = this.getNode('diceLayout');
-        if (!diceLayout || diceLayout.children.length <= 0) {
-            return;
-        }
-        const diceIndex = Math.floor(Math.random() * diceLayout.children.length);
-        const face = Math.floor(Math.random() * 6) + 1;
-        this.throwDice(diceIndex, face);
+        const lockedState = this.ent.BattlePlayerModel.diceLocked.slice();
+        const diceValues = this.ent.BattleDiceBll.resetDice();
+        diceValues.forEach((diceValue, diceIndex) => {
+            if (!lockedState[diceIndex]) {
+                this.throwDice(diceIndex, diceValue);
+            }
+        });
     }
 
-    throwDice(diceIndex: number, face: number): void {
+    throwDice(diceIndex: number, diceValue: number): void {
         const diceLayout = this.getNode('diceLayout');
         const dice = diceLayout?.children[diceIndex];
         const diceView = dice?.getComponent(nodeDice);
@@ -201,7 +201,7 @@ export class BattleView extends CCView<Battle> {
             return;
         }
 
-        diceView.rollToFace(face, 2);
+        diceView.rollToFaceValue(diceValue, 2);
     }
 
     btnClose() {

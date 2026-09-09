@@ -6,6 +6,7 @@ export class BattlePlayerModel extends ecs.Comp {
 
     turn: number = 1;
     dice: number[] = [];
+    diceLocked: boolean[] = [];
     handCards: number[] = [];
     drawPile: number[] = [];
     discardPile: number[] = [];
@@ -16,6 +17,7 @@ export class BattlePlayerModel extends ecs.Comp {
     reset() {
         this.turn = 1;
         this.dice = [];
+        this.diceLocked = [];
         this.handCards = [];
         this.drawPile = [];
         this.discardPile = [];
