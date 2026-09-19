@@ -19,7 +19,7 @@ export class GameFlow extends CCEntity {
 
     init(): void {
         this.addComponents(GameFlowModel);
-        this.addBusinesss(GameFlowBll);
+        this.GameFlowBll = this.addBusiness<GameFlowBll>(GameFlowBll);
     }
 
     openRoleSelectView() {

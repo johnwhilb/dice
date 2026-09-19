@@ -5,17 +5,18 @@ const { ccclass } = _decorator;
 export class diceFace extends Component {
     private renderedTexture: Texture2D | null = null;
     private renderedSignature = '';
-    private colorCache: Map<Texture2D, Color> = new Map();
 
     public syncLabelColor(): void {
         const label = this.getLabel();
         const icon = this.getIcon();
-        const texture = icon?.spriteFrame?.texture as Texture2D | null;
-        if (!label || !texture) {
+
+        if (!label || !icon) {
             return;
         }
 
-        label.color.set(this.getTextureMainColor(texture));
+        // 不再读取 Texture2D 像素。
+        // 直接使用 Sprite 的颜色，Web / 微信小游戏都能用。
+        label.color.set(icon.color);
     }
 
     public getShaderTexture(): Texture2D | null {
@@ -160,110 +161,6 @@ export class diceFace extends Component {
         ctx.restore();
     }
 
-    private getTextureMainColor(texture: Texture2D): Color {
-        const cached = this.colorCache.get(texture);
-        if (cached) {
-            return cached;
-        }
-
-        const color = sys.isBrowser
-            ? this.getTextureMainColorForWeb(texture)
-            : this.getTextureMainColorForNative(texture);
-
-        this.colorCache.set(texture, color);
-        return color;
-    }
-
-    private getTextureMainColorForWeb(texture: Texture2D): Color {
-        const image = this.getTextureImageSource(texture);
-        if (!image) {
-            return new Color(255, 255, 255, 255);
-        }
-
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            canvas.remove();
-            return new Color(255, 255, 255, 255);
-        }
-
-        canvas.width = texture.width;
-        canvas.height = texture.height;
-        ctx.drawImage(image, 0, 0, texture.width, texture.height);
-        const data = ctx.getImageData(0, 0, texture.width, texture.height).data;
-        canvas.remove();
-
-        return this.averageOpaquePixels(data);
-    }
-
-    private getTextureMainColorForNative(texture: Texture2D): Color {
-        const sampleCount = 12;
-        let r = 0;
-        let g = 0;
-        let b = 0;
-        let a = 0;
-        let count = 0;
-
-        for (let y = 0; y < sampleCount; y++) {
-            for (let x = 0; x < sampleCount; x++) {
-                const pixel = (texture as any).getPixel(
-                    Math.floor((x + 0.5) * texture.width / sampleCount),
-                    Math.floor((y + 0.5) * texture.height / sampleCount)
-                );
-                if (!pixel || pixel.a <= 8) {
-                    continue;
-                }
-
-                r += pixel.r;
-                g += pixel.g;
-                b += pixel.b;
-                a += pixel.a;
-                count++;
-            }
-        }
-
-        if (count <= 0) {
-            return new Color(255, 255, 255, 255);
-        }
-
-        return new Color(
-            Math.round(r / count),
-            Math.round(g / count),
-            Math.round(b / count),
-            Math.round(a / count)
-        );
-    }
-
-    private averageOpaquePixels(data: Uint8ClampedArray): Color {
-        let r = 0;
-        let g = 0;
-        let b = 0;
-        let a = 0;
-        let count = 0;
-
-        for (let i = 0; i < data.length; i += 4) {
-            if (data[i + 3] <= 8) {
-                continue;
-            }
-
-            r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
-            a += data[i + 3];
-            count++;
-        }
-
-        if (count <= 0) {
-            return new Color(255, 255, 255, 255);
-        }
-
-        return new Color(
-            Math.round(r / count),
-            Math.round(g / count),
-            Math.round(b / count),
-            Math.round(a / count)
-        );
-    }
 
     private getTextureImageSource(texture: Texture2D | null): HTMLCanvasElement | HTMLImageElement | null {
         return ((texture as any)?.image?.data || null) as HTMLCanvasElement | HTMLImageElement | null;

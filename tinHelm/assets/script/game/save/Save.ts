@@ -12,7 +12,7 @@ export class Save extends CCEntity {
     }
 
     protected init(): void {
-        this.addBusinesss(B_Save);
+        this.B_Save = this.addBusiness<B_Save>(B_Save);
         this.addComponents(M_Save);
     }
 
