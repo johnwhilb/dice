@@ -1,0 +1,154 @@
+<mxfile host="app.diagrams.net" agent="ChatGPT">
+  <diagram id="tinhelm-flow" name="Tin Helm 流程图">
+    <mxGraphModel dx="3423" dy="1852" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="3000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="A" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#284B63;fontColor=#FFFFFF;strokeColor=#16384D;strokeWidth=2;fontSize=14;" value="开始游戏" vertex="1">
+          <mxGeometry height="60" width="220" x="900" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#284B63;fontColor=#FFFFFF;strokeColor=#16384D;strokeWidth=2;fontSize=14;" value="创建角色&lt;br&gt;种族+职业&lt;div&gt;&lt;span style=&quot;color: rgb(255, 0, 0);&quot;&gt;&lt;i&gt;1.种族可以决定角色身材属性，职业可以决定角色用哪套卡组，可以获得什么专属道具，遗物。&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(255, 0, 0);&quot;&gt;&lt;i&gt;道具为一次性物品，遗物为全局加成，局外养成可以用符文。&lt;/i&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="220" x="900" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-62" edge="1" parent="1" source="C" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RuoEVp9Gois10mRWCaiz-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="C" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#284B63;fontColor=#FFFFFF;strokeColor=#16384D;strokeWidth=2;fontSize=14;" value="设置初始资源&lt;br&gt;&lt;span style=&quot;color: rgb(255, 0, 0);&quot;&gt;1.血量/卢恩（货币）/悔恨值/初始道具/初始遗物品&lt;/span&gt;" vertex="1">
+          <mxGeometry height="80" width="320" x="1210" y="165" as="geometry" />
+        </mxCell>
+        <mxCell id="E" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#284B63;fontColor=#FFFFFF;strokeColor=#16384D;strokeWidth=2;fontSize=14;" value="进入第 X 层&lt;br&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(255, 7, 48);&quot;&gt;1.生成两个（房间，命运，道路），暂定房间，房间类型（特殊事件，商人，篝火，宝箱，敌人，精英敌人）。A既定房间直接展示，B未知房间，玩家进入前无法知道里面内容&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;color: rgb(255, 7, 48);&quot;&gt;2.玩家多次选择未知房间（既定房间），会累积悔恨值，悔恨值高了，会导致在未知房间更容易遇见精英怪，或者特殊事件，如宝箱变成宝箱怪，遭遇战。更多挑战已经更多奖励。&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="150" width="385" x="805" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-23" edge="1" parent="1" source="G" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="I">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-24" connectable="0" parent="RuoEVp9Gois10mRWCaiz-23" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="N" vertex="1">
+          <mxGeometry relative="1" x="-0.261" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="G" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#F4D35E;fontColor=#222222;strokeColor=#B48A00;strokeWidth=2;fontSize=14;" value="进入A既定房间？" vertex="1">
+          <mxGeometry height="100" width="180" x="910" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-13" edge="1" parent="1" source="H" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="L">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="H" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F1F7;fontColor=#1F2937;strokeColor=#5B7186;strokeWidth=1.5;fontSize=14;" value="触发A房间事件" vertex="1">
+          <mxGeometry height="80" width="250" x="580" y="1041" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-14" edge="1" parent="1" source="I" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="L">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="I" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F1F7;fontColor=#1F2937;strokeColor=#5B7186;strokeWidth=1.5;fontSize=14;" value="触发未知事件（增加悔恨值）" vertex="1">
+          <mxGeometry height="80" width="250" x="1180" y="1041" as="geometry" />
+        </mxCell>
+        <mxCell id="L" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#F4D35E;fontColor=#222222;strokeColor=#B48A00;strokeWidth=2;fontSize=14;" value="遭遇类型" vertex="1">
+          <mxGeometry height="100" width="180" x="960" y="1341" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-39" edge="1" parent="1" source="N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="RuoEVp9Gois10mRWCaiz-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="N" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#69A297;fontColor=#FFFFFF;strokeColor=#35685F;strokeWidth=2;fontSize=14;" value="商人/敌人/精英敌人/宝箱/特殊事件&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="220" x="940" y="1501" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-54" edge="1" parent="1" source="V" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="RuoEVp9Gois10mRWCaiz-26">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="1905.94" />
+              <mxPoint x="370" y="320.06" />
+              <mxPoint x="1370" y="320.06" />
+            </Array>
+            <mxPoint x="390" y="1906.0000000000005" as="sourcePoint" />
+            <mxPoint x="370" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="V" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E9F1F7;fontColor=#1F2937;strokeColor=#5B7186;strokeWidth=1.5;fontSize=14;" value="房间计数 + 1" vertex="1">
+          <mxGeometry height="60" width="220" x="930" y="1891" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="A" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="B" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="B" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="C" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="G" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="H" value="Y">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="L" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="N" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-31" edge="1" parent="1" source="RuoEVp9Gois10mRWCaiz-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RuoEVp9Gois10mRWCaiz-33">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1672.5" y="1421" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#69A297;fontColor=#FFFFFF;strokeColor=#35685F;strokeWidth=2;fontSize=14;" value="Boss/剧情" vertex="1">
+          <mxGeometry height="70" width="220" x="1562.5" y="1321" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-55" edge="1" parent="1" source="RuoEVp9Gois10mRWCaiz-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="E">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-59" connectable="0" parent="RuoEVp9Gois10mRWCaiz-55" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="N" vertex="1">
+          <mxGeometry relative="1" x="-0.2171" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-60" edge="1" parent="1" source="RuoEVp9Gois10mRWCaiz-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RuoEVp9Gois10mRWCaiz-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-61" connectable="0" parent="RuoEVp9Gois10mRWCaiz-60" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Y" vertex="1">
+          <mxGeometry relative="1" x="-0.7838" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-26" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#F4D35E;fontColor=#222222;strokeColor=#B48A00;strokeWidth=2;fontSize=14;" value="到达指定层数（第五层/第10层/第15层）" vertex="1">
+          <mxGeometry height="130" width="260" x="1240" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-28" edge="1" parent="1" source="E" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.467;entryY=0.07;entryDx=0;entryDy=0;entryPerimeter=0;" target="G">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-37" edge="1" parent="1" source="RuoEVp9Gois10mRWCaiz-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RuoEVp9Gois10mRWCaiz-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-43" connectable="0" parent="RuoEVp9Gois10mRWCaiz-37" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="N" vertex="1">
+          <mxGeometry relative="1" x="-0.4479" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-42" edge="1" parent="1" source="RuoEVp9Gois10mRWCaiz-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1950" y="1536" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-44" connectable="0" parent="RuoEVp9Gois10mRWCaiz-42" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Y" vertex="1">
+          <mxGeometry relative="1" x="-0.1797" y="-1" as="geometry">
+            <mxPoint x="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-33" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#F4D35E;fontColor=#222222;strokeColor=#B48A00;strokeWidth=2;fontSize=14;" value="击败最终boss/结束最终剧情" vertex="1">
+          <mxGeometry height="100" width="260" x="1542.5" y="1486" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-40" edge="1" parent="1" source="RuoEVp9Gois10mRWCaiz-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="V">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-41" edge="1" parent="1" source="RuoEVp9Gois10mRWCaiz-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="RuoEVp9Gois10mRWCaiz-47">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1520" y="1771" />
+            </Array>
+            <mxPoint x="1510" y="1871" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-35" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#F4D35E;fontColor=#222222;strokeColor=#B48A00;strokeWidth=2;fontSize=14;" value="血量&amp;gt;0" vertex="1">
+          <mxGeometry height="100" width="260" x="1190" y="1721" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-45" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF4242;fontColor=#FFFFFF;strokeColor=#35685F;strokeWidth=2;fontSize=14;" value="游戏胜利" vertex="1">
+          <mxGeometry height="70" width="220" x="1950" y="1501" as="geometry" />
+        </mxCell>
+        <mxCell id="RuoEVp9Gois10mRWCaiz-47" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8B1E3F;fontColor=#FFFFFF;strokeColor=#4E1024;strokeWidth=3;fontSize=15;fontStyle=1;" value="失败&lt;br&gt;角色死亡" vertex="1">
+          <mxGeometry height="70" width="200" x="1420" y="1886" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

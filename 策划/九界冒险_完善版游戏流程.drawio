@@ -1,0 +1,232 @@
+<mxfile host="app.diagrams.net" agent="ChatGPT">
+  <diagram id="nine-realms-flow" name="九界冒险-完整流程">
+    <mxGraphModel dx="4454" dy="1111" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="3600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="T" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1F2937;fontColor=#FFFFFF;strokeColor=#111827;strokeWidth=2;fontSize=22;fontStyle=1;" value="九界冒险 Roguelike｜完整游戏流程" vertex="1">
+          <mxGeometry height="70" width="900" x="650" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="S" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#284B63;fontColor=#FFFFFF;strokeColor=#16384D;strokeWidth=2;fontSize=15;fontStyle=1;" value="开始一局" vertex="1">
+          <mxGeometry height="60" width="400" x="900" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="C" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F1F8;fontColor=#1F2937;strokeColor=#5B8DB8;strokeWidth=2;fontSize=14;" value="创建角色&lt;br&gt;&lt;b&gt;种族 + 职业&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;种族：基础身材/被动规则　职业：卡组/专属道具/遗物池&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="560" x="820" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="R" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F1F8;fontColor=#1F2937;strokeColor=#5B8DB8;strokeWidth=2;fontSize=14;" value="初始化 Run&lt;br&gt;Day = 1｜HP / 卢恩 / 道具 / 遗物&lt;br&gt;八界进度 = 0｜界锚 = 0｜威胁池为空" vertex="1">
+          <mxGeometry height="110" width="560" x="820" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="F" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;fontColor=#173A1B;strokeColor=#5B9E62;strokeWidth=2;fontSize=14;" value="随机进入第一个世界&lt;br&gt;&lt;b&gt;首次抵达前显示为「未知世界」&lt;/b&gt;&lt;br&gt;抵达后揭示名称，并永久记录该世界" vertex="1">
+          <mxGeometry height="100" width="560" x="820" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="D20" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="Day ≤ 20？" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="A3" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="已收集 ≥ 3 枚界锚？" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="GOA" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8FA;fontColor=#45256B;strokeColor=#8E68B8;strokeWidth=2;fontSize=14;" value="开启阿斯加德临时通路&lt;br&gt;&lt;b&gt;现在进入阿斯加德？&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;也可继续冒险，承担倒计时风险&lt;/font&gt;" vertex="1">
+          <mxGeometry height="105" width="560" x="820" y="1020" as="geometry" />
+        </mxCell>
+        <mxCell id="PRE" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;fontColor=#173A1B;strokeColor=#5B9E62;strokeWidth=2;fontSize=14;" value="生成「当前世界」下一事件并预览类型&lt;br&gt;怪物 / 精英 / 商人 / 篝火 / 宝箱 / 特殊事件&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;若该世界关键进度=3，则下一关键事件固定为世界 Boss&lt;/font&gt;" vertex="1">
+          <mxGeometry height="120" width="680" x="760" y="1180" as="geometry" />
+        </mxCell>
+        <mxCell id="CHO" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="本日行动选择" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="1350" as="geometry" />
+        </mxCell>
+        <mxCell id="STAY" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;fontColor=#173A1B;strokeColor=#5B9E62;strokeWidth=2;fontSize=14;" value="继续探索当前世界&lt;br&gt;&lt;b&gt;已知：&lt;/b&gt;世界 + 下一事件类型" vertex="1">
+          <mxGeometry height="95" width="500" x="520" y="1520" as="geometry" />
+        </mxCell>
+        <mxCell id="RIFT" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F1F8;fontColor=#1F2937;strokeColor=#5B8DB8;strokeWidth=2;fontSize=14;" value="踏入世界裂隙&lt;br&gt;&lt;b&gt;目的地不可指定&lt;/b&gt;&lt;br&gt;随机前往其余世界之一" vertex="1">
+          <mxGeometry height="95" width="500" x="1280" y="1520" as="geometry" />
+        </mxCell>
+        <mxCell id="SKIP" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;fontColor=#7A1F1F;strokeColor=#C95B5B;strokeWidth=2;fontSize=14;" value="离开前检查当前预览事件&lt;br&gt;若是怪物/精英且未处理：&lt;br&gt;&lt;b&gt;加入该世界「未解决威胁池」，狂怒等级 +1&lt;/b&gt;" vertex="1">
+          <mxGeometry height="115" width="500" x="1280" y="1660" as="geometry" />
+        </mxCell>
+        <mxCell id="ARRIVE" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;fontColor=#173A1B;strokeColor=#5B9E62;strokeWidth=2;fontSize=14;" value="随机抵达另一世界&lt;br&gt;首次抵达：未知轮廓 → 揭示名称并记录&lt;br&gt;已发现：抵达后直接显示世界名称" vertex="1">
+          <mxGeometry height="110" width="500" x="1280" y="1820" as="geometry" />
+        </mxCell>
+        <mxCell id="COLL" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="当前为 Day 16–20？" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="1980" as="geometry" />
+        </mxCell>
+        <mxCell id="HPLOSS" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;fontColor=#7A1F1F;strokeColor=#C95B5B;strokeWidth=2;fontSize=14;" value="世界崩坏：进入本次事件前先损失生命&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;固定值或最大生命百分比，建议全局统一公式&lt;/font&gt;" vertex="1">
+          <mxGeometry height="95" width="500" x="520" y="2140" as="geometry" />
+        </mxCell>
+        <mxCell id="EVENT" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F1F8;fontColor=#1F2937;strokeColor=#5B8DB8;strokeWidth=2;fontSize=14;" value="结算本次事件&lt;br&gt;战斗 / 商店 / 篝火 / 宝箱 / 特殊事件" vertex="1">
+          <mxGeometry height="100" width="560" x="820" y="2300" as="geometry" />
+        </mxCell>
+        <mxCell id="THREAT" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;fontColor=#7A1F1F;strokeColor=#C95B5B;strokeWidth=2;fontSize=14;" value="若本次抽到「未解决威胁」&lt;br&gt;按狂怒等级强化：数值提升 + 通用词缀&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;不额外制作新怪，只复用原怪物模板&lt;/font&gt;" vertex="1">
+          <mxGeometry height="120" width="520" x="1490" y="2290" as="geometry" />
+        </mxCell>
+        <mxCell id="KEY" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="本次是否完成「世界关键事件」？" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="2460" as="geometry" />
+        </mxCell>
+        <mxCell id="P1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F1F8;fontColor=#1F2937;strokeColor=#5B8DB8;strokeWidth=2;fontSize=14;" value="该世界关键进度 +1&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;支援型事件（商人/篝火/宝箱）默认不推进进度&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="520" x="320" y="2635" as="geometry" />
+        </mxCell>
+        <mxCell id="BOSSQ" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="该世界关键进度达到 3？" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="2620" as="geometry" />
+        </mxCell>
+        <mxCell id="BOSS" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;fontColor=#7A1F1F;strokeColor=#C95B5B;strokeWidth=2;fontSize=14;" value="下一次选择该世界的关键事件&lt;br&gt;&lt;b&gt;固定触发该界 Boss（第4个关键事件）&lt;/b&gt;" vertex="1">
+          <mxGeometry height="95" width="520" x="1570" y="2632.5" as="geometry" />
+        </mxCell>
+        <mxCell id="WB" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="击败世界 Boss？" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="2800" as="geometry" />
+        </mxCell>
+        <mxCell id="ANCH" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8FA;fontColor=#45256B;strokeColor=#8E68B8;strokeWidth=2;fontSize=14;" value="获得该世界「界锚」&lt;br&gt;界锚 +1｜该世界稳定&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;稳定世界不再继续恶化；该界 Boss 不重复出现&lt;/font&gt;" vertex="1">
+          <mxGeometry height="105" width="540" x="500" y="2960" as="geometry" />
+        </mxCell>
+        <mxCell id="DAY" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F1F8;fontColor=#1F2937;strokeColor=#5B8DB8;strokeWidth=2;fontSize=14;" value="Day + 1&lt;br&gt;根据新 Day 更新全局灾变阶段&lt;br&gt;返回主循环" vertex="1">
+          <mxGeometry height="95" width="500" x="1090" y="2980" as="geometry" />
+        </mxCell>
+        <mxCell id="DEAD" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="角色 HP &gt; 0？" vertex="1">
+          <mxGeometry height="120" width="360" x="920" y="3150" as="geometry" />
+        </mxCell>
+        <mxCell id="LOSE" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE2E2;fontColor=#7F1D1D;strokeColor=#B91C1C;strokeWidth=3;fontSize=16;fontStyle=1;" value="失败&lt;br&gt;角色死亡 / Day 21 世界树主根断裂" vertex="1">
+          <mxGeometry height="90" width="560" x="510" y="3320" as="geometry" />
+        </mxCell>
+        <mxCell id="ASG" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFE8FA;fontColor=#45256B;strokeColor=#8E68B8;strokeWidth=2;fontSize=14;" value="阿斯加德&lt;br&gt;三枚界锚完成三点定位，逆向追踪生命流&lt;br&gt;发现八界生命正被抽取至阿斯加德" vertex="1">
+          <mxGeometry height="115" width="560" x="1700" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="ODIN" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDECEC;fontColor=#7A1F1F;strokeColor=#C95B5B;strokeWidth=2;fontSize=14;" value="最终 Boss：奥丁 / 世界树控制核心&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;他为延缓诸神黄昏，选择牺牲八界保存阿斯加德&lt;/font&gt;" vertex="1">
+          <mxGeometry height="105" width="560" x="1700" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="FINAL" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF4CC;fontColor=#4B3B00;strokeColor=#D6B656;strokeWidth=2;fontSize=13;" value="击败最终 Boss？" vertex="1">
+          <mxGeometry height="120" width="360" x="1800" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="WIN" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDF4E4;fontColor=#14532D;strokeColor=#2F855A;strokeWidth=3;fontSize=16;fontStyle=1;" value="游戏胜利&lt;br&gt;关闭抽取机制，决定九界之后的命运" vertex="1">
+          <mxGeometry height="90" width="580" x="1690" y="1460" as="geometry" />
+        </mxCell>
+        <mxCell id="TIME" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;fontColor=#222222;strokeColor=#666666;strokeWidth=2;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;20天灾变阶段&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Day 1–5｜征兆&lt;/b&gt;&lt;br&gt;规则正常，世界仍相对稳定。&lt;br&gt;&lt;br&gt;&lt;b&gt;Day 6–10｜狂野&lt;/b&gt;&lt;br&gt;怪物获得统一「狂野」修正；未解决威胁成长。&lt;br&gt;&lt;br&gt;&lt;b&gt;Day 11–15｜狂化&lt;/b&gt;&lt;br&gt;怪物获得更强通用词缀；威胁池优先级提高。&lt;br&gt;&lt;br&gt;&lt;b&gt;Day 16–20｜崩坏&lt;/b&gt;&lt;br&gt;每次进入事件先扣血；安全资源更紧张。&lt;br&gt;&lt;br&gt;&lt;b&gt;Day 21&lt;/b&gt;&lt;br&gt;世界树主根断裂，Run 失败。" vertex="1">
+          <mxGeometry height="560" width="520" x="90" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="BOSSES" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;fontColor=#222222;strokeColor=#666666;strokeWidth=2;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;八界与 Boss（建议）&lt;/b&gt;&lt;br&gt;&lt;br&gt;米德加尔特｜耶梦加得之影&lt;br&gt;约顿海姆｜乌特迦·洛基&lt;br&gt;穆斯贝尔海姆｜苏尔特尔化身&lt;br&gt;尼福尔海姆｜雾中无名者&lt;br&gt;赫尔海姆｜加姆&lt;br&gt;亚尔夫海姆｜失辉精灵王&lt;br&gt;华纳海姆｜古尔维格&lt;br&gt;尼达维勒｜法夫纳 / 锻造巨像&lt;br&gt;&lt;br&gt;&lt;font color=&quot;#555555&quot;&gt;原则：每个 Boss 测试不同能力，而不是只做数值差异。&lt;/font&gt;" vertex="1">
+          <mxGeometry height="500" width="520" x="90" y="1320" as="geometry" />
+        </mxCell>
+        <mxCell id="RULES" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;fontColor=#222222;strokeColor=#666666;strokeWidth=2;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;核心设计规则（控制制作量）&lt;/b&gt;&lt;br&gt;&lt;br&gt;1. 世界差异优先做「规则修正」，少做专属事件树。&lt;br&gt;&lt;br&gt;2. 一个世界 = 3个关键事件 + 1个Boss；支援事件不计进度。&lt;br&gt;&lt;br&gt;3. 玩家不选择的怪物不会消失，而会进入威胁池并升级。&lt;br&gt;&lt;br&gt;4. 随机传送只随机「目的世界」，不额外随机复杂剧情结果。&lt;br&gt;&lt;br&gt;5. 三枚界锚即可去阿斯加德，因此一局不要求清完八界。&lt;br&gt;&lt;br&gt;6. 核心压力来自：时间、世界选择、延迟后果，而不是堆大量卡牌/事件。" vertex="1">
+          <mxGeometry height="610" width="520" x="-50" y="1870" as="geometry" />
+        </mxCell>
+        <mxCell id="LORE" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;fontColor=#222222;strokeColor=#666666;strokeWidth=2;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;剧情逻辑&lt;/b&gt;&lt;br&gt;&lt;br&gt;世界树根系正在断裂，跨界道路失去稳定坐标，因此传送不可指定。&lt;br&gt;&lt;br&gt;阿斯加德已被主动从主干切离；每个被稳定的世界会显露一枚「界锚」。&lt;br&gt;&lt;br&gt;三枚界锚形成三点定位，可逆向重建通往阿斯加德的临时路径。&lt;br&gt;&lt;br&gt;20天倒计时代表世界树从枯萎到主根彻底断裂的剩余时间。" vertex="1">
+          <mxGeometry height="430" width="520" x="-140" y="2630" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="S" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="C">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="C" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="R">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="R" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="F">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="F" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="D20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="D20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="A3" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="D20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="LOSE" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="A3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="GOA" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="A3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="PRE" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="GOA" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="ASG" value="进入">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="GOA" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="PRE" value="继续探索">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="ASG" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="ODIN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="ODIN" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="FINAL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="FINAL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="WIN" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="FINAL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="DEAD" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="PRE" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="CHO">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="CHO" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="STAY" value="当前世界">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="CHO" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="RIFT" value="跨界">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="STAY" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="COLL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="RIFT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="SKIP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="SKIP" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="ARRIVE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="ARRIVE" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="COLL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="COLL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="HPLOSS" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="COLL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="EVENT" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="HPLOSS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="EVENT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="EVENT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="KEY">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" edge="1" parent="1" source="THREAT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;dashed=1;" target="KEY">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e27" edge="1" parent="1" source="KEY" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="P1" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e28" edge="1" parent="1" source="KEY" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="DAY" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e29" edge="1" parent="1" source="P1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="BOSSQ">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e30" edge="1" parent="1" source="BOSSQ" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="BOSS" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e31" edge="1" parent="1" source="BOSSQ" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="DAY" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e32" edge="1" parent="1" source="BOSS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="WB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e33" edge="1" parent="1" source="WB" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="ANCH" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e34" edge="1" parent="1" source="WB" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="DEAD" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e35" edge="1" parent="1" source="ANCH" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="DAY">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e36" edge="1" parent="1" source="DAY" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="DEAD">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e37" edge="1" parent="1" source="DEAD" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="D20" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e38" edge="1" parent="1" source="DEAD" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;" target="LOSE" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e39" edge="1" parent="1" source="EVENT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2;dashed=1;" target="THREAT" value="若抽中威胁池">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
