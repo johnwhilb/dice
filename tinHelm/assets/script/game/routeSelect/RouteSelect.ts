@@ -15,7 +15,7 @@ export class RouteSelect extends CCEntity {
     }
 
     init(): void {
-        this.addBusinesss(RouteSelectBll);
+        this.RouteSelectBll = this.addBusiness<RouteSelectBll>(RouteSelectBll);
         this.addComponents(RouteSelectModel);
     }
 

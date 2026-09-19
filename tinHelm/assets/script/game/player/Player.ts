@@ -19,7 +19,7 @@ export class Player extends CCEntity {
 
     init(): void {
         this.addComponents(PlayerModel);
-        this.addBusinesss(PlayerBll);
+        this.PlayerBll = this.addBusiness<PlayerBll>(PlayerBll);
     }
 
     selectRole(roleId: number) {

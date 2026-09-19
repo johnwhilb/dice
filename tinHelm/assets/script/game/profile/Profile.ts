@@ -13,7 +13,7 @@ export class Profile extends CCEntity {
     ProfileAvatarBll!: ProfileAvatarBll
 
     init(): void {
-        this.addBusinesss(ProfileAvatarBll);
+        this.ProfileAvatarBll = this.addBusiness<ProfileAvatarBll>(ProfileAvatarBll);
         this.addComponents(ProfileAvatarModel);
     }
 
