@@ -36,6 +36,6 @@ export const methods: { [key: string]: (...any: any) => any } = {
             return;
         }
 
-        run();
+        await run();
     }
 };

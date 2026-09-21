@@ -2,6 +2,7 @@ import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 
 import { Profile } from '../Profile';
 import { ProfileEvent } from '../ProfileEvent';
+import { TableRole } from '../../common/table/TableRole';
 
 export class ProfileAvatarBll extends CCBusiness<Profile> {
 
@@ -27,6 +28,10 @@ export class ProfileAvatarBll extends CCBusiness<Profile> {
         this.dispatchEvent(ProfileEvent.currentSelectedAvatarIdChanged, this.ent.ProfileAvatarModel.currentSelectAvatarId);
     }
     changeCurrentSelectAvatarId(avatarId: number) {
+        if (!TableRole.isOwnId(avatarId) || !TableRole.getConfigById(avatarId)) {
+            return;
+        }
+
         this.ent.ProfileAvatarModel.currentSelectAvatarId = avatarId;
         this.dispatchEvent(ProfileEvent.currentSelectAvatarIdChanged, avatarId);
     }

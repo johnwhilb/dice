@@ -3,6 +3,7 @@ import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
 import { BattlePhase } from '../model/BattleModel';
 import { BattleEvent } from '../BattleEvent';
+import { TableEnemy } from '../../common/table/TableEnemy';
 
 export class BattleBll extends CCBusiness<Battle> {
 
@@ -44,6 +45,6 @@ export class BattleBll extends CCBusiness<Battle> {
         this.dispatchEvent(BattleEvent.refreshBattlePhase);
     }
     generateEnemy() {
-        this.ent.BattleEnemyModel.enemyId = 5001
+        this.ent.BattleEnemyModel.enemyId = TableEnemy.createId(1)
     }
 }

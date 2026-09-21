@@ -33,6 +33,6 @@ exports.methods = {
             console.warn("项目->项目设置->Excel To Json->PathTsClient 配置路径");
             return;
         }
-        (0, ExcelToJson_1.run)();
+        await (0, ExcelToJson_1.run)();
     }
 };

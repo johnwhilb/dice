@@ -9,18 +9,48 @@ const JsonToTs_1 = require("./JsonToTs");
 const main_1 = require("./main");
 const fs = require("fs");
 const excel = require("exceljs");
+const LOCAL_ID_BASE = 10000;
+function parseTableIdentity(fileName) {
+    const resourceName = path_1.default.basename(fileName, path_1.default.extname(fileName));
+    const match = /^(\d+)_([A-Za-z][A-Za-z0-9]*)$/.exec(resourceName);
+    if (!match) {
+        throw new Error(`配置表文件名【${fileName}】不合法，必须使用“表ID_表名.xlsx”，例如“1_Role.xlsx”`);
+    }
+    const tableId = Number(match[1]);
+    if (!Number.isInteger(tableId) || tableId <= 0) {
+        throw new Error(`配置表【${resourceName}】的表ID必须是大于0的整数`);
+    }
+    return {
+        tableId,
+        resourceName,
+        className: match[2]
+    };
+}
+function validatePrimaryId(identity, rowNumber, id) {
+    const localId = id % LOCAL_ID_BASE;
+    const ownerTableId = Math.floor(id / LOCAL_ID_BASE);
+    if (!Number.isInteger(id)) {
+        throw new Error(`配置表【${identity.resourceName}】第【${rowNumber}】行主键必须是整数，当前值：【${id}】`);
+    }
+    if (ownerTableId !== identity.tableId) {
+        throw new Error(`配置表【${identity.resourceName}】第【${rowNumber}】行主键【${id}】不属于表ID【${identity.tableId}】`);
+    }
+    if (localId <= 0 || localId >= LOCAL_ID_BASE) {
+        throw new Error(`配置表【${identity.resourceName}】第【${rowNumber}】行主键【${id}】后四位必须在0001到9999之间`);
+    }
+}
 /**
  * 读取 Excel 第二个 Sheet 生成 Enum
  *
  * Sheet2:
- * 1001    Dwarf
- * 1002    Elf
+ * 10001    Dwarf
+ * 10002    Elf
  *
  * Race.xlsx =>
  *
  * export enum EnumRace {
- *     Dwarf = 1001,
- *     Elf = 1002,
+ *     Dwarf = 10001,
+ *     Elf = 10002,
  * }
  *
  * Enum 只负责提供明确的配置 ID，不生成 getAllEnum()。
@@ -125,7 +155,8 @@ function getArrayTypeValue(src, key, type, value, cell) {
     console.warn("File [" + src + "] field [" + key + "] array type must be a valid JSON array");
     return [];
 }
-async function convert(src, dst, name, isClient) {
+async function convert(src, dst, identity, isClient) {
+    const name = identity.className;
     let r = {};
     let names = [];
     let keys = [];
@@ -135,13 +166,17 @@ async function convert(src, dst, name, isClient) {
     let clients = [];
     let primary = [];
     let primary_index = [];
+    const primaryIds = new Set();
     const workbook = new excel.Workbook();
     await workbook.xlsx.readFile(src);
     console.log("读取Excel文件成功", src);
+    const worksheet = workbook.getWorksheet(1);
+    if (!worksheet || worksheet.name !== identity.resourceName) {
+        throw new Error(`配置表【${identity.resourceName}】第一个工作表名称必须是【${identity.resourceName}】`);
+    }
     if (isClient) {
         await createEnumTs(workbook, name);
     }
-    const worksheet = workbook.getWorksheet(1);
     worksheet.eachRow((row, rowNumber) => {
         let data = {};
         row.eachCell((cell, colNumber) => {
@@ -241,6 +276,16 @@ async function convert(src, dst, name, isClient) {
             }
         });
         if (rowNumber > 5) {
+            if (primary.length !== 1) {
+                throw new Error(`配置表【${identity.resourceName}】必须且只能有一个主键`);
+            }
+            const primaryId = Number(getCellValue(row.getCell(primary_index[0])));
+            validatePrimaryId(identity, rowNumber, primaryId);
+            data[primary[0]] = primaryId;
+            if (primaryIds.has(primaryId)) {
+                throw new Error(`配置表【${identity.resourceName}】第【${rowNumber}】行主键【${primaryId}】重复`);
+            }
+            primaryIds.add(primaryId);
             let temp = null;
             for (let i = 0; i < primary.length; i++) {
                 const k = primary[i];
@@ -270,7 +315,7 @@ async function convert(src, dst, name, isClient) {
     if (r["undefined"] == null) {
         fs.writeFileSync(dst, JSON.stringify(r));
         if (isClient) {
-            await (0, JsonToTs_1.createTsClient)(name, types_client, r, primary);
+            await (0, JsonToTs_1.createTsClient)(name, identity.resourceName, identity.tableId, types_client, r, primary);
         }
         else {
             await (0, JsonToTs_1.createTsServer)(name, types_client, r, primary);
@@ -281,7 +326,7 @@ async function convert(src, dst, name, isClient) {
         console.log(isClient ? "客户端数据" : "服务器数据", "无数据", dst);
     }
 }
-function run() {
+async function run() {
     const inputExcelPath = path_1.default.join(__dirname, main_1.config.PathExcel.replace("project://", "../../../") + "/");
     const outJsonPathClient = path_1.default.join(__dirname, main_1.config.PathJsonClient.replace("project://", "../../../") + "/");
     let outJsonPathServer = null;
@@ -290,16 +335,28 @@ function run() {
         outJsonPathServer = path_1.default.join(__dirname, main_1.config.PathJsonServer.replace("project://", "../../../") + "/");
     }
     const files = fs.readdirSync(inputExcelPath);
-    files.forEach((f) => {
-        const name = f.substring(0, f.indexOf("."));
+    const tableIds = new Map();
+    const classNames = new Set();
+    for (const f of files) {
         const ext = f.toString().substring(f.lastIndexOf(".") + 1);
         if (ext !== "xlsx") {
-            return;
+            continue;
         }
+        const identity = parseTableIdentity(f);
+        const existingTable = tableIds.get(identity.tableId);
+        if (existingTable) {
+            throw new Error(`配置表【${identity.resourceName}】与【${existingTable}】使用了重复表ID【${identity.tableId}】`);
+        }
+        if (classNames.has(identity.className)) {
+            throw new Error(`配置表逻辑名称【${identity.className}】重复`);
+        }
+        tableIds.set(identity.tableId, identity.resourceName);
+        classNames.add(identity.className);
+        const src = path_1.default.join(inputExcelPath, f);
         if (outJsonPathServer) {
-            convert(inputExcelPath + f, outJsonPathServer + name + ".json", name, false);
+            await convert(src, path_1.default.join(outJsonPathServer, identity.resourceName + ".json"), identity, false);
         }
-        convert(inputExcelPath + f, outJsonPathClient + name + ".json", name, true);
-    });
+        await convert(src, path_1.default.join(outJsonPathClient, identity.resourceName + ".json"), identity, true);
+    }
 }
 exports.run = run;

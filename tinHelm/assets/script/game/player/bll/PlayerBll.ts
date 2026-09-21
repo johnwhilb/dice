@@ -6,6 +6,10 @@ import { TableRole } from '../../common/table/TableRole';
 export class PlayerBll extends CCBusiness<Player> {
 
     selectRole(roleId: number) {
+        if (!TableRole.isOwnId(roleId) || !TableRole.getConfigById(roleId)) {
+            return;
+        }
+
         this.ent.PlayerModel.roleId = roleId;
         this.dispatchEvent(PlayerEvent.currentSelectedRoleIdChanged, roleId);
     }

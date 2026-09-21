@@ -18,6 +18,8 @@ interface EnemyConfigData {
 interface BaseEnemyConstructor<T extends BaseEnemy> {
     new (): T;
     TableName: string;
+    TableId: number;
+    isOwnId(id: number): boolean;
 }
 
 /**
@@ -28,13 +30,42 @@ interface BaseEnemyConstructor<T extends BaseEnemy> {
 export class BaseEnemy {
 
     /** JsonUtil 中的配置表名称 */
-    static TableName: string = "Enemy";
+    static TableName: string = "5_Enemy";
+    static readonly TableId: number = 5;
+    static readonly LocalIdBase: number = 10000;
 
     /** 配置主键 */
     id: number = 0;
 
     /** 当前配置原始数据 */
     private data: EnemyConfigData = null!;
+
+    /** 判断 ID 是否属于当前配置表。 */
+    static isOwnId(id: number): boolean {
+        return Number.isInteger(id)
+            && Math.floor(id / this.LocalIdBase) === this.TableId
+            && id % this.LocalIdBase > 0;
+    }
+
+    /** 获取 ID 后四位的表内编号，不属于当前表时返回 0。 */
+    static getLocalId(id: number): number {
+        if (!this.isOwnId(id)) {
+            return 0;
+        }
+
+        return id % this.LocalIdBase;
+    }
+
+    /** 根据表内编号生成完整配置 ID。 */
+    static createId(localId: number): number {
+        if (!Number.isInteger(localId) || localId <= 0 || localId >= this.LocalIdBase) {
+            throw new Error(
+                "Enemy 表内ID必须在0001到9999之间，当前值：" + localId
+            );
+        }
+
+        return this.TableId * this.LocalIdBase + localId;
+    }
 
     /**
      * 获取全部配置。
@@ -55,7 +86,7 @@ export class BaseEnemy {
         for (const key of Object.keys(table)) {
             const id = Number(key);
 
-            if (Number.isNaN(id)) {
+            if (!this.isOwnId(id)) {
                 continue;
             }
 
@@ -87,6 +118,10 @@ export class BaseEnemy {
         this: BaseEnemyConstructor<T>,
         id: number
     ): T | null {
+        if (!this.isOwnId(id)) {
+            return null;
+        }
+
         const table = JsonUtil.get(
             this.TableName
         ) as Record<string, EnemyConfigData> | null;

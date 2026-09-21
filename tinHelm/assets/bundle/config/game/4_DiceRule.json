@@ -1,0 +1,1 @@
+{"40001":{"numNeed":"DOUBLE","numNeedDes":"需要两枚点数一样的骰子"},"40002":{"numNeed":"TRIPLE","numNeedDes":"需要三枚点数一样的骰子"},"40003":{"numNeed":"QUADRA","numNeedDes":"需要四枚点数一样的骰子"},"40004":{"numNeed":"PENTA","numNeedDes":"需要五枚点数一样的骰子"},"40005":{"numNeed":"LITTLE_STRAIGHT","numNeedDes":"小顺子(1-4 or 2-5)"},"40006":{"numNeed":"BIG_STRAIGHT","numNeedDes":"大顺子(1-5)"}}
