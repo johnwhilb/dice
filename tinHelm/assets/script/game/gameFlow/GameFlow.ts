@@ -40,5 +40,9 @@ export class GameFlow extends CCEntity {
         this.GameFlowBll.entryGameSceneByGameFlowState();
     }
 
+    advanceLevel() {
+        this.GameFlowBll.advanceLevel();
+    }
+
 
 }

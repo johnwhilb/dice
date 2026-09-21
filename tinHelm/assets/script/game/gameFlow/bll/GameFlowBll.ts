@@ -35,4 +35,10 @@ export class GameFlowBll extends CCBusiness<GameFlow> {
     setGameFlowState(state: GameFlowState) {
         this.ent.GameFlowModel.currentGameFlowState = state;
     }
+
+    advanceLevel() {
+        this.ent.GameFlowModel.currentLevel += 1;
+        smc.routeSelect.generateRoutes();
+        smc.routeSelect.openRouteSelectView();
+    }
 }

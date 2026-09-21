@@ -24,7 +24,8 @@ export class RouteSelect extends CCEntity {
     }
 
     selectUnknownRoute() {
-        this.getBusiness<RouteSelectBll>(RouteSelectBll).selectUnknownRoute();
+        // this.getBusiness<RouteSelectBll>(RouteSelectBll).selectUnknownRoute();
+        this.RouteSelectBll.selectUnknownRoute();
     }
 
     openRouteSelectView() {

@@ -10,13 +10,13 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     }
 
     generateRoutes() {
-        this.ent.RouteSelectModel.currentRoutes = [EnumEvent.TREASURE, EnumEvent.ENEMY];
+        this.ent.RouteSelectModel.currentRoutes = [EnumEvent.STORY, EnumEvent.ENEMY];
     }
 
     selectDefaultRoute() {
         switch (this.ent.RouteSelectModel.currentRoutes[0]) {
-            case EnumEvent.TREASURE:
-                smc.battle.openBattleView();
+            case EnumEvent.STORY:
+                smc.storyEvent.openStoryEventView();
                 break;
             case EnumEvent.ENEMY:
                 smc.battle.openBattleView();
