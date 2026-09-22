@@ -14,9 +14,9 @@
 
 - 引擎使用 Cocos Creator 3.8.x，开发语言使用 TypeScript，项目启用严格类型检查。
 - ECS 与业务模块使用 OopsFramework。数据放在 `Model`，业务判断和状态变更放在 `Bll`，界面展示与交互放在 `View` 或对应节点组件。
-- 表格配置通过 `TableXxx` 类读取，配置枚举统一使用 `EnumXxx`，禁止在业务代码中重复维护魔法数字或字符串映射。
+- 表格配置通过 `TableXxx` 类读取。需要生成枚举的主表字段添加 `_ENUM` 后缀，自动生成 `<表名><字段名首字母大写>Enum`（如 `DiceRuleNumNeedEnum`）；JSON 和配置类字段去掉后缀，枚举成员值使用同行主键。新表无需 Sheet2，未迁移旧表暂时兼容 `EnumXxx`，禁止在业务代码中重复维护魔法数字或字符串映射。
 - `Battle` 实体负责注册战斗 Model、Bll 与 View；跨组件访问战斗数据统一通过实体引用或 `smc.battle`。
-- 自动生成的 `BaseXxx` 和 `EnumXxx` 文件禁止手动修改；项目扩展逻辑写在对应的 `TableXxx`、Model 或 Bll 中。
+- 自动生成的 `BaseXxx`、`XxxEnum` 和旧版 `EnumXxx` 文件禁止手动修改；项目扩展逻辑写在对应的 `TableXxx`、Model 或 Bll 中。
 - Cocos 已序列化的 `@ccclass` 名称不能随意修改；TypeScript 类名仍使用 `PascalCase`，两者允许不同，以保证旧 Prefab 和场景引用有效。
 
 ## 编码规范
@@ -50,3 +50,6 @@
 
 ## skill使用
 $tinhelm-table-config  给 XXX 表新增XXX字段
+
+## 游戏流程
+- dice\策划\游戏流程\mermaid-code1.txt

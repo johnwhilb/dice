@@ -79,6 +79,7 @@
     },
     "scripts": {
         "build": "tsc -b",
+        "test": "npm run build && node --test test-enum.cjs",
         "watch": "tsc -w"
     }
 }

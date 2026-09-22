@@ -1,7 +1,7 @@
 /**
  * 自动生成文件，请勿手动修改
  */
-export enum EnumDiceRule {
+export enum DiceRuleNumNeedEnum {
     DOUBLE = 40001,
     TRIPLE = 40002,
     QUADRA = 40003,

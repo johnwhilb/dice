@@ -1,5 +1,5 @@
 import { smc } from '../../common/SingletonModuleComp';
-import { EnumEvent } from '../../common/table/EnumEvent';
+import { EventTypeEnum } from '../../common/table/EventTypeEnum';
 import { RouteSelect } from '../RouteSelect';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 
@@ -10,15 +10,15 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     }
 
     generateRoutes() {
-        this.ent.RouteSelectModel.currentRoutes = [EnumEvent.STORY, EnumEvent.ENEMY];
+        this.ent.RouteSelectModel.currentRoutes = [EventTypeEnum.STORY, EventTypeEnum.ENEMY];
     }
 
     selectDefaultRoute() {
         switch (this.ent.RouteSelectModel.currentRoutes[0]) {
-            case EnumEvent.STORY:
+            case EventTypeEnum.STORY:
                 smc.storyEvent.openStoryEventView();
                 break;
-            case EnumEvent.ENEMY:
+            case EventTypeEnum.ENEMY:
                 smc.battle.openBattleView();
                 break;
             default:
@@ -27,10 +27,10 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     }
     selectUnknownRoute() {
         switch (this.ent.RouteSelectModel.currentRoutes[1]) {
-            case EnumEvent.TREASURE:
+            case EventTypeEnum.TREASURE:
                 smc.battle.openBattleView();
                 break;
-            case EnumEvent.ENEMY:
+            case EventTypeEnum.ENEMY:
                 smc.battle.openBattleView();
                 break;
             default:

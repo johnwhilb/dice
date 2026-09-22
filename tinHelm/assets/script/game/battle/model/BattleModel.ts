@@ -1,5 +1,4 @@
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
-import { EnumEvent } from '../../common/table/EnumEvent';
 
 export enum BattlePhase {
     Start,
