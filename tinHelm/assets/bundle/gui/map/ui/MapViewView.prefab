@@ -265,7 +265,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 465.768,
+      "y": 0,
       "z": 0
     },
     "_lrot": {
@@ -305,8 +305,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 400,
-      "height": 100
+      "width": 650,
+      "height": 850
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -347,8 +347,8 @@
     "_spacingY": 50,
     "_verticalDirection": 1,
     "_horizontalDirection": 0,
-    "_constraint": 0,
-    "_constraintNum": 2,
+    "_constraint": 2,
+    "_constraintNum": 3,
     "_affectedByScale": false,
     "_isAlign": false,
     "_id": ""

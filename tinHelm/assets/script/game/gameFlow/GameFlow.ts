@@ -44,5 +44,13 @@ export class GameFlow extends CCEntity {
         this.GameFlowBll.advanceLevel();
     }
 
+    advanceDay() {
+        this.GameFlowBll.advanceDay();
+    }
+
+    getCurrentDay() {
+        return this.GameFlowModel.currentDay;
+    }
+
 
 }
