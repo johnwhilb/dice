@@ -6,10 +6,14 @@ import { smc } from '../../common/SingletonModuleComp';
 export class MainMenuBll extends CCBusiness<MainMenu> {
 
     entryGame() {
-        smc.gameFlow.entryGameSceneByGameFlowState();
+        smc.gameFlow.GameFlowBll.startNewGame();
     }
 
     continueGame() {
+        if (!smc.save.restoreGame()) {
+            return;
+        }
+        smc.gameFlow.entryGameSceneByGameFlowState();
     }
 
     openProfileDialog() {

@@ -5,6 +5,7 @@ import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 export enum GameFlowState {
     RoleSelect,
     RouteSelect,
+    Event,
 }
 
 @ecs.register('GameFlowModel')
@@ -14,6 +15,7 @@ export class GameFlowModel extends ecs.Comp {
     currentDay = 1;
 
     reset(): void {
+        this.currentGameFlowState = GameFlowState.RoleSelect;
         this.currentDay = 1;
     }
 

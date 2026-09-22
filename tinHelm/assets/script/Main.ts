@@ -13,6 +13,7 @@ import { GameFlow } from './game/gameFlow/GameFlow';
 import { RouteSelect } from './game/routeSelect/RouteSelect';
 import { Battle } from './game/battle/Battle';
 import { StoryEvent } from './game/StoryEvent/StoryEvent';
+import { Save } from './game/save/Save';
 
 const { ccclass, property } = _decorator;
 
@@ -44,6 +45,7 @@ export class Main extends Root {
         smc.routeSelect = ecs.getEntity(RouteSelect);
         smc.battle = ecs.getEntity(Battle);
         smc.storyEvent = ecs.getEntity(StoryEvent);
+        smc.save = ecs.getEntity(Save);
         smc.initialize.load(this.initial);
     }
 }

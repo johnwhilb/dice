@@ -8,6 +8,7 @@ import { RealmsRealmsEnum } from '../../common/table/RealmsRealmsEnum';
 import { TableUniversal } from '../../common/table/TableUniversal';
 import { UniversalNameEnum } from '../../common/table/UniversalNameEnum';
 import { RealmLevelState, TravelRouteType } from '../model/RouteSelectModel';
+import { GameFlowState } from '../../gameFlow/model/GameFlowModel';
 
 export class RouteSelectBll extends CCBusiness<RouteSelect> {
 
@@ -61,12 +62,26 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     }
 
     selectCurrentEvent() {
+        if (smc.gameFlow.GameFlowModel.currentGameFlowState === GameFlowState.Event) {
+            return false;
+        }
         const currentEvent = this.getCurrentEvent();
         if (!currentEvent) {
             return false;
         }
 
         smc.gameFlow.advanceDay();
+        smc.gameFlow.GameFlowBll.setGameFlowState(GameFlowState.Event);
+        smc.save.saveGame();
+        return this.openCurrentEvent();
+    }
+
+    /** 恢复事件时只打开界面，不重复计时或生成关卡。 */
+    openCurrentEvent() {
+        const currentEvent = this.getCurrentEvent();
+        if (!currentEvent) {
+            return false;
+        }
         switch (currentEvent.id) {
             case EventTypeEnum.STORY:
                 smc.storyEvent.openStoryEventView();
@@ -86,6 +101,9 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     }
 
     selectTravelRoute() {
+        if (smc.gameFlow.GameFlowModel.currentGameFlowState === GameFlowState.Event) {
+            return false;
+        }
         const candidates = this.ent.RouteSelectModel.realmLevels.filter((level) => {
             return level.realmId !== this.ent.RouteSelectModel.currentRealmId
                 && level.realmId !== RealmsRealmsEnum.ASGARD
@@ -101,6 +119,9 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     }
 
     canTravelToRealm(realmId: number) {
+        if (smc.gameFlow.GameFlowModel.currentGameFlowState === GameFlowState.Event) {
+            return false;
+        }
         if (realmId === this.ent.RouteSelectModel.currentRealmId) {
             return false;
         }

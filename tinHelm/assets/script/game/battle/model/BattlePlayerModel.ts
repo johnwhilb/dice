@@ -22,6 +22,7 @@ export class BattlePlayerModel extends ecs.Comp {
         this.drawPile = [];
         this.discardPile = [];
         this.hp = 0;
+        this.maxHp = 0;
         this.playerId = 0;
     }
 }
