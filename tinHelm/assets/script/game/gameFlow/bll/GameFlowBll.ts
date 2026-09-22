@@ -37,8 +37,12 @@ export class GameFlowBll extends CCBusiness<GameFlow> {
     }
 
     advanceLevel() {
-        this.ent.GameFlowModel.currentLevel += 1;
+        smc.routeSelect.completeCurrentEvent();
         smc.routeSelect.generateRoutes();
         smc.routeSelect.openRouteSelectView();
+    }
+
+    advanceDay() {
+        this.ent.GameFlowModel.currentDay += 1;
     }
 }

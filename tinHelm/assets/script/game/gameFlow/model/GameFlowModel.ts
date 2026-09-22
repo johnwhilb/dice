@@ -11,10 +11,10 @@ export enum GameFlowState {
 export class GameFlowModel extends ecs.Comp {
 
     currentGameFlowState: GameFlowState = GameFlowState.RoleSelect;
-    currentLevel = 1;
+    currentDay = 1;
 
     reset(): void {
-        this.currentLevel = 1;
+        this.currentDay = 1;
     }
 
 

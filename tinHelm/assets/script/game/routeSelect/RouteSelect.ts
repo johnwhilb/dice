@@ -3,12 +3,14 @@ import { CCEntity } from 'db://oops-framework/module/common/CCEntity';
 import { RouteSelectBll } from './bll/RouteSelectBll';
 import { RouteSelectModel } from './model/RouteSelectModel';
 import { RouteSelectView } from './view/RouteSelectView';
+import { MapView } from './view/MapView';
 
 @ecs.register('RouteSelect')
 export class RouteSelect extends CCEntity {
     RouteSelectBll!: RouteSelectBll
     RouteSelectModel!: RouteSelectModel
     RouteSelectView!: RouteSelectView
+    MapView!: MapView
 
     static create(): RouteSelect {
         return ecs.getEntity<RouteSelect>(RouteSelect);
@@ -20,19 +22,18 @@ export class RouteSelect extends CCEntity {
     }
 
     selectDefaultRoute() {
-        this.getBusiness<RouteSelectBll>(RouteSelectBll).selectDefaultRoute();
+        return this.RouteSelectBll.selectCurrentEvent();
     }
 
     selectUnknownRoute() {
-        // this.getBusiness<RouteSelectBll>(RouteSelectBll).selectUnknownRoute();
-        this.RouteSelectBll.selectUnknownRoute();
+        return this.RouteSelectBll.selectTravelRoute();
     }
 
     openRouteSelectView() {
         if (this.has(RouteSelectView)) {
             return Promise.resolve(this.RouteSelectView.node);
         }
-        this.addUi(RouteSelectView);
+        return this.addUi(RouteSelectView);
     }
 
     closeRouteSelectView() {
@@ -41,12 +42,59 @@ export class RouteSelect extends CCEntity {
         }
     }
 
-    getCurrentRoutes() {
-        return this.getBusiness<RouteSelectBll>(RouteSelectBll).getCurrentRoutes();
+    generateRoutes() {
+        this.RouteSelectBll.generateRoutes();
     }
 
-    generateRoutes() {
-        this.getBusiness<RouteSelectBll>(RouteSelectBll).generateRoutes();
+    completeCurrentEvent() {
+        this.RouteSelectBll.completeCurrentEvent();
+    }
+
+    getCurrentRealm() {
+        return this.RouteSelectBll.getCurrentRealm();
+    }
+
+    getCurrentEvent() {
+        return this.RouteSelectBll.getCurrentEvent();
+    }
+
+    getTravelRoute() {
+        return this.RouteSelectBll.getTravelRoute();
+    }
+
+    getRealmLevels() {
+        return this.RouteSelectBll.getRealmLevels();
+    }
+
+    canTravelToRealm(realmId: number) {
+        return this.RouteSelectBll.canTravelToRealm(realmId);
+    }
+
+    selectRealmRoute(realmId: number) {
+        return this.RouteSelectBll.selectRealmRoute(realmId);
+    }
+
+    async openMapView() {
+        if (this.has(MapView)) {
+            return Promise.resolve(this.MapView.node);
+        }
+
+        const node = await this.addUi(MapView);
+        if (!node) {
+            return null;
+        }
+
+        const mapView = node.getComponent(MapView) || node.addComponent(MapView);
+        if (!this.has(MapView)) {
+            this.add(mapView);
+        }
+        return node;
+    }
+
+    closeMapView() {
+        if (this.has(MapView)) {
+            this.removeUi(MapView);
+        }
     }
 
 }
