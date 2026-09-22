@@ -1,14 +1,13 @@
 import { Node } from "cc";
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { CCEntity } from 'db://oops-framework/module/common/CCEntity';
-import { M_Save } from '../save/model/M_Save';
+import { smc } from '../common/SingletonModuleComp';
 import { MainMenuBll } from './bll/MainMenuBll';
 import { MainMenuView } from './view/MainMenuView';
 
 @ecs.register('MainMenu')
 export class MainMenu extends CCEntity {
 
-    M_Save!: M_Save
     MainMenuView!: MainMenuView
 
 
@@ -18,7 +17,6 @@ export class MainMenu extends CCEntity {
 
     init(): void {
         this.addBusinesss(MainMenuBll);
-        this.addComponents(M_Save);
     }
 
     open() {
@@ -29,7 +27,7 @@ export class MainMenu extends CCEntity {
     }
 
     hasSave(): boolean {
-        return this.M_Save.hasSave;
+        return smc.save.hasSave();
     }
 
     openProfileDialog() {
@@ -38,6 +36,10 @@ export class MainMenu extends CCEntity {
 
     entryGame() {
         this.getBusiness<MainMenuBll>(MainMenuBll).entryGame();
+    }
+
+    continueGame() {
+        this.getBusiness<MainMenuBll>(MainMenuBll).continueGame();
     }
 
 }

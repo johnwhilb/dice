@@ -25,6 +25,7 @@ export class BattleModel extends ecs.Comp {
     enemyId: number = 0;
 
     reset() {
+        this.phase = BattlePhase.Start;
         this.turn = 1;
         this.dice = [];
         this.handCards = [];

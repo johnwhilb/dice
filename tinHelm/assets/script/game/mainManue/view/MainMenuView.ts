@@ -63,7 +63,7 @@ export class MainMenuView extends CCView<MainMenu> {
 
     btnContinue() {
         if (this.isCanContinueShow) {
-            console.log("点击继续")
+            this.ent.continueGame();
         } else {
             const btnContinue = this.getNode("btnContinue");
             TweenAnimUtil.move(btnContinue!, -300, 0);

@@ -13,6 +13,8 @@ export class PlayerModel extends ecs.Comp {
     public reset(): void {
         this.roleId = TableRole.createId(1);
         this.hp = 0;
+        this.maxHp = 0;
+        this.handCard = [];
     }
 }
 
