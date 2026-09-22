@@ -1,5 +1,5 @@
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
-import { EnumDiceRule } from '../../common/table/EnumDiceRule';
+import { DiceRuleNumNeedEnum } from '../../common/table/DiceRuleNumNeedEnum';
 import { TableRole } from '../../common/table/TableRole';
 import { Battle } from '../Battle';
 
@@ -69,15 +69,15 @@ export class BattleDiceBll extends CCBusiness<Battle> {
     }
 
     /** Returns the earliest matching dice indexes for the requested rule. */
-    checkDiceRule(rule: EnumDiceRule): number[] {
+    checkDiceRule(rule: DiceRuleNumNeedEnum): number[] {
         switch (rule) {
-            case EnumDiceRule.DOUBLE:
+            case DiceRuleNumNeedEnum.DOUBLE:
                 return this.findSameValueGroup(2);
-            case EnumDiceRule.TRIPLE:
+            case DiceRuleNumNeedEnum.TRIPLE:
                 return this.findSameValueGroup(3);
-            case EnumDiceRule.QUADRA:
+            case DiceRuleNumNeedEnum.QUADRA:
                 return this.findSameValueGroup(4);
-            case EnumDiceRule.PENTA:
+            case DiceRuleNumNeedEnum.PENTA:
                 return this.findSameValueGroup(5);
             default:
                 return [];

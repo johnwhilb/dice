@@ -1,10 +1,10 @@
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
-import { EnumEvent } from '../../common/table/EnumEvent';
+import { EventTypeEnum } from '../../common/table/EventTypeEnum';
 
 @ecs.register('RouteSelectModel')
 export class RouteSelectModel extends ecs.Comp {
 
-    currentRoutes: EnumEvent[] = [];
+    currentRoutes: EventTypeEnum[] = [];
     reset(): void {
         this.currentRoutes = [];
     }

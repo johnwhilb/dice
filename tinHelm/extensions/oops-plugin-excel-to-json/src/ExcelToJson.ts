@@ -1,11 +1,84 @@
 import path from "path";
+import { Workbook, Worksheet } from "exceljs";
 import { createTsClient, createTsServer } from "./JsonToTs";
 import { config } from "./main";
 
 const fs = require("fs");
-const excel = require("exceljs");
 
 const LOCAL_ID_BASE = 10000;
+const enumSuffix = "_ENUM";
+
+interface FieldEnum {
+    name: string;
+    column: number;
+    members: Map<string, number>;
+}
+
+function getFieldKey(value: string) {
+    const key = value.trim();
+    return key.endsWith(enumSuffix) ? key.slice(0, -enumSuffix.length) : key;
+}
+
+/** 从主表字段后缀读取枚举声明，JSON 和配置类使用去掉后缀的字段名。 */
+function getFieldEnums(worksheet: Worksheet, name: string) {
+    const fields: FieldEnum[] = [];
+    const keys = new Set<string>();
+    const enumNames = new Set<string>();
+
+    worksheet.getRow(2).eachCell((cell, column) => {
+        const header = cell.text.trim();
+        const key = getFieldKey(header);
+        if (!/^[A-Za-z][A-Za-z0-9]*$/.test(key)) {
+            throw new Error(`配置表【${name}】字段名不合法：【${header}】`);
+        }
+        if (keys.has(key)) {
+            throw new Error(`配置表【${name}】去掉_ENUM后字段名重复：【${key}】`);
+        }
+        keys.add(key);
+
+        if (!header.endsWith(enumSuffix)) {
+            return;
+        }
+        if (worksheet.getRow(3).getCell(column).text.trim().toLowerCase() !== "string") {
+            throw new Error(`配置表【${name}】枚举字段【${header}】必须使用string类型`);
+        }
+
+        const enumName = `${name}${key.charAt(0).toUpperCase()}${key.slice(1)}Enum`;
+        if (enumNames.has(enumName)) {
+            throw new Error(`配置表【${name}】枚举名称重复：【${enumName}】`);
+        }
+        enumNames.add(enumName);
+        fields.push({ name: enumName, column, members: new Map<string, number>() });
+    });
+
+    return fields;
+}
+
+/** 将字段中的英文成员名映射到同一行的配置主键。 */
+function collectFieldEnums(fields: FieldEnum[], worksheet: Worksheet, rowNumber: number, id: number) {
+    for (const field of fields) {
+        const memberName = worksheet.getRow(rowNumber).getCell(field.column).text.trim();
+        if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(memberName)) {
+            throw new Error(`枚举【${field.name}】第【${rowNumber}】行成员名为空或不合法：【${memberName}】`);
+        }
+        if (field.members.has(memberName)) {
+            throw new Error(`枚举【${field.name}】第【${rowNumber}】行成员名重复：【${memberName}】`);
+        }
+        field.members.set(memberName, id);
+    }
+}
+
+function writeFieldEnums(fields: FieldEnum[]) {
+    const outputPath = path.join(__dirname, config.PathTsClient.replace("project://", "../../../"));
+    for (const field of fields) {
+        const members = Array.from(field.members, ([memberName, id]) => {
+            return `    ${memberName} = ${id},`;
+        }).join("\n");
+        const script = `/**\n * 自动生成文件，请勿手动修改\n */\nexport enum ${field.name} {\n${members}\n}\n`;
+        fs.writeFileSync(path.join(outputPath, `${field.name}.ts`), script);
+        console.log(`枚举【${field.name}】生成成功`);
+    }
+}
 
 interface TableIdentity {
     tableId: number;
@@ -63,7 +136,8 @@ function validatePrimaryId(
 }
 
 /**
- * 读取 Excel 第二个 Sheet 生成 Enum
+ * 兼容尚未迁移的配置表：读取 Excel 第二个 Sheet 生成 Enum。
+ * 主表包含 _ENUM 字段时不会使用此规则。
  *
  * Sheet2:
  * 10001    Dwarf
@@ -78,7 +152,7 @@ function validatePrimaryId(
  *
  * Enum 只负责提供明确的配置 ID，不生成 getAllEnum()。
  */
-async function createEnumTs(workbook: any, name: string) {
+async function createLegacyEnumTs(workbook: Workbook, name: string) {
     if (workbook.worksheets.length < 2) {
         return;
     }
@@ -87,7 +161,7 @@ async function createEnumTs(workbook: any, name: string) {
     const enumName = `Enum${name}`;
     let fields = "";
 
-    worksheet.eachRow((row: any, rowNumber: number) => {
+    worksheet.eachRow((row, rowNumber) => {
         const idText = row.getCell(1).text.trim();
         const memberName = row.getCell(2).text.trim();
 
@@ -289,7 +363,7 @@ async function convert(
     let primary_index: number[] = [];
     const primaryIds = new Set<number>();
 
-    const workbook = new excel.Workbook();
+    const workbook = new Workbook();
 
     await workbook.xlsx.readFile(src);
     console.log("读取Excel文件成功", src);
@@ -301,9 +375,7 @@ async function convert(
         );
     }
 
-    if (isClient) {
-        await createEnumTs(workbook, name);
-    }
+    const fieldEnums = getFieldEnums(worksheet, name);
 
     worksheet.eachRow((row: any, rowNumber: number) => {
         let data: any = {};
@@ -312,27 +384,28 @@ async function convert(
             const value = cell.text;
 
             if (rowNumber === 1) {
-                names.push(value);
+                names[colNumber - 1] = value;
 
                 if (value.indexOf("【KEY】") > -1) {
                     primary_index.push(colNumber);
                 }
             }
             else if (rowNumber === 2) {
-                keys.push(value);
+                const key = getFieldKey(value);
+                keys[colNumber - 1] = key;
 
                 if (primary_index.indexOf(colNumber) > -1) {
-                    primary.push(value);
+                    primary.push(key);
                 }
             }
             else if (rowNumber === 3) {
-                types.push(value);
+                types[colNumber - 1] = value;
             }
             else if (isClient === false && rowNumber === 4) {
-                servers.push(value);
+                servers[colNumber - 1] = value;
             }
             else if (isClient === true && rowNumber === 5) {
-                clients.push(value);
+                clients[colNumber - 1] = value;
             }
             else if (rowNumber > 5) {
                 const index = colNumber - 1;
@@ -465,6 +538,7 @@ async function convert(
                 );
             }
             primaryIds.add(primaryId);
+            collectFieldEnums(fieldEnums, worksheet, rowNumber, primaryId);
 
             let temp: any = null;
 
@@ -498,6 +572,15 @@ async function convert(
     });
 
     if (r["undefined"] == null) {
+        if (isClient) {
+            if (fieldEnums.length > 0) {
+                writeFieldEnums(fieldEnums);
+            }
+            else {
+                await createLegacyEnumTs(workbook, name);
+            }
+        }
+
         fs.writeFileSync(
             dst,
             JSON.stringify(r)
