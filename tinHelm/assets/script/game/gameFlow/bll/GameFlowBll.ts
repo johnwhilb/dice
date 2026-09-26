@@ -8,12 +8,14 @@ export class GameFlowBll extends CCBusiness<GameFlow> {
     startNewGame() {
         this.ent.closeRoleSelectView();
         smc.routeSelect.closeMapView();
+        smc.shop.closeShopView();
         smc.routeSelect.closeRouteSelectView();
         smc.storyEvent.closeStoryDialog();
         smc.storyEvent.closeStoryEventView();
         smc.battle.closeBattleView();
         this.ent.GameFlowModel.reset();
         smc.routeSelect.RouteSelectModel.reset();
+        smc.shop.ShopModel.reset();
         smc.player.PlayerModel.reset();
         smc.storyEvent.StoryEventModel.reset();
         smc.battle.BattleModel.reset();
@@ -62,6 +64,7 @@ export class GameFlowBll extends CCBusiness<GameFlow> {
             return;
         }
         smc.routeSelect.completeCurrentEvent();
+        this.advanceDay();
         this.setGameFlowState(GameFlowState.RouteSelect);
         smc.routeSelect.generateRoutes();
         smc.save.saveGame();

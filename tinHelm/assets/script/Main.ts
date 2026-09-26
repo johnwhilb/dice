@@ -14,6 +14,7 @@ import { RouteSelect } from './game/routeSelect/RouteSelect';
 import { Battle } from './game/battle/Battle';
 import { StoryEvent } from './game/StoryEvent/StoryEvent';
 import { Save } from './game/save/Save';
+import { Shop } from './game/shop/Shop';
 
 const { ccclass, property } = _decorator;
 
@@ -46,6 +47,7 @@ export class Main extends Root {
         smc.battle = ecs.getEntity(Battle);
         smc.storyEvent = ecs.getEntity(StoryEvent);
         smc.save = ecs.getEntity(Save);
+        smc.shop = ecs.getEntity(Shop);
         smc.initialize.load(this.initial);
     }
 }

@@ -9,6 +9,8 @@ import { TableUniversal } from '../../common/table/TableUniversal';
 import { UniversalNameEnum } from '../../common/table/UniversalNameEnum';
 import { RealmLevelState, TravelRouteType } from '../model/RouteSelectModel';
 import { GameFlowState } from '../../gameFlow/model/GameFlowModel';
+import { TableFightEvent } from '../../common/table/TableFightEvent';
+import { TableEnemy } from '../../common/table/TableEnemy';
 
 export class RouteSelectBll extends CCBusiness<RouteSelect> {
 
@@ -20,6 +22,27 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         const level = this.getCurrentRealmLevel();
         const eventId = level?.eventIds[level.currentEventIndex] ?? 0;
         return TableEvent.getConfigById(eventId);
+    }
+
+    getCurrentEventDetail() {
+        const currentEvent = this.getCurrentEvent();
+        const detailId = this.ent.RouteSelectModel.currentEventDetailId;
+        if (currentEvent?.id === EventTypeEnum.SHOP) {
+            const shopEvent = smc.shop.prepare(
+                smc.gameFlow.getCurrentDay(),
+                smc.player.getSelectedRoleId(),
+                detailId,
+            );
+            this.ent.RouteSelectModel.currentEventDetailId = shopEvent?.id ?? 0;
+            return shopEvent;
+        }
+        if (currentEvent?.id === EventTypeEnum.FIGHT && TableFightEvent.isOwnId(detailId)) {
+            return TableFightEvent.getConfigById(detailId);
+        }
+
+        this.ent.RouteSelectModel.currentEventDetailId = 0;
+        smc.shop.clear();
+        return this.generateCurrentEventDetail();
     }
 
     getTravelRoute() {
@@ -66,11 +89,11 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
             return false;
         }
         const currentEvent = this.getCurrentEvent();
-        if (!currentEvent) {
+        const eventDetail = this.getCurrentEventDetail();
+        if (!currentEvent || !eventDetail) {
             return false;
         }
 
-        smc.gameFlow.advanceDay();
         smc.gameFlow.GameFlowBll.setGameFlowState(GameFlowState.Event);
         smc.save.saveGame();
         return this.openCurrentEvent();
@@ -79,23 +102,25 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     /** 恢复事件时只打开界面，不重复计时或生成关卡。 */
     openCurrentEvent() {
         const currentEvent = this.getCurrentEvent();
-        if (!currentEvent) {
+        const eventDetail = this.getCurrentEventDetail();
+        if (!currentEvent || !eventDetail) {
             return false;
         }
         switch (currentEvent.id) {
-            case EventTypeEnum.STORY:
-                smc.storyEvent.openStoryEventView();
-                break;
-            case EventTypeEnum.ENEMY:
-            case EventTypeEnum.ELETE_ENEMY:
+            case EventTypeEnum.FIGHT: {
+                const fightEvent = TableFightEvent.getConfigById(eventDetail.id);
+                if (!fightEvent) {
+                    return false;
+                }
+                smc.battle.setEnemy(fightEvent.enemyId);
                 smc.battle.openBattleView();
                 break;
+            }
             case EventTypeEnum.SHOP:
-            case EventTypeEnum.TREASURE:
-                smc.storyEvent.openStoryEventView();
+                smc.shop.openShopView();
                 break;
             default:
-                break;
+                return false;
         }
         return true;
     }
@@ -168,6 +193,8 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         }
 
         this.ent.RouteSelectModel.currentRealmId = realmId;
+        this.ent.RouteSelectModel.currentEventDetailId = 0;
+        smc.shop.clear();
         const level = this.getCurrentRealmLevel();
         if (level) {
             level.visited = true;
@@ -188,6 +215,8 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         }
 
         level.currentEventIndex += 1;
+        this.ent.RouteSelectModel.currentEventDetailId = 0;
+        smc.shop.clear();
         level.completed = level.currentEventIndex >= level.eventIds.length;
         if (level.completed && level.realmId !== RealmsRealmsEnum.ASGARD) {
             this.ent.RouteSelectModel.anchorCount += 1;
@@ -217,7 +246,7 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
             return typeof eventId === 'number' && !!TableEvent.getConfigById(eventId);
         });
         const enemyPool = eventPool.filter((eventId) => {
-            return eventId === EventTypeEnum.ENEMY || eventId === EventTypeEnum.ELETE_ENEMY;
+            return eventId === EventTypeEnum.FIGHT;
         });
         const otherPool = eventPool.filter((eventId) => {
             return !enemyPool.includes(eventId);
@@ -262,6 +291,33 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
             result[targetIndex] = current;
         }
         return result;
+    }
+
+    private generateCurrentEventDetail() {
+        const currentEvent = this.getCurrentEvent();
+        if (!currentEvent) {
+            return null;
+        }
+
+        if (currentEvent.id === EventTypeEnum.FIGHT) {
+            const allFightEvents = TableFightEvent.getAllConfig().filter((item) => {
+                return !!TableEnemy.getConfigById(item.enemyId);
+            });
+            const realmFightEvents = allFightEvents.filter((item) => {
+                return item.realmId === this.ent.RouteSelectModel.currentRealmId
+                    && !!TableEnemy.getConfigById(item.enemyId);
+            });
+            const fightEvents = realmFightEvents.length ? realmFightEvents : allFightEvents;
+            if (!fightEvents.length) {
+                return null;
+            }
+
+            const fightEvent = fightEvents[Math.floor(Math.random() * fightEvents.length)];
+            this.ent.RouteSelectModel.currentEventDetailId = fightEvent.id;
+            return fightEvent;
+        }
+
+        return null;
     }
 
     private updateTravelRoute() {

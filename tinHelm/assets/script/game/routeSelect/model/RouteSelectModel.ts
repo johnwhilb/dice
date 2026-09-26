@@ -30,6 +30,7 @@ export class RouteSelectModel extends ecs.Comp {
     realmLevels: RealmLevelState[] = [];
     anchorCount = 0;
     recordedRealmId = 0;
+    currentEventDetailId = 0;
     travelRoute: TravelRouteData = {
         type: TravelRouteType.RANDOM,
         name: '跨界移动',
@@ -42,6 +43,7 @@ export class RouteSelectModel extends ecs.Comp {
         this.realmLevels = [];
         this.anchorCount = 0;
         this.recordedRealmId = 0;
+        this.currentEventDetailId = 0;
         this.travelRoute = {
             type: TravelRouteType.RANDOM,
             name: '跨界移动',

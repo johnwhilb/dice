@@ -14,16 +14,13 @@ import { nodeDice } from '../../dice/nodeDice';
 import { TableDice } from '../../common/table/TableDice';
 import { TableRole } from '../../common/table/TableRole';
 import { Prefab } from 'cc';
-import { instantiate, Node } from 'cc';
-import List from '../../ui/List';
+import { EventTouch, instantiate, Node, UITransform, Vec3 } from 'cc';
 import { TableCard } from '../../common/table/TableCard';
 import { nodeCard } from '../../card/nodeCard';
 import { BattleEvent } from '../BattleEvent';
-import { EventTouch, ScrollView, UITransform, Vec3 } from 'cc';
 import { GraphView } from '../../ui/GraphView';
 
 const { ccclass, property } = _decorator;
-
 
 @ccclass("BattleView")
 @ecs.register("BattleView", false)
@@ -33,11 +30,12 @@ export class BattleView extends CCView<Battle> {
     @property({ type: Prefab })
     prefabDice: Prefab = null!;
 
-    private readonly cardGestureJudgeThreshold: number = 8;
+    @property({ type: Prefab })
+    prefabCard: Prefab = null!;
 
-    private cardTouchStartPos: Vec3 = new Vec3();
-
-    private lineIsMove: boolean = false;
+    private readonly cardGestureJudgeThreshold = 8;
+    private readonly maxHandCardCount = 5;
+    private readonly cardTouchStartPos = new Vec3();
 
     start() {
         this.nodeTreeInfoLite();
@@ -68,70 +66,75 @@ export class BattleView extends CCView<Battle> {
     }
 
     updateCardList() {
-        this.getNode('cardList')!.getComponent(List).numItems = this.ent.BattlePlayerModel.handCards.length;
+        const cardLayout = this.getNode('cardLayout')!;
+        cardLayout.destroyAllChildren();
+        this.ent.BattlePlayerModel.handCards.slice(0, this.maxHandCardCount).forEach((cardId) => {
+            const card = TableCard.getConfigById(cardId);
+            if (!card) {
+                return;
+            }
+            const cardNode = instantiate(this.prefabCard);
+            cardNode.parent = cardLayout;
+            cardNode.getComponent(nodeCard)!.setData(card);
+            this.bindCardGesture(cardNode);
+        });
     }
 
-    updateCardItem(node: Node, index: number) {
-        const cardList = this.ent.BattlePlayerModel.handCards;
-        const item = TableCard.getConfigById(cardList[index]);
-        node.getComponent(nodeCard).setData(item!);
-        this.bindCardGesture(node);
-    }
-
-    private bindCardGesture(node: Node) {
-        node.off(Node.EventType.TOUCH_START, this.onCardTouchStart, this);
-        node.off(Node.EventType.TOUCH_MOVE, this.onCardTouchMove, this);
-        node.off(Node.EventType.TOUCH_END, this.onCardTouchEnd, this);
-        node.off(Node.EventType.TOUCH_CANCEL, this.onCardTouchEnd, this);
-
-        node.on(Node.EventType.TOUCH_START, this.onCardTouchStart, this);
-        node.on(Node.EventType.TOUCH_MOVE, this.onCardTouchMove, this);
-        node.on(Node.EventType.TOUCH_END, this.onCardTouchEnd, this);
-        node.on(Node.EventType.TOUCH_CANCEL, this.onCardTouchEnd, this);
+    private bindCardGesture(cardNode: Node) {
+        cardNode.off(Node.EventType.TOUCH_START, this.onCardTouchStart, this);
+        cardNode.off(Node.EventType.TOUCH_MOVE, this.onCardTouchMove, this);
+        cardNode.off(Node.EventType.TOUCH_END, this.onCardTouchEnd, this);
+        cardNode.off(Node.EventType.TOUCH_CANCEL, this.onCardTouchEnd, this);
+        cardNode.on(Node.EventType.TOUCH_START, this.onCardTouchStart, this);
+        cardNode.on(Node.EventType.TOUCH_MOVE, this.onCardTouchMove, this);
+        cardNode.on(Node.EventType.TOUCH_END, this.onCardTouchEnd, this);
+        cardNode.on(Node.EventType.TOUCH_CANCEL, this.onCardTouchEnd, this);
     }
 
     private onCardTouchStart(event: EventTouch) {
         const touchPos = event.getUILocation();
         this.cardTouchStartPos.set(touchPos.x, touchPos.y, 0);
-        const cardListScrollView = this.getNode('cardList')!.getComponent(ScrollView);
-        cardListScrollView.horizontal = false;
-        cardListScrollView.vertical = false;
     }
 
     private onCardTouchMove(event: EventTouch) {
         const touchPos = event.getUILocation();
-        const deltaX = touchPos.x - this.cardTouchStartPos.x;
-        const deltaY = touchPos.y - this.cardTouchStartPos.y;
-        const absX = Math.abs(deltaX);
-        const absY = Math.abs(deltaY);
-        if (Math.max(absX, absY) < this.cardGestureJudgeThreshold) {
+        const touchWorldPos = new Vec3(touchPos.x, touchPos.y, 0);
+        const moveDistance = Vec3.distance(this.cardTouchStartPos, touchWorldPos);
+        if (moveDistance < this.cardGestureJudgeThreshold) {
             return;
         }
-        if (absY > absX) {
-            this.getNode('cardList')!.getComponent(ScrollView).horizontal = false;
-        } else if (!this.lineIsMove) {
-            this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;
+
+        if (this.isWorldPosInsideNode(touchWorldPos, this.getNode('cardLayout')!)) {
+            return;
         }
 
-        if (!this.isWorldPosInsideNode(new Vec3(touchPos.x, touchPos.y, 0), this.getNode('cardList')!)) {
-            const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
-            graphView.drawBezierCurveByWorldPos(this.cardTouchStartPos, new Vec3(touchPos.x, touchPos.y, 0));
-            this.lineIsMove = true;
-        }
-
+        this.getNode('nodeGraphView')!
+            .getComponent(GraphView)!
+            .drawBezierCurveByWorldPos(this.cardTouchStartPos, touchWorldPos);
     }
 
     private onCardTouchEnd(event: EventTouch) {
-        this.lineIsMove = false;
-        const graphView = this.getNode('nodeGraphView')!.getComponent(GraphView);
-        graphView.getComponent(GraphView)!.reset();
-        this.getNode('cardList')!.getComponent(ScrollView).horizontal = true;
+        this.getNode('nodeGraphView')!.getComponent(GraphView)!.reset();
         const touchPos = event.getUILocation();
-        if (this.isWorldPosInsideNode(new Vec3(touchPos.x, touchPos.y, 0), this.getNode('spEnemy')!)) {
+        const touchWorldPos = new Vec3(touchPos.x, touchPos.y, 0);
+        if (this.isWorldPosInsideNode(touchWorldPos, this.getNode('spEnemy')!)) {
             console.log('点击了敌人');
         } else {
             console.log('点击了其他区域');
         }
+    }
+
+    private isWorldPosInsideNode(worldPos: Vec3, node: Node) {
+        const uiTransform = node.getComponent(UITransform)!;
+        const localPos = uiTransform.convertToNodeSpaceAR(worldPos);
+        const minX = -uiTransform.width * uiTransform.anchorX;
+        const maxX = uiTransform.width * (1 - uiTransform.anchorX);
+        const minY = -uiTransform.height * uiTransform.anchorY;
+        const maxY = uiTransform.height * (1 - uiTransform.anchorY);
+        return localPos.x >= minX
+            && localPos.x <= maxX
+            && localPos.y >= minY
+            && localPos.y <= maxY;
     }
 
     initPlayerView() {
@@ -231,28 +234,5 @@ export class BattleView extends CCView<Battle> {
     }
 
     reset(): void {
-    }
-
-
-    isWorldPosInsideNode(worldPos: Vec3, node: Node): boolean {
-        const uiTransform = node.getComponent(UITransform);
-        if (!uiTransform) {
-            return false;
-        }
-        const localPos = uiTransform.convertToNodeSpaceAR(worldPos);
-        const width = uiTransform.width;
-        const height = uiTransform.height;
-        const anchorX = uiTransform.anchorX;
-        const anchorY = uiTransform.anchorY;
-        const minX = -width * anchorX;
-        const maxX = width * (1 - anchorX);
-        const minY = -height * anchorY;
-        const maxY = height * (1 - anchorY);
-        return (
-            localPos.x >= minX &&
-            localPos.x <= maxX &&
-            localPos.y >= minY &&
-            localPos.y <= maxY
-        );
     }
 }

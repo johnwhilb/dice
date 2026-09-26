@@ -7,7 +7,6 @@ import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
  */
 interface EventConfigData {
     name: string;
-    des: string;
     type: string;
 }
 
@@ -159,11 +158,6 @@ export class BaseEvent {
     /** 事件 */
     get name(): string {
         return this.data.name;
-    }
-
-    /** 卡牌描述 */
-    get des(): string {
-        return this.data.des;
     }
 
     /** 事件类型 */

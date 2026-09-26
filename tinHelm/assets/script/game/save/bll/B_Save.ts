@@ -17,6 +17,8 @@ interface RunSaveData {
     realmLevels: RealmLevelState[];
     anchorCount: number;
     recordedRealmId: number;
+    currentEventDetailId?: number;
+    shopCardIds?: number[];
     roleId: number;
     hp: number;
     maxHp: number;
@@ -45,6 +47,8 @@ export class SaveBll extends CCBusiness<Save> {
             realmLevels: route.realmLevels,
             anchorCount: route.anchorCount,
             recordedRealmId: route.recordedRealmId,
+            currentEventDetailId: route.currentEventDetailId,
+            shopCardIds: smc.shop.ShopModel.cardIds,
             roleId: player.roleId,
             hp: player.hp,
             maxHp: player.maxHp,
@@ -72,6 +76,8 @@ export class SaveBll extends CCBusiness<Save> {
         route.realmLevels = data.realmLevels;
         route.anchorCount = data.anchorCount;
         route.recordedRealmId = data.recordedRealmId;
+        route.currentEventDetailId = data.currentEventDetailId ?? 0;
+        smc.shop.restore(data.currentEventDetailId ?? 0, data.roleId, data.shopCardIds ?? []);
         player.roleId = data.roleId;
         player.hp = data.hp;
         player.maxHp = data.maxHp;
@@ -105,6 +111,11 @@ export class SaveBll extends CCBusiness<Save> {
             && typeof data.originRealmId === 'number'
             && typeof data.anchorCount === 'number'
             && typeof data.recordedRealmId === 'number'
+            && (data.currentEventDetailId === undefined || typeof data.currentEventDetailId === 'number')
+            && (data.shopCardIds === undefined || (Array.isArray(data.shopCardIds)
+                && data.shopCardIds.every((id: unknown) => {
+                    return typeof id === 'number';
+                })))
             && typeof data.roleId === 'number'
             && typeof data.hp === 'number'
             && typeof data.maxHp === 'number'

@@ -8,6 +8,7 @@ import { GameFlow } from '../gameFlow/GameFlow';
 import { RouteSelect } from '../routeSelect/RouteSelect';
 import { Battle } from '../battle/Battle';
 import { StoryEvent } from '../StoryEvent/StoryEvent';
+import { Shop } from '../shop/Shop';
 
 /** 游戏单例业务模块 */
 @ecs.register('SingletonModule')
@@ -30,6 +31,8 @@ export class SingletonModuleComp extends ecs.Comp {
     battle: Battle = null!;
     /** 剧情事件模块 */
     storyEvent: StoryEvent = null!;
+    /** 游戏商店模块 */
+    shop: Shop = null!;
 
      
 

@@ -21,7 +21,6 @@ export class nodeCard extends GameComponent {
     setData(tableCard: TableCard) {
         this.getNode("lbtName")!.getComponent(Label)!.string = tableCard.name;
         this.getNode("lbtDes")!.getComponent(Label)!.string = tableCard.des;
-        this.getNode("lbtNumNeed")!.getComponent(Label)!.string = tableCard.numNeedDes;
         const iconNeed = tableCard.DiceNeed
         const nodeIconNeed = this.getNode("nodeIconNeed")!;
         for (let i = 0; i < Math.max(iconNeed.length, nodeIconNeed.children.length); i++) {
