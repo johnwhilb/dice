@@ -44,6 +44,9 @@ export class BattleBll extends CCBusiness<Battle> {
         this.dispatchEvent(BattleEvent.refreshBattlePhase);
     }
     generateEnemy() {
-        this.ent.BattleEnemyModel.enemyId = TableEnemy.createId(1)
+        const enemyId = this.ent.BattleModel.enemyId;
+        this.ent.BattleEnemyModel.enemyId = TableEnemy.getConfigById(enemyId)
+            ? enemyId
+            : TableEnemy.createId(1);
     }
 }

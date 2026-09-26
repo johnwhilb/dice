@@ -57,7 +57,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
+      "x": -280,
       "y": 0,
       "z": 0
     },
@@ -70,9 +70,9 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
+      "x": 0.8,
+      "y": 0.8,
+      "z": 0.8
     },
     "_mobility": 0,
     "_layer": 33554432,
@@ -236,9 +236,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_string": "2",
@@ -1118,9 +1118,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_string": "2",
@@ -1559,9 +1559,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_string": "2",
@@ -2000,9 +2000,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_string": "2",
@@ -2441,9 +2441,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_string": "2",
@@ -2903,7 +2903,6 @@
       "__id__": 0
     },
     "fileId": "f4ZEgg4N9JE5fOqjr8gx0H",
-    "instance": null,
     "targetOverrides": null
   }
 ]

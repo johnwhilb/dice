@@ -44,8 +44,6 @@ export class RoleSelectView extends CCView<GameFlow> {
     }
 
     refresh() {
-        this.updateSpRole();
-        this.updateRoleHp();
         this.updateTab();
     }
 
@@ -55,59 +53,20 @@ export class RoleSelectView extends CCView<GameFlow> {
         const spSelect = this.getNode('spSelect')!;
         const roleList = this.getNode('roleList')!;
         const cardList = this.getNode('cardList')!;
-        const btnLeft = this.getNode('btnLeft')!;
-        const btnRight = this.getNode('btnRight')!;
-        const roleSelectBottomBg = this.getNode('roleSelectBottomBg')!.getComponent(UITransform);
-        const lbtTitle = this.getNode('lbtTitle')!.getComponent(Label);
         roleList.active = this.currentTab === TABS.ROLE;
         cardList.active = this.currentTab === TABS.CARD;
         if (this.currentTab === TABS.ROLE) {
             tween(spSelect)
                 .to(0.1, { position: new Vec3(0, btnRole.position.y, 0) })
                 .start();
-            btnLeft.active = true;
-            btnRight.active = true;
-            lbtTitle.string = 'ROLE SELECT!!   ROLE SELECT!!   ';
             this.updateRoleList();
         } else if (this.currentTab === TABS.CARD) {
             tween(spSelect)
                 .to(0.1, { position: new Vec3(0, btnCard.position.y, 0) })
                 .start();
-            lbtTitle.string = 'CARD PREVIEW!!   CARD PREVIEW!!   ';
-            btnLeft.active = false;
-            btnRight.active = false;
             this.updateCardList();
         }
 
-    }
-
-    updateSpRole() {
-        const spRole = this.getNode('spRole')!.getComponent(Sprite);
-        const currentSelectRoleId = smc.player.getSelectedRoleId();
-        this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectRoleId));
-    }
-
-    updateRoleHp() {
-        const currentSelectRoleId = smc.player.getSelectedRoleId();
-        const tableRole = TableRole.getConfigById(currentSelectRoleId);
-        const originHp = tableRole!.originHp;
-        const maxHp = tableRole!.maxHp;
-        const hpLayout = this.getNode('hpLayout')!;
-        const fullHeartCount = Math.floor(maxHp / HP_EVERY_HEART);
-        for (let i = 0; i < Math.max(fullHeartCount, hpLayout.children.length); i++) {
-            let hpNode = hpLayout.children[i];
-            if (i >= fullHeartCount) {
-                hpNode.active = false;
-                continue;
-            }
-            if (!hpNode) {
-                hpNode = instantiate(hpLayout.children[0]);
-                hpNode.parent = hpLayout;
-            }
-            hpNode.active = true;
-        }
-        const lbtHp = this.getNode('lbtHp')!;
-        lbtHp.getComponent(Label).string = `${originHp}/${maxHp}`;
     }
 
     updateRoleList() {

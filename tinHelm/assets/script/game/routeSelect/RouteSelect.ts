@@ -25,6 +25,10 @@ export class RouteSelect extends CCEntity {
         return this.RouteSelectBll.selectCurrentEvent();
     }
 
+    triggerCurrentEvent() {
+        return this.RouteSelectBll.selectCurrentEvent();
+    }
+
     selectUnknownRoute() {
         return this.RouteSelectBll.selectTravelRoute();
     }
@@ -56,6 +60,10 @@ export class RouteSelect extends CCEntity {
 
     getCurrentEvent() {
         return this.RouteSelectBll.getCurrentEvent();
+    }
+
+    getCurrentEventDetail() {
+        return this.RouteSelectBll.getCurrentEventDetail();
     }
 
     getTravelRoute() {

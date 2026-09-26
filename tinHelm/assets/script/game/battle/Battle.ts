@@ -52,6 +52,10 @@ export class Battle extends CCEntity {
         this.BattleBll.changePhase();
     }
 
+    setEnemy(enemyId: number) {
+        this.BattleModel.enemyId = enemyId;
+    }
+
     initBattleSceneInfo() {
         this.BattleBll.generateEnemy();
         this.BattleEnemyBll.initEnemy();
