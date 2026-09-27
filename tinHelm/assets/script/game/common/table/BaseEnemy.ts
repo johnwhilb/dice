@@ -10,6 +10,7 @@ interface EnemyConfigData {
     title: string;
     info: string;
     originHp: number;
+    nomalAttack: number;
 }
 
 /**
@@ -175,5 +176,10 @@ export class BaseEnemy {
     /** 初始血量 */
     get originHp(): number {
         return this.data.originHp;
+    }
+
+    /** 普通攻击伤害 */
+    get nomalAttack(): number {
+        return this.data.nomalAttack;
     }
 }
