@@ -24,7 +24,10 @@ export class nodeDice extends Component {
 
     start() {
         this.syncFaces();
-        this.stopAtFace(1);
+        // BattleView 可能已在首帧前发起投掷，不能在 start 中覆盖结果。
+        if (!this.rolling) {
+            this.stopAtFace(this.rollTargetFace);
+        }
     }
 
     update(deltaTime: number): void {

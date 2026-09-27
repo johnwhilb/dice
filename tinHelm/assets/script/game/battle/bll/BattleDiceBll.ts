@@ -2,17 +2,27 @@ import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { DiceRuleNumNeedEnum } from '../../common/table/DiceRuleNumNeedEnum';
 import { TableRole } from '../../common/table/TableRole';
 import { Battle } from '../Battle';
+import { BattlePhase } from '../model/BattleModel';
 
 export class BattleDiceBll extends CCBusiness<Battle> {
     lockDice(diceIndex: number) {
+        if (this.ent.BattleModel.busy || this.ent.BattleModel.phase !== BattlePhase.PlayerAction
+            || diceIndex < 0 || diceIndex >= this.ent.BattlePlayerModel.dice.length) {
+            return;
+        }
         const diceLocked = this.ent.BattlePlayerModel.diceLocked;
         if (!diceLocked.includes(diceIndex)) {
             diceLocked.push(diceIndex);
         }
+        this.ent.BattleBll.refresh();
     }
 
     unlockDice(diceIndex: number) {
+        if (this.ent.BattleModel.busy || this.ent.BattleModel.phase !== BattlePhase.PlayerAction) {
+            return;
+        }
         this.ent.BattlePlayerModel.diceLocked = this.ent.BattlePlayerModel.diceLocked.filter(index => index !== diceIndex);
+        this.ent.BattleBll.refresh();
     }
 
     isDiceLocked(diceIndex: number): boolean {
@@ -30,7 +40,7 @@ export class BattleDiceBll extends CCBusiness<Battle> {
     resetDice(random: () => number = Math.random): number[] {
         const playerModel = this.ent.BattlePlayerModel;
         const role = TableRole.getConfigById(playerModel.playerId);
-        const diceFaces = role?.originDice as number[][] | undefined;
+        const diceFaces: number[][] = role?.originDice || [];
 
         if (!diceFaces || diceFaces.length === 0) {
             return playerModel.dice.slice();

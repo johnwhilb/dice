@@ -23,6 +23,7 @@ interface RunSaveData {
     hp: number;
     maxHp: number;
     handCard: number[];
+    gold?: number;
 }
 
 @ccclass('B_Save')
@@ -53,6 +54,7 @@ export class SaveBll extends CCBusiness<Save> {
             hp: player.hp,
             maxHp: player.maxHp,
             handCard: player.handCard,
+            gold: player.gold,
         };
         const saved = oops.storage.set(CommonStorageConfig.CurrentRun, JSON.stringify(data));
         this.ent.SaveModel.hasSave = saved;
@@ -82,6 +84,7 @@ export class SaveBll extends CCBusiness<Save> {
         player.hp = data.hp;
         player.maxHp = data.maxHp;
         player.handCard = data.handCard;
+        player.gold = data.gold ?? 0;
         smc.routeSelect.generateRoutes();
         this.ent.SaveModel.hasSave = true;
         return true;
@@ -119,6 +122,7 @@ export class SaveBll extends CCBusiness<Save> {
             && typeof data.roleId === 'number'
             && typeof data.hp === 'number'
             && typeof data.maxHp === 'number'
+            && (data.gold === undefined || (typeof data.gold === 'number' && Number.isFinite(data.gold) && data.gold >= 0))
             && Array.isArray(data.handCard)
             && data.handCard.every((id: unknown) => {
                 return typeof id === 'number';
