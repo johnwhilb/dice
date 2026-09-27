@@ -2941,7 +2941,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btnContinue",
+    "_name": "btnEnd",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {

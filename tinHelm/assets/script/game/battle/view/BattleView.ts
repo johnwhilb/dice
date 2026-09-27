@@ -29,7 +29,6 @@ export class BattleView extends CCView<Battle> {
 
     @property({ type: Prefab })
     prefabDice: Prefab = null!;
-
     @property({ type: Prefab })
     prefabCard: Prefab = null!;
 
@@ -170,22 +169,6 @@ export class BattleView extends CCView<Battle> {
         diceLayout.destroyAllChildren();
         const playerId = smc.player.getSelectedRoleId();
         const diceInfo = TableRole.getConfigById(playerId)!.originDice;
-        // for (const item of diceInfo.entries()) {
-        //     const diceNode = instantiate(this.prefabDice);
-        //     diceNode.parent = diceLayout;
-        //     const diceView = diceNode.getComponent(nodeDice)
-        //     for (let i = 0; i < item.length; i++) {
-        //         const face = diceNode.children[i].getChildByName('spIcon')!.getComponent(Sprite);
-        //         const lbtNum = diceNode.children[i].getChildByName('lbtNum')!.getComponent(Label);
-        //         lbtNum.string = `${item[i]}`;
-        //         const diceId = TableDice.getAllConfig().find(dice => dice.role === playerId && dice.diceNum.includes(item[i]))!.id;
-        //         this.setSprite(face, ResPath.getSpriteDice(diceId));
-        //     }
-        //     diceView.syncFaces();
-        //     diceView.stopAtFace(1);
-        // }
-
-
         for (let i = 0; i < diceInfo.length; i++) {
             const diceNode = instantiate(this.prefabDice);
             diceNode.parent = diceLayout;
@@ -198,14 +181,9 @@ export class BattleView extends CCView<Battle> {
                 const diceId = TableDice.getAllConfig().find(dice => dice.role === playerId && dice.diceNum.includes(diceInfo[i][j]))!.id;
                 this.setSprite(face, ResPath.getSpriteDice(diceId));
             }
-
             diceView.syncFaces();
             diceView.stopAtFace(1);
         }
-
-
-
-
     }
 
     btnThrow() {
@@ -225,7 +203,6 @@ export class BattleView extends CCView<Battle> {
         if (!diceView) {
             return;
         }
-
         diceView.rollToFaceValue(diceValue, 2);
     }
 
