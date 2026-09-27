@@ -6,6 +6,11 @@ const Excel = require('../extensions/oops-plugin-excel-to-json/node_modules/exce
 
 const root = path.resolve(__dirname, '..');
 const tables = ['1_Role', '2_Card', '3_Dice'];
+const unsupportedEffects = new Set([
+    'DRAW', 'DRAW_UNTIL', 'NO_DRAW', 'GAIN_ENERGY', 'GAIN_ENERGY_NEXT_TURN',
+    'ENERGY_NEXT_TURN', 'DOUBLE_ENERGY', 'SET_ENERGY', 'GAIN_ENERGY_PER',
+    'X_COST', 'SET_CARD_COST', 'MODIFY_CARD_COST'
+]);
 let writing = false;
 
 async function readTables() {
@@ -62,10 +67,10 @@ function validateCards(cards, data) {
         }
         const inspect = nodes => {
             for (const node of nodes) {
-                if (!['SELF', 'ENEMY'].includes(node.target) || /ORB|STANCE|MANTRA|MARK|SCRY|DAMAGE_ALL|DAMAGE_RANDOM|POISON_EXPLODE/.test(node.type)) {
+                if (!['SELF', 'ENEMY'].includes(node.target) || unsupportedEffects.has(node.type) || /ORB|STANCE|MANTRA|MARK|SCRY|DAMAGE_ALL|DAMAGE_RANDOM|POISON_EXPLODE/.test(node.type)) {
                     throw new Error(`${id}：效果包含不支持的目标或机制`);
                 }
-                for (const branch of ['children', 'else_effects']) {
+                for (const branch of ['children', 'elseEffects']) {
                     if (node[branch]) {
                         inspect(node[branch]);
                     }
@@ -84,7 +89,11 @@ async function saveCards(payload) {
     validateCards(payload.cards, data);
     const workbook = data.workbooks[1];
     const sheet = workbook.worksheets[0];
-    const extra = [['target', '出牌目标', 'string'], ['type', '卡牌类型', 'string'], ['up_id', '升级卡牌', 'int'], ['flags', '特殊属性', 'json']];
+    const extra = [['target', '出牌目标', 'string'], ['type', '卡牌类型', 'string'], ['upId', '升级卡牌', 'int'], ['flags', '特殊属性', 'json']];
+    const legacyUpIdColumn = sheet.getRow(2).values.indexOf('up_id');
+    if (legacyUpIdColumn > 0) {
+        sheet.getCell(2, legacyUpIdColumn).value = 'upId';
+    }
     for (const [field, label, type] of extra) {
         if (!sheet.getRow(2).values.includes(field)) {
             const col = sheet.columnCount + 1;
@@ -101,6 +110,9 @@ async function saveCards(payload) {
         fields.forEach((field, col) => {
             const previous = card ? original.get(Number(card.id)) || {} : {};
             let value = card ? (Object.prototype.hasOwnProperty.call(card, field) ? card[field] : previous[field]) : null;
+            if (field === 'upId' && card && !Object.prototype.hasOwnProperty.call(card, field)) {
+                value = previous.up_id || null;
+            }
             if (value === undefined || value === '') {
                 value = null;
             }

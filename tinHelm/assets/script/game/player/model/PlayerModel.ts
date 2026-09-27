@@ -9,12 +9,15 @@ export class PlayerModel extends ecs.Comp {
     hp: number = 0;
     maxHp: number = 0;
     handCard: number[] = [];
+    /** 当前冒险持有的金币。 */
+    gold: number = 0;
 
     public reset(): void {
         this.roleId = TableRole.createId(1);
         this.hp = 0;
         this.maxHp = 0;
         this.handCard = [];
+        this.gold = 0;
     }
 }
 

@@ -25,6 +25,7 @@ export class nodeCard extends GameComponent {
         const nodeIconNeed = this.getNode("nodeIconNeed")!;
         for (let i = 0; i < Math.max(iconNeed.length, nodeIconNeed.children.length); i++) {
             if (i >= iconNeed.length) {
+                nodeIconNeed.children[i].active = false;
                 continue;
             }
             let node = nodeIconNeed.children[i];
@@ -32,6 +33,7 @@ export class nodeCard extends GameComponent {
                 node = instantiate(this.diceIcon);
                 node.parent = nodeIconNeed;
             }
+            node.active = true;
             const spIcon = node.getChildByName("face")!.getChildByName("spIcon")!.getComponent(Sprite);
             this.setSprite(spIcon, ResPath.getSpriteDice(iconNeed[i]));
         }

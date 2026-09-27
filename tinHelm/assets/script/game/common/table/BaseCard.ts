@@ -12,6 +12,10 @@ interface CardConfigData {
     level: number;
     price: number;
     role: number;
+    effect: any[];
+    target: string;
+    type: string;
+    flags: Record<string, any>;
 }
 
 /**
@@ -187,5 +191,25 @@ export class BaseCard {
     /** 所属角色 */
     get role(): number {
         return this.data.role;
+    }
+
+    /** 卡牌效果 */
+    get effect(): any[] {
+        return this.data.effect;
+    }
+
+    /** 出牌目标 */
+    get target(): string {
+        return this.data.target;
+    }
+
+    /** 卡牌类型 */
+    get type(): string {
+        return this.data.type;
+    }
+
+    /** 特殊属性 */
+    get flags(): Record<string, any> {
+        return this.data.flags;
     }
 }
