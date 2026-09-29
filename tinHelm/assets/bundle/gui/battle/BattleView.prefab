@@ -3205,7 +3205,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80,
+      "width": 170,
       "height": 52.92
     },
     "_anchorPoint": {
@@ -3241,14 +3241,14 @@
       "b": 0,
       "a": 255
     },
-    "_string": "重掷",
+    "_string": "重投 -2",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 40,
-    "_fontSize": 40,
+    "_actualFontSize": 26,
+    "_fontSize": 26,
     "_fontFamily": "Arial",
-    "_lineHeight": 42,
-    "_overflow": 0,
+    "_lineHeight": 30,
+    "_overflow": 2,
     "_enableWrapText": true,
     "_font": {
       "__uuid__": "fa5d70b6-c51f-4238-9f81-f82591c5c3a5",

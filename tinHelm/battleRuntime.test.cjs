@@ -100,22 +100,76 @@ async function run() {
     let player = ent.BattlePlayerModel;
     assert.equal(player.handCards.length, 5);
     assert.equal(player.drawPile.length, 5);
-    assert.equal(player.energy, 6);
-    const locked = player.dice[0];
+    assert.equal(player.energy, 3);
+    assert.deepEqual(ent.BattleModel.rollingDiceIndexes, []);
+    assert.equal(ent.BattleBll.reroll(), false, '未选骰子不能重投');
     ent.BattleDiceBll.lockDice(0);
+    ent.BattleDiceBll.lockDice(1);
+    assert.deepEqual(player.diceLocked, [1], '任意时刻只选一颗骰子');
+    const unchanged = player.dice.map((value, index) => index === 1 ? null : value);
     assert.equal(ent.BattleBll.reroll(), true);
-    assert.equal(player.energy, 5);
-    assert.equal(player.dice[0], locked);
+    assert.equal(player.energy, 1);
+    assert.deepEqual(ent.BattleModel.rollingDiceIndexes, [1]);
+    assert.deepEqual(player.diceLocked, []);
+    player.dice.forEach((value, index) => {
+        if (index !== 1) {
+            assert.equal(value, unchanged[index], '其他骰子的点数不得改变');
+        }
+    });
     ent.BattleBll.finishRoll();
-    assert.equal(ent.BattleBll.reroll(), true);
-    assert.equal(player.energy, 4);
+    ent.BattleDiceBll.lockDice(1);
+    assert.equal(ent.BattleBll.reroll(), false, '不足2能量不能重投');
+    ent = await ready();
+    player = ent.BattlePlayerModel;
+    player.dice = [1, 2, 3, 4, 5];
+    player.diceUsed = [2];
+    ent.BattleDiceBll.lockDice(0);
+    ent.BattleDiceBll.lockDice(2);
+    assert.deepEqual(player.diceLocked, [2], '失活骰子也可被单选');
+    ent.BattleDiceBll.unlockDice(2);
+    assert.deepEqual(player.diceLocked, [], '再次点击失活骰子可反选');
+    ent.BattleDiceBll.lockDice(2);
+    const beforeActivation = [...player.dice];
+    const originalRandom = Math.random;
+    Math.random = () => 0.99;
+    try {
+        assert.equal(ent.BattleBll.reroll(), true, '选中失活骰子后由重投按钮激活');
+    } finally {
+        Math.random = originalRandom;
+    }
+    assert.equal(player.energy, 1);
+    assert.deepEqual(player.diceUsed, []);
+    assert.deepEqual(player.diceLocked, []);
+    assert.deepEqual(ent.BattleModel.rollingDiceIndexes, [2]);
+    assert.equal(player.dice[2], 6);
+    player.dice.forEach((value, index) => {
+        if (index !== 2) {
+            assert.equal(value, beforeActivation[index], '激活不能改变其他骰子');
+        }
+    });
     ent.BattleBll.finishRoll();
+    assert.equal(ent.BattleBll.activateUsedDie(2), false, '已激活骰子不能再次激活');
+    player.diceUsed = [2];
+    assert.equal(ent.BattleBll.activateUsedDie(2), false, '能量不足不能激活');
+    assert.equal(player.dice[2], 6);
+    assert.equal(player.energy, 1);
+    assert.equal(ent.BattleModel.message, '激活失活骰子需要2点能量');
     player.handCards = [20007];
     player.dice = [6, 2, 1, 4, 5];
     assert.equal(ent.BattleCardBll.canPlay(0), false);
     player.dice[4] = 6;
+    assert.equal(ent.BattleCardBll.canPlay(0), true, '选中的可用骰子仍可支付卡牌');
     ent.BattleDiceBll.unlockDice(0);
     assert.equal(ent.BattleCardBll.canPlay(0), true);
+
+    player.handCards = [20001];
+    player.dice = [1];
+    player.diceUsed = [];
+    ent.BattleDiceBll.lockDice(0);
+    assert.equal(ent.BattleCardBll.canPlay(0), true);
+    await ent.BattleCardBll.play(0);
+    assert.deepEqual(player.diceLocked, [], '选中的骰子支付后取消选择');
+    assert.deepEqual(player.diceUsed, [0]);
 
     player.handCards = [20001];
     player.drawPile = [20002];
@@ -140,8 +194,9 @@ async function run() {
     assert.deepEqual(player.handCards, [20001, 20002]);
     player.handCards = [20001, 20001, 20001, 20001, 20001];
     player.drawPile = [20002];
-    assert.equal(await ent.BattleCardBll.draw(), false);
-    assert.equal(player.energy, 5);
+    assert.equal(await ent.BattleCardBll.draw(), false, '手牌满五张不可抽牌');
+    assert.equal(player.energy, 5, '禁止抽牌时不扣能量');
+    assert.deepEqual(player.drawPile, [20002]);
     player.handCards = [];
     player.drawPile = [];
     player.discardPile = [20002];
@@ -156,9 +211,24 @@ async function run() {
     player.drawPile = [20001, 20001, 20001, 20001, 20001];
     await ent.BattleBll.endTurn();
     assert.equal(ent.BattleModel.turn, 2);
-    assert.equal(player.energy, 6);
+    assert.equal(player.energy, 3);
     assert.equal(player.handCards.length, 5);
     assert.deepEqual(player.diceUsed, []);
+
+    ent = await ready();
+    player = ent.BattlePlayerModel;
+    player.energy = 2;
+    player.diceUsed = [1];
+    const lastFace = player.dice[1];
+    let endSnapshot = null;
+    ent.onRefresh = () => {
+        if (ent.BattleModel.phase === BattlePhase.EnemyStart) {
+            endSnapshot = { energy: player.energy, used: [...player.diceUsed], face: player.dice[1] };
+        }
+    };
+    await ent.BattleBll.endTurn();
+    assert.deepEqual(endSnapshot, { energy: 0, used: [], face: lastFace }, '回合末恢复状态且不重投骰面');
+    assert.equal(player.energy, 3, '新回合恢复基础能量');
 
     ent = await ready();
     player = ent.BattlePlayerModel;
@@ -234,7 +304,7 @@ async function run() {
     ent.BattleEnemyModel.hp = 2;
     await ent.BattleCardBll.play(0);
     assert.equal(ent.BattleModel.phase, BattlePhase.Victory);
-    assert.equal(player.energy, 6);
+    assert.equal(player.energy, 3);
     assert.equal(player.drawPile.length, 1);
     assert.equal(player.resolvingCards.length, 0);
     await ent.BattleBll.endTurn();
@@ -384,7 +454,13 @@ async function run() {
         const node = prefab.find(item => item.__type__ === 'cc.Node' && item._name === name);
         assert.ok(node._components.some(ref => prefab[ref.__id__].__type__ === 'cc.Button'), name);
     }
-    console.log('通过：30 张真实卡牌及全部选择分支、回合循环、骰子匹配/重投、补牌、伤害/Buff、表达式、持续/延迟触发、生命周期、选择取消、胜负中断及 Prefab 节点合约。');
+    const dicePrefab = JSON.parse(fs.readFileSync(path.join(root, 'assets/bundle/gui/dice/prefab/nodeDice.prefab'), 'utf8'));
+    const usedMask = dicePrefab.find(item => item.__type__ === 'cc.Node' && item._name === 'usedMask');
+    const maskButton = usedMask._components.map(ref => dicePrefab[ref.__id__])
+        .find(item => item.__type__ === 'cc.Button');
+    assert.ok(maskButton, '失活遮罩需要可点击按钮');
+    assert.equal(dicePrefab[maskButton.clickEvents[0].__id__].handler, 'onUsedMaskClick');
+    console.log('通过：30 张真实卡牌及全部选择分支、回合循环、3能量起手、单骰重投/失活选中激活、满手禁抽、伤害/Buff、生命周期、胜负中断及 Prefab 按钮合约。');
     if (process.argv.includes('--typecheck')) {
         const file = ts.readConfigFile(path.join(root, 'tsconfig.json'), ts.sys.readFile);
         file.config.compilerOptions.types = ['./temp/declarations/cc', './temp/declarations/cc.env',

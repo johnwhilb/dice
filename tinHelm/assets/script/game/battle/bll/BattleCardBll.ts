@@ -47,7 +47,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
             return null;
         }
         const availableIndexes = player.dice.map((_value, diceIndex) => diceIndex)
-            .filter(diceIndex => !player.diceLocked.includes(diceIndex) && !player.diceUsed.includes(diceIndex))
+            .filter(diceIndex => !player.diceUsed.includes(diceIndex))
             .sort((left, right) => player.dice[right] - player.dice[left] || left - right);
         const diceNeed = card.DiceNeed.map(Number);
         return this.matchDiceIndexes(diceNeed, availableIndexes, [], 0);
@@ -96,6 +96,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
         const cardId = player.handCards.splice(index, 1)[0];
         const card = TableCard.getConfigById(cardId)!;
         player.diceUsed.push(...usedDiceIndexes);
+        player.diceLocked = player.diceLocked.filter(index => !usedDiceIndexes.includes(index));
         player.resolvingCards.push(cardId);
         const context = this.ent.BattleValueResolver.context(BattleSide.Player, cardId,
             card.target === 'SELF' ? BattleSide.Player : BattleSide.Enemy);

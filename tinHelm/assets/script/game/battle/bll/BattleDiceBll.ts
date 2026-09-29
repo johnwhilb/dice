@@ -7,13 +7,12 @@ import { BattlePhase } from '../model/BattleModel';
 export class BattleDiceBll extends CCBusiness<Battle> {
     lockDice(diceIndex: number) {
         if (this.ent.BattleModel.busy || this.ent.BattleModel.phase !== BattlePhase.PlayerAction
-            || diceIndex < 0 || diceIndex >= this.ent.BattlePlayerModel.dice.length
-            || this.ent.BattlePlayerModel.diceUsed.includes(diceIndex)) {
+            || diceIndex < 0 || diceIndex >= this.ent.BattlePlayerModel.dice.length) {
             return;
         }
         const diceLocked = this.ent.BattlePlayerModel.diceLocked;
         if (!diceLocked.includes(diceIndex)) {
-            diceLocked.push(diceIndex);
+            this.ent.BattlePlayerModel.diceLocked = [diceIndex];
         }
         this.ent.BattleBll.refresh();
     }
@@ -34,10 +33,21 @@ export class BattleDiceBll extends CCBusiness<Battle> {
         return this.ent.BattlePlayerModel.diceLocked.slice();
     }
 
-    /**
-     * 重掷所有未锁定骰子，并返回当前全部骰子的点数。
-     * 每颗骰子的可用面值来自角色配置 originDice。
-     */
+    /** 从角色配置的六个骰面中，只随机指定的一颗骰子。 */
+    rollOne(diceIndex: number, random: () => number = Math.random) {
+        const player = this.ent.BattlePlayerModel;
+        const role = TableRole.getConfigById(player.playerId);
+        const faces: number[] = role?.originDice?.[diceIndex] ?? [];
+        if (!Number.isInteger(diceIndex) || diceIndex < 0 || diceIndex >= player.dice.length || !faces.length) {
+            return false;
+        }
+        const rawIndex = Math.floor(random() * faces.length);
+        const faceIndex = Math.max(0, Math.min(rawIndex, faces.length - 1));
+        player.dice[diceIndex] = faces[faceIndex];
+        return true;
+    }
+
+    /** 每回合开始重新随机全部骰子，结束回合仅恢复状态而不改变骰面。 */
     resetDice(random: () => number = Math.random): number[] {
         const playerModel = this.ent.BattlePlayerModel;
         const role = TableRole.getConfigById(playerModel.playerId);
@@ -48,24 +58,9 @@ export class BattleDiceBll extends CCBusiness<Battle> {
         }
 
         const currentDice = playerModel.dice;
-        const currentLocked = playerModel.diceLocked;
-        const currentUsed = playerModel.diceUsed;
         const nextDice = new Array<number>(diceFaces.length);
-        const nextLocked = currentLocked.filter(index =>
-            Number.isInteger(index)
-            && index >= 0
-            && index < diceFaces.length
-            && currentDice[index] !== undefined
-        );
-        const nextLockedSet = new Set(nextLocked);
-        const usedSet = new Set(currentUsed);
 
         for (let diceIndex = 0; diceIndex < diceFaces.length; diceIndex++) {
-            if (nextLockedSet.has(diceIndex) || usedSet.has(diceIndex)) {
-                nextDice[diceIndex] = currentDice[diceIndex];
-                continue;
-            }
-
             const faces = diceFaces[diceIndex];
             if (!faces || faces.length === 0) {
                 nextDice[diceIndex] = currentDice[diceIndex] ?? 0;
@@ -77,7 +72,8 @@ export class BattleDiceBll extends CCBusiness<Battle> {
         }
 
         playerModel.dice = nextDice;
-        playerModel.diceLocked = nextLocked;
+        playerModel.diceLocked = [];
+        playerModel.diceUsed = [];
         return nextDice.slice();
     }
 
@@ -103,7 +99,7 @@ export class BattleDiceBll extends CCBusiness<Battle> {
         const indexesByValue = new Map<number, number[]>();
 
         dice.forEach((value, index) => {
-            if (player.diceLocked.includes(index) || player.diceUsed.includes(index)) {
+            if (player.diceUsed.includes(index)) {
                 return;
             }
             const indexes = indexesByValue.get(value) ?? [];

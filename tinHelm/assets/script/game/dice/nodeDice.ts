@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, Sprite, Texture2D } from 'cc';
+import { _decorator, Color, Component, Event, Label, Node, Sprite, Texture2D, UITransform } from 'cc';
 import { diceFace } from './diceFace';
 import { smc } from '../common/SingletonModuleComp';
 const { ccclass } = _decorator;
@@ -24,6 +24,18 @@ export class nodeDice extends Component {
 
     start() {
         this.syncFaces();
+        const usedMask = this.node.getChildByName('usedMask')!;
+        const hint = new Node('activationHint');
+        hint.layer = usedMask.layer;
+        usedMask.addChild(hint);
+        hint.addComponent(UITransform).setContentSize(110, 40);
+        const label = hint.addComponent(Label);
+        label.string = '点选激活';
+        label.fontSize = 22;
+        label.color = Color.WHITE;
+        label.overflow = Label.Overflow.SHRINK;
+        usedMask.on(Node.EventType.TOUCH_START, this.stopUsedMaskTouch, this);
+        usedMask.on(Node.EventType.TOUCH_END, this.stopUsedMaskTouch, this);
         // BattleView 可能已在首帧前发起投掷，不能在 start 中覆盖结果。
         if (!this.rolling) {
             this.stopAtFace(this.rollTargetFace);
@@ -157,6 +169,23 @@ export class nodeDice extends Component {
     }
 
     onBtnClick() {
+        if (smc.battle.BattlePlayerModel.diceUsed.includes(this.index)) {
+            return;
+        }
+        const isLocked = smc.battle.BattlePlayerModel.diceLocked.includes(this.index);
+        if (isLocked) {
+            smc.battle.BattleDiceBll.unlockDice(this.index);
+        } else {
+            smc.battle.BattleDiceBll.lockDice(this.index);
+        }
+    }
+
+    private stopUsedMaskTouch(event: Event) {
+        event.propagationStopped = true;
+    }
+
+    onUsedMaskClick(event: Event) {
+        event.propagationStopped = true;
         const isLocked = smc.battle.BattlePlayerModel.diceLocked.includes(this.index);
         if (isLocked) {
             smc.battle.BattleDiceBll.unlockDice(this.index);

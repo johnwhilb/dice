@@ -75,6 +75,8 @@ function setup(cardId = 20001) {
     const card = { on(name, callback, owner) {
         listeners.set(name, callback.bind(owner));
     }, async fire(name, event) {
+        // 引擎派发给节点时会重写 type，原始输入类型由 getEventCode 保留。
+        event.type = name;
         await listeners.get(name)(event);
     } };
     view.bindCardGesture(card, 0);
@@ -83,6 +85,8 @@ function setup(cardId = 20001) {
 function touch(originalType, target = 'spEnemy', id = 1) {
     return { type: originalType, windowId: 7, getID() {
         return id;
+    }, getEventCode() {
+        return originalType;
     }, getUILocation() {
         return { x: 10, y: 20 };
     }, getLocation() {

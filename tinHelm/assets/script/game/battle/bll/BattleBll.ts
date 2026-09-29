@@ -48,6 +48,9 @@ export class BattleBll extends CCBusiness<Battle> {
             this.setPhase(BattlePhase.PlayerEnd);
             await this.ent.BattleCardBll.endTurn();
             await this.endEffects(BattleSide.Player, runId);
+            this.ent.BattlePlayerModel.energy = 0;
+            this.ent.BattlePlayerModel.diceUsed = [];
+            this.ent.BattlePlayerModel.diceLocked = [];
             if (this.checkResult(runId)) {
                 return;
             }
@@ -108,7 +111,7 @@ export class BattleBll extends CCBusiness<Battle> {
         this.setPhase(BattlePhase.PlayerStart);
         this.ent.BattleModel.turnVariables = {};
         player.turn = this.ent.BattleModel.turn;
-        player.energy = player.maxEnergy;
+        player.energy = Math.min(player.baseEnergy, player.maxEnergy);
         await this.ent.BattleBuffBll.startTurn(BattleSide.Player);
         if (this.checkResult(runId)) {
             return;
@@ -124,26 +127,56 @@ export class BattleBll extends CCBusiness<Battle> {
         player.diceLocked = [];
         player.diceUsed = [];
         this.ent.BattleDiceBll.resetDice();
+        this.ent.BattleModel.rollingDiceIndexes = player.dice.map((_value, index) => index);
         this.setPhase(BattlePhase.PlayerRollDice);
     }
 
     reroll() {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
-        const unavailableDice = new Set([...player.diceLocked, ...player.diceUsed]);
-        if (model.busy || model.phase !== BattlePhase.PlayerAction || player.energy <= 0
-            || unavailableDice.size >= player.dice.length || this.isFinished()) {
+        const selected = player.diceLocked[0];
+        if (model.busy || model.phase !== BattlePhase.PlayerAction || player.energy < 2
+            || player.diceLocked.length !== 1 || this.isFinished()) {
             return false;
         }
-        player.energy--;
+        if (player.diceUsed.includes(selected)) {
+            return this.activateUsedDie(selected);
+        }
+        if (!this.ent.BattleDiceBll.rollOne(selected)) {
+            return false;
+        }
+        player.energy -= 2;
+        player.diceLocked = [];
+        model.rollingDiceIndexes = [selected];
         model.message = '';
-        this.ent.BattleDiceBll.resetDice();
+        this.setPhase(BattlePhase.PlayerRollDice);
+        return true;
+    }
+
+    activateUsedDie(index: number) {
+        const model = this.ent.BattleModel;
+        const player = this.ent.BattlePlayerModel;
+        if (model.busy || model.phase !== BattlePhase.PlayerAction || player.energy < 2
+            || !player.diceUsed.includes(index) || this.isFinished()
+            || !this.ent.BattleDiceBll.rollOne(index)) {
+            if (model.phase === BattlePhase.PlayerAction && player.diceUsed.includes(index) && player.energy < 2) {
+                model.message = '激活失活骰子需要2点能量';
+                this.refresh();
+            }
+            return false;
+        }
+        player.energy -= 2;
+        player.diceLocked = [];
+        player.diceUsed = player.diceUsed.filter(usedIndex => usedIndex !== index);
+        model.rollingDiceIndexes = [index];
+        model.message = '';
         this.setPhase(BattlePhase.PlayerRollDice);
         return true;
     }
 
     finishRoll() {
         if (this.ent.BattleModel.phase === BattlePhase.PlayerRollDice && !this.isFinished()) {
+            this.ent.BattleModel.rollingDiceIndexes = [];
             this.setPhase(BattlePhase.PlayerAction);
         }
     }

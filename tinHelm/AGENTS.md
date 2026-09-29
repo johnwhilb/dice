@@ -55,4 +55,4 @@ $tinhelm-table-config  给 XXX 表新增XXX字段
 - dice\策划\游戏流程\mermaid-code1.txt
 
 ## 战斗流程 
-- dice\策划\战斗流程\battle.txt
+- dice\策划\战斗流程
