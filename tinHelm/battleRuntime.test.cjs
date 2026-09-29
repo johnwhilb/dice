@@ -100,52 +100,65 @@ async function run() {
     let player = ent.BattlePlayerModel;
     assert.equal(player.handCards.length, 5);
     assert.equal(player.drawPile.length, 5);
-    assert.equal(player.energy, 3);
-    assert.equal(player.rerolls, 2);
+    assert.equal(player.energy, 6);
     const locked = player.dice[0];
     ent.BattleDiceBll.lockDice(0);
     assert.equal(ent.BattleBll.reroll(), true);
+    assert.equal(player.energy, 5);
     assert.equal(player.dice[0], locked);
-    assert.equal(ent.BattleBll.reroll(), false);
     ent.BattleBll.finishRoll();
     assert.equal(ent.BattleBll.reroll(), true);
+    assert.equal(player.energy, 4);
     ent.BattleBll.finishRoll();
-    assert.equal(ent.BattleBll.reroll(), false);
     player.handCards = [20007];
     player.dice = [6, 2, 1, 4, 5];
     assert.equal(ent.BattleCardBll.canPlay(0), false);
     player.dice[4] = 6;
+    ent.BattleDiceBll.unlockDice(0);
     assert.equal(ent.BattleCardBll.canPlay(0), true);
 
     player.handCards = [20001];
     player.drawPile = [20002];
     player.discardPile = [];
     player.dice = [1];
+    player.diceLocked = [];
+    player.diceUsed = [];
+    player.energy = 6;
     ent.BattleEnemyModel.hp = 100;
     await ent.BattleCardBll.play(0);
     assert.equal(ent.BattleEnemyModel.hp, 94);
-    assert.equal(player.energy, 2);
-    assert.deepEqual(player.handCards, [20002]);
+    assert.equal(player.energy, 6);
+    assert.deepEqual(player.handCards, []);
+    assert.deepEqual(player.drawPile, [20002]);
     assert.deepEqual(player.discardPile, [20001]);
     assert.deepEqual(player.dice, [1]);
+    assert.deepEqual(player.diceUsed, [0]);
     player.handCards = [20001];
-    player.energy = 0;
+    assert.equal(ent.BattleCardBll.canPlay(0), false);
+    assert.equal(await ent.BattleCardBll.draw(), true);
+    assert.equal(player.energy, 5);
+    assert.deepEqual(player.handCards, [20001, 20002]);
+    player.handCards = [20001, 20001, 20001, 20001, 20001];
     player.drawPile = [20002];
-    await ent.BattleCardBll.play(0);
-    assert.equal(ent.BattleEnemyModel.hp, 88);
-    assert.equal(player.drawPile.length, 1);
-    assert.equal(player.handCards.length, 0);
-    player.handCards = [20001];
-    player.energy = 3;
+    assert.equal(await ent.BattleCardBll.draw(), false);
+    assert.equal(player.energy, 5);
+    player.handCards = [];
     player.drawPile = [];
+    player.discardPile = [20002];
+    assert.equal(await ent.BattleCardBll.draw(), true);
+    assert.equal(player.energy, 4);
+    assert.deepEqual(player.handCards, [20002]);
+    player.handCards = [20003];
+    player.dice = [2, 3];
+    player.diceUsed = [];
     await ent.BattleCardBll.play(0);
-    assert.equal(player.energy, 3);
-    assert.equal(player.drawPile.length, 0);
+    assert.deepEqual(player.diceUsed, [1]);
+    player.drawPile = [20001, 20001, 20001, 20001, 20001];
     await ent.BattleBll.endTurn();
     assert.equal(ent.BattleModel.turn, 2);
-    assert.equal(player.energy, 3);
-    assert.equal(player.rerolls, 2);
-    assert.equal(player.handCards.length, 3);
+    assert.equal(player.energy, 6);
+    assert.equal(player.handCards.length, 5);
+    assert.deepEqual(player.diceUsed, []);
 
     ent = await ready();
     player = ent.BattlePlayerModel;
@@ -221,7 +234,7 @@ async function run() {
     ent.BattleEnemyModel.hp = 2;
     await ent.BattleCardBll.play(0);
     assert.equal(ent.BattleModel.phase, BattlePhase.Victory);
-    assert.equal(player.energy, 3);
+    assert.equal(player.energy, 6);
     assert.equal(player.drawPile.length, 1);
     assert.equal(player.resolvingCards.length, 0);
     await ent.BattleBll.endTurn();
@@ -358,7 +371,7 @@ async function run() {
     // 验证实际 Prefab 合约，防止节点重命名或缺组件时直到运行才报错。
     const prefab = JSON.parse(fs.readFileSync(path.join(root, 'assets/bundle/gui/battle/BattleView.prefab'), 'utf8'));
     for (const name of ['lbtPlayerEnergy', 'lbtPlayerHP', 'lbtEnemyHP',
-        'lbtCurrentPhase', 'lbtCurrentRound', 'txtThrow', 'txtContinue']) {
+        'lbtCurrentPhase', 'lbtCurrentRound', 'txtThrow', 'txtDraw', 'txtContinue']) {
         const node = prefab.find(item => item.__type__ === 'cc.Node' && item._name === name);
         assert.ok(node, name);
         assert.ok(node._components.some(ref => prefab[ref.__id__].__type__ === 'cc.Label'), name);
@@ -367,7 +380,7 @@ async function run() {
         const node = prefab.find(item => item.__type__ === 'cc.Node' && item._name === name);
         assert.ok(node._components.some(ref => prefab[ref.__id__].__type__ === 'cc.RichText'), name);
     }
-    for (const name of ['btnEnd', 'btnThrow']) {
+    for (const name of ['btnEnd', 'btnThrow', 'btnDraw']) {
         const node = prefab.find(item => item.__type__ === 'cc.Node' && item._name === name);
         assert.ok(node._components.some(ref => prefab[ref.__id__].__type__ === 'cc.Button'), name);
     }

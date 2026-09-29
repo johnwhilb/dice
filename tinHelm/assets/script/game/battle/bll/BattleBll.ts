@@ -38,7 +38,7 @@ export class BattleBll extends CCBusiness<Battle> {
 
     async endTurn() {
         const model = this.ent.BattleModel;
-        if (model.busy || model.shownCardPile || model.phase !== BattlePhase.PlayerAction || this.isFinished()) {
+        if (model.busy || model.phase !== BattlePhase.PlayerAction || this.isFinished()) {
             return;
         }
         model.busy = true;
@@ -122,7 +122,7 @@ export class BattleBll extends CCBusiness<Battle> {
             return;
         }
         player.diceLocked = [];
-        player.rerolls = 2;
+        player.diceUsed = [];
         this.ent.BattleDiceBll.resetDice();
         this.setPhase(BattlePhase.PlayerRollDice);
     }
@@ -130,11 +130,12 @@ export class BattleBll extends CCBusiness<Battle> {
     reroll() {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
-        if (model.busy || model.shownCardPile || model.phase !== BattlePhase.PlayerAction || player.rerolls <= 0
-            || player.diceLocked.length >= player.dice.length || this.isFinished()) {
+        const unavailableDice = new Set([...player.diceLocked, ...player.diceUsed]);
+        if (model.busy || model.phase !== BattlePhase.PlayerAction || player.energy <= 0
+            || unavailableDice.size >= player.dice.length || this.isFinished()) {
             return false;
         }
-        player.rerolls--;
+        player.energy--;
         model.message = '';
         this.ent.BattleDiceBll.resetDice();
         this.setPhase(BattlePhase.PlayerRollDice);

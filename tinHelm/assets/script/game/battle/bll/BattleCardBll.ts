@@ -37,33 +37,55 @@ export class BattleCardBll extends CCBusiness<Battle> {
     }
 
     canPlay(index: number) {
+        return !!this.getPlayableDiceIndexes(index);
+    }
+
+    private getPlayableDiceIndexes(index: number) {
         const player = this.ent.BattlePlayerModel;
         const card = TableCard.getConfigById(player.handCards[index]);
         if (!card || card.flags.unplayable) {
-            return false;
+            return null;
         }
-        const available = [...player.dice];
-        // 相同 Icon 必须由不同骰子满足；匹配后只移除副本，不消耗实际骰子。
-        for (const icon of card.DiceNeed) {
-            const dice = TableDice.getConfigById(Number(icon));
-            if (!dice || dice.role !== player.playerId) {
-                return false;
-            }
-            const matched = available.findIndex(value => dice.diceNum.includes(value));
-            if (matched < 0) {
-                return false;
-            }
-            available.splice(matched, 1);
+        const availableIndexes = player.dice.map((_value, diceIndex) => diceIndex)
+            .filter(diceIndex => !player.diceLocked.includes(diceIndex) && !player.diceUsed.includes(diceIndex))
+            .sort((left, right) => player.dice[right] - player.dice[left] || left - right);
+        const diceNeed = card.DiceNeed.map(Number);
+        return this.matchDiceIndexes(diceNeed, availableIndexes, [], 0);
+    }
+
+    private matchDiceIndexes(diceNeed: number[], availableIndexes: number[], matchedIndexes: number[], needIndex: number): number[] | null {
+        if (needIndex >= diceNeed.length) {
+            return matchedIndexes;
         }
-        return true;
+        const player = this.ent.BattlePlayerModel;
+        const dice = TableDice.getConfigById(diceNeed[needIndex]);
+        if (!dice || dice.role !== player.playerId) {
+            return null;
+        }
+        for (const diceIndex of availableIndexes) {
+            if (!dice.diceNum.includes(player.dice[diceIndex])) {
+                continue;
+            }
+            const result = this.matchDiceIndexes(
+                diceNeed,
+                availableIndexes.filter(index => index !== diceIndex),
+                [...matchedIndexes, diceIndex],
+                needIndex + 1
+            );
+            if (result) {
+                return result;
+            }
+        }
+        return null;
     }
 
     async play(index: number) {
         const model = this.ent.BattleModel;
-        if (model.busy || model.shownCardPile || model.phase !== BattlePhase.PlayerAction || this.ent.BattleBll.isFinished()) {
+        if (model.busy || model.phase !== BattlePhase.PlayerAction || this.ent.BattleBll.isFinished()) {
             return;
         }
-        if (!this.canPlay(index)) {
+        const usedDiceIndexes = this.getPlayableDiceIndexes(index);
+        if (!usedDiceIndexes) {
             model.message = '骰子条件不足，或此牌不可打出';
             this.ent.BattleBll.refresh();
             return;
@@ -73,6 +95,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
         const player = this.ent.BattlePlayerModel;
         const cardId = player.handCards.splice(index, 1)[0];
         const card = TableCard.getConfigById(cardId)!;
+        player.diceUsed.push(...usedDiceIndexes);
         player.resolvingCards.push(cardId);
         const context = this.ent.BattleValueResolver.context(BattleSide.Player, cardId,
             card.target === 'SELF' ? BattleSide.Player : BattleSide.Enemy);
@@ -87,12 +110,6 @@ export class BattleCardBll extends CCBusiness<Battle> {
                 return;
             }
             await this.ent.BattleTriggerBll.fire(`ON_${card.type}_PLAYED`, BattleSide.Player, { cardId, type: card.type });
-            // 自动补牌不洗弃牌堆，也不以能量作为出牌前置条件。
-            if (!this.ent.BattleBll.isFinished(context.runId) && player.energy > 0 && player.drawPile.length > 0
-                && player.handCards.length < player.handLimit) {
-                player.energy--;
-                await this.drawOne(false);
-            }
         } catch (error) {
             if (context.runId === model.runId) {
                 this.ent.BattleBll.fail(error);
@@ -149,13 +166,41 @@ export class BattleCardBll extends CCBusiness<Battle> {
         return true;
     }
 
+    /** 回合开始时补足手牌，保留牌会占用手牌上限 */
     async fillHand() {
         const player = this.ent.BattlePlayerModel;
-        // 抽入即消耗等效果可能让手牌一直不满，限制本次可抽取总次数。
         let remaining = player.drawPile.length + player.discardPile.length;
         while (remaining-- > 0 && player.handCards.length < player.handLimit) {
             if (!await this.drawOne(true)) {
                 break;
+            }
+        }
+    }
+
+    async draw() {
+        const model = this.ent.BattleModel;
+        const player = this.ent.BattlePlayerModel;
+        if (model.busy || model.phase !== BattlePhase.PlayerAction || this.ent.BattleBll.isFinished()
+            || player.energy <= 0 || player.handCards.length >= player.handLimit
+            || (!player.drawPile.length && !player.discardPile.length)) {
+            return false;
+        }
+        const runId = model.runId;
+        model.busy = true;
+        model.message = '';
+        player.energy--;
+        try {
+            return await this.drawOne(true);
+        } catch (error) {
+            if (runId === model.runId) {
+                this.ent.BattleBll.fail(error);
+            }
+            return false;
+        } finally {
+            if (runId === model.runId) {
+                model.busy = false;
+                await this.ent.BattleBll.finishResult();
+                this.ent.BattleBll.refresh();
             }
         }
     }

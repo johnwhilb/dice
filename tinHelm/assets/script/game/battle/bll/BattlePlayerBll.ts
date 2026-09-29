@@ -11,7 +11,7 @@ export class BattlePlayerBll extends CCBusiness<Battle> {
         const role = TableRole.getConfigById(player.playerId);
         player.hp = smc.player.PlayerModel.hp;
         player.maxHp = smc.player.PlayerModel.maxHp;
-        player.maxEnergy = role?.originEnergy ?? 3;
+        player.maxEnergy = role?.originEnergy ?? 6;
         this.ent.BattleCardBll.initialize(smc.player.PlayerModel.handCard);
     }
 }
