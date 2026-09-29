@@ -20,6 +20,7 @@ export class BattleModel extends ecs.Comp {
     /** 不随 reset 清零，隔离关闭后尚未返回的异步结算。 */
     runId: number = 0;
     turn: number = 1;
+    rollingDiceIndexes: number[] = [];
     phase: BattlePhase = BattlePhase.Start;
     enemyId: number = 0;
     busy: boolean = false;
@@ -36,6 +37,7 @@ export class BattleModel extends ecs.Comp {
     reset() {
         this.phase = BattlePhase.Start;
         this.turn = 1;
+        this.rollingDiceIndexes = [];
         this.enemyId = 0;
         this.busy = false;
         this.shownCardPile = null;

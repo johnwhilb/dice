@@ -17,6 +17,7 @@ export class BattlePlayerModel extends ecs.Comp {
     exhaustPile: number[] = [];
     powerPile: number[] = [];
     energy: number = 0;
+    readonly baseEnergy: number = 3;
     maxEnergy: number = 6;
     block: number = 0;
     buffs: BattleBuff[] = [];
