@@ -4,7 +4,6 @@ import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { gui } from 'db://oops-framework/core/gui/Gui';
 import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
 import { Battle } from '../Battle';
-import { BattleEvent } from '../BattleEvent';
 import { BattleCardPile } from '../model/BattleTypes';
 import { TableCard } from '../../common/table/TableCard';
 import { nodeCard } from '../../card/nodeCard';
@@ -21,7 +20,6 @@ export class CardShowDialog extends CCView<Battle> {
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
-        this.on(BattleEvent.refreshBattlePhase, this.refresh, this);
         this.refresh();
         this.getNode('nodeCardList')!.getComponent(ScrollView)!.scrollToTop(0);
     }
@@ -57,6 +55,5 @@ export class CardShowDialog extends CCView<Battle> {
     }
 
     reset() {
-        this.cardIds = [];
     }
 }

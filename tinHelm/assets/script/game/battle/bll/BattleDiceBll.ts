@@ -7,7 +7,8 @@ import { BattlePhase } from '../model/BattleModel';
 export class BattleDiceBll extends CCBusiness<Battle> {
     lockDice(diceIndex: number) {
         if (this.ent.BattleModel.busy || this.ent.BattleModel.phase !== BattlePhase.PlayerAction
-            || diceIndex < 0 || diceIndex >= this.ent.BattlePlayerModel.dice.length) {
+            || diceIndex < 0 || diceIndex >= this.ent.BattlePlayerModel.dice.length
+            || this.ent.BattlePlayerModel.diceUsed.includes(diceIndex)) {
             return;
         }
         const diceLocked = this.ent.BattlePlayerModel.diceLocked;
@@ -48,6 +49,7 @@ export class BattleDiceBll extends CCBusiness<Battle> {
 
         const currentDice = playerModel.dice;
         const currentLocked = playerModel.diceLocked;
+        const currentUsed = playerModel.diceUsed;
         const nextDice = new Array<number>(diceFaces.length);
         const nextLocked = currentLocked.filter(index =>
             Number.isInteger(index)
@@ -56,9 +58,10 @@ export class BattleDiceBll extends CCBusiness<Battle> {
             && currentDice[index] !== undefined
         );
         const nextLockedSet = new Set(nextLocked);
+        const usedSet = new Set(currentUsed);
 
         for (let diceIndex = 0; diceIndex < diceFaces.length; diceIndex++) {
-            if (nextLockedSet.has(diceIndex)) {
+            if (nextLockedSet.has(diceIndex) || usedSet.has(diceIndex)) {
                 nextDice[diceIndex] = currentDice[diceIndex];
                 continue;
             }
@@ -95,34 +98,42 @@ export class BattleDiceBll extends CCBusiness<Battle> {
     }
 
     private findSameValueGroup(requiredCount: number): number[] {
-        const dice = this.ent.BattlePlayerModel.dice;
+        const player = this.ent.BattlePlayerModel;
+        const dice = player.dice;
         const indexesByValue = new Map<number, number[]>();
 
         dice.forEach((value, index) => {
+            if (player.diceLocked.includes(index) || player.diceUsed.includes(index)) {
+                return;
+            }
             const indexes = indexesByValue.get(value) ?? [];
             indexes.push(index);
             indexesByValue.set(value, indexes);
         });
 
-        const candidates = Array.from(indexesByValue.values())
-            .filter(indexes => indexes.length >= requiredCount)
-            .map(indexes => indexes.slice(0, requiredCount));
+        const candidates = Array.from(indexesByValue.entries())
+            .filter(([, indexes]) => indexes.length >= requiredCount)
+            .map(([value, indexes]) => ({ value, indexes: indexes.slice(0, requiredCount) }));
 
         candidates.sort((a, b) => {
-            const indexTotalDifference = this.sumIndexes(a) - this.sumIndexes(b);
+            const valueDifference = b.value - a.value;
+            if (valueDifference !== 0) {
+                return valueDifference;
+            }
+            const indexTotalDifference = this.sumIndexes(a.indexes) - this.sumIndexes(b.indexes);
             if (indexTotalDifference !== 0) {
                 return indexTotalDifference;
             }
 
             for (let index = 0; index < requiredCount; index++) {
-                if (a[index] !== b[index]) {
-                    return a[index] - b[index];
+                if (a.indexes[index] !== b.indexes[index]) {
+                    return a.indexes[index] - b.indexes[index];
                 }
             }
             return 0;
         });
 
-        return candidates[0] ?? [];
+        return candidates[0]?.indexes ?? [];
     }
 
 

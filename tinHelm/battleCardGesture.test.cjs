@@ -81,14 +81,12 @@ function setup(cardId = 20001) {
     return { view, card, played, hits };
 }
 function touch(originalType, target = 'spEnemy', id = 1) {
-    return { windowId: 7, getID() {
+    return { type: originalType, windowId: 7, getID() {
         return id;
     }, getUILocation() {
         return { x: 10, y: 20 };
     }, getLocation() {
         return { x: 800, y: 450, target };
-    }, getEventCode() {
-        return originalType;
     } };
 }
 async function run() {
@@ -126,6 +124,12 @@ async function run() {
     await busy.card.fire(events.TOUCH_START, touch(events.TOUCH_START));
     await busy.card.fire(events.TOUCH_CANCEL, touch(events.TOUCH_END));
     assert.deepEqual(busy.played, []);
+
+    const pile = setup();
+    pile.view.ent.BattleModel.shownCardPile = 'DRAW';
+    await pile.card.fire(events.TOUCH_START, touch(events.TOUCH_START));
+    await pile.card.fire(events.TOUCH_CANCEL, touch(events.TOUCH_END));
+    assert.deepEqual(pile.played, [0], '牌堆记录不能阻止卡牌拖动');
 
     const stale = setup();
     await stale.card.fire(events.TOUCH_START, touch(events.TOUCH_START));

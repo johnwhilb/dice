@@ -59,7 +59,6 @@ export class nodeDice extends Component {
             const faceNode = this.node.children[i];
             const face = faceNode.getComponent(diceFace) || faceNode.addComponent(diceFace);
 
-            face.syncLabelColor();
             const texture = face.getShaderTexture();
             if (texture && this.faceTextures[i] !== texture) {
                 this.faceTextures[i] = texture;

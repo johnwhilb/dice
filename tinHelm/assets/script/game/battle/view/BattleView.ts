@@ -73,30 +73,35 @@ export class BattleView extends CCView<Battle> {
         this.getNode('lbtEnemyBuff')!.getComponent(RichText)!.string = this.ent.BattleBuffBll.describe(BattleSide.Enemy);
         this.getNode('lbtCurrentPhase')!.getComponent(Label)!.string = model.message || phaseNames[model.phase];
         this.getNode('lbtCurrentRound')!.getComponent(Label)!.string = `第 ${model.turn} 回合`;
-        this.getNode('txtThrow')!.getComponent(Label)!.string = `重投 ${player.rerolls}`;
+        this.getNode('txtThrow')!.getComponent(Label)!.string = '重掷 -1';
+        this.getNode('txtDraw')!.getComponent(Label)!.string = '抽牌 -1';
         this.getNode('txtContinue')!.getComponent(Label)!.string = model.phase === BattlePhase.Victory ? '继续前进'
             : model.phase === BattlePhase.Defeat ? '重新开始' : model.closed ? '关闭' : '结束回合';
-        const actionable = !model.busy && !model.shownCardPile && model.phase === BattlePhase.PlayerAction && !this.ent.BattleBll.isFinished();
+        const actionable = !model.busy && model.phase === BattlePhase.PlayerAction && !this.ent.BattleBll.isFinished();
         this.getNode('txtDrawPile')!.getComponent(Label)!.string = `抽牌堆 ${player.drawPile.length}`;
         this.getNode('txtDiscardPile')!.getComponent(Label)!.string = `弃牌堆 ${player.discardPile.length}`;
-        const canInspect = !model.busy && !model.closed && !model.shownCardPile;
+        const canInspect = !model.busy && !model.closed;
         this.getNode('btnDrawPile')!.getComponent(Button)!.interactable = canInspect;
         this.getNode('btnDiscardPile')!.getComponent(Button)!.interactable = canInspect;
-        this.getNode('btnThrow')!.getComponent(Button)!.interactable = actionable && player.rerolls > 0
-            && player.diceLocked.length < player.dice.length;
+        const unavailableDice = new Set([...player.diceLocked, ...player.diceUsed]);
+        this.getNode('btnThrow')!.getComponent(Button)!.interactable = actionable && player.energy > 0
+            && unavailableDice.size < player.dice.length;
+        this.getNode('btnDraw')!.getComponent(Button)!.interactable = actionable && player.energy > 0
+            && player.handCards.length < player.handLimit && (!!player.drawPile.length || !!player.discardPile.length);
         this.getNode('btnEnd')!.getComponent(Button)!.interactable = actionable
-            || (!model.busy && !model.shownCardPile && this.ent.BattleBll.isFinished());
+            || (!model.busy && this.ent.BattleBll.isFinished());
         this.updateCardList();
         this.getNode('diceLayout')!.children.forEach((dice, index) => {
             const scale = this.diceScales[index];
             const factor = player.diceLocked.includes(index) ? 0.88 : 1;
             dice.setScale(scale.x * factor, scale.y * factor, scale.z);
+            dice.getChildByName('usedMask')!.active = player.diceUsed.includes(index);
         });
         this.updateChoice();
         if (model.phase === BattlePhase.PlayerRollDice && !this.rolling && !model.closed) {
             this.rolling = true;
             player.dice.forEach((value, index) => {
-                if (!player.diceLocked.includes(index)) {
+                if (!player.diceLocked.includes(index) && !player.diceUsed.includes(index)) {
                     this.throwDice(index, value);
                 }
             });
@@ -140,7 +145,7 @@ export class BattleView extends CCView<Battle> {
 
     private bindCardGesture(cardNode: Node, index: number) {
         cardNode.on(Node.EventType.TOUCH_START, (event: EventTouch) => {
-            if (this.selectedTouchId !== null || this.ent.BattleModel.busy || this.ent.BattleModel.shownCardPile
+            if (this.selectedTouchId !== null || this.ent.BattleModel.busy
                 || this.ent.BattleModel.phase !== BattlePhase.PlayerAction) {
                 return;
             }
@@ -202,9 +207,9 @@ export class BattleView extends CCView<Battle> {
         if (event.getID() !== this.selectedTouchId) {
             return;
         }
-        // Cocos 3.8 会把卡牌范围外的松手改成 TOUCH_CANCEL；getEventCode 保留原始类型。
+        // Cocos 3.8 会把卡牌范围外的松手派发给 TOUCH_CANCEL；type 保留原始类型。
         // 系统取消、节点销毁产生的真正 CANCEL 只清理手势，不能出牌。
-        if (event.getEventCode() === Node.EventType.TOUCH_END) {
+        if (event.type === Node.EventType.TOUCH_END) {
             await this.onCardTouchEnd(event);
         } else {
             this.cancelCardGesture();
@@ -287,6 +292,10 @@ export class BattleView extends CCView<Battle> {
 
     btnThrow() {
         this.ent.BattleBll.reroll();
+    }
+
+    async btnDraw() {
+        await this.ent.BattleCardBll.draw();
     }
 
     async btnDrawPile() {

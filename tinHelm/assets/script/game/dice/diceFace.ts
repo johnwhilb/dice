@@ -1,23 +1,10 @@
-import { _decorator, Color, Component, Label, Node, Sprite, sys, Texture2D, UITransform } from 'cc';
+import { _decorator, Component, Label, Node, Sprite, sys, Texture2D, UITransform } from 'cc';
 const { ccclass } = _decorator;
 
 @ccclass('diceFace')
 export class diceFace extends Component {
     private renderedTexture: Texture2D | null = null;
     private renderedSignature = '';
-
-    public syncLabelColor(): void {
-        const label = this.getLabel();
-        const icon = this.getIcon();
-
-        if (!label || !icon) {
-            return;
-        }
-
-        // 不再读取 Texture2D 像素。
-        // 直接使用 Sprite 的颜色，Web / 微信小游戏都能用。
-        label.color.set(icon.color);
-    }
 
     public getShaderTexture(): Texture2D | null {
         const icon = this.getIcon();

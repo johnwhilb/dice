@@ -71,34 +71,18 @@ export class Battle extends CCEntity {
         }
     }
 
-    async openCardShowDialog(pile: BattleCardPile) {
+    openCardShowDialog(pile: BattleCardPile) {
         const model = this.BattleModel;
-        if (model.busy || model.closed || model.shownCardPile) {
+        if (model.busy || model.closed || this.has(CardShowDialog)) {
             return;
         }
-        const runId = model.runId;
         model.shownCardPile = pile;
-        this.BattleBll.refresh();
-        try {
-            const node = await this.addUi(CardShowDialog);
-            if (!node || model.closed || model.runId !== runId || !model.shownCardPile) {
-                this.closeCardShowDialog();
-            }
-        } catch (error) {
-            model.shownCardPile = null;
-            model.message = '牌堆界面加载失败，请重试';
-            this.BattleBll.refresh();
-            console.error('牌堆界面加载失败', error);
-        }
+        return this.addUi(CardShowDialog);
     }
 
     closeCardShowDialog() {
-        this.BattleModel.shownCardPile = null;
         if (this.has(CardShowDialog)) {
             this.removeUi(CardShowDialog);
-        }
-        if (this.has(BattleView)) {
-            this.BattleBll.refresh();
         }
     }
 
