@@ -20,6 +20,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 </style>
 </head>
 <body>
+<a href="http://127.0.0.1:3211/" style="position:fixed;right:12px;bottom:36px;z-index:5;background:#274c49;color:#b7f7e6;padding:9px 13px;border:1px solid #56bda9;border-radius:8px;text-decoration:none">敌人行为树编辑器 →</a>
 <div class="app">
 <header class="top"><div class="brand"><div class="logo">◇</div><div><strong>TinHelm</strong><p>角色卡牌配置 · Excel 实时读取</p></div></div><div class="toolbar"><button class="btn" id="guideBtn">使用说明</button><button class="btn" id="importBtn">导入 JSON</button><button class="btn" id="csvBtn">导出 CSV</button><button class="btn" id="exportBtn">导出全部 JSON</button><button class="btn primary" id="saveExcelBtn">保存到 Excel</button><button class="btn primary" id="addCardBtn">＋ 新建卡牌</button></div></header>
 <div class="layout"><aside class="sidebar"><div class="side-section"><div class="side-title"><h3>卡牌库</h3><span id="countTag" class="badgel green">0 张</span></div><div style="margin-top:13px"><label class="helper">选择角色</label><select id="roleSelect" class="select"></select></div><div id="starterDeckSummary" class="notice" style="margin-top:13px"></div><div style="margin-top:13px"><input id="cardSearch" class="search" placeholder="⌕ 搜索名称或 ID…" /></div><div class="status-line"><span>Excel 配置源</span><span id="saveStatus"><span class="dot"></span>已就绪</span></div></div><div class="card-list" id="cardList"></div><div class="side-section" style="border-top:1px solid #29394c"><div class="side-title"><h3>配置表连接</h3></div><p class="helper" id="connectionNotice">每次打开重新读取 Role、Card、Dice 表。</p><button class="btn block" id="loadSamplesBtn">重新读取 Excel</button></div></aside>
@@ -191,7 +192,7 @@ async function reloadTables() {
         document.getElementById('saveStatus').textContent = '已读取最新 Excel';
         document.getElementById('connectionNotice').textContent = '每次打开重新读取三个 Excel 表。修改后点击保存到 Excel。';
     } catch (error) {
-        document.getElementById('connectionNotice').textContent = '读取失败：请在 tinHelm 目录运行 node cardEffectEditor/cardEffectEditorServer.cjs，再打开 http://127.0.0.1:3210。' + error.message;
+        document.getElementById('connectionNotice').textContent = '读取失败：请在 dice 目录运行 node 策划/cardEffectEditor/cardEffectEditorServer.cjs，再打开 http://127.0.0.1:3210。' + error.message;
         document.getElementById('saveStatus').textContent = '读取失败';
     }
 }

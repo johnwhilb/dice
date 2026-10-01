@@ -621,9 +621,9 @@ async function convert(
 }
 
 export async function run() {
-    const inputExcelPath = path.join(
+    const inputExcelPath = path.resolve(
         __dirname,
-        config.PathExcel.replace("project://", "../../../") + "/"
+        config.PathExcel.replace("project://", "../../../")
     );
 
     const outJsonPathClient = path.join(

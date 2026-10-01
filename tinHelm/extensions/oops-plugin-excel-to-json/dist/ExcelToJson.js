@@ -395,7 +395,7 @@ async function convert(src, dst, identity, isClient) {
     }
 }
 async function run() {
-    const inputExcelPath = path_1.default.join(__dirname, main_1.config.PathExcel.replace("project://", "../../../") + "/");
+    const inputExcelPath = path_1.default.resolve(__dirname, main_1.config.PathExcel.replace("project://", "../../../"));
     const outJsonPathClient = path_1.default.join(__dirname, main_1.config.PathJsonClient.replace("project://", "../../../") + "/");
     let outJsonPathServer = null;
     if (main_1.config.PathJsonServer != null &&
