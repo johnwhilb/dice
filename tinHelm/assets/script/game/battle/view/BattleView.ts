@@ -65,12 +65,12 @@ export class BattleView extends CCView<Battle> {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
         const phaseNames = ['战斗准备', '玩家回合开始', '投掷骰子', '玩家行动', '玩家回合结束',
-            '敌人回合开始', '敌人攻击', '敌人回合结束', '结果结算', '战斗胜利', '战斗失败'];
+            '敌人回合开始', '敌人行动', '敌人回合结束', '结果结算', '战斗胜利', '战斗失败'];
         this.updatePlayerStatus();
         this.updateEnemyStatus();
         this.getNode('lbtPlayerEnergy')!.getComponent(Label)!.string = `${player.energy}/${player.maxEnergy}`;
         this.getNode('lbtPlayerBuff')!.getComponent(RichText)!.string = this.ent.BattleBuffBll.describe(BattleSide.Player);
-        this.getNode('lbtEnemyBuff')!.getComponent(RichText)!.string = this.ent.BattleBuffBll.describe(BattleSide.Enemy);
+        this.getNode('lbtEnemyBuff')!.getComponent(RichText)!.string = `${this.ent.BattleBuffBll.describe(BattleSide.Enemy)}<br/>意图：${this.ent.BattleEnemyBll.intent()}`;
         this.getNode('lbtCurrentPhase')!.getComponent(Label)!.string = model.message || phaseNames[model.phase];
         this.getNode('lbtCurrentRound')!.getComponent(Label)!.string = `第 ${model.turn} 回合`;
         const selectedDiceIndex = player.diceLocked[0];

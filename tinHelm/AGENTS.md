@@ -41,7 +41,9 @@
 - 允许新建文件，但是新建文件夹必须请求项目负责人同意。
 
 ## 项目结构
-- tinHelm\excel  表格配置文件 
+- dice\策划\excel  表格配置文件
+- dice\策划\cardEffectEditor  卡牌效果编辑器
+- dice\策划\enemyBehaviorEditor  敌人行为树编辑器
 - tinHelm\extensions\oops-plugin-excel-to-json  表格配置插件
 - tinHelm\assets\script\game  游戏逻辑代码  
 - tinHelm\assets\script\game\mainManue  主菜单逻辑代码，可以作为编码规范参考

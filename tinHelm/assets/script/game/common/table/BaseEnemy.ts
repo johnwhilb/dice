@@ -10,7 +10,7 @@ interface EnemyConfigData {
     title: string;
     info: string;
     originHp: number;
-    nomalAttack: number;
+    behavior: Record<string, any>;
 }
 
 /**
@@ -178,8 +178,8 @@ export class BaseEnemy {
         return this.data.originHp;
     }
 
-    /** 普通攻击伤害 */
-    get nomalAttack(): number {
-        return this.data.nomalAttack;
+    /** 敌人行为树 */
+    get behavior(): Record<string, any> {
+        return this.data.behavior;
     }
 }

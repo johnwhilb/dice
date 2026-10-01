@@ -3,6 +3,65 @@ export enum BattleSide {
     Enemy = 'ENEMY'
 }
 
+export enum EnemyBehaviorNodeType {
+    Selector = 'SELECTOR',
+    Random = 'RANDOM',
+    Sequence = 'SEQUENCE',
+    Condition = 'CONDITION',
+    Action = 'ACTION',
+    Cycle = 'CYCLE'
+}
+
+export enum EnemyActionType {
+    Attack = 'ATTACK',
+    Defend = 'DEFEND',
+    Buff = 'BUFF',
+    Debuff = 'DEBUFF',
+    Heal = 'HEAL',
+    Wait = 'WAIT',
+    LoseHp = 'LOSE_HP',
+    RemoveBlock = 'REMOVE_BLOCK',
+    Cleanse = 'CLEANSE',
+    Discard = 'DISCARD',
+    Exhaust = 'EXHAUST',
+    AddCard = 'ADD_CARD',
+    Effects = 'EFFECTS'
+}
+
+export enum EnemyConditionField {
+    Turn = 'TURN',
+    SelfHpPercent = 'SELF_HP_PERCENT',
+    PlayerHpPercent = 'PLAYER_HP_PERCENT',
+    SelfBlock = 'SELF_BLOCK',
+    PlayerBlock = 'PLAYER_BLOCK',
+    TurnMod = 'TURN_MOD',
+    RepeatCount = 'REPEAT_COUNT',
+    LastAction = 'LAST_ACTION'
+}
+
+export interface EnemyBehaviorNode {
+    type: EnemyBehaviorNodeType;
+    children?: EnemyBehaviorNode[];
+    field?: EnemyConditionField;
+    operator?: string;
+    value?: number;
+    action?: EnemyActionType;
+    moveName?: string;
+    amount?: number;
+    hits?: number;
+    status?: string;
+    stacks?: number;
+    weight?: number;
+    modulus?: number;
+    actionValue?: EnemyActionType;
+    target?: BattleSide;
+    cardId?: number;
+    pile?: string;
+    count?: number;
+    effects?: BattleEffect[];
+    editorId?: string;
+}
+
 export enum BattleCardPile {
     Draw = 'DRAW',
     Discard = 'DISCARD'

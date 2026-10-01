@@ -10,7 +10,7 @@ export class BattleEffectBll extends CCBusiness<Battle> {
         'MODIFY_STAT', 'SET_STAT', 'DOUBLE_STAT', 'SET_INTANGIBLE', 'IF', 'SEQUENCE', 'REPEAT',
         'REGISTER_TRIGGER', 'SCHEDULE', 'CHOOSE_ONE', 'RANDOM_CHOICE', 'DISCARD', 'EXHAUST',
         'DISCARD_HAND', 'EXHAUST_HAND', 'EXHAUST_THIS_CARD', 'GAIN_GOLD', 'LOSE_GOLD',
-        'SET_VARIABLE', 'MODIFY_VARIABLE'
+        'SET_VARIABLE', 'MODIFY_VARIABLE', 'ADD_CARD'
     ];
 
     validate(effects: BattleEffect[], depth = 0) {
@@ -216,6 +216,9 @@ export class BattleEffectBll extends CCBusiness<Battle> {
             case 'EXHAUST_HAND':
                 await this.ent.BattleCardBll.discard(params.count === 'ALL' || effect.type.endsWith('_HAND') ? Infinity : number('count', 1),
                     effect.type.endsWith('_HAND') ? 'ALL' : text('mode', 'SELECT'), effect.type.startsWith('EXHAUST'), this.record(params.filter));
+                break;
+            case 'ADD_CARD':
+                this.ent.BattleCardBll.addCard(number('cardId'), number('count', 1), text('pile', 'DISCARD'));
                 break;
             case 'EXHAUST_THIS_CARD':
                 context.variables.exhaustThisCard = 1;

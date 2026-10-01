@@ -6,6 +6,19 @@ import { BattlePhase } from '../model/BattleModel';
 import { BattleCardPile, BattleContext, BattleEffect, BattleSide } from '../model/BattleTypes';
 
 export class BattleCardBll extends CCBusiness<Battle> {
+    addCard(cardId: number, count: number, pile: string) {
+        const card = TableCard.getConfigById(cardId);
+        if (!card) {
+            throw new Error(`敌人生成的卡牌不存在：${cardId}`);
+        }
+        const player = this.ent.BattlePlayerModel;
+        const destination = pile === 'DRAW' ? player.drawPile : pile === 'HAND' ? player.handCards : player.discardPile;
+        for (let index = 0; index < Math.min(100, count); index++) {
+            destination.push(cardId);
+        }
+        this.ent.BattleBll.refresh();
+    }
+
     getPileCards(pile: BattleCardPile) {
         const player = this.ent.BattlePlayerModel;
         // 展示副本，排序不改变抽牌顺序；重复的卡牌仍逐张显示。

@@ -64,7 +64,7 @@ export class BattleBll extends CCBusiness<Battle> {
                 return;
             }
             this.setPhase(BattlePhase.EnemyAction);
-            await this.ent.BattleEnemyBll.attack();
+            await this.ent.BattleEnemyBll.act();
             if (this.checkResult(runId)) {
                 return;
             }
@@ -126,6 +126,7 @@ export class BattleBll extends CCBusiness<Battle> {
         }
         player.diceLocked = [];
         player.diceUsed = [];
+        this.ent.BattleEnemyBll.planAction();
         this.ent.BattleDiceBll.resetDice();
         this.ent.BattleModel.rollingDiceIndexes = player.dice.map((_value, index) => index);
         this.setPhase(BattlePhase.PlayerRollDice);

@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
-const Excel = require('../extensions/oops-plugin-excel-to-json/node_modules/exceljs');
+const Excel = require('../../tinHelm/extensions/oops-plugin-excel-to-json/node_modules/exceljs');
 
 const root = path.resolve(__dirname, '..');
 const tables = ['1_Role', '2_Card', '3_Dice'];

@@ -68,7 +68,7 @@ async function run() {
     assert.notStrictEqual(saved.revision, data.revision);
     await api.saveCards({revision:saved.revision, cards:[]});
     assert.strictEqual((await api.readTables()).cards.length, 0);
-    console.log('通过：真实 XLSX 解析、角色骰子校验、5 个上限、等级/目标校验、并发冲突、增删改回读、空表保存、备份。');
+    console.log('通过：卡牌真实 XLSX 回读、角色骰子校验、并发冲突、备份。');
 }
 run().catch(error => {
     console.error(error);

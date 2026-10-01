@@ -1,6 +1,6 @@
 {
   "__version__": "1.0.0",
-  "PathExcel": "project://excel",
+  "PathExcel": "../../../../策划/excel",
   "PathJsonClient": "project://assets/bundle/config/game",
   "PathTsClient": "project://assets/script/game/common/table"
 }
