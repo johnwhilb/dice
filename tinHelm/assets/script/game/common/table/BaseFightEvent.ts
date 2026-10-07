@@ -6,7 +6,6 @@ import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
  * 自动生成，请勿手动修改。
  */
 interface FightEventConfigData {
-    realmId: number;
     enemyId: number;
     name: string;
     des: string;
@@ -155,11 +154,6 @@ export class BaseFightEvent {
     ) {
         this.id = id;
         this.data = data;
-    }
-
-    /** 世界id */
-    get realmId(): number {
-        return this.data.realmId;
     }
 
     /** 怪物id */

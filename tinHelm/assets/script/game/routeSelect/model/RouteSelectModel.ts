@@ -11,6 +11,7 @@ export enum TravelRouteType {
 export interface RealmLevelState {
     realmId: number;
     eventIds: number[];
+    eventDetailIds?: number[];
     currentEventIndex: number;
     completed: boolean;
     visited: boolean;

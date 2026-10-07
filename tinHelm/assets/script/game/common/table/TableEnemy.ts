@@ -1,5 +1,5 @@
 import { BaseEnemy } from "./BaseEnemy";
-import { EnemyBehaviorNode, EnemyBehaviorNodeType } from '../../battle/model/BattleTypes';
+import { EnemyBehaviorNode, EnemyBehaviorNodeType, EnemyMechanics } from '../../battle/model/BattleTypes';
 
 /**
  * Enemy 配置扩展类。
@@ -8,6 +8,16 @@ import { EnemyBehaviorNode, EnemyBehaviorNodeType } from '../../battle/model/Bat
  * 可以在这里安全编写项目自己的方法。
  */
 export class TableEnemy extends BaseEnemy {
+    getMechanics() {
+        const value: unknown = this.mechanics;
+        const config: Partial<EnemyMechanics> = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+        return {
+            initialStatuses: Array.isArray(config.initialStatuses) ? config.initialStatuses : [],
+            phases: Array.isArray(config.phases) ? config.phases : [],
+            triggers: Array.isArray(config.triggers) ? config.triggers : []
+        };
+    }
+
     getBehavior(): EnemyBehaviorNode | undefined {
         const value: unknown = this.behavior;
         if (this.isBehaviorNode(value)) {

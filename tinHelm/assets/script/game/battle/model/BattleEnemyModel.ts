@@ -14,6 +14,12 @@ export class BattleEnemyModel extends ecs.Comp {
     lastAction: string = '';
     lastMoveId: string = '';
     repeatCount: number = 0;
+    hitsTaken: number = 0;
+    phaseName: string = '';
+    phaseStartTurn: number = 1;
+    phaseBehavior: EnemyBehaviorNode | null = null;
+    enteredPhases: string[] = [];
+    changingPhase: boolean = false;
 
 
     reset() {
@@ -26,5 +32,11 @@ export class BattleEnemyModel extends ecs.Comp {
         this.lastAction = '';
         this.lastMoveId = '';
         this.repeatCount = 0;
+        this.hitsTaken = 0;
+        this.phaseName = '';
+        this.phaseStartTurn = 1;
+        this.phaseBehavior = null;
+        this.enteredPhases = [];
+        this.changingPhase = false;
     }
 }

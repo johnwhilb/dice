@@ -37,7 +37,7 @@ export class ResPath {
     static getSpriteEnemyBody(id: number): string {
         const localId = this.requireLocalId(id, TableEnemy.getLocalId(id), TableEnemy.TableName);
         const resourceId = 5000 + localId;
-        return `texture/enemyBody/enemyBody${resourceId}/spriteFrame`;
+        return `texture/enemyBody/enemyBody${5001}/spriteFrame`;
     }
 
     /**

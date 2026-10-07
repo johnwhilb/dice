@@ -20,6 +20,8 @@ import { nodeCard } from '../../card/nodeCard';
 import { BattleEvent } from '../BattleEvent';
 import { GraphView } from '../../ui/GraphView';
 import { BattleCardPile, BattleChoice, BattleSide } from '../model/BattleTypes';
+import { TableItem } from '../../common/table/TableItem';
+import { PlayerEvent } from '../../player/PlayerEvent';
 
 const { ccclass, property } = _decorator;
 
@@ -32,20 +34,34 @@ export class BattleView extends CCView<Battle> {
     prefabDice: Prefab = null!;
     @property({ type: Prefab })
     prefabCard: Prefab = null!;
+    @property({ type: Prefab })
+    prefabItem: Prefab = null!;
 
     private readonly cardGestureJudgeThreshold = 8;
     private readonly cardTouchStartPos = new Vec3();
     private selectedCardIndex = -1;
     private selectedTouchId: number | null = null;
     private handSignature = '';
-    private rolling = false;
     private diceScales: Vec3[] = [];
     private choiceNode: Node | null = null;
     private displayedChoice: BattleChoice | null = null;
+    private selectedItemId = 0;
+    private itemSignature = '';
+    private itemsVisible = false;
 
+    // 等待战斗数据初始化完成后，再加载双方立绘和刷新界面。
     async start() {
         this.nodeTreeInfoLite();
         this.setButton();
+        const itemLayout = this.getNode('itemLayout')!;
+        this.itemsVisible = false;
+        for (const child of [...itemLayout.children]) {
+            child.removeFromParent();
+            child.destroy();
+        }
+        itemLayout.active = false;
+        // 单独绑定CLICK，避免框架同时绑定TOUCH_END造成展开后立即收起。
+        this.getNode('BtnItem')!.on(Button.EventType.CLICK, this.toggleItems, this);
         for (const name of ['lbtPlayerBuff', 'lbtEnemyBuff']) {
             const text = this.getNode(name)!.getComponent(RichText)!;
             text.fontSize = 20;
@@ -53,6 +69,7 @@ export class BattleView extends CCView<Battle> {
             text.maxWidth = 260;
         }
         this.on(BattleEvent.refreshBattlePhase, this.refresh, this);
+        this.on(PlayerEvent.statsChanged, this.refresh, this);
         this.startBattleAnimation();
         this.initDiceView();
         await this.ent.BattleBll.start();
@@ -64,7 +81,7 @@ export class BattleView extends CCView<Battle> {
     refresh() {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
-        const phaseNames = ['战斗准备', '玩家回合开始', '投掷骰子', '玩家行动', '玩家回合结束',
+        const phaseNames = ['战斗准备', '玩家回合开始', '玩家行动', '玩家回合结束',
             '敌人回合开始', '敌人行动', '敌人回合结束', '结果结算', '战斗胜利', '战斗失败'];
         this.updatePlayerStatus();
         this.updateEnemyStatus();
@@ -93,22 +110,84 @@ export class BattleView extends CCView<Battle> {
         this.getNode('btnEnd')!.getComponent(Button)!.interactable = actionable
             || (!model.busy && this.ent.BattleBll.isFinished());
         this.updateCardList();
+        this.updateItemList();
+        const diceConfigs = TableDice.getAllConfig().filter(dice => dice.role === player.playerId);
         this.getNode('diceLayout')!.children.forEach((dice, index) => {
+            if (dice.getComponent(nodeDice)!.setValue(player.dice[index] ?? 0)) {
+                const config = diceConfigs.find(config => config.diceNum.includes(player.dice[index]));
+                const icon = dice.getChildByName('spIcon')!.getComponent(Sprite)!;
+                icon.node.active = !!config;
+                if (config) {
+                    this.setSprite(icon, ResPath.getSpriteDice(config.id));
+                }
+            }
             const scale = this.diceScales[index];
             const factor = player.diceLocked.includes(index) ? 0.9 : 1;
             dice.setScale(scale.x * factor, scale.y * factor, scale.z);
             dice.getChildByName('usedMask')!.active = player.diceUsed.includes(index);
         });
         this.updateChoice();
-        if (model.phase === BattlePhase.PlayerRollDice && !this.rolling && !model.closed) {
-            this.rolling = true;
-            model.rollingDiceIndexes.forEach(index => {
-                this.throwDice(index, player.dice[index]);
+
+    }
+
+    private toggleItems() {
+        this.cancelCardGesture();
+        this.itemsVisible = !this.itemsVisible;
+        this.getNode('itemLayout')!.active = this.itemsVisible;
+    }
+
+    private updateItemList() {
+        const layout = this.getNode('itemLayout')!;
+        const inventory = smc.player.PlayerModel.items;
+        const ids: number[] = [];
+        for (const [key, count] of Object.entries(inventory)) {
+            const id = Number(key);
+            if (!TableItem.getConfigById(id) || !Number.isSafeInteger(count) || count <= 0) {
+                continue;
+            }
+            for (let index = 0; index < count; index++) {
+                ids.push(id);
+            }
+        }
+        this.getNode('txtItem')!.getComponent(Label)!.string =
+            `道具${smc.player.PlayerBll.getItemCount()}/${smc.player.PlayerBll.getItemLimit()}`;
+        layout.active = this.itemsVisible && !this.ent.BattleModel.closed;
+        this.getNode('BtnItem')!.getComponent(Button)!.interactable = !this.ent.BattleModel.closed;
+        const signature = ids.join(',');
+        if (signature === this.itemSignature && layout.children.length === ids.length) {
+            layout.children.forEach((node, index) => {
+                node.getComponent(UIOpacity)!.opacity = this.ent.BattleItemBll.canUse(ids[index]) ? 255 : 140;
             });
-            this.scheduleOnce(() => {
-                this.rolling = false;
-                this.ent.BattleBll.finishRoll();
-            }, 0.65);
+            return;
+        }
+        this.itemSignature = signature;
+        this.cancelCardGesture();
+        for (const child of [...layout.children]) {
+            child.removeFromParent();
+            child.destroy();
+        }
+        for (const [index, itemId] of Array.from(ids.entries())) {
+            const item = TableItem.getConfigById(itemId)!;
+            const node = instantiate(this.prefabItem);
+            node.name = `item${index}`;
+            node.parent = layout;
+            node.active = true;
+            node.getChildByName('lbtName')!.getComponent(Label)!.string =
+                `${item.name}\n${item.target === 'SELF' ? '拖向自己' : '拖向敌人'}`;
+            const opacity = node.getComponent(UIOpacity) || node.addComponent(UIOpacity);
+            opacity.opacity = this.ent.BattleItemBll.canUse(itemId) ? 255 : 140;
+            node.on(Node.EventType.TOUCH_START, (event: EventTouch) => {
+                if (this.selectedTouchId !== null || !this.ent.BattleItemBll.canUse(itemId)) {
+                    return;
+                }
+                this.selectedItemId = itemId;
+                this.selectedTouchId = event.getID();
+                this.onCardTouchStart(event);
+                this.getNode('lbtCurrentPhase')!.getComponent(Label)!.string = `${item.name}：${item.des}`;
+            }, this);
+            node.on(Node.EventType.TOUCH_MOVE, this.onCardTouchMove, this);
+            node.on(Node.EventType.TOUCH_END, this.onCardTouchEnd, this);
+            node.on(Node.EventType.TOUCH_CANCEL, this.onCardTouchCancel, this);
         }
     }
 
@@ -164,7 +243,7 @@ export class BattleView extends CCView<Battle> {
     }
 
     private onCardTouchMove(event: EventTouch) {
-        if (this.selectedCardIndex < 0 || event.getID() !== this.selectedTouchId) {
+        if ((this.selectedCardIndex < 0 && !this.selectedItemId) || event.getID() !== this.selectedTouchId) {
             return;
         }
         const touchPos = event.getUILocation();
@@ -174,7 +253,8 @@ export class BattleView extends CCView<Battle> {
             return;
         }
 
-        if (this.isWorldPosInsideNode(touchWorldPos, this.getNode('cardLayout')!)) {
+        const layout = this.getNode(this.selectedItemId ? 'itemLayout' : 'cardLayout')!;
+        if (this.isWorldPosInsideNode(touchWorldPos, layout)) {
             return;
         }
 
@@ -183,12 +263,26 @@ export class BattleView extends CCView<Battle> {
             .drawBezierCurveByWorldPos(this.cardTouchStartPos, touchWorldPos);
     }
 
+    // 等待道具或卡牌效果（包括玩家选择和胜负结算）执行完毕，再完成拖拽处理。
     private async onCardTouchEnd(event: EventTouch) {
         if (event.getID() !== this.selectedTouchId) {
             return;
         }
         const index = this.selectedCardIndex;
+        const itemId = this.selectedItemId;
         this.cancelCardGesture();
+        if (itemId) {
+            const item = TableItem.getConfigById(itemId);
+            if (!item) {
+                return;
+            }
+            const targetNode = this.getNode(item.target === 'SELF' ? 'spRole' : 'spEnemy')!;
+            if (targetNode.getComponent(UITransform)!.hitTest(event.getLocation(), event.windowId)) {
+                await this.ent.BattleItemBll.use(itemId);
+            }
+            this.refresh();
+            return;
+        }
         if (index < 0) {
             return;
         }
@@ -203,21 +297,23 @@ export class BattleView extends CCView<Battle> {
         }
     }
 
-    private async onCardTouchCancel(event: EventTouch) {
+    private onCardTouchCancel(event: EventTouch) {
         if (event.getID() !== this.selectedTouchId) {
             return;
         }
         // 拖出卡牌范围松手时，派发类型变为 TOUCH_CANCEL，原始类型仍是 TOUCH_END。
         // 真正的系统取消只清理手势，不执行出牌。
         if (event.getEventCode() === Node.EventType.TOUCH_END) {
-            await this.onCardTouchEnd(event);
+            return this.onCardTouchEnd(event);
         } else {
             this.cancelCardGesture();
+            this.refresh();
         }
     }
 
     private cancelCardGesture() {
         this.selectedCardIndex = -1;
+        this.selectedItemId = 0;
         this.selectedTouchId = null;
         this.getNode('nodeGraphView')!.getComponent(GraphView)!.reset();
     }
@@ -271,59 +367,39 @@ export class BattleView extends CCView<Battle> {
         }
         this.diceScales = [];
         const playerId = smc.player.getSelectedRoleId();
-        const diceInfo = TableRole.getConfigById(playerId)!.originDice;
-        for (let i = 0; i < diceInfo.length; i++) {
+        const diceInfo: number[][] = TableRole.getConfigById(playerId)?.originDice ?? [];
+        diceInfo.forEach((faces, index) => {
             const diceNode = instantiate(this.prefabDice);
             diceNode.parent = diceLayout;
             this.diceScales.push(diceNode.scale.clone());
-            const diceView = diceNode.getComponent(nodeDice)
-            diceView.setIndex(i);
-            for (let j = 0; j < diceInfo[i].length; j++) {
-                const face = diceNode.children[j].getChildByName('spIcon')!.getComponent(Sprite);
-                const lbtNum = diceNode.children[j].getChildByName('lbtNum')!.getComponent(Label);
-                lbtNum.string = `${diceInfo[i][j]}`;
-                const diceId = TableDice.getAllConfig().find(dice => dice.role === playerId && dice.diceNum.includes(diceInfo[i][j]))!.id;
-                this.setSprite(face, ResPath.getSpriteDice(diceId));
-            }
-            diceView.syncFaces();
-            diceView.stopAtFace(1);
-        }
+            diceNode.getComponent(nodeDice)!.setIndex(index);
+        });
     }
 
     btnThrow() {
         this.ent.BattleBll.reroll();
     }
 
-    async btnDraw() {
-        await this.ent.BattleCardBll.draw();
+    btnDraw() {
+        return this.ent.BattleCardBll.draw();
     }
 
-    async btnDrawPile() {
+    btnDrawPile() {
         this.cancelCardGesture();
-        await this.ent.openCardShowDialog(BattleCardPile.Draw);
+        return this.ent.openCardShowDialog(BattleCardPile.Draw);
     }
 
-    async btnDiscardPile() {
+    btnDiscardPile() {
         this.cancelCardGesture();
-        await this.ent.openCardShowDialog(BattleCardPile.Discard);
+        return this.ent.openCardShowDialog(BattleCardPile.Discard);
     }
 
-    async btnEnd() {
+    btnEnd() {
         if (this.ent.BattleBll.isFinished()) {
             this.ent.BattleBll.leaveResult();
             return;
         }
-        await this.ent.BattleBll.endTurn();
-    }
-
-    throwDice(diceIndex: number, diceValue: number): void {
-        const diceLayout = this.getNode('diceLayout');
-        const dice = diceLayout?.children[diceIndex];
-        const diceView = dice?.getComponent(nodeDice);
-        if (!diceView) {
-            return;
-        }
-        diceView.rollToFaceValue(diceValue, 0.6);
+        return this.ent.BattleBll.endTurn();
     }
 
     private updateChoice() {
@@ -394,11 +470,11 @@ export class BattleView extends CCView<Battle> {
     }
 
     reset(): void {
-        this.unscheduleAllCallbacks();
-        this.ent.BattleBll.close();
-        this.rolling = false;
+        this.itemSignature = '';
         this.handSignature = '';
+        this.itemsVisible = false;
         this.selectedCardIndex = -1;
+        this.selectedItemId = 0;
         this.selectedTouchId = null;
     }
 }

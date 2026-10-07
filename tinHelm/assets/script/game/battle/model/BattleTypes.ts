@@ -51,6 +51,7 @@ export interface EnemyBehaviorNode {
     hits?: number;
     status?: string;
     stacks?: number;
+    duration?: string;
     weight?: number;
     modulus?: number;
     actionValue?: EnemyActionType;
@@ -60,6 +61,41 @@ export interface EnemyBehaviorNode {
     count?: number;
     effects?: BattleEffect[];
     editorId?: string;
+}
+
+export enum EnemyPhaseCondition {
+    HpBelow = 'HP_BELOW',
+    TurnAtLeast = 'TURN_AT_LEAST',
+    HitsAtLeast = 'HITS_AT_LEAST'
+}
+
+export interface EnemyInitialStatus {
+    status: string;
+    stacks: number;
+    duration?: string;
+}
+
+export interface EnemyPhase {
+    id: string;
+    name: string;
+    condition: EnemyPhaseCondition;
+    value: number;
+    effects: BattleEffect[];
+    behavior?: EnemyBehaviorNode;
+}
+
+export interface EnemyMechanicTrigger {
+    event: string;
+    listenSide?: BattleSide;
+    effects: BattleEffect[];
+    limit?: number;
+    filter?: Record<string, unknown>;
+}
+
+export interface EnemyMechanics {
+    initialStatuses: EnemyInitialStatus[];
+    phases: EnemyPhase[];
+    triggers: EnemyMechanicTrigger[];
 }
 
 export enum BattleCardPile {
@@ -109,6 +145,27 @@ export interface BattleContext {
     variables: Record<string, number>;
     event: Record<string, unknown>;
     activeCardEvents?: string[];
+    /** 只有实际打出的卡牌使用卡牌加成，装备和持续触发效果不继承。 */
+    cardPlay?: boolean;
+    equipmentKey?: string;
+}
+
+export interface BattleCardPlayedEvent extends Record<string, unknown> {
+    cardId: number;
+    type: string;
+    diceCount: number;
+    requiredDiceCount: number;
+    cardCount: number;
+    attackCount: number;
+    block?: number;
+}
+
+export interface BattleEnergyEvent extends Record<string, unknown> {
+    previous: number;
+    current: number;
+    amount: number;
+    spent: number;
+    reason: string;
 }
 
 export interface BattleTrigger {

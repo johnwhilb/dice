@@ -10,7 +10,8 @@ export class BattleEffectBll extends CCBusiness<Battle> {
         'MODIFY_STAT', 'SET_STAT', 'DOUBLE_STAT', 'SET_INTANGIBLE', 'IF', 'SEQUENCE', 'REPEAT',
         'REGISTER_TRIGGER', 'SCHEDULE', 'CHOOSE_ONE', 'RANDOM_CHOICE', 'DISCARD', 'EXHAUST',
         'DISCARD_HAND', 'EXHAUST_HAND', 'EXHAUST_THIS_CARD', 'GAIN_GOLD', 'LOSE_GOLD',
-        'SET_VARIABLE', 'MODIFY_VARIABLE', 'ADD_CARD'
+        'SET_VARIABLE', 'MODIFY_VARIABLE', 'ADD_CARD', 'MODIFY_CARD_VALUE',
+        'GAIN_ENERGY', 'DRAW', 'RETAIN_BLOCK', 'FREE_DICE'
     ];
 
     validate(effects: BattleEffect[], depth = 0) {
@@ -21,6 +22,10 @@ export class BattleEffectBll extends CCBusiness<Battle> {
             if (!this.supported.includes(effect.type)) {
                 throw new Error(`战斗尚不支持效果：${effect.type}，请调整该卡配置`);
             }
+            if (['MODIFY_CARD_VALUE', 'GAIN_ENERGY', 'DRAW', 'RETAIN_BLOCK', 'FREE_DICE'].includes(effect.type)
+                && effect.target !== 'SELF') {
+                throw new Error('该装备效果只支持 SELF：' + effect.type);
+            }
             if (effect.type === 'EXHAUST' && effect.params?.zone && effect.params.zone !== 'HAND') {
                 throw new Error('EXHAUST 当前仅支持 HAND');
             }
@@ -29,6 +34,7 @@ export class BattleEffectBll extends CCBusiness<Battle> {
         }
     }
 
+    // 等待多段伤害、事件和选择效果按配置顺序完成。
     async execute(effects: BattleEffect[], context: BattleContext, allowFinished = false): Promise<void> {
         for (const effect of effects) {
             if (context.runId !== this.ent.BattleModel.runId || this.ent.BattleModel.closed
@@ -46,6 +52,7 @@ export class BattleEffectBll extends CCBusiness<Battle> {
         }
     }
 
+    // 等待当前效果引起的事件结算完成后，才继续下一个节点。
     private async executeOne(effect: BattleEffect, context: BattleContext, allowFinished: boolean) {
         const resolver = this.ent.BattleValueResolver;
         const buffs = this.ent.BattleBuffBll;
@@ -67,7 +74,14 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 const hits = Math.min(100, Math.max(0, Math.floor(number('hits', 1))));
                 context.variables.totalHpLoss = 0;
                 for (let hit = 0; hit < hits && !this.ent.BattleBll.isFinished(); hit++) {
-                    const loss = await damage.damage(context.source, target, number('amount'), text('damageKind', 'ATTACK'), params.ignoreBlock === true);
+                    const damageKind = text('damageKind', 'ATTACK');
+                    const cardDamage = context.cardPlay && damageKind === 'ATTACK'
+                        ? (context.variables.cardDamageBonus || 0) + (context.variables.nextCardDamageBonus || 0) : 0;
+                    if (context.cardPlay && damageKind === 'ATTACK') {
+                        context.variables.nextCardDamageBonus = 0;
+                    }
+                    const loss = await damage.damage(context.source, target, number('amount') + cardDamage,
+                        damageKind, params.ignoreBlock === true, context);
                     context.variables.lastDamage = loss;
                     context.variables.totalHpLoss = (context.variables.totalHpLoss || 0) + loss;
                     if (context.cardId && loss > 0) {
@@ -79,8 +93,32 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 }
                 break;
             }
-            case 'BLOCK':
-                damage.block(target, amount);
+            case 'BLOCK': {
+                const player = this.ent.BattlePlayerModel;
+                const cardBlock = context.cardPlay && target === context.source && amount > 0;
+                const bonus = cardBlock ? player.cardBlockBonus + player.nextCardBlockBonus : 0;
+                const gained = damage.block(target, amount + bonus, params.scale !== false);
+                if (cardBlock && gained > 0) {
+                    player.nextCardBlockBonus = 0;
+                    context.variables.cardBlockGained = (context.variables.cardBlockGained || 0) + gained;
+                }
+                break;
+            }
+            case 'MODIFY_CARD_VALUE':
+                this.ent.BattleEquipmentBll.modifyCardValue(text('kind'), amount, text('timing', 'COMBAT'));
+                break;
+            case 'GAIN_ENERGY':
+                await this.ent.BattleEquipmentBll.changeEnergy(amount, 'EFFECT');
+                break;
+            case 'DRAW':
+                await this.ent.BattleCardBll.drawExtra(number('count', 1));
+                break;
+            case 'RETAIN_BLOCK':
+                this.ent.BattlePlayerModel.retainedBlockLimit = Math.max(0,
+                    this.ent.BattlePlayerModel.retainedBlockLimit + Math.floor(amount));
+                break;
+            case 'FREE_DICE':
+                this.ent.BattleEquipmentBll.grantFreeDice(number('count', 1), text('scope', 'TURN'));
                 break;
             case 'BLOCK_NEXT_TURN':
                 this.ent.BattleTriggerBll.schedule('NEXT_TURN_START', 1,
@@ -230,7 +268,8 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 break;
             case 'SET_VARIABLE':
             case 'MODIFY_VARIABLE': {
-                const name = text('name');
+                const variable = text('name');
+                const name = context.equipmentKey ? context.equipmentKey + '.' + variable : variable;
                 const scope = text('scope', 'ACTION');
                 const variables = scope === 'COMBAT' ? this.ent.BattleModel.combatVariables
                     : scope === 'TURN' ? this.ent.BattleModel.turnVariables : context.variables;
