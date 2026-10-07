@@ -11,6 +11,10 @@ interface EnemyConfigData {
     info: string;
     originHp: number;
     behavior: Record<string, any>;
+    itemRewad: number;
+    cardRewad: any[];
+    resourceReward: any[];
+    mechanics: Record<string, any>;
 }
 
 /**
@@ -181,5 +185,25 @@ export class BaseEnemy {
     /** 敌人行为树 */
     get behavior(): Record<string, any> {
         return this.data.behavior;
+    }
+
+    /** 道具掉落 */
+    get itemRewad(): number {
+        return this.data.itemRewad;
+    }
+
+    /** 卡牌掉落 （必定掉落,数组长度三意味进入三选一界面 0.4意味着这张牌为1级牌概率是0.4第二个0.4意味这张牌的二级概率为0.4  0.2意味为三级牌概率为0.2） */
+    get cardRewad(): any[] {
+        return this.data.cardRewad;
+    }
+
+    /** 资源掉落 [[资源ID,数量]]：精英敌人掉落100金币和1枝桠，其余敌人固定掉落100金币 */
+    get resourceReward(): any[] {
+        return this.data.resourceReward;
+    }
+
+    /** 特殊状态与阶段机制（无召唤）：初始状态、一次性阶段、事件触发 */
+    get mechanics(): Record<string, any> {
+        return this.data.mechanics;
     }
 }

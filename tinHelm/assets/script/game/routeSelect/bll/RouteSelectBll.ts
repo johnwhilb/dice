@@ -11,6 +11,9 @@ import { RealmLevelState, TravelRouteType } from '../model/RouteSelectModel';
 import { GameFlowState } from '../../gameFlow/model/GameFlowModel';
 import { TableFightEvent } from '../../common/table/TableFightEvent';
 import { TableEnemy } from '../../common/table/TableEnemy';
+import { TableShopEvent } from '../../common/table/TableShopEvent';
+import { TableRelmEvent } from '../../common/table/TableRelmEvent';
+import { RouteSelectEvent } from '../RouteSelectEvent';
 
 export class RouteSelectBll extends CCBusiness<RouteSelect> {
 
@@ -26,23 +29,26 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
 
     getCurrentEventDetail() {
         const currentEvent = this.getCurrentEvent();
-        const detailId = this.ent.RouteSelectModel.currentEventDetailId;
+        const level = this.getCurrentRealmLevel();
+        const detailId = level?.eventDetailIds?.[level.currentEventIndex]
+            ?? this.ent.RouteSelectModel.currentEventDetailId;
         if (currentEvent?.id === EventTypeEnum.SHOP) {
             const shopEvent = smc.shop.prepare(
-                smc.gameFlow.getCurrentDay(),
                 smc.player.getSelectedRoleId(),
                 detailId,
             );
             this.ent.RouteSelectModel.currentEventDetailId = shopEvent?.id ?? 0;
             return shopEvent;
         }
-        if (currentEvent?.id === EventTypeEnum.FIGHT && TableFightEvent.isOwnId(detailId)) {
-            return TableFightEvent.getConfigById(detailId);
+        if (currentEvent?.id === EventTypeEnum.FIGHT) {
+            const fightEvent = TableFightEvent.getConfigById(detailId);
+            this.ent.RouteSelectModel.currentEventDetailId = fightEvent?.id ?? 0;
+            return fightEvent;
         }
 
         this.ent.RouteSelectModel.currentEventDetailId = 0;
         smc.shop.clear();
-        return this.generateCurrentEventDetail();
+        return null;
     }
 
     getTravelRoute() {
@@ -67,13 +73,10 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
     }
 
     generateRealmLevels() {
-        const eventCount = this.getUniversalValue(UniversalNameEnum.REALM_EVENT_NUM, 10);
-        const enemyCount = this.getUniversalValue(UniversalNameEnum.REALM_ENEMY_EVENT_NUM, 5);
-        const otherCount = this.getUniversalValue(UniversalNameEnum.REALM_OTHER_EVENT_NUM, 5);
         const originRealmId = this.getUniversalValue(UniversalNameEnum.ORIGIN_REALM, RealmsRealmsEnum.MIDGARD);
 
         this.ent.RouteSelectModel.realmLevels = TableRealms.getAllConfig().map((realm) => {
-            return this.createRealmLevel(realm.id, realm.eventPool, realm.bossEventId, eventCount, enemyCount, otherCount);
+            return this.createRealmLevel(realm.id);
         });
         this.ent.RouteSelectModel.originRealmId = originRealmId;
         this.ent.RouteSelectModel.currentRealmId = originRealmId;
@@ -220,104 +223,56 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         level.completed = level.currentEventIndex >= level.eventIds.length;
         if (level.completed && level.realmId !== RealmsRealmsEnum.ASGARD) {
             this.ent.RouteSelectModel.anchorCount += 1;
+            this.dispatchEvent(RouteSelectEvent.anchorCountChanged);
         }
         this.updateTravelRoute();
     }
 
-    private createRealmLevel(
-        realmId: number,
-        rawEventPool: unknown[],
-        bossEventId: number,
-        eventCount: number,
-        enemyCount: number,
-        otherCount: number,
-    ): RealmLevelState {
-        if (realmId === RealmsRealmsEnum.ASGARD) {
-            return {
-                realmId,
-                eventIds: [bossEventId],
-                currentEventIndex: 0,
-                completed: false,
-                visited: false,
-            };
-        }
+    private createRealmLevel(realmId: number): RealmLevelState {
+        const floorCount = this.getUniversalValue(UniversalNameEnum.REALM_EVENT_NUM, 10);
+        const floorConfigs = TableRelmEvent.getAllConfig().filter((item) => {
+            return item.realms === realmId;
+        });
+        const eventIds: number[] = [];
+        const eventDetailIds: number[] = [];
 
-        const eventPool = rawEventPool.filter((eventId): eventId is number => {
-            return typeof eventId === 'number' && !!TableEvent.getConfigById(eventId);
-        });
-        const enemyPool = eventPool.filter((eventId) => {
-            return eventId === EventTypeEnum.FIGHT;
-        });
-        const otherPool = eventPool.filter((eventId) => {
-            return !enemyPool.includes(eventId);
-        });
-        const normalEventCount = Math.max(eventCount - 1, 0);
-        const enemyEventCount = Math.min(Math.max(enemyCount - 1, 0), normalEventCount);
-        const otherEventCount = Math.min(otherCount, normalEventCount - enemyEventCount);
-        const events = [
-            ...this.pickEvents(enemyPool, enemyEventCount),
-            ...this.pickEvents(otherPool, otherEventCount),
-        ];
+        for (const floor of Array.from({ length: floorCount }, (_, index) => index + 1)) {
+            const config = floorConfigs.find((item) => {
+                return item.level === floor;
+            });
+            if (!config) {
+                throw new Error(`世界 ${realmId} 缺少第 ${floor} 层事件配置`);
+            }
 
-        while (events.length < normalEventCount && eventPool.length) {
-            events.push(this.pickEvents(eventPool, 1)[0]);
+            const fightPool = config.fightPool.filter((id): id is number => {
+                return typeof id === 'number'
+                    && !!TableEnemy.getConfigById(TableFightEvent.getConfigById(id)?.enemyId ?? 0);
+            });
+            const shopPool = config.shopPool.filter((id): id is number => {
+                return typeof id === 'number' && !!TableShopEvent.getConfigById(id);
+            });
+            const candidates = config.maybeEvent.filter((id): id is number => {
+                return (id === EventTypeEnum.FIGHT && !!fightPool.length)
+                    || (id === EventTypeEnum.SHOP && !!shopPool.length);
+            });
+            if (!candidates.length) {
+                throw new Error(`世界 ${realmId} 第 ${floor} 层没有可用事件`);
+            }
+
+            const eventId = candidates[Math.floor(Math.random() * candidates.length)];
+            const pool = eventId === EventTypeEnum.FIGHT ? fightPool : shopPool;
+            eventIds.push(eventId);
+            eventDetailIds.push(pool[Math.floor(Math.random() * pool.length)]);
         }
 
         return {
             realmId,
-            eventIds: [...this.shuffle(events), bossEventId],
+            eventIds,
+            eventDetailIds,
             currentEventIndex: 0,
             completed: false,
             visited: false,
         };
-    }
-
-    private pickEvents(pool: number[], count: number) {
-        if (!pool.length) {
-            return [];
-        }
-
-        return Array.from({ length: count }, () => {
-            return pool[Math.floor(Math.random() * pool.length)];
-        });
-    }
-
-    private shuffle(events: number[]) {
-        const result = [...events];
-        for (let index = result.length - 1; index > 0; index -= 1) {
-            const targetIndex = Math.floor(Math.random() * (index + 1));
-            const current = result[index];
-            result[index] = result[targetIndex];
-            result[targetIndex] = current;
-        }
-        return result;
-    }
-
-    private generateCurrentEventDetail() {
-        const currentEvent = this.getCurrentEvent();
-        if (!currentEvent) {
-            return null;
-        }
-
-        if (currentEvent.id === EventTypeEnum.FIGHT) {
-            const allFightEvents = TableFightEvent.getAllConfig().filter((item) => {
-                return !!TableEnemy.getConfigById(item.enemyId);
-            });
-            const realmFightEvents = allFightEvents.filter((item) => {
-                return item.realmId === this.ent.RouteSelectModel.currentRealmId
-                    && !!TableEnemy.getConfigById(item.enemyId);
-            });
-            const fightEvents = realmFightEvents.length ? realmFightEvents : allFightEvents;
-            if (!fightEvents.length) {
-                return null;
-            }
-
-            const fightEvent = fightEvents[Math.floor(Math.random() * fightEvents.length)];
-            this.ent.RouteSelectModel.currentEventDetailId = fightEvent.id;
-            return fightEvent;
-        }
-
-        return null;
     }
 
     private updateTravelRoute() {

@@ -16,11 +16,17 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
         model.lastAction = '';
         model.lastMoveId = '';
         model.repeatCount = 0;
+        model.hitsTaken = 0;
+        model.phaseName = '';
+        model.phaseStartTurn = 1;
+        model.phaseBehavior = null;
+        model.enteredPhases = [];
+        model.changingPhase = false;
     }
 
     planAction() {
         const enemy = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId);
-        const actions = this.selectActions(enemy?.getBehavior());
+        const actions = this.selectActions(this.ent.BattleEnemyModel.phaseBehavior || enemy?.getBehavior());
         this.ent.BattleEnemyModel.plannedActions = actions.length ? actions : [{
             type: EnemyBehaviorNodeType.Action,
             action: EnemyActionType.Wait
@@ -73,7 +79,8 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                 if (!children.length) {
                     return [];
                 }
-                const index = (this.ent.BattleModel.turn - 1) % children.length;
+                const startTurn = this.ent.BattleEnemyModel.phaseBehavior ? this.ent.BattleEnemyModel.phaseStartTurn : 1;
+                const index = Math.max(0, this.ent.BattleModel.turn - startTurn) % children.length;
                 return this.selectActions(children[index], depth + 1);
             }
             default:
@@ -141,7 +148,8 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
             [EnemyActionType.AddCard]: '塞入卡牌',
             [EnemyActionType.Effects]: '复合效果'
         };
-        return this.ent.BattleEnemyModel.plannedActions.map(action => {
+        const phaseName = this.ent.BattleEnemyModel.phaseName;
+        const intent = this.ent.BattleEnemyModel.plannedActions.map(action => {
             const label = action.moveName?.trim() || names[action.action || EnemyActionType.Wait];
             if (action.action === EnemyActionType.Attack) {
                 return `${label} ${action.amount ?? 0}${(action.hits ?? 1) > 1 ? `×${action.hits}` : ''}`;
@@ -160,9 +168,12 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
             }
             return label;
         }).join(' + ');
+        return phaseName ? `【${phaseName}】${intent}` : intent;
     }
 
     async act() {
+        // 玩家行动结束后的阶段切换可能改变招式；当前敌人行动一旦开始则保留快照。
+        await this.ent.BattleEnemyMechanicBll.updatePhases();
         const actions = this.ent.BattleEnemyModel.plannedActions;
         const model = this.ent.BattleEnemyModel;
         const moveId = actions.map(action => action.editorId || action.action || '').join('+');
@@ -185,10 +196,10 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                     this.ent.BattleDamageBll.block(BattleSide.Enemy, action.amount ?? 0);
                     break;
                 case EnemyActionType.Buff:
-                    this.ent.BattleBuffBll.add(BattleSide.Enemy, action.status || '', action.stacks ?? 0);
+                    this.ent.BattleBuffBll.add(BattleSide.Enemy, action.status || '', action.stacks ?? 0, action.duration || 'DEFAULT');
                     break;
                 case EnemyActionType.Debuff:
-                    this.ent.BattleBuffBll.add(BattleSide.Player, action.status || '', action.stacks ?? 0);
+                    this.ent.BattleBuffBll.add(BattleSide.Player, action.status || '', action.stacks ?? 0, action.duration || 'DEFAULT');
                     break;
                 case EnemyActionType.Heal:
                     this.ent.BattleDamageBll.heal(BattleSide.Enemy, action.amount ?? 0);

@@ -6,7 +6,6 @@ import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
  * 自动生成，请勿手动修改。
  */
 interface ShopEventConfigData {
-    day: number;
     cardCounts: any[];
     name: string;
     des: string;
@@ -157,12 +156,7 @@ export class BaseShopEvent {
         this.data = data;
     }
 
-    /** 出现日期 */
-    get day(): number {
-        return this.data.day;
-    }
-
-    /** 售卖各等级卡牌数量（等级由1-3） */
+    /** 售卖各等级卡牌数量：[1级数量,2级数量,3级数量]；展示按等级从低到高排序，不足数量时取该等级全部卡牌 */
     get cardCounts(): any[] {
         return this.data.cardCounts;
     }

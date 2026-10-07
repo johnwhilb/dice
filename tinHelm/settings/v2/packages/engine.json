@@ -24,7 +24,7 @@
             "_value": true
           },
           "3d": {
-            "_value": true
+            "_value": false
           },
           "meshopt": {
             "_value": false
@@ -54,10 +54,10 @@
             "_value": true
           },
           "particle": {
-            "_value": true
+            "_value": false
           },
           "physics": {
-            "_value": true,
+            "_value": false,
             "_option": "physics-ammo"
           },
           "physics-ammo": {
@@ -101,7 +101,7 @@
             "_value": true
           },
           "primitive": {
-            "_value": true
+            "_value": false
           },
           "profiler": {
             "_value": true
@@ -137,10 +137,10 @@
             "_value": false
           },
           "terrain": {
-            "_value": true
+            "_value": false
           },
           "light-probe": {
-            "_value": true
+            "_value": false
           },
           "tiled-map": {
             "_value": true
@@ -191,12 +191,10 @@
           }
         },
         "flags": {
-          "LOAD_BULLET_MANUALLY": false,
           "LOAD_SPINE_MANUALLY": false
         },
         "includeModules": [
           "2d",
-          "3d",
           "affine-transform",
           "animation",
           "audio",
@@ -206,20 +204,15 @@
           "gfx-webgl",
           "graphics",
           "intersection-2d",
-          "light-probe",
           "marionette",
           "mask",
-          "particle",
           "particle-2d",
           "physics-2d-box2d",
-          "physics-ammo",
-          "primitive",
           "procedural-animation",
           "profiler",
           "rich-text",
           "skeletal-animation",
           "spine-3.8",
-          "terrain",
           "tiled-map",
           "tween",
           "ui",

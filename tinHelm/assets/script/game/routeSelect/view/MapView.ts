@@ -12,13 +12,12 @@ const { ccclass } = _decorator;
 
 @ccclass('MapView')
 @ecs.register('MapView', false)
-@gui.register('MapView', { layer: LayerType.UI, prefab: 'gui/map/ui/MapViewView' })
+@gui.register('MapView', { layer: LayerType.UI, prefab: 'gui/map/ui/MapView' })
 export class MapView extends CCView<RouteSelect> {
 
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
-        this.node.on(Node.EventType.TOUCH_END, this.btnClose, this);
         this.refresh();
     }
 

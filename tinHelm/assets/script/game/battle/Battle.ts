@@ -16,6 +16,12 @@ import { BattleBuffBll } from './bll/BattleBuffBll';
 import { BattleTriggerBll } from './bll/BattleTriggerBll';
 import { CardShowDialog } from './view/CardShowDialog';
 import { BattleCardPile } from './model/BattleTypes';
+import { BattleRewardBll } from './bll/BattleRewardBll';
+import { BattleCleadupDialog } from './view/BattleCleadupDialog';
+import { CardRewardDialog } from './view/CardRewardDialog';
+import { BattleEnemyMechanicBll } from './bll/BattleEnemyMechanicBll';
+import { BattleItemBll } from './bll/BattleItemBll';
+import { BattleEquipmentBll } from './bll/BattleEquipmentBll';
 
 @ecs.register('Battle')
 export class Battle extends CCEntity {
@@ -35,6 +41,12 @@ export class Battle extends CCEntity {
     BattleDamageBll!: BattleDamageBll;
     BattleBuffBll!: BattleBuffBll;
     BattleTriggerBll!: BattleTriggerBll;
+    BattleRewardBll!: BattleRewardBll;
+    BattleCleadupDialog!: BattleCleadupDialog;
+    CardRewardDialog!: CardRewardDialog;
+    BattleEnemyMechanicBll!: BattleEnemyMechanicBll;
+    BattleItemBll!: BattleItemBll;
+    BattleEquipmentBll!: BattleEquipmentBll;
 
     static create(): Battle {
         return ecs.getEntity<Battle>(Battle);
@@ -54,6 +66,10 @@ export class Battle extends CCEntity {
         this.BattleDamageBll = this.addBusiness<BattleDamageBll>(BattleDamageBll);
         this.BattleBuffBll = this.addBusiness<BattleBuffBll>(BattleBuffBll);
         this.BattleTriggerBll = this.addBusiness<BattleTriggerBll>(BattleTriggerBll);
+        this.BattleRewardBll = this.addBusiness<BattleRewardBll>(BattleRewardBll);
+        this.BattleEnemyMechanicBll = this.addBusiness<BattleEnemyMechanicBll>(BattleEnemyMechanicBll);
+        this.BattleItemBll = this.addBusiness<BattleItemBll>(BattleItemBll);
+        this.BattleEquipmentBll = this.addBusiness<BattleEquipmentBll>(BattleEquipmentBll);
     }
 
     openBattleView() {
@@ -64,6 +80,10 @@ export class Battle extends CCEntity {
     }
 
     closeBattleView() {
+        this.closeCardRewardDialog();
+        if (this.has(BattleCleadupDialog)) {
+            this.removeUi(BattleCleadupDialog);
+        }
         this.closeCardShowDialog();
         this.BattleBll.close();
         if (this.has(BattleView)) {
@@ -90,6 +110,71 @@ export class Battle extends CCEntity {
         this.BattleBll.changePhase();
     }
 
+    async openBattleCleadupDialog() {
+        const model = this.BattleModel;
+        if (model.closed || model.rewardsDismissed || model.rewardDialogOpening || this.has(BattleCleadupDialog)) {
+            return;
+        }
+        const runId = model.runId;
+        model.rewardDialogOpening = true;
+        this.closeCardShowDialog();
+        try {
+            const node = await this.addUi(BattleCleadupDialog);
+            if (model.closed || model.runId !== runId) {
+                if (node) {
+                    this.removeUi(BattleCleadupDialog);
+                }
+            }
+        }
+        catch (error) {
+            console.error('战斗奖励界面打开失败', error);
+        }
+        finally {
+            if (model.runId === runId) {
+                model.rewardDialogOpening = false;
+            }
+        }
+    }
+
+    async openCardRewardDialog() {
+        const model = this.BattleModel;
+        if (model.closed || model.selectedRewardIndex < 0 || model.cardRewardDialogOpening || this.has(CardRewardDialog)) {
+            return;
+        }
+        const runId = model.runId;
+        model.cardRewardDialogOpening = true;
+        try {
+            const node = await this.addUi(CardRewardDialog);
+            if (model.closed || model.runId !== runId) {
+                if (node) {
+                    this.removeUi(CardRewardDialog);
+                }
+            }
+            else if (!node) {
+                this.closeCardRewardDialog();
+            }
+        }
+        catch (error) {
+            if (model.runId === runId) {
+                this.closeCardRewardDialog();
+            }
+            console.error('卡牌奖励界面打开失败', error);
+        }
+        finally {
+            if (model.runId === runId) {
+                model.cardRewardDialogOpening = false;
+            }
+        }
+    }
+
+    closeCardRewardDialog() {
+        this.BattleModel.selectedRewardIndex = -1;
+        if (this.has(CardRewardDialog)) {
+            this.removeUi(CardRewardDialog);
+        }
+        this.BattleRewardBll.refresh();
+    }
+
     setEnemy(enemyId: number) {
         this.BattleModel.enemyId = enemyId;
     }
@@ -98,6 +183,7 @@ export class Battle extends CCEntity {
         this.BattleBll.generateEnemy();
         this.BattleEnemyBll.initEnemy();
         this.BattlePlayerBll.initPlayer();
+        this.BattleEnemyMechanicBll.initialize();
     }
 
 }

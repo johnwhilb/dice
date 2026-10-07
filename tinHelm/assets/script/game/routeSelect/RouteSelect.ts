@@ -86,17 +86,7 @@ export class RouteSelect extends CCEntity {
         if (this.has(MapView)) {
             return Promise.resolve(this.MapView.node);
         }
-
-        const node = await this.addUi(MapView);
-        if (!node) {
-            return null;
-        }
-
-        const mapView = node.getComponent(MapView) || node.addComponent(MapView);
-        if (!this.has(MapView)) {
-            this.add(mapView);
-        }
-        return node;
+        return this.addUi(MapView);
     }
 
     closeMapView() {

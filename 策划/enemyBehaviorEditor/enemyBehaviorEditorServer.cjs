@@ -38,8 +38,12 @@ const actionTypes = new Set(['ATTACK', 'DEFEND', 'BUFF', 'DEBUFF', 'HEAL', 'WAIT
 const conditionFields = new Set(['TURN', 'TURN_MOD', 'SELF_HP_PERCENT', 'PLAYER_HP_PERCENT', 'SELF_BLOCK',
     'PLAYER_BLOCK', 'LAST_ACTION', 'REPEAT_COUNT']);
 const operators = new Set(['<', '<=', '==', '!=', '>=', '>']);
-const buffs = new Set(['STRENGTH', 'DEXTERITY', 'ARTIFACT', 'INTANGIBLE', 'THORNS', 'REGENERATION', 'METALLICIZE', 'BARRICADE']);
-const debuffs = new Set(['WEAK', 'VULNERABLE', 'FRAIL', 'POISON']);
+const buffs = new Set(['STRENGTH', 'DEXTERITY', 'ARTIFACT', 'INTANGIBLE', 'THORNS', 'REGENERATION', 'METALLICIZE', 'BARRICADE',
+    'ARMOR', 'EVASION', 'FLIGHT', 'PLATED_ARMOR', 'FURY', 'RITUAL']);
+const debuffs = new Set(['WEAK', 'VULNERABLE', 'FRAIL', 'POISON', 'BURN', 'CONSTRICTED']);
+const durations = new Set(['DEFAULT', 'ACTION', 'TURN', 'NEXT_TURN', 'COMBAT', 'RUN']);
+const mechanismEvents = new Set(['ON_COMBAT_START', 'ON_TURN_START', 'ON_TURN_END', 'ON_CARD_PLAYED',
+    'ON_ATTACK_PLAYED', 'ON_SKILL_PLAYED', 'ON_POWER_PLAYED', 'ON_DAMAGE_DEALT', 'ON_DAMAGE_TAKEN', 'ON_HP_LOSS']);
 const effectTypes = new Set(['DAMAGE', 'BLOCK', 'HEAL', 'LOSE_HP', 'KILL_IF', 'MULTIPLY_BLOCK',
     'REMOVE_BLOCK', 'PIERCE_BLOCK', 'BLOCK_NEXT_TURN', 'APPLY_STATUS', 'REMOVE_STATUS',
     'MULTIPLY_STATUS', 'TRANSFER_STATUS', 'CLEANSE', 'MODIFY_STAT', 'SET_STAT', 'DOUBLE_STAT',
@@ -61,6 +65,16 @@ function validateEffects(effects, depth = 0) {
         if (effect.params && (typeof effect.params !== 'object' || Array.isArray(effect.params))) {
             throw new Error('复合效果参数格式错误');
         }
+        if (effect.type === 'APPLY_STATUS') {
+            const params = effect.params || {};
+            const validStacks = Number.isSafeInteger(params.stacks) && Math.abs(params.stacks) <= 999
+                || typeof params.stacks === 'string' && params.stacks.trim().length > 0 && params.stacks.length <= 512;
+            if ((!buffs.has(params.status) && !debuffs.has(params.status))
+                || !validStacks
+                || !durations.has(params.duration || 'DEFAULT')) {
+                throw new Error('复合效果状态、层数或持续范围无效');
+            }
+        }
         if (effect.children) {
             validateEffects(effect.children, depth + 1);
         }
@@ -75,6 +89,9 @@ function validateBehavior(node, depth = 0) {
         throw new Error('行为树格式错误或嵌套过深');
     }
     if (node.type === 'ACTION') {
+        if (node.duration && !durations.has(node.duration)) {
+            throw new Error('状态持续范围无效');
+        }
         if (!actionTypes.has(node.action)) {
             throw new Error('敌人行动类型无效');
         }
@@ -128,6 +145,47 @@ function validateBehavior(node, depth = 0) {
     node.children.forEach(child => validateBehavior(child, depth + 1));
 }
 
+function validateMechanics(mechanics) {
+    if (!mechanics) {
+        return;
+    }
+    if (typeof mechanics !== 'object' || Array.isArray(mechanics)
+        || !Array.isArray(mechanics.initialStatuses) || !Array.isArray(mechanics.phases) || !Array.isArray(mechanics.triggers)
+        || mechanics.initialStatuses.length > 20 || mechanics.phases.length > 10 || mechanics.triggers.length > 20) {
+        throw new Error('特殊机制须包含 initialStatuses、phases、triggers 数组，且数量不能超过20/10/20');
+    }
+    for (const initial of mechanics.initialStatuses) {
+        if (!initial || !buffs.has(initial.status) || !Number.isSafeInteger(initial.stacks)
+            || initial.stacks < 1 || initial.stacks > 999 || !durations.has(initial.duration || 'COMBAT')) {
+            throw new Error('战斗初始状态无效');
+        }
+    }
+    const phaseIds = new Set();
+    for (const phase of mechanics.phases) {
+        if (!phase || typeof phase.id !== 'string' || !phase.id.trim() || phaseIds.has(phase.id)
+            || typeof phase.name !== 'string' || !phase.name.trim()
+            || !['HP_BELOW', 'TURN_AT_LEAST', 'HITS_AT_LEAST'].includes(phase.condition)
+            || !Number.isFinite(phase.value) || phase.value <= 0
+            || (phase.condition === 'HP_BELOW' ? phase.value > 100 : !Number.isSafeInteger(phase.value))) {
+            throw new Error('阶段编号、名称、触发条件或阈值无效');
+        }
+        phaseIds.add(phase.id);
+        validateEffects(phase.effects);
+        if (phase.behavior) {
+            validateBehavior(phase.behavior);
+        }
+    }
+    for (const trigger of mechanics.triggers) {
+        if (!trigger || !mechanismEvents.has(trigger.event)
+            || !['ENEMY', 'PLAYER'].includes(trigger.listenSide || 'ENEMY')
+            || !Number.isSafeInteger(trigger.limit || 0) || (trigger.limit || 0) < 0
+            || (trigger.filter && (typeof trigger.filter !== 'object' || Array.isArray(trigger.filter)))) {
+            throw new Error('特殊机制触发器无效');
+        }
+        validateEffects(trigger.effects);
+    }
+}
+
 function validateEnemies(enemies) {
     if (!Array.isArray(enemies) || !enemies.length) {
         throw new Error('敌人列表不能为空');
@@ -142,6 +200,7 @@ function validateEnemies(enemies) {
             throw new Error(`${enemy.id}：名称或初始生命无效`);
         }
         validateBehavior(enemy.behavior);
+        validateMechanics(enemy.mechanics);
     }
 }
 
@@ -231,4 +290,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { readTables, validateBehavior, validateEnemies, saveEnemies, server };
+module.exports = { readTables, validateBehavior, validateMechanics, validateEnemies, saveEnemies, server };

@@ -4,10 +4,10 @@ import { BattleContext, BattleEffect, BattleSide, BattleTrigger } from '../model
 
 export class BattleTriggerBll extends CCBusiness<Battle> {
     register(event: string, effects: BattleEffect[], context: BattleContext, scope = 'COMBAT', limit = 0,
-        filter: Record<string, unknown> = {}, dueTurn = 0) {
+        filter: Record<string, unknown> = {}, dueTurn = 0, listenSide = context.source) {
         const trigger: BattleTrigger = {
-            owner: context.source, event, effects,
-            context: { ...context, variables: { ...context.variables }, event: {} },
+            owner: listenSide, event, effects,
+            context: { ...context, cardPlay: false, variables: { ...context.variables }, event: {} },
             filter, remaining: limit > 0 ? limit : -1, scope,
             expiresTurn: this.ent.BattleModel.turn + (scope === 'NEXT_TURN' ? 1 : 0),
             dueTurn, active: false

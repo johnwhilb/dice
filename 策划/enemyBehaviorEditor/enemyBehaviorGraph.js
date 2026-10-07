@@ -1,8 +1,8 @@
 const labels = { SELECTOR: '优先选择', RANDOM: '随机选择', CYCLE: '回合循环', SEQUENCE: '连续行动', CONDITION: '条件判断', ACTION: '执行行动' };
 const actions = { ATTACK: '攻击', DEFEND: '防御', BUFF: '强化', DEBUFF: '削弱', HEAL: '治疗', LOSE_HP: '失去生命', REMOVE_BLOCK: '移除格挡', CLEANSE: '净化', DISCARD: '弃牌', EXHAUST: '消耗手牌', ADD_CARD: '塞入卡牌', EFFECTS: '复合效果', WAIT: '等待' };
 const fields = { TURN: '当前回合', TURN_MOD: '回合取余', SELF_HP_PERCENT: '敌人生命 %', PLAYER_HP_PERCENT: '玩家生命 %', SELF_BLOCK: '敌人格挡', PLAYER_BLOCK: '玩家格挡', LAST_ACTION: '上回合行动', REPEAT_COUNT: '连续使用次数' };
-const buffs = { STRENGTH: '力量', DEXTERITY: '敏捷', ARTIFACT: '人工制品', INTANGIBLE: '无实体', THORNS: '荆棘', REGENERATION: '再生', METALLICIZE: '金属化', BARRICADE: '壁垒' };
-const debuffs = { WEAK: '虚弱', VULNERABLE: '易伤', FRAIL: '脆弱', POISON: '中毒' };
+const buffs = { STRENGTH: '力量', DEXTERITY: '敏捷', ARTIFACT: '人工制品', INTANGIBLE: '无实体', THORNS: '荆棘', REGENERATION: '再生', METALLICIZE: '金属化', BARRICADE: '壁垒', ARMOR: '硬甲', EVASION: '闪避', FLIGHT: '飞行', PLATED_ARMOR: '多层护甲', FURY: '受击暴怒', RITUAL: '仪式' };
+const debuffs = { WEAK: '虚弱', VULNERABLE: '易伤', FRAIL: '脆弱', POISON: '中毒', BURN: '灼烧', CONSTRICTED: '紧缚' };
 const nodeWidth = 228;
 const nodeHeight = 106;
 let enemies = [];
@@ -402,6 +402,7 @@ function renderInspector() {
         }
         if (['BUFF', 'DEBUFF'].includes(node.action)) {
             html += `<div class="field"><label>状态</label><select data-field="status">${options(node.action === 'BUFF' ? buffs : debuffs, node.status)}</select></div><div class="field"><label>层数</label><input data-field="stacks" type="number" min="1" max="999" value="${node.stacks ?? 1}"></div>`;
+            html += `<div class="field"><label>持续范围（duration）</label><select data-field="duration">${options({ DEFAULT: '默认：减益按回合递减', TURN: '当前回合', NEXT_TURN: '持续到下一回合结束', COMBAT: '整场战斗' }, node.duration || 'DEFAULT')}</select></div>`;
         }
         if (['LOSE_HP', 'REMOVE_BLOCK', 'CLEANSE'].includes(node.action)) {
             html += `<div class="field"><label>目标</label><select data-field="target">${options({ PLAYER: '玩家', ENEMY: '敌人' }, node.target || (node.action === 'CLEANSE' ? 'ENEMY' : 'PLAYER'))}</select></div>`;
@@ -446,6 +447,10 @@ function render() {
     ].map(([key, label, type]) => `<div class="field ${key === 'info' ? 'wide' : ''}"><label>${label}</label>${type === 'textarea' ? `<textarea data-enemy-field="${key}">${escapeHtml(enemy[key] || '')}</textarea>` : `<input data-enemy-field="${key}" type="${type}" value="${escapeHtml(enemy[key] ?? '')}">`}</div>`).join('') : '<p class="hint">请先选择敌人。</p>';
     renderGraph();
     renderInspector();
+    byId('mechanicsJson').value = JSON.stringify(enemy?.mechanics || { initialStatuses: [], phases: [], triggers: [] }, null, 2);
+    byId('previewPhase').innerHTML = '<option value="">初始阶段</option>' + (enemy?.mechanics?.phases || []).map((phase) => {
+        return `<option value="${escapeHtml(phase.id)}">${escapeHtml(phase.name)}</option>`;
+    }).join('');
 }
 
 function selectActions(node, state, depth = 0) {
@@ -485,7 +490,8 @@ function selectActions(node, state, depth = 0) {
         }
     }
     if (node.type === 'CYCLE' && children.length) {
-        return selectActions(children[(state.TURN - 1) % children.length], state, depth + 1);
+        const offset = Math.max(0, state.TURN - (state.phaseStartTurn || 1));
+        return selectActions(children[offset % children.length], state, depth + 1);
     }
     if (node.type === 'RANDOM') {
         const choices = children.map(child => ({ actions: selectActions(child, state, depth + 1), weight: child.weight ?? 1 }))
@@ -513,7 +519,11 @@ function preview() {
         PLAYER_BLOCK: Number(byId('previewPlayerBlock').value), LAST_ACTION: byId('previewLastAction').value,
         REPEAT_COUNT: Number(byId('previewRepeatCount').value)
     };
-    const selected = selectActions(enemy.behavior, state);
+    const phase = (enemy.mechanics?.phases || []).find((entry) => {
+        return entry.id === byId('previewPhase').value;
+    });
+    state.phaseStartTurn = phase ? Number(byId('previewPhaseStartTurn').value) || 1 : 1;
+    const selected = selectActions(phase?.behavior || enemy.behavior, state);
     byId('intent').textContent = selected.length ? selected.map(summary).join(' + ') : '等待（没有命中任何行动）';
 }
 
@@ -652,6 +662,7 @@ function editNode(field, raw) {
         delete node.hits;
         delete node.status;
         delete node.stacks;
+        delete node.duration;
         delete node.target;
         delete node.cardId;
         delete node.pile;
@@ -916,6 +927,22 @@ byId('save').onclick = save;
 byId('addEnemy').onclick = addEnemy;
 byId('addRoot').onclick = autoLayout;
 byId('preview').onclick = preview;
+byId('applyMechanics').onclick = () => {
+    try {
+        const value = JSON.parse(byId('mechanicsJson').value);
+        if (!value || !Array.isArray(value.initialStatuses) || !Array.isArray(value.phases) || !Array.isArray(value.triggers)) {
+            throw new Error('必须包含 initialStatuses、phases 和 triggers 数组');
+        }
+        currentEnemy().mechanics = value;
+        changed();
+        render();
+        preview();
+        notify('机制已应用，保存时会校验状态、阶段和行动；阶段树可在此 JSON 中编辑。');
+    }
+    catch (error) {
+        notify(`机制 JSON 无效：${error.message}`, true);
+    }
+};
 byId('copyEnemy').onclick = () => {
     const enemy = currentEnemy();
     if (!enemy) {

@@ -113,6 +113,7 @@ export class BattleValueResolver extends CCBusiness<Battle> {
             const side = scope === 'self' ? context.source : context.target;
             const actor = this.actor(side);
             switch (field) {
+                case 'turn': return this.ent.BattleModel.turn;
                 case 'hp': return actor.hp;
                 case 'maxHp': return actor.maxHp;
                 case 'block': return actor.block;
@@ -128,7 +129,8 @@ export class BattleValueResolver extends CCBusiness<Battle> {
         if (scope === 'last_damage') {
             return context.variables.totalHpLoss || 0;
         }
-        const name = field || scope;
+        const variable = field || scope;
+        const name = context.equipmentKey ? context.equipmentKey + '.' + variable : variable;
         return context.variables[name] ?? this.ent.BattleModel.turnVariables[name]
             ?? this.ent.BattleModel.combatVariables[name] ?? 0;
     }
