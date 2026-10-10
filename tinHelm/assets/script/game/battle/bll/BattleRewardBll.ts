@@ -5,38 +5,33 @@ import { BattleReward, BattleRewardKind } from '../model/BattleReward';
 import { BattleEvent } from '../BattleEvent';
 import { smc } from '../../common/SingletonModuleComp';
 import { TableEnemy } from '../../common/table/TableEnemy';
-import { TableItem } from '../../common/table/TableItem';
 import { TableCard } from '../../common/table/TableCard';
-import { TableGameResource } from '../../common/table/TableGameResource';
 import { PlayerEvent } from '../../player/PlayerEvent';
-
 export class BattleRewardBll extends CCBusiness<Battle> {
-    refresh() {
+    // 通知奖励界面刷新数据。
+    refreshRewards(): void {
         this.dispatchEvent(BattleEvent.rewardsChanged);
     }
-
-    prepare() {
+    // 按敌人配置生成资源、道具和卡牌奖励。
+    prepareRewards(): void {
         const model = this.ent.BattleModel;
         if (model.rewardsPrepared || model.closed || model.phase !== BattlePhase.Victory) {
             return;
         }
         model.rewardsPrepared = true;
-        const enemy = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId);
-        if (!enemy) {
-            return;
-        }
+        const enemy = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId)!;
         const rewards: BattleReward[] = [];
-        if (TableItem.getConfigById(enemy.itemRewad)) {
+        if (enemy.itemRewad > 0) {
             rewards.push({ kind: BattleRewardKind.Item, id: enemy.itemRewad, count: 1, cardIds: [], claimed: false });
         }
-        const resources: unknown[] = enemy.resourceReward || [];
+        const resources: number[][] = enemy.resourceReward;
         for (const raw of resources) {
             if (!Array.isArray(raw)) {
                 continue;
             }
-            const id: unknown = raw[0];
-            const amount: unknown = raw[1];
-            if (typeof id !== 'number' || !TableGameResource.getConfigById(id)
+            const id: number = raw[0];
+            const amount: number = raw[1];
+            if (typeof id !== 'number'
                 || typeof amount !== 'number' || !Number.isFinite(amount) || amount < 1) {
                 continue;
             }
@@ -51,14 +46,14 @@ export class BattleRewardBll extends CCBusiness<Battle> {
                 rewards.push({ kind: BattleRewardKind.Resource, id, count, cardIds: [], claimed: false });
             }
         }
-        const cardIds = this.generateCards(enemy.cardRewad || []);
+        const cardIds = this.generateCards(enemy.cardRewad);
         if (cardIds.length) {
             rewards.push({ kind: BattleRewardKind.Card, id: 0, count: 1, cardIds, claimed: false });
         }
         model.rewards = rewards;
     }
-
-    private generateCards(rawSlots: unknown[]) {
+    // 根据等级权重生成互不重复的卡牌奖励。
+    private generateCards(rawSlots: number[][]): number[] {
         const pool = TableCard.getAllConfig().filter((card) => {
             return card.role === smc.player.PlayerModel.roleId && card.level >= 1 && card.level <= 3
                 && ['ATTACK', 'SKILL', 'POWER'].includes(card.type);
@@ -69,8 +64,11 @@ export class BattleRewardBll extends CCBusiness<Battle> {
                 continue;
             }
             const weights = [0, 1, 2].map((index) => {
-                const value: unknown = slot[index];
-                return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : 0;
+                const value: number = slot[index];
+                if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+                    throw new Error(`卡牌奖励等级权重无效：${value}`);
+                }
+                return value;
             });
             const available = pool.filter((card) => {
                 return !result.includes(card.id);
@@ -102,18 +100,20 @@ export class BattleRewardBll extends CCBusiness<Battle> {
                 return card.level === selectedLevel;
             });
             const selected = candidates[Math.floor(Math.random() * candidates.length)];
-            if (selected) {
-                result.push(selected.id);
-            }
+            result.push(selected.id);
         }
         return result;
     }
-
-    claim(index: number) {
+    // 领取选中的道具或资源奖励。
+    claimReward(index: number): boolean {
         const model = this.ent.BattleModel;
-        const reward = model.rewards[index];
         if (model.closed || model.busy || model.phase !== BattlePhase.Victory || !model.resultHandled
-            || model.rewardsDismissed || model.selectedRewardIndex >= 0 || !reward || reward.claimed) {
+            || model.rewardsDismissed || model.selectedRewardIndex >= 0
+            || !Number.isInteger(index) || index < 0 || index >= model.rewards.length) {
+            return false;
+        }
+        const reward = model.rewards[index];
+        if (reward.claimed) {
             return false;
         }
         if (reward.kind === BattleRewardKind.Card) {
@@ -132,14 +132,19 @@ export class BattleRewardBll extends CCBusiness<Battle> {
         this.dispatchEvent(BattleEvent.rewardsChanged);
         return true;
     }
-
-    chooseCard(cardId: number) {
+    // 将确认的卡牌奖励加入玩家牌组。
+    chooseCard(cardId: number): boolean {
         const model = this.ent.BattleModel;
+        if (model.closed || model.phase !== BattlePhase.Victory
+            || model.selectedRewardIndex < 0 || model.selectedRewardIndex >= model.rewards.length) {
+            return false;
+        }
         const reward = model.rewards[model.selectedRewardIndex];
-        const card = TableCard.getConfigById(cardId);
-        if (model.closed || model.phase !== BattlePhase.Victory || !reward || reward.claimed
-            || reward.kind !== BattleRewardKind.Card || !reward.cardIds.includes(cardId)
-            || !card || card.role !== smc.player.PlayerModel.roleId) {
+        if (reward.claimed || reward.kind !== BattleRewardKind.Card || !reward.cardIds.includes(cardId)) {
+            return false;
+        }
+        const card = TableCard.getConfigById(cardId)!;
+        if (card.role !== smc.player.PlayerModel.roleId) {
             return false;
         }
         reward.claimed = true;
@@ -149,8 +154,8 @@ export class BattleRewardBll extends CCBusiness<Battle> {
         this.dispatchEvent(BattleEvent.rewardsChanged);
         return true;
     }
-
-    leave() {
+    // 关闭奖励选择并推进战斗结果流程。
+    leaveRewards(): void {
         const model = this.ent.BattleModel;
         if (model.busy || model.selectedRewardIndex >= 0 || model.closed || model.phase !== BattlePhase.Victory) {
             return;

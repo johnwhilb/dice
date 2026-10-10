@@ -1,10 +1,13 @@
+import { CardEvent, BattleTriggerEvent } from './BattleCardBll';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
-import { BattleContext, BattleEffect, BattleSide, BattleTrigger } from '../model/BattleTypes';
-
+import { BattleContext, BattleEffect, BattleSide, BattleTrigger, BattleEventData } from '../model/BattleTypes';
 export class BattleTriggerBll extends CCBusiness<Battle> {
-    register(event: string, effects: BattleEffect[], context: BattleContext, scope = 'COMBAT', limit = 0,
-        filter: Record<string, unknown> = {}, dueTurn = 0, listenSide = context.source) {
+    // 注册事件监听、使用次数和生效范围。
+    registerTrigger(event: BattleTriggerEvent, effects: BattleEffect[], context: BattleContext, scope = 'COMBAT', limit = 0, filter: BattleEventData = {}, dueTurn = 0, listenSide = context.source): void {
+        if (!Object.values(BattleTriggerEvent).includes(event)) {
+            throw new Error(`战斗触发事件无效：${event}`);
+        }
         const trigger: BattleTrigger = {
             owner: listenSide, event, effects,
             context: { ...context, cardPlay: false, variables: { ...context.variables }, event: {} },
@@ -14,21 +17,20 @@ export class BattleTriggerBll extends CCBusiness<Battle> {
         };
         this.ent.BattleModel.triggers.push(trigger);
     }
-
-    schedule(when: string, times: number, effects: BattleEffect[], context: BattleContext) {
-        const events: Record<string, string> = {
-            NEXT_TURN_START: 'ON_TURN_START', NEXT_TURN_END: 'ON_TURN_END',
-            TURN_END: 'ON_TURN_END', COMBAT_END: 'ON_COMBAT_END', AFTER_ENEMY_TURN: 'AFTER_ENEMY_TURN'
+    // 注册指定时机执行的延迟效果。
+    scheduleEffects(when: string, times: number, effects: BattleEffect[], context: BattleContext): void {
+        const events: Record<string, BattleTriggerEvent> = {
+            NEXT_TURN_START: BattleTriggerEvent.TurnStart, NEXT_TURN_END: BattleTriggerEvent.TurnEnd,
+            TURN_END: BattleTriggerEvent.TurnEnd, COMBAT_END: BattleTriggerEvent.CombatEnd, AFTER_ENEMY_TURN: BattleTriggerEvent.AfterEnemyTurn
         };
         const event = events[when];
         if (!event) {
             throw new Error(`未知延迟时机：${when}`);
         }
-        this.register(event, effects, context, 'COMBAT', Math.max(1, times), {},
-            this.ent.BattleModel.turn + (when.startsWith('NEXT_') ? 1 : 0));
+        this.registerTrigger(event, effects, context, 'COMBAT', Math.max(1, times), {}, this.ent.BattleModel.turn + (when.startsWith('NEXT_') ? 1 : 0));
     }
-
-    async fire(event: string, owner: BattleSide, data: Record<string, unknown> = {}) {
+    // 等待事件监听与卡牌响应按顺序结算。
+    async fireEvent(event: BattleTriggerEvent, owner: BattleSide, data: BattleEventData = {}): Promise<void> {
         const model = this.ent.BattleModel;
         const runId = model.runId;
         // 快照避免本次事件中新注册的监听器立即触发；active 防止反击互相递归。
@@ -36,38 +38,46 @@ export class BattleTriggerBll extends CCBusiness<Battle> {
             if (runId !== model.runId) {
                 return;
             }
-            if (this.ent.BattleBll.isFinished() && event !== 'ON_COMBAT_END' && event !== 'ON_ENEMY_DIED') {
+            if (this.ent.BattleBll.isBattleFinished() && event !== BattleTriggerEvent.CombatEnd && event !== BattleTriggerEvent.EnemyDied) {
                 break;
             }
             if (trigger.event !== event || trigger.owner !== owner || trigger.active
                 || trigger.remaining === 0 || trigger.dueTurn > model.turn) {
                 continue;
             }
-            if (!Object.entries(trigger.filter).every(([key, value]) => data[key] === value)) {
+            if (!Object.entries(trigger.filter).every(([key, value]) => {
+                return data[key] === value;
+            })) {
                 continue;
             }
             trigger.active = true;
             if (trigger.remaining > 0) {
                 trigger.remaining--;
             }
-            try {
-                await this.ent.BattleEffectBll.execute(trigger.effects, {
+            await (async () => {
+                await this.ent.BattleEffectBll.executeEffects(trigger.effects, {
                     ...trigger.context, variables: { ...trigger.context.variables }, event: data
-                }, event === 'ON_COMBAT_END' || event === 'ON_ENEMY_DIED');
-            } finally {
+                }, event === BattleTriggerEvent.CombatEnd || event === BattleTriggerEvent.EnemyDied);
+            })().finally(() => {
                 trigger.active = false;
-            }
+            });
         }
         if (runId !== model.runId) {
             return;
         }
-        model.triggers = model.triggers.filter(trigger => trigger.remaining !== 0);
-        await this.ent.BattleCardBll.triggerCards(event, owner);
+        model.triggers = model.triggers.filter(trigger => {
+            return trigger.remaining !== 0;
+        });
+        if (event === BattleTriggerEvent.CombatStart) {
+            await this.ent.BattleCardBll.triggerCards(CardEvent.CombatStart, owner);
+        }
     }
-
-    expire(owner: BattleSide) {
+    // 移除当前回合到期的临时事件监听。
+    expireTriggers(owner: BattleSide): void {
         const model = this.ent.BattleModel;
-        model.triggers = model.triggers.filter(trigger => trigger.owner !== owner
-            || !(['TURN', 'NEXT_TURN'].includes(trigger.scope) && trigger.expiresTurn <= model.turn));
+        model.triggers = model.triggers.filter(trigger => {
+            return trigger.owner !== owner
+                || !(['TURN', 'NEXT_TURN'].includes(trigger.scope) && trigger.expiresTurn <= model.turn);
+        });
     }
 }

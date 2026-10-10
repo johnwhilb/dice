@@ -30,100 +30,114 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <div class="pane"><div class="pane-head"><h2>结构校验与输出</h2><div class="tabs"><button class="tab active" data-output="validate">校验</button><button class="tab" data-output="json">JSON 预览</button></div></div><div class="pane-body" id="outputPane"></div></div>
 </div></main>
 <aside class="inspector"><div class="inspector-head"><div class="side-title"><h2 id="insTitle">效果属性</h2><span id="insBadge" class="badgel">INSPECTOR</span></div><p id="insSub" class="helper" style="margin:8px 0 0">选择中间的效果，编辑其参数和触发条件。</p></div><div id="inspectorBody" class="inspector-body"></div></aside></div>
-<footer class="footer"><span><span class="dot"></span>配置源：excel/1_Role.xlsx · 2_Card.xlsx · 3_Dice.xlsx</span><span>支持 JSON / CSV 导出 · Ctrl / ⌘ + S 保存 Excel</span></footer></div>
+<footer class="footer"><span><span class="dot"></span>配置源：excel/1_Role.xlsx · 2_Card.xlsx · 3_Dice.xlsx · 20_BattleBuff.xlsx · 21_BattleEffect.xlsx</span><span>支持 JSON / CSV 导出 · Ctrl / ⌘ + S 保存 Excel</span></footer></div>
 <div class="overlay" id="catalogOverlay"><div class="modal"><div class="modal-header"><div><h2>添加效果</h2><p class="helper" id="catalogContext" style="margin:4px 0 0">选择效果类型</p></div><button class="btn" data-close="catalogOverlay">关闭 ×</button></div><div class="modal-content"><div class="catalog-toolbar"><input class="search" id="catalogSearch" placeholder="搜索：伤害、格挡、状态、能力触发……" /></div><div class="catalog-chips" id="catalogCategories"></div><div class="catalog-grid" id="catalogGrid"></div></div></div></div>
-<div class="overlay" id="guideOverlay"><div class="modal" style="width:min(740px,100%)"><div class="modal-header"><h2>编辑器说明及 JSON 运行时约定</h2><button class="btn" data-close="guideOverlay">关闭 ×</button></div><div class="modal-content guide"><p>每次打开页面读取最新 Role、Card、Dice 表。选择角色后可查看、新增、复制、编辑、删除卡牌。</p><p>战斗开始洗牌并发 5 张手牌。出牌本身不消耗能量；有能量且牌堆有牌时，出牌后消耗 1 点能量并自动补 1 张。抽牌与能量消耗不写进卡牌 effect。</p><p>等级 level 为 1–3，价格为非负整数。DiceNeed 最多添加 5 个当前角色的骰子 ID，可以重复。出牌与效果目标仅支持 SELF / ENEMY。</p><p>点击「保存到 Excel」写回 2_Card.xlsx，保存前会校验全部卡牌，并保留上一次表格为 2_Card.xlsx.editor-backup。若 Excel 正在占用文件，请关闭该工作簿后重试。重新读取或关闭页面前请保存修改。</p><p>首次保存会补充 target、type、upId、flags 字段。JSON / CSV 可导出备份。保存后在项目配表插件中生成客户端配置。</p><p>effect 是按顺序执行的效果数组，支持条件、循环与事件。表达式及处理器需要游戏运行时支持。</p></div></div></div>
+<div class="overlay" id="guideOverlay"><div class="modal" style="width:min(740px,100%)"><div class="modal-header"><h2>编辑器说明及 JSON 运行时约定</h2><button class="btn" data-close="guideOverlay">关闭 ×</button></div><div class="modal-content guide"><p>每次打开页面读取最新 Role、Card、Dice、BattleBuff 表。选择角色后可查看、新增、复制、编辑、删除卡牌。</p><p>战斗开始洗牌并发 5 张手牌。出牌本身不消耗能量；有能量且牌堆有牌时，出牌后消耗 1 点能量并自动补 1 张。抽牌与能量消耗不写进卡牌 effect。</p><p>等级 level 为 1–3，价格为非负整数。DiceNeed 最多添加 5 个当前角色的骰子 ID，可以重复。出牌与效果目标仅支持 SELF / ENEMY。</p><p>点击「保存到 Excel」写回 2_Card.xlsx，保存前会校验全部卡牌，并保留上一次表格为 2_Card.xlsx.editor-backup。若 Excel 正在占用文件，请关闭该工作簿后重试。重新读取或关闭页面前请保存修改。</p><p>首次保存会补充 target、type、upId、flags 字段。JSON / CSV 可导出备份。保存后在项目配表插件中生成客户端配置。</p><p>effect 是按顺序执行的效果数组，支持条件、循环与事件。表达式及处理器需要游戏运行时支持。</p></div></div></div>
 <div class="overlay" id="helpOverlay"><div class="modal" style="width:min(560px,100%)"><div class="modal-header"><h2 id="helpTitle">字段说明</h2><button class="btn" data-close="helpOverlay">关闭 ×</button></div><div class="modal-content guide" id="helpBody"></div></div></div>
 <input id="fileInput" type="file" accept=".json,application/json" hidden /><div class="toast" id="toast" role="status"></div>
-<script>
+<script>/**
+ * @typedef {import('../../tinHelm/assets/script/game/battle/model/BattleTypes').BattleEffect} BattleEffect
+ * @typedef {import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyBehaviorNode & {editorX?:number,editorY?:number}} EditorBehaviorNode
+ * @typedef {{id:number|string,name:string,role:number,level:number,price:number,DiceNeed:number[],des:string,type:string,target:string,upId?:number|string|null,flags:Record<string,boolean>,effect:BattleEffect[]}} EditorCard
+ * @typedef {{id:number,name:string,hp:number,behavior:EditorBehaviorNode,mechanics:import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyMechanics}} EditorEnemy
+ * @typedef {{id:number,type:string,name:string,category:string,stackMode:string,maxStacks:number,decayAtTurnEnd:boolean,description:string}} BuffConfig
+ * @typedef {{key:string,label:string,kind:string,options:(number|string)[]|null}} EffectField
+ * @typedef {{id:number,type:string,name:string,category:string,description:string,defaultTarget:string,defaultParams:import('../../tinHelm/assets/script/game/battle/model/BattleTypes').BattleEffectParams,fields:EffectField[],container:string,cardEnabled:boolean,enemyEnabled:boolean}} EffectConfig
+ * @typedef {{node:BattleEffect,arr:BattleEffect[],index:number,parent:BattleEffect|null,branch:string}} EffectLocation
+ */
 'use strict';
-const CATEGORIES=['全部','基础战斗','资源与数值','卡牌与牌堆','状态与能力','流程与触发','特殊机制'];
-const f=(key,label,kind='expr',options=null)=>({key,label,kind,options});
-const catalog={};
-function register(cat,rows){for(const [type,label,hint,defaults,fields=[],container=''] of rows){catalog[type]={type,label,hint,cat,defaults,fields,container};}}
-register('基础战斗',[
-['DAMAGE','造成伤害','普通 / 穿透 / 生命损失 / 多段 / 动态伤害',{amount:6,hits:1,damageKind:'ATTACK',ignoreBlock:false},[f('amount','单次基础伤害'),f('hits','攻击次数'),f('damageKind','伤害类型','enum',['ATTACK','THORNS','HP_LOSS','SPECIAL']),f('ignoreBlock','无视格挡','bool')]],
-['BLOCK','获得格挡','可以使用动态表达式',{amount:5},[f('amount','格挡值')]],
-['BLOCK_NEXT_TURN','下回合格挡','延迟获得格挡',{amount:4},[f('amount','格挡值')]],
-['MULTIPLY_BLOCK','改变当前格挡','例如 Entrench 翻倍',{factor:2},[f('factor','倍率')]],
-['REMOVE_BLOCK','移除格挡','消除目标所有或部分格挡',{amount:'ALL'},[f('amount','数量 / ALL')]],
-['PIERCE_BLOCK','融化 / 消去格挡','直接消除敌人格挡后执行其他效果',{amount:'ALL'},[f('amount','数量 / ALL')]],
-['HEAL','回复生命','可使用 @last_damage.total_hp_loss',{amount:4},[f('amount','回复量')]],
-['LOSE_HP','直接失去生命','不同于攻击伤害',{amount:2,canKill:false},[f('amount','失去生命'),f('canKill','可以使玩家死亡','bool')]],
-['KILL_IF','满足条件直接击杀','例如血量阈值斩杀',{threshold:30},[f('threshold','目标当前生命上限')]],
-['DAMAGE_PER_CARD','根据卡牌数量造成伤害','例如攻击牌数量、打击牌数量',{base:2,filter:{type:'ATTACK',zone:'HAND'}},[f('base','每张卡提供伤害'),f('filter','筛选条件 JSON','json')]],
-['SET_DAMAGE_SCALING','修改永久 / 战斗内成长伤害','例如 Rampage、仪式匕首',{amount:5,scope:'COMBAT',when:'ON_HIT'},[f('amount','成长量'),f('scope','持续范围','enum',['ACTION','TURN','COMBAT','RUN']),f('when','结算时机','enum',['ON_PLAY','ON_HIT','ON_KILL'])]],
-]);
-register('资源与数值',[
-['GAIN_GOLD','获得金币','可由击杀触发',{amount:20},[f('amount','金币数量')]],
-['LOSE_GOLD','失去金币','直接减少金币',{amount:20},[f('amount','金币数量')]],
-['GAIN_MAX_HP','提高生命上限','永久 / 战斗内配置',{amount:3,scope:'RUN'},[f('amount','生命上限增量'),f('scope','持续范围','enum',['COMBAT','RUN'])]],
-['LOSE_MAX_HP','降低生命上限','生命上限惩罚',{amount:3,scope:'RUN'},[f('amount','生命上限减少量'),f('scope','持续范围','enum',['COMBAT','RUN'])]],
-['MODIFY_STAT','改变基础数值','力量、敏捷等，支持持续时间',{stat:'STRENGTH',amount:2,duration:'COMBAT'},[f('stat','属性','enum',['STRENGTH','DEXTERITY','HP','MAX_HP']),f('amount','变化量'),f('duration','有效期','enum',['ACTION','TURN','NEXT_TURN','COMBAT','RUN'])]],
-['SET_STAT','设置属性','属性直接修改为指定值',{stat:'STRENGTH',value:0},[f('stat','属性','enum',['STRENGTH','DEXTERITY','BLOCK']),f('value','目标值')]],
-['DOUBLE_STAT','属性翻倍','例如 Limit Break',{stat:'STRENGTH'},[f('stat','属性','enum',['STRENGTH','DEXTERITY'])]],
-['EXTRA_TURN','额外回合','特殊回合流程，追加一个行动回合',{phase:'PLAYER'},[f('phase','额外回合归属','enum',['PLAYER','ENEMY'])]],
-]);
-register('卡牌与牌堆',[
-['DISCARD','弃牌','可由玩家选牌或随机',{count:1,mode:'SELECT'},[f('count','数量 / ALL'),f('mode','选择方式','enum',['SELECT','RANDOM','ALL','FILTER']),f('filter','筛选 JSON','json')]],
-['EXHAUST','消耗卡牌','可指定手牌 / 抽牌堆等',{count:1,zone:'HAND',mode:'SELECT'},[f('count','数量 / ALL'),f('zone','来源牌堆','enum',['HAND','DRAW','DISCARD','EXHAUST','ANY']),f('mode','选择方式','enum',['SELECT','RANDOM','ALL','FILTER']),f('filter','筛选 JSON','json')]],
-['CREATE_CARD','生成卡牌','产生临时卡，指定目标牌堆',{cardId:'shiv',count:1,zone:'HAND',temporary:true},[f('cardId','卡牌配置 ID','text'),f('count','数量'),f('zone','生成位置','enum',['HAND','DRAW_TOP','DRAW_RANDOM','DISCARD','EXHAUST','MASTER_DECK']),f('temporary','仅当前战斗','bool')]],
-['CREATE_RANDOM_CARD','生成随机卡牌','按角色、等级等筛选',{count:1,pool:'ANY',zone:'HAND',filter:{}},[f('count','数量'),f('pool','卡池','text'),f('zone','生成位置','enum',['HAND','DRAW_TOP','DRAW_RANDOM','DISCARD']),f('filter','卡池筛选 JSON','json')]],
-['SELECT_CARD','检索 / 选牌','从牌堆选择卡进入目标区域',{count:1,source:'DRAW',destination:'HAND',filter:{}},[f('count','选牌数量'),f('source','来源','enum',['HAND','DRAW','DISCARD','EXHAUST','MASTER_DECK','ANY']),f('destination','目标区域','enum',['HAND','DRAW_TOP','DRAW_BOTTOM','DISCARD','EXHAUST']),f('filter','筛选 JSON','json')]],
-['MOVE_CARDS','卡牌移动','批量跨牌堆移动 / 置顶',{count:1,source:'DISCARD',destination:'DRAW_TOP',mode:'SELECT',filter:{}},[f('count','数量 / ALL'),f('source','来源','enum',['HAND','DRAW','DISCARD','EXHAUST','MASTER_DECK']),f('destination','目标','enum',['HAND','DRAW_TOP','DRAW_BOTTOM','DRAW_RANDOM','DISCARD','EXHAUST']),f('mode','模式','enum',['SELECT','RANDOM','ALL','FILTER']),f('filter','筛选 JSON','json')]],
-['SHUFFLE','洗牌','重新洗牌或把弃牌堆洗入抽牌堆',{source:'DISCARD',destination:'DRAW'},[f('source','来源','enum',['DRAW','DISCARD','HAND','EXHAUST']),f('destination','目标','enum',['DRAW','DISCARD'])]],
-['UPGRADE_CARD','升级卡牌','当前战斗或整局永久升级',{count:1,zone:'HAND',mode:'SELECT',scope:'COMBAT'},[f('count','数量 / ALL'),f('zone','来源','enum',['HAND','DRAW','DISCARD','ALL_PILES','MASTER_DECK']),f('mode','方式','enum',['SELECT','RANDOM','ALL']),f('scope','有效期','enum',['COMBAT','RUN'])]],
-['TRANSFORM_CARD','转化卡牌','重随机或转成指定卡牌',{count:1,zone:'MASTER_DECK',pool:'RANDOM'},[f('count','数量'),f('zone','来源','enum',['HAND','DRAW','MASTER_DECK']),f('pool','目标池或卡牌 ID','text')]],
-['COPY_CARD','复制卡牌','复制后放入手牌、弃牌或抽牌',{source:'SELECTED',count:1,destination:'HAND'},[f('source','复制对象','enum',['SELECTED','PLAYED','TOP_DRAW','LAST_PLAYED','CAPTURED']),f('count','复制数量'),f('destination','位置','enum',['HAND','DRAW_TOP','DRAW_RANDOM','DISCARD','MASTER_DECK'])]],
-['PLAY_CARD','自动打出卡牌','从指定区域检索后打出',{source:'DRAW_TOP',count:1,exhaustAfter:false},[f('source','来源','enum',['DRAW_TOP','DRAW_RANDOM','DISCARD_SELECT','HAND_SELECT','EXHAUST_SELECT']),f('count','数量'),f('exhaustAfter','打出后消耗','bool')]],
-['REPLAY_CARD','重复打出效果','再次执行一张卡牌的效果',{times:1,filter:{type:'ATTACK'}},[f('times','追加结算次数'),f('filter','作用对象 JSON','json')]],
-['MODIFY_CARD_VALUE','成长卡牌数值','例如玻璃刀衰减、灼热攻击持续成长',{field:'DAMAGE',delta:2,scope:'COMBAT',source:'THIS_CARD'},[f('field','卡牌属性','enum',['DAMAGE','BLOCK','MAGIC']),f('delta','增量（负值减少）'),f('scope','有效期','enum',['TURN','COMBAT','RUN']),f('source','卡牌对象','enum',['THIS_CARD','SELECTED','PLAYED','ALL_MATCHING'])]],
-['SET_CARD_FLAG','设置卡牌属性','保留 / 消耗 / 虚无 / 固有等',{flag:'RETAIN',value:true,zone:'HAND',mode:'SELECT',duration:'COMBAT'},[f('flag','属性','enum',['RETAIN','EXHAUST','ETHEREAL','INNATE','UNPLAYABLE','AUTOPLAY']),f('value','启用属性','bool'),f('zone','来源','enum',['HAND','DRAW','DISCARD','ALL_PILES']),f('mode','选择方式','enum',['SELECT','RANDOM','ALL']),f('duration','有效期','enum',['TURN','COMBAT','RUN'])]],
-['DISCARD_HAND','弃掉整手牌','例如计算下注',{exceptFilter:{}},[f('exceptFilter','保留筛选 JSON','json')]],
-['EXHAUST_HAND','消耗整手牌','例如恶魔之焰',{exceptFilter:{}},[f('exceptFilter','保留筛选 JSON','json')]],
-['EXHAUST_THIS_CARD','消耗这张卡','例如虚无状态抽入手牌后立即消耗',{},[]],
-['RETURN_CARD','将卡牌返回手牌','例如消耗堆回收 / 弹回',{from:'DISCARD',count:1,filter:{}},[f('from','来源','enum',['DISCARD','EXHAUST','DRAW']),f('count','数量'),f('filter','筛选 JSON','json')]],
-['REORDER_DRAW','调整抽牌堆顺序','调整抽牌堆顶部顺序',{count:3},[f('count','查看顶部数量')]],
-]);
-register('状态与能力',[
-['APPLY_STATUS','施加增益 / 减益','力量、敏捷、虚弱、中毒、易伤、人工制品等',{status:'WEAK',stacks:2,duration:'DEFAULT'},[f('status','状态 ID','text'),f('stacks','层数'),f('duration','持续时间','enum',['DEFAULT','TURN','NEXT_TURN','COMBAT','RUN'])]],
-['REMOVE_STATUS','移除状态','可移除全部或部分层数',{status:'WEAK',stacks:'ALL'},[f('status','状态 ID / ALL','text'),f('stacks','移除层数 / ALL')]],
-['MULTIPLY_STATUS','按倍率修改状态层数','例如 Catalyst 将中毒翻倍',{status:'POISON',factor:2},[f('status','状态 ID','text'),f('factor','倍率')]],
-['TRANSFER_STATUS','转移状态','在自己与敌人之间转移状态',{status:'POISON',amount:'ALL',destination:'ENEMY'},[f('status','状态 ID','text'),f('amount','转移层数 / ALL'),f('destination','目标','enum',['SELF','ENEMY'])]],
-['CLEANSE','清除不利状态','按规则清除减益',{filter:{kind:'DEBUFF'}},[f('filter','状态筛选 JSON','json')]],
-['SET_INTANGIBLE','无实体','减少战斗伤害的能力',{stacks:1},[f('stacks','层数')]],
-['SET_INVINCIBLE','伤害 / 生命损失上限','特殊减伤机制',{cap:15,duration:'TURN'},[f('cap','上限值'),f('duration','期限','enum',['TURN','COMBAT'])]],
-['APPLY_TEMP_STAT','临时属性','回合结束时恢复原值，例如 Piercing Wail',{stat:'STRENGTH',amount:-6,restoreAt:'END_TURN'},[f('stat','属性','enum',['STRENGTH','DEXTERITY']),f('amount','变化量'),f('restoreAt','恢复时机','enum',['END_TURN','START_NEXT_TURN'])]],
-['REGISTER_POWER','获得持续能力','使用能力 ID 和参数，由战斗引擎实现',{powerId:'METALLICIZE',stacks:3,params:{}},[f('powerId','能力 ID','text'),f('stacks','层数'),f('params','额外参数 JSON','json')]],
-['REMOVE_POWER','移除持续能力','根据能力 ID 解除',{powerId:'METALLICIZE'},[f('powerId','能力 ID','text')]],
-]);
-register('流程与触发',[
-['IF','条件分支','满足条件走 THEN，不满足走 ELSE',{},[],'if'],
-['SEQUENCE','效果组 / 顺序执行','把多效果打包成一个步骤',{},[],'children'],
-['REPEAT','循环执行','固定或动态次数的多段效果',{count:2,maxIterations:30},[f('count','重复次数'),f('maxIterations','安全上限','number')],'children'],
-['FOR_EACH','遍历对象','遍历牌堆中的卡牌，子效果引用 @item',{source:'HAND',filter:{}},[f('source','遍历集合','enum',['HAND','DRAW','DISCARD','EXHAUST','ALL_PILES','PLAYED_THIS_TURN']),f('filter','筛选条件 JSON','json')],'children'],
-['REGISTER_TRIGGER','注册能力 / 持续触发','配置事件、监听过滤器、次数和持续范围',{event:'ON_TURN_START',scope:'COMBAT',limit:0,filter:{}},[f('event','触发事件','enum',['ON_COMBAT_START','ON_TURN_START','ON_TURN_END','ON_CARD_DRAWN','ON_CARD_PLAYED','ON_ATTACK_PLAYED','ON_SKILL_PLAYED','ON_POWER_PLAYED','ON_DISCARD','ON_EXHAUST','ON_SHUFFLE','ON_DAMAGE_DEALT','ON_DAMAGE_TAKEN','ON_HP_LOSS','ON_ENEMY_DIED','ON_CARD_CREATED','ON_COMBAT_END']),f('scope','有效期','enum',['TURN','NEXT_TURN','COMBAT','RUN']),f('limit','最多触发次数（0=不限）','number'),f('filter','事件过滤 JSON','json')],'children'],
-['SCHEDULE','延迟执行','下回合或在指定时机执行；可快照选定卡',{when:'NEXT_TURN_START',times:1,capture:{}},[f('when','执行时机','enum',['NEXT_TURN_START','NEXT_TURN_END','TURN_END','COMBAT_END','AFTER_ENEMY_TURN']),f('times','执行次数'),f('capture','执行上下文快照 JSON','json')],'children'],
-['CHOOSE_ONE','让玩家选择一项','每个直接子节点代表一个可选效果；多个效果可用 SEQUENCE',{maxChoices:1,showCount:3},[f('maxChoices','选择数量'),f('showCount','展示选项数量')],'children'],
-['RANDOM_CHOICE','从子效果中随机选取','按数量从选项中选择，不重复可配置',{count:1,unique:true},[f('count','选择数量'),f('unique','不重复','bool')],'children'],
-['SET_VARIABLE','设置临时变量','例如记录本次伤害总量',{name:'temp',value:0,scope:'ACTION'},[f('name','变量名','text'),f('value','数值 / 表达式'),f('scope','作用域','enum',['ACTION','TURN','COMBAT'])]],
-['MODIFY_VARIABLE','修改临时变量','变量加法或乘法',{name:'temp',operator:'ADD',value:1},[f('name','变量名','text'),f('operator','操作','enum',['ADD','MULTIPLY','SET','MIN','MAX']),f('value','值 / 表达式')]],
-['BREAK_LOOP','终止当前循环','需要循环处理器支持',{},[]],
-]);
-register('特殊机制',[
-['GENERATE_REWARD','生成战后奖励','卡牌 / 金币 / 药水等',{reward:'CARD',amount:1,pool:'ANY'},[f('reward','奖励','enum',['CARD','GOLD','POTION','RELIC']),f('amount','数量'),f('pool','奖励池','text')]],
-['GAIN_POTION','获得药水','生成药水；满槽时按照引擎规则处理',{potionId:'RANDOM',count:1},[f('potionId','药水 ID / RANDOM','text'),f('count','数量')]],
-['GAIN_RELIC','获得遗物','战斗奖励或特殊卡牌提供遗物',{relicId:'RANDOM'},[f('relicId','遗物 ID / RANDOM','text')]],
-['REMOVE_CARD_FROM_DECK','永久移除卡牌','从主卡组移除目标卡',{count:1,mode:'SELECT'},[f('count','数量'),f('mode','方式','enum',['SELECT','RANDOM','ALL'])]],
-['END_TURN','结束当前回合','结算并结束回合',{skipEndTriggers:false},[f('skipEndTriggers','跳过回合结束事件','bool')]],
-['END_COMBAT','直接结束战斗','由引擎验证胜负条件',{result:'VICTORY'},[f('result','结果','enum',['VICTORY','DEFEAT'])]],
-['MODIFY_COMBAT_RULE','修改战斗规则','格挡保留、伤害封顶等',{rule:'BLOCK_PERSISTS',value:true,scope:'COMBAT',filter:{}},[f('rule','规则 ID','text'),f('value','值 JSON','json'),f('scope','有效期','enum',['TURN','COMBAT','RUN']),f('filter','筛选 JSON','json')]],
-['CUSTOM','自定义脚本处理器','极端特殊效果可由引擎注册 resolver',{handler:'my_special_effect',args:{}},[f('handler','处理器名称','text'),f('args','参数 JSON','json')]],
-]);
-const icons={'基础战斗':'⚔','资源与数值':'✦','卡牌与牌堆':'▣','状态与能力':'◈','流程与触发':'⑂','特殊机制':'⌘'};
-let uid=0;const newid=()=>`e_${Date.now().toString(36)}_${(++uid).toString(36)}`;
-const clone=x=>JSON.parse(JSON.stringify(x));
-const make=(type)=>{const d=catalog[type]||catalog.CUSTOM;const n={id:newid(),type:d.type,target:'SELF',params:clone(d.defaults)};if(d.container)n.children=[];if(d.container==='if'){n.condition={op:'AND',rules:[{lhs:'@target.hp',cmp:'<=',rhs:30}]};n.elseEffects=[];}return n;};
+let CATEGORIES = ['全部'];
+let BattleEffectTypeEnum = {};
+/**
+ * @returns {void}
+ */
+function updateEffectCatalog(rows) {
+    BattleEffectTypeEnum = Object.fromEntries(rows.map(row => [row.type, row.id]));
+    Object.keys(catalog).forEach(key => {
+        delete catalog[key];
+    });
+    for (const row of rows) {
+        if (row.cardEnabled) {
+            catalog[row.id] = { type: row.id, label: row.name, hint: row.description, cat: row.category, defaults: row.defaultParams, fields: row.fields, container: row.container, target: row.defaultTarget };
+        }
+    }
+    CATEGORIES = ['全部', ...new Set(Object.values(catalog).map(row => row.cat))];
+}
+const catalog = {};
+let buffRows = [];
+let BattleBuffTypeEnum = {};
+/**
+ * @returns {void}
+ */
+function updateBuffCatalog(rows) {
+    buffRows = rows;
+    BattleBuffTypeEnum = Object.fromEntries(rows.map(row => {
+        return [row.type, row.id];
+    }));
+    const ids = rows.map(row => {
+        return row.id;
+    });
+    for (const definition of Object.values(catalog)) {
+        for (const field of definition.fields) {
+            if (['status', 'stat', 'powerId'].includes(field.key)) {
+                field.kind = 'enum';
+                field.options = [...ids, ...(field.key === 'stat' ? ['HP', 'MAX_HP', 'BLOCK'] : definition.type === BattleEffectTypeEnum.REMOVE_STATUS ? ['ALL'] : [])];
+            }
+        }
+        for (const key of ['status', 'stat', 'powerId']) {
+            if (definition.fields.some(field => field.key === key)) {
+                const choices = rows.filter(row => key === 'stat' ? row.category === 'BUFF' : true);
+                if (!choices.length) {
+                    throw new Error('Buff表没有可选状态');
+                }
+                if (!rows.some(row => {
+                    return row.id === definition.defaults[key];
+                }) && !['HP', 'MAX_HP', 'BLOCK', 'ALL'].includes(definition.defaults[key])) {
+                    throw new Error('效果表的默认状态或属性不在Buff表中');
+                }
+            }
+        }
+    }
+}
+const icons = { '基础战斗': '⚔', '资源与数值': '✦', '卡牌与牌堆': '▣', '状态与能力': '◈', '流程与触发': '⑂', '特殊机制': '⌘' };
+let uid = 0;
+/**
+ * @returns {string}
+ */
+const createNodeId = () => {
+    return `e_${Date.now().toString(36)}_${(++uid).toString(36)}`;
+};
+/**
+ * @template T
+ * @param {T} x
+ * @returns {T}
+ */
+const cloneValue = x => {
+    return JSON.parse(JSON.stringify(x));
+};
+/**
+ * @returns {BattleEffect}
+ */
+const createEffect = (type) => {
+    const d = catalog[type];
+    if (!d) {
+        throw new Error('效果编号不在效果表的卡牌可用列表中：' + type);
+    }
+    const n = { id: createNodeId(), type: d.type, target: d.target, params: cloneValue(d.defaults), children: [], elseEffects: [] };
+    if (d.container) {
+        n.children = [];
+    }
+    if (d.container === 'if') {
+        n.condition = { op: 'AND', rules: [{ lhs: '@target.hp', cmp: '<=', rhs: 30 }] };
+        n.elseEffects = [];
+    }
+    return n;
+};
+/**
+ * @template T
+ * @param {T} value
+ * @returns {T}
+ */
 function normalizeJsonKeys(value) {
     if (Array.isArray(value)) {
         return value.map(normalizeJsonKeys);
@@ -133,11 +147,16 @@ function normalizeJsonKeys(value) {
     }
     const result = {};
     for (const [key, item] of Object.entries(value)) {
-        const field = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        const field = key.replace(/_([a-z])/g, (_, letter) => {
+            return letter.toUpperCase();
+        });
         result[field] = normalizeJsonKeys(item);
     }
     return result;
 }
+/**
+ * @returns {EditorCard}
+ */
 function normalizeCard(card) {
     const result = normalizeJsonKeys(card);
     result.id = String(card.id ?? '');
@@ -157,61 +176,104 @@ function normalizeCard(card) {
     delete result.description;
     return result;
 }
-function normalizeNode(raw){let n=normalizeJsonKeys(raw);if(!n||typeof n!=='object'||Array.isArray(n))return make('CUSTOM');n.id=String(n.id||newid());n.type=String(n.type||'CUSTOM');n.target=n.target||'SELF';n.params=n.params&&typeof n.params==='object'&&!Array.isArray(n.params)?n.params:{};for(let key of ['children','elseEffects'])if(Array.isArray(n[key]))n[key]=n[key].map(normalizeNode);return n;}
+/**
+ * @returns {BattleEffect}
+ */
+function normalizeNode(raw) {
+    let n = normalizeJsonKeys(raw);
+    if (!n || typeof n !== 'object' || Array.isArray(n)) {
+        throw new Error('效果节点必须是JSON对象');
+    }
+    n.id = String(n.id || createNodeId());
+    if (!n.type) {
+        throw new Error('效果节点缺少type');
+    }
+    if (!Number.isSafeInteger(n.type) || !catalog[n.type]) {
+        throw new Error('效果类型必须是效果表中的数值编号：' + n.type);
+    }
+    n.target = n.target || 'SELF';
+    n.params = n.params && typeof n.params === 'object' && !Array.isArray(n.params) ? n.params : {};
+    for (let key of ['children', 'elseEffects']) {
+        if (!Object.prototype.hasOwnProperty.call(n, key)) {
+            n[key] = [];
+        }
+        if (!Array.isArray(n[key])) {
+            throw new Error('效果分支必须是数组');
+        }
+        n[key] = n[key].map(normalizeNode);
+    }
+    return n;
+}
 let roles = [], dice = [], activeRole = '', revision = '', dirty = false, saving = false, editVersion = 0;
-let db = {schemaVersion:'1.0', cards:[]}, current = null, selectedNode = null, outputTab = 'validate', catalogFilter = '全部', addContext = {parent:null, branch:'effect'};
-function save() {
+let db = { schemaVersion: '1.0', cards: [] }, current = null, selectedNode = null, outputTab = 'validate', catalogFilter = '全部', addContext = { parent: null, branch: 'effect' };
+/**
+ * @returns {void}
+ */
+function markChanges() {
     scheduleSave();
 }
+/**
+ * @returns {void}
+ */
 function scheduleSave() {
     dirty = true;
     editVersion++;
     document.getElementById('saveStatus').textContent = '待保存到 Excel';
 }
-async function reloadTables() {
+/** @returns {Promise<void>|void} */
+function reloadTables() {
     if (dirty && !confirm('重新读取会丢弃尚未保存的修改，是否继续？')) {
         return;
     }
-    try {
-        const response = await fetch('/api/tables', {cache:'no-store'});
+    return (async () => {
+        const response = await fetch('/api/tables', { cache: 'no-store' });
         const data = await response.json();
         if (!response.ok) {
             throw new Error(data.error);
         }
+        updateEffectCatalog(data.effects);
+        updateBuffCatalog(data.buffs);
         roles = data.roles;
         dice = data.dice;
         db.cards = data.cards.map(normalizeCard);
         revision = data.revision;
         dirty = false;
-        activeRole = roles.some(role => String(role.id) === activeRole) ? activeRole : String(roles[0]?.id || '');
-        document.getElementById('roleSelect').innerHTML = roles.map(role => '<option value="' + attr(role.id) + '">' + esc(role.name) + ' · ' + role.id + '</option>').join('');
+        activeRole = roles.some(role => {
+            return String(role.id) === activeRole;
+        }) ? activeRole : String(roles[0]?.id || '');
+        document.getElementById('roleSelect').innerHTML = roles.map(role => {
+            return '<option value="' + escapeAttribute(role.id) + '">' + escapeHtml(role.name) + ' · ' + role.id + '</option>';
+        }).join('');
         document.getElementById('roleSelect').value = activeRole;
         current = null;
         selectedNode = null;
-        render();
+        renderEditor();
         document.getElementById('saveStatus').textContent = '已读取最新 Excel';
-        document.getElementById('connectionNotice').textContent = '每次打开重新读取三个 Excel 表。修改后点击保存到 Excel。';
-    } catch (error) {
+        document.getElementById('connectionNotice').textContent = '每次打开重新读取五个 Excel 表。修改后点击保存到 Excel。';
+    })().catch(error => {
         document.getElementById('connectionNotice').textContent = '读取失败：请在 dice 目录运行 node 策划/cardEffectEditor/cardEffectEditorServer.cjs，再打开 http://127.0.0.1:3210。' + error.message;
         document.getElementById('saveStatus').textContent = '读取失败';
-    }
+    });
 }
-async function saveExcel() {
+/** @returns {Promise<void>|void} */
+function saveExcel() {
     if (!revision || saving) {
         return;
     }
-    const errors = getValidation().filter(message => message[0] === 'error');
+    const errors = getValidationMessages().filter(message => {
+        return message[0] === 'error';
+    });
     if (errors.length) {
         outputTab = 'validate';
         renderOutput();
-        toast('请先修正校验错误：' + errors[0][1]);
+        showToast('请先修正校验错误：' + errors[0][1]);
         return;
     }
     saving = true;
     const version = editVersion;
     document.getElementById('saveExcelBtn').disabled = true;
-    try {
-        const response = await fetch('/api/cards', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({revision, cards:db.cards})});
+    return (async () => {
+        const response = await fetch('/api/cards', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ revision, cards: db.cards }) });
         const result = await response.json();
         if (!response.ok) {
             throw new Error(result.error);
@@ -219,50 +281,156 @@ async function saveExcel() {
         revision = result.revision;
         dirty = version !== editVersion;
         document.getElementById('saveStatus').textContent = dirty ? '有新增修改待保存' : '已保存到 Excel';
-        toast('卡牌表已保存，原表已备份');
-    } catch (error) {
-        toast('保存失败：' + error.message);
-    } finally {
+        showToast('卡牌表已保存，原表已备份');
+    })().catch(error => {
+        showToast('保存失败：' + error.message);
+    }).finally(() => {
         saving = false;
         document.getElementById('saveExcelBtn').disabled = false;
+    });
+}
+/**
+ * @returns {EditorCard|null}
+ */
+const getCurrentCard = () => {
+    return db.cards.find(x => {
+        return x.id === current;
+    }) || null;
+};
+/**
+ * @returns {string}
+ */
+const escapeHtml = s => {
+    return String(s ?? '').replace(/[&<>"']/g, x => {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[x]);
+    });
+};
+const escapeAttribute = escapeHtml;
+/**
+ * @returns {string}
+ */
+const serializeJson = value => {
+    return JSON.stringify(normalizeJsonKeys(value), null, 2);
+};
+/**
+ * @returns {void}
+ */
+function showToast(msg) {
+    let t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast.t);
+    showToast.t = setTimeout(() => {
+        return t.classList.remove('show');
+    }, 3000);
+}
+/**
+ * @returns {void}
+ */
+function walkNodes(arr, fn) {
+    for (let n of arr || []) {
+        fn(n);
+        if (Array.isArray(n.children)) {
+            walkNodes(n.children, fn);
+        }
+        if (Array.isArray(n.elseEffects)) {
+            walkNodes(n.elseEffects, fn);
+        }
     }
 }
-const currentCard=()=>db.cards.find(x=>x.id===current)||null;
-const esc=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
-const attr=esc;
-const pretty = value => JSON.stringify(normalizeJsonKeys(value), null, 2);
-function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),3000)}
-function walkNodes(arr,fn){for(let n of arr||[]){fn(n);if(Array.isArray(n.children))walkNodes(n.children,fn);if(Array.isArray(n.elseEffects))walkNodes(n.elseEffects,fn);}}
-function findNode(id,arr=currentCard()?.effect){let found=null;walkNodes(arr,n=>{if(n.id===id)found=n});return found;}
-function findNodeLocation(id,arr=currentCard()?.effect,parent=null,branch='effect'){for(let i=0;i<(arr||[]).length;i++){const n=arr[i];if(n.id===id)return {node:n,arr,index:i,parent,branch};for(const key of ['children','elseEffects'])if(Array.isArray(n[key])){const r=findNodeLocation(id,n[key],n,key);if(r)return r;}}return null;}
-function nextCardId(){let nums=db.cards.map(c=>Number(c.id)).filter(Number.isFinite);return String(Math.max(20000,...nums)+1)}
-function parseScalar(s){if(s==='')return '';if(/^-?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(s.trim()))return Number(s);return s;}
+/**
+ * @returns {BattleEffect|null}
+ */
+function findNode(id, arr = getCurrentCard()?.effect) {
+    let found = null;
+    walkNodes(arr, n => {
+        if (n.id === id) {
+            found = n;
+        }
+    });
+    return found;
+}
+/**
+ * @returns {EffectLocation|null}
+ */
+function findNodeLocation(id, arr = getCurrentCard()?.effect, parent = null, branch = 'effect') {
+    for (let i = 0; i < (arr || []).length; i++) {
+        const n = arr[i];
+        if (n.id === id) {
+            return { node: n, arr, index: i, parent, branch };
+        }
+        for (const key of ['children', 'elseEffects']) {
+            if (Array.isArray(n[key])) {
+                const r = findNodeLocation(id, n[key], n, key);
+                if (r) {
+                    return r;
+                }
+            }
+        }
+    }
+    return null;
+}
+/**
+ * @returns {string}
+ */
+function createCardId() {
+    let nums = db.cards.map(c => {
+        return Number(c.id);
+    }).filter(Number.isFinite);
+    return String(Math.max(20000, ...nums) + 1);
+}
+/**
+ * @returns {number|string}
+ */
+function parseScalar(s) {
+    if (s === '') {
+        return '';
+    }
+    if (/^-?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(s.trim())) {
+        return Number(s);
+    }
+    return s;
+}
+/**
+ * @returns {void}
+ */
 function renderSidebar() {
     const query = document.getElementById('cardSearch').value.trim().toLowerCase();
     const cards = db.cards
-        .filter(card => String(card.role) === activeRole)
-        .filter(card => (card.name + ' ' + card.id + ' ' + card.type).toLowerCase().includes(query));
+        .filter(card => {
+        return String(card.role) === activeRole;
+    })
+        .filter(card => {
+        return (card.name + ' ' + card.id + ' ' + card.type).toLowerCase().includes(query);
+    });
     document.getElementById('countTag').textContent = cards.length + ' 种';
-    document.getElementById('cardList').innerHTML = cards.map(card => `
-        <div class="card-item ${card.id === current ? 'active' : ''}" data-card="${attr(card.id)}">
+    document.getElementById('cardList').innerHTML = cards.map(card => {
+        return `
+        <div class="card-item ${card.id === current ? 'active' : ''}" data-card="${escapeAttribute(card.id)}">
             <div class="ico">${{ ATTACK: '⚔', SKILL: '✦', POWER: '◈', STATUS: '◇', CURSE: '☠' }[card.type] || '▣'}</div>
             <div style="min-width:0;flex:1">
-                <strong>${esc(card.name)}</strong>
-                <small>${esc(card.id)} · Lv.${esc(card.level)} · ${esc(card.price)} 金币</small>
+                <strong>${escapeHtml(card.name)}</strong>
+                <small>${escapeHtml(card.id)} · Lv.${escapeHtml(card.level)} · ${escapeHtml(card.price)} 金币</small>
             </div>
-            ${db.cards.some(other => other.upId === card.id) ? '<span class="badgel gold">＋</span>' : ''}
+            ${db.cards.some(other => {
+            return other.upId === card.id;
+        }) ? '<span class="badgel gold">＋</span>' : ''}
         </div>
-    `).join('') || '<div class="helper" style="padding:12px">没有找到卡牌</div>';
-
-    const role = roles.find(item => String(item.id) === activeRole);
+    `;
+    }).join('') || '<div class="helper" style="padding:12px">没有找到卡牌</div>';
+    const role = roles.find(item => {
+        return String(item.id) === activeRole;
+    });
     const starterCards = role?.originCards || [];
     const counts = new Map();
     starterCards.forEach(id => {
         counts.set(id, (counts.get(id) || 0) + 1);
     });
     const summary = [...counts].map(([id, count]) => {
-        const card = db.cards.find(item => Number(item.id) === Number(id));
-        return esc(card?.name || id) + ' × ' + count;
+        const card = db.cards.find(item => {
+            return Number(item.id) === Number(id);
+        });
+        return escapeHtml(card?.name || id) + ' × ' + count;
     });
     document.getElementById('starterDeckSummary').innerHTML =
         '<strong>初始牌组 · ' + starterCards.length + ' 张</strong><br>' + summary.join(' · ');
@@ -298,9 +466,15 @@ const fieldHelp = {
     damageKind: 'ATTACK 为普通攻击伤害；THORNS 为反伤；HP_LOSS 为直接失去生命；SPECIAL 为特殊伤害。',
     ignoreBlock: '启用后伤害忽略目标格挡。'
 };
-function helpButton(field) {
-    return '<button type="button" class="help-button" data-help="' + attr(field) + '" aria-label="查看 ' + attr(field) + ' 的说明" title="查看说明">!</button>';
+/**
+ * @returns {string}
+ */
+function createHelpButton(field) {
+    return '<button type="button" class="help-button" data-help="' + escapeAttribute(field) + '" aria-label="查看 ' + escapeAttribute(field) + ' 的说明" title="查看说明">!</button>';
 }
+/**
+ * @returns {void}
+ */
 function showHelp(field, label, options) {
     const title = label || field;
     const details = fieldHelp[field] || '这个字段会写入 JSON 的 ' + field + ' 属性，由对应效果处理器读取。';
@@ -308,14 +482,17 @@ function showHelp(field, label, options) {
     const values = options || (explanations ? TRIGGER_EVENTS : []);
     const items = values.map(value => {
         const description = explanations?.[value] || '选项值：' + value;
-        return '<li><code>' + esc(value) + '</code>：' + esc(description) + '</li>';
+        return '<li><code>' + escapeHtml(value) + '</code>：' + escapeHtml(description) + '</li>';
     }).join('');
     document.getElementById('helpTitle').textContent = title + '（' + field + '）';
-    document.getElementById('helpBody').innerHTML = '<p>' + esc(details) + '</p>' + (items ? '<ul class="help-list">' + items + '</ul>' : '');
+    document.getElementById('helpBody').innerHTML = '<p>' + escapeHtml(details) + '</p>' + (items ? '<ul class="help-list">' + items + '</ul>' : '');
     document.getElementById('helpOverlay').classList.add('show');
 }
+/**
+ * @returns {void}
+ */
 function renderCardForm() {
-    const card = currentCard();
+    const card = getCurrentCard();
     const form = document.getElementById('cardForm');
     document.getElementById('heading').textContent = card?.name || '当前角色暂无卡牌';
     document.getElementById('breadcrumb').textContent = card?.name || '新建卡牌';
@@ -324,85 +501,778 @@ function renderCardForm() {
         form.innerHTML = '<div class="empty">选择角色后，点击「新建卡牌」。</div>';
         return;
     }
-    const input = (key, label, type = 'text') => '<div class="field"><label>' + label + '（' + key + '）' + helpButton(key) + '</label><input class="input" type="' + type + '" data-card-field="' + key + '" value="' + attr(card[key] ?? '') + '" /></div>';
-    const select = (key, label, options) => '<div class="field"><label>' + label + '（' + key + '）' + helpButton(key) + '</label><select class="select" data-card-field="' + key + '">' + selectHtml(options, card[key]) + '</select></div>';
-    const available = dice.filter(item => item.role === card.role);
-    form.innerHTML = '<div class="fields">' + input('id', '卡牌 ID', 'number') + input('name', '名称') + select('level', '等级（1 最低，3 最高）', [1, 2, 3]) + input('price', '价格', 'number') + select('target', '出牌目标', ['SELF', 'ENEMY']) + select('type', '类型', ['ATTACK','SKILL','POWER','STATUS','CURSE']) + input('upId', '升级目标 ID', 'number') + '<div class="field"><label>所属角色（role）' + helpButton('role') + '</label><input class="input" readonly value="' + attr(roles.find(role => role.id === card.role)?.name || card.role) + '" /></div><div class="field span4"><label>骰子 Icon 触发条件（DiceNeed）' + helpButton('DiceNeed') + ' · ' + card.DiceNeed.length + ' / 5（允许重复）</label><div class="pills">' + card.DiceNeed.map((id, index) => {
-        const item = available.find(die => die.id === id);
-        return '<button class="btn tiny ' + (item ? '' : 'danger') + '" data-remove-dice="' + index + '">' + esc(item ? item.name : '不属于此角色：' + id) + ' ×</button>';
-    }).join('') + '</div><div class="split"><select class="select" id="diceSelect">' + available.map(item => '<option value="' + item.id + '">' + esc(item.name) + ' · ' + item.id + ' · 骰面 ' + esc(item.diceNum.join('/')) + '</option>').join('') + '</select><button class="btn" id="addDiceBtn" ' + (card.DiceNeed.length >= 5 || !available.length ? 'disabled' : '') + '>＋ 添加触发条件</button></div></div><div class="field span4"><label>描述（des）' + helpButton('des') + '</label><textarea class="textarea" data-card-field="des">' + esc(card.des) + '</textarea></div><div class="field span4"><label>特殊属性（flags）' + helpButton('flags') + '</label><div class="flagline">' + ['exhaust','retain','ethereal','innate','unplayable'].map(key => '<label class="check"><input type="checkbox" data-card-flag="' + key + '" ' + (card.flags[key] ? 'checked' : '') + '/>' + ({exhaust:'消耗',retain:'保留',ethereal:'虚无',innate:'固有',unplayable:'不可打出'}[key]) + '</label>').join('') + '</div></div></div>';
+    /**
+ * @returns {void}
+ */
+    const input = (key, label, type = 'text') => {
+        return '<div class="field"><label>' + label + '（' + key + '）' + createHelpButton(key) + '</label><input class="input" type="' + type + '" data-card-field="' + key + '" value="' + escapeAttribute(card[key] ?? '') + '" /></div>';
+    };
+    /**
+ * @returns {void}
+ */
+    const select = (key, label, options) => {
+        return '<div class="field"><label>' + label + '（' + key + '）' + createHelpButton(key) + '</label><select class="select" data-card-field="' + key + '">' + selectHtml(options, card[key]) + '</select></div>';
+    };
+    const available = dice.filter(item => {
+        return item.role === card.role;
+    });
+    form.innerHTML = '<div class="fields">' + input('id', '卡牌 ID', 'number') + input('name', '名称') + select('level', '等级（1 最低，3 最高）', [1, 2, 3]) + input('price', '价格', 'number') + select('target', '出牌目标', ['SELF', 'ENEMY']) + select('type', '类型', ['ATTACK', 'SKILL', 'POWER', 'STATUS', 'CURSE']) + input('upId', '升级目标 ID', 'number') + '<div class="field"><label>所属角色（role）' + createHelpButton('role') + '</label><input class="input" readonly value="' + escapeAttribute(roles.find(role => {
+        return role.id === card.role;
+    })?.name || card.role) + '" /></div><div class="field span4"><label>骰子 Icon 触发条件（DiceNeed）' + createHelpButton('DiceNeed') + ' · ' + card.DiceNeed.length + ' / 5（允许重复）</label><div class="pills">' + card.DiceNeed.map((id, index) => {
+        const item = available.find(die => {
+            return die.id === id;
+        });
+        return '<button class="btn tiny ' + (item ? '' : 'danger') + '" data-remove-dice="' + index + '">' + escapeHtml(item ? item.name : '不属于此角色：' + id) + ' ×</button>';
+    }).join('') + '</div><div class="split"><select class="select" id="diceSelect">' + available.map(item => {
+        return '<option value="' + item.id + '">' + escapeHtml(item.name) + ' · ' + item.id + ' · 骰面 ' + escapeHtml(item.diceNum.join('/')) + '</option>';
+    }).join('') + '</select><button class="btn" id="addDiceBtn" ' + (card.DiceNeed.length >= 5 || !available.length ? 'disabled' : '') + '>＋ 添加触发条件</button></div></div><div class="field span4"><label>描述（des）' + createHelpButton('des') + '</label><textarea class="textarea" data-card-field="des">' + escapeHtml(card.des) + '</textarea></div><div class="field span4"><label>特殊属性（flags）' + createHelpButton('flags') + '</label><div class="flagline">' + ['exhaust', 'retain', 'ethereal', 'innate', 'unplayable'].map(key => {
+        return '<label class="check"><input type="checkbox" data-card-flag="' + key + '" ' + (card.flags[key] ? 'checked' : '') + '/>' + ({ exhaust: '消耗', retain: '保留', ethereal: '虚无', innate: '固有', unplayable: '不可打出' }[key]) + '</label>';
+    }).join('') + '</div></div></div>';
 }
-function effectSummary(n){let d=catalog[n.type],p=n.params||{};let keys=d?.fields?.slice(0,2).map(x=>x.key)||Object.keys(p).slice(0,2);let ps=keys.filter(k=>p[k]!==undefined&&typeof p[k]!=='object').map(k=>`${k}: ${String(p[k])}`).join(' · ');if(n.type==='IF')ps=`${n.condition?.rules?.map(r=>`${r.lhs} ${r.cmp} ${r.rhs}`).join(' '+(n.condition?.op||'AND')+' ')||'未设置条件'}`;return ps||d?.hint||'自定义参数';}
-function renderNodes(arr,branch='effect',parent=null){return (arr||[]).map((n,i)=>{let d=catalog[n.type];let container=d?.container|| (n.children?'children':'');let indent=`<div class="effect ${selectedNode===n.id?'selected':''}" data-effect-node="${attr(n.id)}"><div class="effect-row" data-select-node="${attr(n.id)}"><span class="step-num">${i+1}</span><div class="effect-icon">${icons[d?.cat]||'⌘'}</div><div style="min-width:0;flex:1"><div class="effect-title">${esc(d?.label||n.type)} <span class="badgel" style="margin-left:4px">${esc(n.target)}</span></div><div class="effect-desc">${n.trigger&&n.trigger!=='ON_PLAY'?'['+esc(n.trigger)+'] · ':''}${esc(effectSummary(n))}${n.condition&&n.type!=='IF'?' · ⚑ 有条件':''}</div></div><div class="effect-actions"><button class="round" title="上移" data-move="up" data-id="${attr(n.id)}">↑</button><button class="round" title="下移" data-move="down" data-id="${attr(n.id)}">↓</button><button class="round" title="复制" data-dup="${attr(n.id)}">⧉</button><button class="round danger" title="删除" data-del="${attr(n.id)}">×</button></div></div>`;
-if(container){indent+=`<div class="nested"><div class="nested-label"><span>${container==='if'?'THEN · 条件成立':'子效果 · '+(n.children||[]).length+' 项'}</span><span class="muted">顺序执行</span></div><div class="nested-list">${renderNodes(n.children||[],'children',n)||'<div class="helper">暂无子效果</div>'}<button class="add-inline" data-add-parent="${attr(n.id)}" data-add-branch="children">＋ 在此添加子效果</button></div>`;if(container==='if')indent+=`<div class="nested-label"><span>ELSE · 条件不成立</span></div><div class="nested-list">${renderNodes(n.elseEffects||[],'elseEffects',n)||'<div class="helper">默认跳过</div>'}<button class="add-inline" data-add-parent="${attr(n.id)}" data-add-branch="elseEffects">＋ 添加 ELSE 效果</button></div>`;indent+='</div>';}
-return indent+'</div>';}).join('');}
-function renderTree(){const c=currentCard();document.getElementById('effectCount').textContent=(c?.effect?.length||0)+' 个步骤';document.getElementById('effectTree').innerHTML=c?.effect?.length?renderNodes(c.effect):'<div class="empty">当前卡牌没有效果。<br/>添加伤害、格挡、状态、条件或持续触发器。<br/><button class="btn primary" style="margin-top:13px" data-add-parent="" data-add-branch="effect">＋ 添加第一个效果</button></div>';}
-function selectHtml(options,value){return options.map(v=>`<option value="${attr(v)}" ${String(v)===String(value)?'selected':''}>${esc(v)}</option>`).join('')}
-function renderParamField(field,p){let v=p[field.key]??'',content='';if(field.kind==='enum')content=`<select class="select" data-param="${attr(field.key)}" data-kind="enum">${selectHtml(field.options||[],v)}${v&&!field.options.includes(v)?`<option selected value="${attr(v)}">${esc(v)} (自定义)</option>`:''}</select>`;
-else if(field.kind==='bool')content=`<label class="check"><input type="checkbox" data-param="${attr(field.key)}" data-kind="bool" ${v?'checked':''}/> 启用</label>`;
-else if(field.kind==='json')content=`<textarea class="textarea mono" spellcheck="false" rows="3" data-param="${attr(field.key)}" data-kind="json">${esc(pretty(v))}</textarea><span class="helper" data-json-error="${attr(field.key)}">对象 / 数组均可，离开输入框时解析</span>`;
-else content=`<input class="input ${field.kind==='expr'?'mono':''}" ${field.kind==='number'?'type="number"':''} data-param="${attr(field.key)}" data-kind="${attr(field.kind)}" value="${attr(v)}" placeholder="${field.kind==='expr'?'数字或表达式':''}" />`;
-return `<div class="field"><label>${esc(field.label)}（${esc(field.key)}）${helpButton(field.key)}</label>${content}</div>`;}
-const TRIGGER_EVENTS=['ON_PLAY','ON_DRAWN','ON_DISCARDED','ON_EXHAUSTED','ON_TURN_END_IN_HAND','ON_COMBAT_START','ON_KILL_WITH_THIS_CARD','ON_HIT_UNBLOCKED','ON_RETAINED','ON_UPGRADED','ON_CREATED'];
-const commonTargets=['SELF','ENEMY'];
-const cmpOps=['==','!=','>','>=','<','<=','IN','NOT_IN','HAS','IS_TRUE','IS_FALSE'];
-function renderCondition(n){let co=n.condition||{op:'AND',rules:[]};let rules=Array.isArray(co.rules)?co.rules:[];return `<div class="ins-group"><h3>触发条件（condition）${helpButton('condition')}</h3><div class="ins-stack"><div class="field"><label>条件组合</label><select class="select" id="condOp">${selectHtml(['AND','OR'],co.op||'AND')}</select></div>${rules.map((r,i)=>`<div class="cond-rule"><div class="cond-line"><input class="input mono" data-condition-field="lhs" data-rule="${i}" value="${attr(r.lhs)}" placeholder="@target.poison" /><select class="select" data-condition-field="cmp" data-rule="${i}">${selectHtml(cmpOps,r.cmp||'==')}</select><button class="round danger" data-remove-condition="${i}" title="删除条件">×</button></div><div class="cond-line"><span class="muted small">比较值</span><input class="input mono" data-condition-field="rhs" data-rule="${i}" value="${attr(typeof r.rhs==='object'?JSON.stringify(r.rhs):r.rhs)}" placeholder="数值、true 或公式" /></div></div>`).join('')}<button class="btn block" data-add-condition="1">＋ 添加条件</button><span class="helper">条件支持 AND / OR，复杂嵌套请用下方的节点 JSON 编辑。</span></div></div>`;}
-let advancedText='';
-function renderInspector(){const n=selectedNode?findNode(selectedNode):null;const header=document.getElementById('insTitle'),sub=document.getElementById('insSub'),body=document.getElementById('inspectorBody'),badge=document.getElementById('insBadge');if(!n){header.textContent='效果属性';sub.textContent='选择一个效果，或从效果库中添加。';badge.textContent='INSPECTOR';body.innerHTML='<div class="empty">← 在中间添加或选择效果<br/>这里会出现动态参数表单。</div>';return;}const d=catalog[n.type];header.textContent=d?.label||n.type;badge.textContent=n.type;sub.textContent=d?.hint||'未知扩展类型：使用 JSON 编辑';let form=`<div class="ins-group"><h3>通用配置</h3><div class="ins-stack"><div class="field"><label>效果类型（type）${helpButton('type')}</label><input class="input mono" readonly value="${attr(n.type)}"/></div><div class="field"><label>作用目标（target）${helpButton('target')}</label><select class="select" data-node-field="target">${selectHtml(commonTargets,n.target||'SELF')}</select></div>${!findNodeLocation(n.id)?.parent?`<div class="field"><label>该卡效果触发时机（根节点）${helpButton('trigger')}</label><select class="select" data-node-field="trigger">${selectHtml(TRIGGER_EVENTS,n.trigger||'ON_PLAY')}</select></div>`:''}<div class="field"><label>备注（note）${helpButton('note')}</label><input class="input" data-node-field="note" value="${attr(n.note||'')}" placeholder="可选" /></div></div></div>`;
-form+=`<div class="ins-group"><h3>效果参数</h3><div class="ins-stack">${d?.fields?.length?d.fields.map(x=>renderParamField(x,n.params)).join(''):'<div class="helper">此类型无需参数。如需扩展，可在下方编辑节点 JSON。</div>'}</div></div>`;
-form+=renderCondition(n);
-if(d?.container)form+=`<div class="notice">${d.container==='if'?'THEN / ELSE':'children'} 是有序子效果数组，直接在中间流程树中添加。${n.type==='REGISTER_TRIGGER'?'触发器的监听生命周期由战斗引擎管理。':''}</div><div class="divider"></div>`;
-form+=`<div class="ins-group"><h3>高级 JSON（保留所有自定义字段）</h3><div class="ins-stack"><textarea class="textarea mono" spellcheck="false" id="advancedJSON" rows="11">${esc(pretty(n))}</textarea><div id="advanceError" class="helper">手动修改后点击应用；可实现嵌套条件和特殊结构。</div><button class="btn" id="applyNodeJson">应用节点 JSON</button></div></div><div class="split"><button class="btn" data-dup="${attr(n.id)}">⧉ 复制步骤</button><button class="btn danger" data-del="${attr(n.id)}">删除步骤</button></div>`;body.innerHTML=form;advancedText=pretty(n);}
-const unsupportedEffects = new Set(['DRAW','DRAW_UNTIL','NO_DRAW','GAIN_ENERGY','GAIN_ENERGY_NEXT_TURN','ENERGY_NEXT_TURN','DOUBLE_ENERGY','SET_ENERGY','GAIN_ENERGY_PER','X_COST','SET_CARD_COST','MODIFY_CARD_COST']);
-function getValidation(){let messages=[],ids=new Set();
-for(const card of db.cards) {
-    if (!Number.isSafeInteger(Number(card.id)) || Number(card.id) <= 0 || !roles.some(role => role.id === card.role)) {
-        messages.push(['error', card.name + '：ID 或角色无效']);
+/**
+ * @returns {string}
+ */
+function describeEffect(n) {
+    let d = catalog[n.type], p = n.params || {};
+    let keys = d?.fields?.slice(0, 2).map(x => {
+        return x.key;
+    }) || Object.keys(p).slice(0, 2);
+    let ps = keys.filter(k => {
+        return p[k] !== undefined && typeof p[k] !== 'object';
+    }).map(k => {
+        return `${k}: ${String(p[k])}`;
+    }).join(' · ');
+    if (n.type === BattleEffectTypeEnum.IF) {
+        ps = `${n.condition?.rules?.map(r => {
+            return `${r.lhs} ${r.cmp} ${r.rhs}`;
+        }).join(' ' + (n.condition?.op || 'AND') + ' ') || '未设置条件'}`;
     }
-    if (![1,2,3].includes(card.level) || !Number.isSafeInteger(card.price) || card.price < 0) {
-        messages.push(['error', card.name + '：等级须为 1–3，价格须为非负整数']);
-    }
-    if (!['SELF','ENEMY'].includes(card.target) || card.DiceNeed.length > 5 || card.DiceNeed.some(id => !dice.some(item => item.id === id && item.role === card.role))) {
-        messages.push(['error', card.name + '（' + card.id + '）：目标或骰子条件无效，请选用当前角色骰子，最多 5 个']);
-    }
-    walkNodes(card.effect, node => {
-        if (!catalog[node.type] || unsupportedEffects.has(node.type) || !['SELF','ENEMY'].includes(node.target)) {
-            messages.push(['error', card.name + '：不支持的效果或目标 ' + node.type]);
+    return ps || d?.hint || '自定义参数';
+}
+/**
+ * @returns {string}
+ */
+function renderNodes(arr, branch = 'effect', parent = null) {
+    return (arr || []).map((n, i) => {
+        let d = catalog[n.type];
+        let container = d?.container || (n.children ? 'children' : '');
+        let indent = `<div class="effect ${selectedNode === n.id ? 'selected' : ''}" data-effect-node="${escapeAttribute(n.id)}"><div class="effect-row" data-select-node="${escapeAttribute(n.id)}"><span class="step-num">${i + 1}</span><div class="effect-icon">${icons[d?.cat] || '⌘'}</div><div style="min-width:0;flex:1"><div class="effect-title">${escapeHtml(d?.label || n.type)} <span class="badgel" style="margin-left:4px">${escapeHtml(n.target)}</span></div><div class="effect-desc">${n.trigger && n.trigger !== 'ON_PLAY' ? '[' + escapeHtml(n.trigger) + '] · ' : ''}${escapeHtml(describeEffect(n))}${n.condition && n.type !== BattleEffectTypeEnum.IF ? ' · ⚑ 有条件' : ''}</div></div><div class="effect-actions"><button class="round" title="上移" data-move="up" data-id="${escapeAttribute(n.id)}">↑</button><button class="round" title="下移" data-move="down" data-id="${escapeAttribute(n.id)}">↓</button><button class="round" title="复制" data-dup="${escapeAttribute(n.id)}">⧉</button><button class="round danger" title="删除" data-del="${escapeAttribute(n.id)}">×</button></div></div>`;
+        if (container) {
+            indent += `<div class="nested"><div class="nested-label"><span>${container === 'if' ? 'THEN · 条件成立' : '子效果 · ' + (n.children || []).length + ' 项'}</span><span class="muted">顺序执行</span></div><div class="nested-list">${renderNodes(n.children || [], 'children', n) || '<div class="helper">暂无子效果</div>'}<button class="add-inline" data-add-parent="${escapeAttribute(n.id)}" data-add-branch="children">＋ 在此添加子效果</button></div>`;
+            if (container === 'if') {
+                indent += `<div class="nested-label"><span>ELSE · 条件不成立</span></div><div class="nested-list">${renderNodes(n.elseEffects || [], 'elseEffects', n) || '<div class="helper">默认跳过</div>'}<button class="add-inline" data-add-parent="${escapeAttribute(n.id)}" data-add-branch="elseEffects">＋ 添加 ELSE 效果</button></div>`;
+            }
+            indent += '</div>';
         }
+        return indent + '</div>';
+    }).join('');
+}
+/**
+ * @returns {void}
+ */
+function renderTree() {
+    const c = getCurrentCard();
+    document.getElementById('effectCount').textContent = (c?.effect?.length || 0) + ' 个步骤';
+    document.getElementById('effectTree').innerHTML = c?.effect?.length ? renderNodes(c.effect) : '<div class="empty">当前卡牌没有效果。<br/>添加伤害、格挡、状态、条件或持续触发器。<br/><button class="btn primary" style="margin-top:13px" data-add-parent="" data-add-branch="effect">＋ 添加第一个效果</button></div>';
+}
+/**
+ * @returns {string}
+ */
+function selectHtml(options, value) {
+    return options.map(v => {
+        return `<option value="${escapeAttribute(v)}" ${String(v) === String(value) ? 'selected' : ''}>${escapeHtml(buffRows.find(row => {
+            return row.id === v;
+        })?.name ?? v)}</option>`;
+    }).join('');
+}
+/**
+ * @returns {string}
+ */
+function renderParamField(field, p) {
+    let v = p[field.key] ?? '', content = '';
+    if (field.kind === 'enum') {
+        content = `<select class="select" data-param="${escapeAttribute(field.key)}" data-kind="enum">${selectHtml(field.options || [], v)}${v && !field.options.includes(v) ? `<option selected value="${escapeAttribute(v)}">${escapeHtml(v)} (自定义)</option>` : ''}</select>`;
+    }
+    else if (field.kind === 'bool') {
+        content = `<label class="check"><input type="checkbox" data-param="${escapeAttribute(field.key)}" data-kind="bool" ${v ? 'checked' : ''}/> 启用</label>`;
+    }
+    else if (field.kind === 'json') {
+        content = `<textarea class="textarea mono" spellcheck="false" rows="3" data-param="${escapeAttribute(field.key)}" data-kind="json">${escapeHtml(serializeJson(v))}</textarea><span class="helper" data-json-error="${escapeAttribute(field.key)}">对象 / 数组均可，离开输入框时解析</span>`;
+    }
+    else {
+        content = `<input class="input ${field.kind === 'expr' ? 'mono' : ''}" ${field.kind === 'number' ? 'type="number"' : ''} data-param="${escapeAttribute(field.key)}" data-kind="${escapeAttribute(field.kind)}" value="${escapeAttribute(v)}" placeholder="${field.kind === 'expr' ? '数字或表达式' : ''}" />`;
+    }
+    return `<div class="field"><label>${escapeHtml(field.label)}（${escapeHtml(field.key)}）${createHelpButton(field.key)}</label>${content}</div>`;
+}
+const TRIGGER_EVENTS = ['ON_PLAY', 'ON_DRAWN', 'ON_DISCARDED', 'ON_EXHAUSTED', 'ON_TURN_END_IN_HAND', 'ON_COMBAT_START', 'ON_KILL_WITH_THIS_CARD', 'ON_HIT_UNBLOCKED', 'ON_RETAINED', 'ON_UPGRADED', 'ON_CREATED'];
+const commonTargets = ['SELF', 'ENEMY'];
+const cmpOps = ['==', '!=', '>', '>=', '<', '<=', 'IN', 'NOT_IN', 'HAS', 'IS_TRUE', 'IS_FALSE'];
+/**
+ * @returns {string}
+ */
+function renderCondition(n) {
+    let co = n.condition || { op: 'AND', rules: [] };
+    let rules = Array.isArray(co.rules) ? co.rules : [];
+    return `<div class="ins-group"><h3>触发条件（condition）${createHelpButton('condition')}</h3><div class="ins-stack"><div class="field"><label>条件组合</label><select class="select" id="condOp">${selectHtml(['AND', 'OR'], co.op || 'AND')}</select></div>${rules.map((r, i) => {
+        return `<div class="cond-rule"><div class="cond-line"><input class="input mono" data-condition-field="lhs" data-rule="${i}" value="${escapeAttribute(r.lhs)}" placeholder="@target.buff.状态编号" /><select class="select" data-condition-field="cmp" data-rule="${i}">${selectHtml(cmpOps, r.cmp || '==')}</select><button class="round danger" data-remove-condition="${i}" title="删除条件">×</button></div><div class="cond-line"><span class="muted small">比较值</span><input class="input mono" data-condition-field="rhs" data-rule="${i}" value="${escapeAttribute(typeof r.rhs === 'object' ? JSON.stringify(r.rhs) : r.rhs)}" placeholder="数值、true 或公式" /></div></div>`;
+    }).join('')}<button class="btn block" data-add-condition="1">＋ 添加条件</button><span class="helper">条件支持 AND / OR，复杂嵌套请用下方的节点 JSON 编辑。</span></div></div>`;
+}
+let advancedText = '';
+/**
+ * @returns {void}
+ */
+function renderInspector() {
+    const n = selectedNode ? findNode(selectedNode) : null;
+    const header = document.getElementById('insTitle'), sub = document.getElementById('insSub'), body = document.getElementById('inspectorBody'), badge = document.getElementById('insBadge');
+    if (!n) {
+        header.textContent = '效果属性';
+        sub.textContent = '选择一个效果，或从效果库中添加。';
+        badge.textContent = 'INSPECTOR';
+        body.innerHTML = '<div class="empty">← 在中间添加或选择效果<br/>这里会出现动态参数表单。</div>';
+        return;
+    }
+    const d = catalog[n.type];
+    header.textContent = d?.label || n.type;
+    badge.textContent = n.type;
+    sub.textContent = d?.hint || '未知扩展类型：使用 JSON 编辑';
+    let form = `<div class="ins-group"><h3>通用配置</h3><div class="ins-stack"><div class="field"><label>效果类型（type）${createHelpButton('type')}</label><input class="input mono" readonly value="${escapeAttribute(n.type)}"/></div><div class="field"><label>作用目标（target）${createHelpButton('target')}</label><select class="select" data-node-field="target">${selectHtml(commonTargets, n.target || 'SELF')}</select></div>${!findNodeLocation(n.id)?.parent ? `<div class="field"><label>该卡效果触发时机（根节点）${createHelpButton('trigger')}</label><select class="select" data-node-field="trigger">${selectHtml(TRIGGER_EVENTS, n.trigger || 'ON_PLAY')}</select></div>` : ''}<div class="field"><label>备注（note）${createHelpButton('note')}</label><input class="input" data-node-field="note" value="${escapeAttribute(n.note || '')}" placeholder="可选" /></div></div></div>`;
+    form += `<div class="ins-group"><h3>效果参数</h3><div class="ins-stack">${d?.fields?.length ? d.fields.map(x => {
+        return renderParamField(x, n.params);
+    }).join('') : '<div class="helper">此类型无需参数。如需扩展，可在下方编辑节点 JSON。</div>'}</div></div>`;
+    form += renderCondition(n);
+    if (d?.container) {
+        form += `<div class="notice">${d.container === 'if' ? 'THEN / ELSE' : 'children'} 是有序子效果数组，直接在中间流程树中添加。${n.type === BattleEffectTypeEnum.REGISTER_TRIGGER ? '触发器的监听生命周期由战斗引擎管理。' : ''}</div><div class="divider"></div>`;
+    }
+    form += `<div class="ins-group"><h3>高级 JSON（保留所有自定义字段）</h3><div class="ins-stack"><textarea class="textarea mono" spellcheck="false" id="advancedJSON" rows="11">${escapeHtml(serializeJson(n))}</textarea><div id="advanceError" class="helper">手动修改后点击应用；可实现嵌套条件和特殊结构。</div><button class="btn" id="applyNodeJson">应用节点 JSON</button></div></div><div class="split"><button class="btn" data-dup="${escapeAttribute(n.id)}">⧉ 复制步骤</button><button class="btn danger" data-del="${escapeAttribute(n.id)}">删除步骤</button></div>`;
+    body.innerHTML = form;
+    advancedText = serializeJson(n);
+}
+/**
+ * @returns {Array<[string,string]>}
+ */
+function getValidationMessages() {
+    let messages = [], ids = new Set();
+    for (const card of db.cards) {
+        if (!Number.isSafeInteger(Number(card.id)) || Number(card.id) <= 0 || !roles.some(role => {
+            return role.id === card.role;
+        })) {
+            messages.push(['error', card.name + '：ID 或角色无效']);
+        }
+        if (![1, 2, 3].includes(card.level) || !Number.isSafeInteger(card.price) || card.price < 0) {
+            messages.push(['error', card.name + '：等级须为 1–3，价格须为非负整数']);
+        }
+        if (!['SELF', 'ENEMY'].includes(card.target) || card.DiceNeed.length > 5 || card.DiceNeed.some(id => {
+            return !dice.some(item => {
+                return item.id === id && item.role === card.role;
+            });
+        })) {
+            messages.push(['error', card.name + '（' + card.id + '）：目标或骰子条件无效，请选用当前角色骰子，最多 5 个']);
+        }
+        walkNodes(card.effect, node => {
+            if (!catalog[node.type] || !['SELF', 'ENEMY'].includes(node.target)) {
+                messages.push(['error', card.name + '：不支持的效果或目标 ' + node.type]);
+            }
+        });
+    }
+    for (const c of db.cards) {
+        if (!c.id) {
+            messages.push(['error', '存在空白卡牌 ID']);
+        }
+        if (ids.has(c.id)) {
+            messages.push(['error', `卡牌 ID 重复：${c.id}`]);
+        }
+        ids.add(c.id);
+        if (!Array.isArray(c.effect)) {
+            messages.push(['error', `${c.name}：effect 不是数组`]);
+        }
+    }
+    for (const c of db.cards) {
+        if (c.upId && !ids.has(String(c.upId))) {
+            messages.push(['error', `${c.name} 的 upId=${c.upId} 找不到目标`]);
+        }
+        if (c.upId === c.id) {
+            messages.push(['error', `${c.name} 的 upId 指向自身`]);
+        }
+        let seen = new Set([c.id]), p = c;
+        while (p?.upId) {
+            if (seen.has(p.upId)) {
+                messages.push(['error', `${c.name} 的升级关系出现循环`]);
+                break;
+            }
+            seen.add(p.upId);
+            p = db.cards.find(x => {
+                return x.id === p.upId;
+            });
+        }
+        const nodeIds = new Set();
+        walkNodes(c.effect || [], n => {
+            if (nodeIds.has(n.id)) {
+                messages.push(['error', `${c.name} 的效果节点 ID 重复：${n.id}`]);
+            }
+            nodeIds.add(n.id);
+            if (!n.type) {
+                messages.push(['error', `${c.name} 存在空白效果类型`]);
+            }
+            if (!catalog[n.type]) {
+                messages.push(['warn', `${c.name}：${n.type} 是自定义效果，请在游戏引擎实现`]);
+            }
+            if (n.type === BattleEffectTypeEnum.IF && (!n.condition || !Array.isArray(n.condition.rules) || !n.condition.rules.length)) {
+                messages.push(['warn', `${c.name} 的 IF 分支没有条件`]);
+            }
+            if (catalog[n.type]?.container && (!n.children || !n.children.length)) {
+                messages.push(['warn', `${c.name} 的 ${n.type} 暂无子效果`]);
+            }
+            if (catalog[n.type]) {
+                for (const fld of catalog[n.type].fields) {
+                    if (n.params?.[fld.key] === undefined) {
+                        messages.push(['warn', `${c.name} 的 ${n.type} 缺少 ${fld.key} 参数`]);
+                    }
+                }
+            }
+        });
+    }
+    return messages;
+}
+/**
+ * @returns {void}
+ */
+function renderOutput() {
+    const c = getCurrentCard();
+    const el = document.getElementById('outputPane');
+    document.querySelectorAll('[data-output]').forEach(x => {
+        return x.classList.toggle('active', x.dataset.output === outputTab);
+    });
+    if (outputTab === 'json') {
+        el.innerHTML = `<div style="display:flex;justify-content:end;gap:7px;margin-bottom:10px"><button class="btn tiny" id="copyJson">复制当前卡牌</button><button class="btn tiny" id="downloadCard">下载当前卡牌</button></div><pre class="pre">${escapeHtml(serializeJson(c))}</pre>`;
+        return;
+    }
+    let msgs = getValidationMessages();
+    el.innerHTML = `<div class="validation">${msgs.length ? msgs.map(([level, msg]) => {
+        return `<div class="${level === 'error' ? 'error' : 'muted'}">${level === 'error' ? '✕' : '⚠'} ${escapeHtml(msg)}</div>`;
+    }).join('') : '<div class="ok">✓ 结构校验通过：ID、升级引用、参数和流程节点没有发现明显问题。</div>'}<div class="helper" style="margin-top:7px">结构校验不等于游戏运行时正确性；公式、事件和特殊 CUSTOM 仍需战斗引擎支持。</div></div>`;
+}
+/**
+ * @returns {void}
+ */
+function renderEditor() {
+    if (!getCurrentCard() || String(getCurrentCard().role) !== activeRole) {
+        current = db.cards.find(card => {
+            return String(card.role) === activeRole;
+        })?.id || null;
+    }
+    if (selectedNode && !findNode(selectedNode)) {
+        selectedNode = null;
+    }
+    renderSidebar();
+    renderCardForm();
+    renderTree();
+    renderInspector();
+    renderOutput();
+}
+/**
+ * @returns {void}
+ */
+function showCatalog(parent = null, branch = 'effect') {
+    addContext = { parent, branch };
+    catalogFilter = '全部';
+    document.getElementById('catalogSearch').value = '';
+    document.getElementById('catalogContext').textContent = parent ? `添加到 ${catalog[findNode(parent)?.type]?.label || '效果组'} / ${branch === 'elseEffects' ? 'ELSE' : 'children'}` : '在 effect 数组末尾添加步骤';
+    renderCatalog();
+    document.getElementById('catalogOverlay').classList.add('show');
+    document.getElementById('catalogSearch').focus();
+}
+/**
+ * @returns {void}
+ */
+function renderCatalog() {
+    const q = document.getElementById('catalogSearch').value.trim().toLowerCase();
+    document.getElementById('catalogCategories').innerHTML = CATEGORIES.map(x => {
+        return `<button class="chip ${x === catalogFilter ? 'active' : ''}" data-cat="${escapeAttribute(x)}">${escapeHtml(x)}</button>`;
+    }).join('');
+    let matching = Object.values(catalog).filter(x => {
+        return (catalogFilter === '全部' || x.cat === catalogFilter) && (x.label + x.type + x.hint + x.cat).toLowerCase().includes(q);
+    });
+    document.getElementById('catalogGrid').innerHTML = matching.map(d => {
+        return `<button class="catalog-option" data-create-type="${d.type}"><strong>${icons[d.cat]} ${escapeHtml(d.label)}</strong><small>${escapeHtml(d.hint)}</small><code>${d.type}</code></button>`;
+    }).join('') || '<div class="helper">没有找到匹配效果，请检查效果表中的卡牌可用配置。</div>';
+}
+/**
+ * @returns {void}
+ */
+function addEffect(type) {
+    let c = getCurrentCard();
+    if (!c) {
+        return;
+    }
+    let arr = addContext.parent ? findNode(addContext.parent)?.[addContext.branch] : c.effect;
+    if (!Array.isArray(arr)) {
+        return showToast('目标节点不可添加子效果');
+    }
+    let n = createEffect(type);
+    arr.push(n);
+    selectedNode = n.id;
+    document.getElementById('catalogOverlay').classList.remove('show');
+    scheduleSave();
+    renderEditor();
+    showToast('已添加 ' + (catalog[type]?.label || type));
+}
+/**
+ * @returns {void}
+ */
+function moveNode(id, dir) {
+    let r = findNodeLocation(id);
+    if (!r) {
+        return;
+    }
+    let to = r.index + (dir === 'up' ? -1 : 1);
+    if (to < 0 || to >= r.arr.length) {
+        return;
+    }
+    [r.arr[r.index], r.arr[to]] = [r.arr[to], r.arr[r.index]];
+    scheduleSave();
+    renderEditor();
+}
+/**
+ * @returns {void}
+ */
+function reassignIds(n) {
+    n.id = createNodeId();
+    (n.children || []).forEach(reassignIds);
+    (n.elseEffects || []).forEach(reassignIds);
+}
+/**
+ * @returns {void}
+ */
+function duplicateNode(id) {
+    let r = findNodeLocation(id);
+    if (!r) {
+        return;
+    }
+    let copy = cloneValue(r.node);
+    reassignIds(copy);
+    r.arr.splice(r.index + 1, 0, copy);
+    selectedNode = copy.id;
+    scheduleSave();
+    renderEditor();
+    showToast('已复制效果');
+}
+/**
+ * @returns {void}
+ */
+function deleteNode(id) {
+    let r = findNodeLocation(id);
+    if (!r) {
+        return;
+    }
+    if (r.node.children?.length || r.node.elseEffects?.length) {
+        if (!confirm('该步骤包含子效果。确认删除整个子树？')) {
+            return;
+        }
+    }
+    r.arr.splice(r.index, 1);
+    selectedNode = null;
+    scheduleSave();
+    renderEditor();
+}
+/**
+ * @returns {void}
+ */
+function downloadFile(name, content, mime = 'application/json') {
+    const b = new Blob([content], { type: mime + ';charset=utf-8' }), u = URL.createObjectURL(b), a = document.createElement('a');
+    a.href = u;
+    a.download = name;
+    a.click();
+    setTimeout(() => {
+        return URL.revokeObjectURL(u);
+    }, 2000);
+}
+/**
+ * @returns {void}
+ */
+function exportCards() {
+    downloadFile('cards.json', serializeJson({ schemaVersion: db.schemaVersion, cards: db.cards }));
+    showToast(`已导出 ${db.cards.length} 张卡牌`);
+}
+/**
+ * @returns {string}
+ */
+function quoteCsvValue(v) {
+    return '"' + String(v ?? '').replaceAll('"', '""') + '"';
+}
+/**
+ * @returns {void}
+ */
+function exportCSV() {
+    let columns = ['id', 'name', 'des', 'DiceNeed', 'level', 'price', 'role', 'target', 'type', 'upId', 'flags', 'effect'];
+    let rows = [columns.join(','), ...db.cards.map(c => {
+            return columns.map(k => {
+                return quoteCsvValue(k === 'effect' || k === 'flags' || k === 'DiceNeed' ? JSON.stringify(c[k] || {}) : c[k] ?? '');
+            }).join(',');
+        })];
+    downloadFile('cards.csv', '\ufeff' + rows.join('\r\n'), 'text/csv');
+    showToast('已导出 Excel 可打开的 CSV');
+}
+/**
+ * @returns {void}
+ */
+function createCard() {
+    if (!activeRole) {
+        showToast('请先读取角色表');
+        return;
+    }
+    let id = createCardId();
+    let c = normalizeCard({ id, name: '新卡牌', role: Number(activeRole), DiceNeed: [], level: 1, price: 0, type: 'SKILL', target: 'SELF', upId: null, effect: [], des: '' });
+    db.cards.push(c);
+    current = id;
+    selectedNode = null;
+    scheduleSave();
+    renderEditor();
+    showToast('已新建卡牌');
+}
+/**
+ * @returns {void}
+ */
+function duplicateCard() {
+    let c = getCurrentCard();
+    if (!c) {
+        return;
+    }
+    let copy = cloneValue(c);
+    copy.id = createCardId();
+    copy.name = c.name + '（复制）';
+    copy.upId = null;
+    copy.effect.forEach(reassignIds);
+    db.cards.push(copy);
+    current = copy.id;
+    selectedNode = null;
+    scheduleSave();
+    renderEditor();
+    showToast('已复制卡牌');
+}
+/**
+ * @returns {void}
+ */
+function generateUpgrade() {
+    let c = getCurrentCard();
+    if (!c) {
+        return;
+    }
+    if (c.upId) {
+        let existing = db.cards.find(x => {
+            return x.id === c.upId;
+        });
+        if (existing) {
+            current = existing.id;
+            selectedNode = null;
+            renderEditor();
+            showToast('已跳转现有升级版');
+            return;
+        }
+        if (!confirm('该卡 upId 指向不存在的 ID。继续创建新升级版并覆盖引用？')) {
+            return;
+        }
+    }
+    if (c.level >= 3) {
+        showToast('已经是最高等级 3');
+        return;
+    }
+    let next = cloneValue(c);
+    next.level = c.level + 1;
+    next.id = createCardId();
+    next.name = c.name.endsWith('+') ? c.name + '+' : c.name + '+';
+    next.upId = null;
+    next.effect.forEach(reassignIds);
+    c.upId = next.id;
+    db.cards.push(next);
+    current = next.id;
+    selectedNode = null;
+    scheduleSave();
+    renderEditor();
+    showToast('已创建升级版，请修改等级、骰子条件与效果');
+}
+/**
+ * @returns {void}
+ */
+function deleteCurrentCard() {
+    let c = getCurrentCard();
+    if (!c || !confirm(`删除「${c.name}」（${c.id}）？该操作可通过重新导入备份恢复。`)) {
+        return;
+    }
+    db.cards = db.cards.filter(x => {
+        return x !== c;
+    });
+    current = db.cards[0]?.id || null;
+    selectedNode = null;
+    for (const card of db.cards) {
+        if (card.upId === c.id) {
+            card.upId = null;
+        }
+    }
+    scheduleSave();
+    renderEditor();
+    showToast('已删除卡牌');
+}
+/**
+ * @returns {void}
+ */
+function closeOverlay() {
+    document.querySelectorAll('.overlay').forEach(x => {
+        return x.classList.remove('show');
     });
 }
-for(const c of db.cards){if(!c.id)messages.push(['error','存在空白卡牌 ID']);if(ids.has(c.id))messages.push(['error',`卡牌 ID 重复：${c.id}`]);ids.add(c.id);if(!Array.isArray(c.effect))messages.push(['error',`${c.name}：effect 不是数组`]);}
-for(const c of db.cards){if(c.upId&&!ids.has(String(c.upId)))messages.push(['error',`${c.name} 的 upId=${c.upId} 找不到目标`]);if(c.upId===c.id)messages.push(['error',`${c.name} 的 upId 指向自身`]);let seen=new Set([c.id]),p=c;while(p?.upId){if(seen.has(p.upId)){messages.push(['error',`${c.name} 的升级关系出现循环`]);break;}seen.add(p.upId);p=db.cards.find(x=>x.id===p.upId);}const nodeIds=new Set();walkNodes(c.effect||[],n=>{if(nodeIds.has(n.id))messages.push(['error',`${c.name} 的效果节点 ID 重复：${n.id}`]);nodeIds.add(n.id);if(!n.type)messages.push(['error',`${c.name} 存在空白效果类型`]);if(!catalog[n.type])messages.push(['warn',`${c.name}：${n.type} 是自定义效果，请在游戏引擎实现`]);if(n.type==='IF'&&(!n.condition||!Array.isArray(n.condition.rules)||!n.condition.rules.length))messages.push(['warn',`${c.name} 的 IF 分支没有条件`]);if(catalog[n.type]?.container&&(!n.children||!n.children.length))messages.push(['warn',`${c.name} 的 ${n.type} 暂无子效果`]);if(catalog[n.type])for(const fld of catalog[n.type].fields)if(n.params?.[fld.key]===undefined)messages.push(['warn',`${c.name} 的 ${n.type} 缺少 ${fld.key} 参数`]);});}
-return messages;}
-function renderOutput(){const c=currentCard();const el=document.getElementById('outputPane');document.querySelectorAll('[data-output]').forEach(x=>x.classList.toggle('active',x.dataset.output===outputTab));if(outputTab==='json'){el.innerHTML=`<div style="display:flex;justify-content:end;gap:7px;margin-bottom:10px"><button class="btn tiny" id="copyJson">复制当前卡牌</button><button class="btn tiny" id="downloadCard">下载当前卡牌</button></div><pre class="pre">${esc(pretty(c))}</pre>`;return;}let msgs=getValidation();el.innerHTML=`<div class="validation">${msgs.length?msgs.map(([level,msg])=>`<div class="${level==='error'?'error':'muted'}">${level==='error'?'✕':'⚠'} ${esc(msg)}</div>`).join(''):'<div class="ok">✓ 结构校验通过：ID、升级引用、参数和流程节点没有发现明显问题。</div>'}<div class="helper" style="margin-top:7px">结构校验不等于游戏运行时正确性；公式、事件和特殊 CUSTOM 仍需战斗引擎支持。</div></div>`;}
-function render(){if(!currentCard() || String(currentCard().role)!==activeRole){current=db.cards.find(card=>String(card.role)===activeRole)?.id || null;}if(selectedNode&&!findNode(selectedNode))selectedNode=null;renderSidebar();renderCardForm();renderTree();renderInspector();renderOutput();}
-function showCatalog(parent=null,branch='effect'){addContext={parent,branch};catalogFilter='全部';document.getElementById('catalogSearch').value='';document.getElementById('catalogContext').textContent=parent?`添加到 ${catalog[findNode(parent)?.type]?.label||'效果组'} / ${branch==='elseEffects'?'ELSE':'children'}`:'在 effect 数组末尾添加步骤';renderCatalog();document.getElementById('catalogOverlay').classList.add('show');document.getElementById('catalogSearch').focus();}
-function renderCatalog(){const q=document.getElementById('catalogSearch').value.trim().toLowerCase();document.getElementById('catalogCategories').innerHTML=CATEGORIES.map(x=>`<button class="chip ${x===catalogFilter?'active':''}" data-cat="${attr(x)}">${esc(x)}</button>`).join('');let matching=Object.values(catalog).filter(x=>(catalogFilter==='全部'||x.cat===catalogFilter)&&(x.label+x.type+x.hint+x.cat).toLowerCase().includes(q));document.getElementById('catalogGrid').innerHTML=matching.map(d=>`<button class="catalog-option" data-create-type="${d.type}"><strong>${icons[d.cat]} ${esc(d.label)}</strong><small>${esc(d.hint)}</small><code>${d.type}</code></button>`).join('')||'<div class="helper">没有找到匹配效果，试试 CUSTOM。</div>';}
-function addEffect(type){let c=currentCard();if(!c)return;let arr=addContext.parent?findNode(addContext.parent)?.[addContext.branch]:c.effect;if(!Array.isArray(arr))return toast('目标节点不可添加子效果');let n=make(type);arr.push(n);selectedNode=n.id;document.getElementById('catalogOverlay').classList.remove('show');scheduleSave();render();toast('已添加 '+(catalog[type]?.label||type));}
-function moveNode(id,dir){let r=findNodeLocation(id);if(!r)return;let to=r.index+(dir==='up'?-1:1);if(to<0||to>=r.arr.length)return;[r.arr[r.index],r.arr[to]]=[r.arr[to],r.arr[r.index]];scheduleSave();render();}
-function reassignIds(n){n.id=newid();(n.children||[]).forEach(reassignIds);(n.elseEffects||[]).forEach(reassignIds);}
-function duplicateNode(id){let r=findNodeLocation(id);if(!r)return;let copy=clone(r.node);reassignIds(copy);r.arr.splice(r.index+1,0,copy);selectedNode=copy.id;scheduleSave();render();toast('已复制效果');}
-function deleteNode(id){let r=findNodeLocation(id);if(!r)return;if(r.node.children?.length||r.node.elseEffects?.length){if(!confirm('该步骤包含子效果。确认删除整个子树？'))return;}r.arr.splice(r.index,1);selectedNode=null;scheduleSave();render();}
-function download(name,content,mime='application/json'){const b=new Blob([content],{type:mime+';charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);}
-function downloadAll(){download('cards.json',pretty({schemaVersion:db.schemaVersion,cards:db.cards}));toast(`已导出 ${db.cards.length} 张卡牌`);}
-function csvQuote(v){return '"'+String(v??'').replaceAll('"','""')+'"';}
-function exportCSV(){let columns=['id','name','des','DiceNeed','level','price','role','target','type','upId','flags','effect'];let rows=[columns.join(','),...db.cards.map(c=>columns.map(k=>csvQuote(k==='effect'||k==='flags'||k==='DiceNeed'?JSON.stringify(c[k]||{}):c[k]??'')).join(','))];download('cards.csv','\ufeff'+rows.join('\r\n'),'text/csv');toast('已导出 Excel 可打开的 CSV');}
-function createCard(){if(!activeRole){toast('请先读取角色表');return;}let id=nextCardId();let c=normalizeCard({id,name:'新卡牌',role:Number(activeRole),DiceNeed:[],level:1,price:0,type:'SKILL',target:'SELF',upId:null,effect:[],des:''});db.cards.push(c);current=id;selectedNode=null;scheduleSave();render();toast('已新建卡牌');}
-function duplicateCard(){let c=currentCard();if(!c)return;let copy=clone(c);copy.id=nextCardId();copy.name=c.name+'（复制）';copy.upId=null;copy.effect.forEach(reassignIds);db.cards.push(copy);current=copy.id;selectedNode=null;scheduleSave();render();toast('已复制卡牌');}
-function generateUpgrade(){let c=currentCard();if(!c)return;if(c.upId){let existing=db.cards.find(x=>x.id===c.upId);if(existing){current=existing.id;selectedNode=null;render();toast('已跳转现有升级版');return;}if(!confirm('该卡 upId 指向不存在的 ID。继续创建新升级版并覆盖引用？'))return;}if(c.level>=3){toast('已经是最高等级 3');return;}let next=clone(c);next.level=c.level+1;next.id=nextCardId();next.name=c.name.endsWith('+')?c.name+'+':c.name+'+';next.upId=null;next.effect.forEach(reassignIds);c.upId=next.id;db.cards.push(next);current=next.id;selectedNode=null;scheduleSave();render();toast('已创建升级版，请修改等级、骰子条件与效果');}
-function deleteCurrentCard(){let c=currentCard();if(!c||!confirm(`删除「${c.name}」（${c.id}）？该操作可通过重新导入备份恢复。`))return;db.cards=db.cards.filter(x=>x!==c);current=db.cards[0]?.id||null;selectedNode=null;for(const card of db.cards){if(card.upId===c.id){card.upId=null;}}scheduleSave();render();toast('已删除卡牌');}
-function closeOverlay(){document.querySelectorAll('.overlay').forEach(x=>x.classList.remove('show'));}
-function onCardField(el){let c=currentCard(),field=el.dataset.cardField;if(!c||!field)return;let raw=el.value,val=['level','price'].includes(field)?Number(raw):raw;if(field==='upId')val=raw.trim()||null;if(field==='id'){if(!raw.trim()){toast('ID 不能为空');el.value=c.id;return;}if(db.cards.some(x=>x!==c&&x.id===raw)){toast('卡牌 ID 已存在');el.value=c.id;return;}let old=c.id;c.id=raw;for(let x of db.cards)if(x.upId===old)x.upId=raw;current=raw;}else c[field]=val;scheduleSave();}
-function updateParam(el,commit=false){let n=findNode(selectedNode);if(!n)return;let key=el.dataset.param,kind=el.dataset.kind,raw=kind==='bool'?el.checked:el.value;if(kind==='json'){try{n.params[key]=JSON.parse(raw);let msg=document.querySelector(`[data-json-error="${key}"]`);if(msg){msg.textContent='✓ JSON 格式正确';msg.className='helper ok';}}catch(err){let msg=document.querySelector(`[data-json-error="${key}"]`);if(msg){msg.textContent='JSON 错误：'+err.message;msg.className='helper error';}return;}}else if(kind==='bool')n.params[key]=raw;else if(kind==='number')n.params[key]=Number(raw)||0;else if(kind==='expr')n.params[key]=parseScalar(raw);else n.params[key]=raw;scheduleSave();if(commit){renderTree();renderOutput();}}
-function updateConditionField(el){let n=findNode(selectedNode);if(!n)return;let i=Number(el.dataset.rule),key=el.dataset.conditionField;if(!n.condition?.rules?.[i])return;let val=el.value;if(key==='rhs'){if(val.trim()==='true')val=true;else if(val.trim()==='false')val=false;else val=parseScalar(val);}n.condition.rules[i][key]=val;scheduleSave();}
-function applyAdvanced(){let n=findNode(selectedNode),loc=findNodeLocation(selectedNode);if(!n||!loc)return;try{let candidate=JSON.parse(document.getElementById('advancedJSON').value);if(!candidate||typeof candidate!=='object'||Array.isArray(candidate)||!candidate.type)throw new Error('必须是带 type 的 JSON 对象');let normalized=normalizeNode(candidate);normalized.id=n.id;let otherIds=new Set();walkNodes(currentCard().effect,x=>{if(x!==n)otherIds.add(x.id)});let newIds=new Set();walkNodes([normalized],x=>{if(newIds.has(x.id)||otherIds.has(x.id))throw new Error('存在重复节点 ID：'+x.id);newIds.add(x.id)});loc.arr[loc.index]=normalized;scheduleSave();render();toast('已应用节点 JSON');}catch(e){let m=document.getElementById('advanceError');m.textContent='JSON 应用失败：'+e.message;m.className='helper error';}}
-function importObject(o){let list=Array.isArray(o)?o:Array.isArray(o?.cards)?o.cards:o?.id?[o]:null;if(!list)throw new Error('支持卡牌数组、单张卡牌、或包含 cards 数组的对象');let normalized=list.map(normalizeCard),ids=new Set();for(let c of normalized){if(!c.id||ids.has(c.id))throw new Error('卡牌 ID 不能为空或重复：'+c.id);ids.add(c.id);}if(!normalized.length)throw new Error('文件中没有卡牌');if(!confirm(`导入 ${normalized.length} 张卡牌，将替换当前卡牌库。建议先导出备份。是否继续？`))return;db={schemaVersion:o?.schemaVersion||'1.0',cards:normalized};current=db.cards[0].id;selectedNode=null;save();render();toast('已导入 '+db.cards.length+' 张卡牌');}
-function handleClick(e){const t=e.target.closest('[data-card],[data-select-node],[data-move],[data-dup],[data-del],[data-add-parent],[data-create-type],[data-cat],[data-close],[data-output]');if(!t)return;if(t.dataset.card!==undefined){current=t.dataset.card;selectedNode=null;render();}else if(t.dataset.move){e.stopPropagation();moveNode(t.dataset.id,t.dataset.move);}else if(t.dataset.dup){e.stopPropagation();duplicateNode(t.dataset.dup);}else if(t.dataset.del){e.stopPropagation();deleteNode(t.dataset.del);}else if(t.dataset.addParent!==undefined){showCatalog(t.dataset.addParent||null,t.dataset.addBranch||'effect');}else if(t.dataset.createType){addEffect(t.dataset.createType);}else if(t.dataset.cat){catalogFilter=t.dataset.cat;renderCatalog();}else if(t.dataset.close){document.getElementById(t.dataset.close)?.classList.remove('show');}else if(t.dataset.output){outputTab=t.dataset.output;renderOutput();}else if(t.dataset.selectNode){selectedNode=t.dataset.selectNode;renderTree();renderInspector();}}
-document.addEventListener('click',handleClick);
-document.getElementById('cardSearch').addEventListener('input',renderSidebar);
-document.getElementById('catalogSearch').addEventListener('input',renderCatalog);
-document.getElementById('catalogOverlay').addEventListener('click',e=>{if(e.target.id==='catalogOverlay')closeOverlay()});document.getElementById('guideOverlay').addEventListener('click',e=>{if(e.target.id==='guideOverlay')closeOverlay()});
-document.getElementById('helpOverlay').addEventListener('click', event => { if (event.target.id === 'helpOverlay') { closeOverlay(); } });
+/**
+ * @returns {void}
+ */
+function onCardField(el) {
+    let c = getCurrentCard(), field = el.dataset.cardField;
+    if (!c || !field) {
+        return;
+    }
+    let raw = el.value, val = ['level', 'price'].includes(field) ? Number(raw) : raw;
+    if (field === 'upId') {
+        val = raw.trim() || null;
+    }
+    if (field === 'id') {
+        if (!raw.trim()) {
+            showToast('ID 不能为空');
+            el.value = c.id;
+            return;
+        }
+        if (db.cards.some(x => {
+            return x !== c && x.id === raw;
+        })) {
+            showToast('卡牌 ID 已存在');
+            el.value = c.id;
+            return;
+        }
+        let old = c.id;
+        c.id = raw;
+        for (let x of db.cards) {
+            if (x.upId === old) {
+                x.upId = raw;
+            }
+        }
+        current = raw;
+    }
+    else {
+        c[field] = val;
+    }
+    scheduleSave();
+}
+// 等待JSON校验完成后更新编辑状态，并向界面报告错误。
+/**
+ * @returns {Promise<void>}
+ */
+async function updateParam(el, commit = false) {
+    let n = findNode(selectedNode);
+    if (!n) {
+        return;
+    }
+    let key = el.dataset.param, kind = el.dataset.kind, raw = kind === 'bool' ? el.checked : el.value;
+    if (kind === 'json') {
+        const valid = await (async () => {
+            n.params[key] = JSON.parse(raw);
+            let msg = document.querySelector(`[data-json-error="${key}"]`);
+            if (msg) {
+                msg.textContent = '✓ JSON 格式正确';
+                msg.className = 'helper ok';
+            }
+            return true;
+        })().catch(err => {
+            let msg = document.querySelector(`[data-json-error="${key}"]`);
+            if (msg) {
+                msg.textContent = 'JSON 错误：' + err.message;
+                msg.className = 'helper error';
+            }
+            return false;
+        });
+        if (!valid) {
+            return;
+        }
+    }
+    else if (kind === 'bool') {
+        n.params[key] = raw;
+    }
+    else if (kind === 'number') {
+        const value = Number(raw);
+        if (!raw.trim() || !Number.isFinite(value)) {
+            showToast('请输入有效数值');
+            return;
+        }
+        n.params[key] = value;
+    }
+    else if (kind === 'expr') {
+        n.params[key] = parseScalar(raw);
+    }
+    else {
+        n.params[key] = ['status', 'stat', 'powerId'].includes(key) && /^\d+$/.test(raw) ? Number(raw) : raw;
+    }
+    scheduleSave();
+    if (commit) {
+        renderTree();
+        renderOutput();
+    }
+}
+/**
+ * @returns {void}
+ */
+function updateConditionField(el) {
+    let n = findNode(selectedNode);
+    if (!n) {
+        return;
+    }
+    let i = Number(el.dataset.rule), key = el.dataset.conditionField;
+    if (!n.condition?.rules?.[i]) {
+        return;
+    }
+    let val = el.value;
+    if (key === 'rhs') {
+        if (val.trim() === 'true') {
+            val = true;
+        }
+        else if (val.trim() === 'false') {
+            val = false;
+        }
+        else {
+            val = parseScalar(val);
+        }
+    }
+    n.condition.rules[i][key] = val;
+    scheduleSave();
+}
+// 等待JSON校验完成后更新编辑状态，并向界面报告错误。
+/**
+ * @returns {Promise<void>}
+ */
+async function applyAdvanced() {
+    let n = findNode(selectedNode), loc = findNodeLocation(selectedNode);
+    if (!n || !loc) {
+        return;
+    }
+    return (async () => {
+        let candidate = JSON.parse(document.getElementById('advancedJSON').value);
+        if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate) || !candidate.type) {
+            throw new Error('必须是带 type 的 JSON 对象');
+        }
+        let normalized = normalizeNode(candidate);
+        normalized.id = n.id;
+        let otherIds = new Set();
+        walkNodes(getCurrentCard().effect, x => {
+            if (x !== n) {
+                otherIds.add(x.id);
+            }
+        });
+        let newIds = new Set();
+        walkNodes([normalized], x => {
+            if (newIds.has(x.id) || otherIds.has(x.id)) {
+                throw new Error('存在重复节点 ID：' + x.id);
+            }
+            newIds.add(x.id);
+        });
+        loc.arr[loc.index] = normalized;
+        scheduleSave();
+        renderEditor();
+        showToast('已应用节点 JSON');
+    })().catch(e => {
+        let m = document.getElementById('advanceError');
+        m.textContent = 'JSON 应用失败：' + e.message;
+        m.className = 'helper error';
+    });
+}
+/**
+ * @returns {void}
+ */
+function importObject(o) {
+    let list = Array.isArray(o) ? o : Array.isArray(o?.cards) ? o.cards : o?.id ? [o] : null;
+    if (!list) {
+        throw new Error('支持卡牌数组、单张卡牌、或包含 cards 数组的对象');
+    }
+    let normalized = list.map(normalizeCard), ids = new Set();
+    for (let c of normalized) {
+        if (!c.id || ids.has(c.id)) {
+            throw new Error('卡牌 ID 不能为空或重复：' + c.id);
+        }
+        ids.add(c.id);
+    }
+    if (!normalized.length) {
+        throw new Error('文件中没有卡牌');
+    }
+    if (!confirm(`导入 ${normalized.length} 张卡牌，将替换当前卡牌库。建议先导出备份。是否继续？`)) {
+        return;
+    }
+    db = { schemaVersion: o?.schemaVersion || '1.0', cards: normalized };
+    current = db.cards[0].id;
+    selectedNode = null;
+    markChanges();
+    renderEditor();
+    showToast('已导入 ' + db.cards.length + ' 张卡牌');
+}
+/**
+ * @returns {void}
+ */
+function handleClick(e) {
+    const t = e.target.closest('[data-card],[data-select-node],[data-move],[data-dup],[data-del],[data-add-parent],[data-create-type],[data-cat],[data-close],[data-output]');
+    if (!t) {
+        return;
+    }
+    if (t.dataset.card !== undefined) {
+        current = t.dataset.card;
+        selectedNode = null;
+        renderEditor();
+    }
+    else if (t.dataset.move) {
+        e.stopPropagation();
+        moveNode(t.dataset.id, t.dataset.move);
+    }
+    else if (t.dataset.dup) {
+        e.stopPropagation();
+        duplicateNode(t.dataset.dup);
+    }
+    else if (t.dataset.del) {
+        e.stopPropagation();
+        deleteNode(t.dataset.del);
+    }
+    else if (t.dataset.addParent !== undefined) {
+        showCatalog(t.dataset.addParent || null, t.dataset.addBranch || 'effect');
+    }
+    else if (t.dataset.createType) {
+        addEffect(Number(t.dataset.createType));
+    }
+    else if (t.dataset.cat) {
+        catalogFilter = t.dataset.cat;
+        renderCatalog();
+    }
+    else if (t.dataset.close) {
+        document.getElementById(t.dataset.close)?.classList.remove('show');
+    }
+    else if (t.dataset.output) {
+        outputTab = t.dataset.output;
+        renderOutput();
+    }
+    else if (t.dataset.selectNode) {
+        selectedNode = t.dataset.selectNode;
+        renderTree();
+        renderInspector();
+    }
+}
+document.addEventListener('click', handleClick);
+document.getElementById('cardSearch').addEventListener('input', renderSidebar);
+document.getElementById('catalogSearch').addEventListener('input', renderCatalog);
+document.getElementById('catalogOverlay').addEventListener('click', e => {
+    if (e.target.id === 'catalogOverlay') {
+        closeOverlay();
+    }
+});
+document.getElementById('guideOverlay').addEventListener('click', e => {
+    if (e.target.id === 'guideOverlay') {
+        closeOverlay();
+    }
+});
+document.getElementById('helpOverlay').addEventListener('click', event => {
+    if (event.target.id === 'helpOverlay') {
+        closeOverlay();
+    }
+});
 document.addEventListener('click', event => {
     const button = event.target.closest('[data-help]');
     if (!button) {
@@ -411,43 +1281,188 @@ document.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
     const field = button.dataset.help;
-    const catalogField = Object.values(catalog).flatMap(item => item.fields).find(item => item.key === field);
+    const catalogField = Object.values(catalog).flatMap(item => {
+        return item.fields;
+    }).find(item => {
+        return item.key === field;
+    });
     const label = catalogField?.label || button.parentElement.textContent.replace('!', '').trim();
     showHelp(field, label, catalogField?.options);
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay();if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveExcel();}});
-document.getElementById('cardForm').addEventListener('input',e=>{if(e.target.dataset.cardField&&e.target.dataset.cardField!=='id')onCardField(e.target);});document.getElementById('cardForm').addEventListener('change',e=>{if(e.target.dataset.cardFlag){currentCard().flags[e.target.dataset.cardFlag]=e.target.checked;scheduleSave();}else if(e.target.dataset.cardField)onCardField(e.target);render();});
-document.getElementById('inspectorBody').addEventListener('input',e=>{if(e.target.dataset.param&&e.target.dataset.kind!=='json'&&e.target.dataset.kind!=='bool'&&e.target.dataset.kind!=='enum')updateParam(e.target);else if(e.target.dataset.nodeField){let n=findNode(selectedNode);if(n)n[e.target.dataset.nodeField]=e.target.value;scheduleSave();}else if(e.target.dataset.conditionField)updateConditionField(e.target);});
-document.getElementById('inspectorBody').addEventListener('change',e=>{if(e.target.dataset.param)updateParam(e.target,true);else if(e.target.dataset.nodeField){let n=findNode(selectedNode);if(n)n[e.target.dataset.nodeField]=e.target.value;scheduleSave();renderTree();renderOutput();}else if(e.target.dataset.conditionField){updateConditionField(e.target);renderTree();renderOutput();}else if(e.target.id==='condOp'){let n=findNode(selectedNode);if(n){if(!n.condition)n.condition={op:'AND',rules:[]};n.condition.op=e.target.value;scheduleSave();renderTree();renderOutput();}}});
-document.getElementById('inspectorBody').addEventListener('click',e=>{const el=e.target.closest('[data-add-condition],[data-remove-condition],#applyNodeJson');if(!el)return;let n=findNode(selectedNode);if(!n)return;if(el.dataset.addCondition){if(!n.condition)n.condition={op:'AND',rules:[]};if(!Array.isArray(n.condition.rules))n.condition.rules=[];n.condition.rules.push({lhs:'@target.poison',cmp:'>=',rhs:1});scheduleSave();renderInspector();renderTree();renderOutput();}else if(el.dataset.removeCondition!==undefined){n.condition?.rules?.splice(Number(el.dataset.removeCondition),1);scheduleSave();renderInspector();renderTree();renderOutput();}else if(el.id==='applyNodeJson')applyAdvanced();});
-document.getElementById('addRootEffect').onclick=()=>showCatalog();document.getElementById('addCardBtn').onclick=createCard;document.getElementById('copyCardBtn').onclick=duplicateCard;document.getElementById('upgradeBtn').onclick=generateUpgrade;document.getElementById('deleteCardBtn').onclick=deleteCurrentCard;document.getElementById('guideBtn').onclick=()=>document.getElementById('guideOverlay').classList.add('show');document.getElementById('exportBtn').onclick=downloadAll;document.getElementById('csvBtn').onclick=exportCSV;
-document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click();document.getElementById('fileInput').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{importObject(JSON.parse(await file.text()));}catch(err){toast('导入失败：'+err.message);}e.target.value='';});
-document.getElementById('loadSamplesBtn').onclick=reloadTables;
-document.getElementById('outputPane').addEventListener('click',e=>{const t=e.target.closest('#copyJson,#downloadCard');if(!t)return;if(t.id==='copyJson'){navigator.clipboard?.writeText(pretty(currentCard())).then(()=>toast('已复制当前卡牌 JSON')).catch(()=>toast('无法访问剪贴板，请选择预览文本复制'));}if(t.id==='downloadCard')download('card_'+currentCard().id+'.json',pretty(currentCard()));});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeOverlay();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveExcel();
+    }
+});
+document.getElementById('cardForm').addEventListener('input', e => {
+    if (e.target.dataset.cardField && e.target.dataset.cardField !== 'id') {
+        onCardField(e.target);
+    }
+});
+document.getElementById('cardForm').addEventListener('change', e => {
+    if (e.target.dataset.cardFlag) {
+        getCurrentCard().flags[e.target.dataset.cardFlag] = e.target.checked;
+        scheduleSave();
+    }
+    else if (e.target.dataset.cardField) {
+        onCardField(e.target);
+    }
+    renderEditor();
+});
+document.getElementById('inspectorBody').addEventListener('input', e => {
+    if (e.target.dataset.param && e.target.dataset.kind !== 'json' && e.target.dataset.kind !== 'bool' && e.target.dataset.kind !== 'enum') {
+        updateParam(e.target);
+    }
+    else if (e.target.dataset.nodeField) {
+        let n = findNode(selectedNode);
+        if (n) {
+            n[e.target.dataset.nodeField] = e.target.value;
+        }
+        scheduleSave();
+    }
+    else if (e.target.dataset.conditionField) {
+        updateConditionField(e.target);
+    }
+});
+document.getElementById('inspectorBody').addEventListener('change', e => {
+    if (e.target.dataset.param) {
+        updateParam(e.target, true);
+    }
+    else if (e.target.dataset.nodeField) {
+        let n = findNode(selectedNode);
+        if (n) {
+            n[e.target.dataset.nodeField] = e.target.value;
+        }
+        scheduleSave();
+        renderTree();
+        renderOutput();
+    }
+    else if (e.target.dataset.conditionField) {
+        updateConditionField(e.target);
+        renderTree();
+        renderOutput();
+    }
+    else if (e.target.id === 'condOp') {
+        let n = findNode(selectedNode);
+        if (n) {
+            if (!n.condition) {
+                n.condition = { op: 'AND', rules: [] };
+            }
+            n.condition.op = e.target.value;
+            scheduleSave();
+            renderTree();
+            renderOutput();
+        }
+    }
+});
+document.getElementById('inspectorBody').addEventListener('click', e => {
+    const el = e.target.closest('[data-add-condition],[data-remove-condition],#applyNodeJson');
+    if (!el) {
+        return;
+    }
+    let n = findNode(selectedNode);
+    if (!n) {
+        return;
+    }
+    if (el.dataset.addCondition) {
+        if (!n.condition) {
+            n.condition = { op: 'AND', rules: [] };
+        }
+        if (!Array.isArray(n.condition.rules)) {
+            n.condition.rules = [];
+        }
+        n.condition.rules.push({ lhs: '@target.buff.' + BattleBuffTypeEnum.POISON, cmp: '>=', rhs: 1 });
+        scheduleSave();
+        renderInspector();
+        renderTree();
+        renderOutput();
+    }
+    else if (el.dataset.removeCondition !== undefined) {
+        n.condition?.rules?.splice(Number(el.dataset.removeCondition), 1);
+        scheduleSave();
+        renderInspector();
+        renderTree();
+        renderOutput();
+    }
+    else if (el.id === 'applyNodeJson') {
+        applyAdvanced();
+    }
+});
+document.getElementById('addRootEffect').onclick = () => {
+    return showCatalog();
+};
+document.getElementById('addCardBtn').onclick = createCard;
+document.getElementById('copyCardBtn').onclick = duplicateCard;
+document.getElementById('upgradeBtn').onclick = generateUpgrade;
+document.getElementById('deleteCardBtn').onclick = deleteCurrentCard;
+document.getElementById('guideBtn').onclick = () => {
+    return document.getElementById('guideOverlay').classList.add('show');
+};
+document.getElementById('exportBtn').onclick = exportCards;
+document.getElementById('csvBtn').onclick = exportCSV;
+document.getElementById('importBtn').onclick = () => {
+    return document.getElementById('fileInput').click();
+};
+document.getElementById('fileInput').addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+        return;
+    }
+    await (async () => {
+        importObject(JSON.parse(await file.text()));
+    })().catch(err => {
+        showToast('导入失败：' + err.message);
+    });
+    e.target.value = '';
+});
+document.getElementById('loadSamplesBtn').onclick = reloadTables;
+document.getElementById('outputPane').addEventListener('click', e => {
+    const t = e.target.closest('#copyJson,#downloadCard');
+    if (!t) {
+        return;
+    }
+    if (t.id === 'copyJson') {
+        navigator.clipboard?.writeText(serializeJson(getCurrentCard())).then(() => {
+            return showToast('已复制当前卡牌 JSON');
+        }).catch(() => {
+            return showToast('无法访问剪贴板，请选择预览文本复制');
+        });
+    }
+    if (t.id === 'downloadCard') {
+        downloadFile('card_' + getCurrentCard().id + '.json', serializeJson(getCurrentCard()));
+    }
+});
 document.getElementById('saveExcelBtn').onclick = saveExcel;
 document.getElementById('roleSelect').onchange = event => {
     activeRole = event.target.value;
     current = null;
     selectedNode = null;
-    render();
+    renderEditor();
 };
 document.getElementById('cardForm').addEventListener('click', event => {
     const button = event.target.closest('[data-remove-dice],#addDiceBtn');
-    const card = currentCard();
+    const card = getCurrentCard();
     if (!button || !card) {
         return;
     }
     if (button.dataset.removeDice !== undefined) {
         card.DiceNeed.splice(Number(button.dataset.removeDice), 1);
-    } else if (card.DiceNeed.length < 5) {
+    }
+    else if (card.DiceNeed.length < 5) {
         const id = Number(document.getElementById('diceSelect').value);
-        if (!dice.some(item => item.id === id && item.role === card.role)) {
+        if (!dice.some(item => {
+            return item.id === id && item.role === card.role;
+        })) {
             return;
         }
         card.DiceNeed.push(id);
     }
     scheduleSave();
-    render();
+    renderEditor();
 });
 window.addEventListener('beforeunload', event => {
     if (dirty) {
@@ -455,7 +1470,7 @@ window.addEventListener('beforeunload', event => {
         event.returnValue = '';
     }
 });
-render();
+renderEditor();
 reloadTables();
 </script>
 </body>

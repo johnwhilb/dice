@@ -1,15 +1,14 @@
+import { BattleTriggerEvent } from './BattleCardBll';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
 import { BattlePhase } from '../model/BattleModel';
 import { BattleEvent } from '../BattleEvent';
-import { TableEnemy } from '../../common/table/TableEnemy';
 import { BattleSide } from '../model/BattleTypes';
 import { smc } from '../../common/SingletonModuleComp';
 import { PlayerEvent } from '../../player/PlayerEvent';
-
 export class BattleBll extends CCBusiness<Battle> {
     // 等待装备初始化、战斗开始触发与首回合准备完成后开放操作。
-    async start() {
+    startBattle(): Promise<void> {
         const model = this.ent.BattleModel;
         const enemyId = model.enemyId;
         model.reset();
@@ -17,44 +16,44 @@ export class BattleBll extends CCBusiness<Battle> {
         model.enemyId = enemyId;
         model.gold = smc.player.PlayerModel.gold;
         model.busy = true;
-        try {
+        return (async () => {
             this.ent.initBattleSceneInfo();
-            await this.ent.BattleEquipmentBll.initialize();
+            await this.ent.BattleEquipmentBll.initializeEquipment();
             if (this.checkResult(runId)) {
                 return;
             }
-            await this.ent.BattleTriggerBll.fire('ON_COMBAT_START', BattleSide.Enemy);
-            await this.ent.BattleTriggerBll.fire('ON_COMBAT_START', BattleSide.Player);
-            await this.playerStart(runId);
-        } catch (error) {
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.CombatStart, BattleSide.Enemy);
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.CombatStart, BattleSide.Player);
+            await this.startPlayerTurn(runId);
+        })().catch((error: Error) => {
             if (runId === model.runId) {
-                this.fail(error);
+                this.handleBattleError(error);
             }
-        } finally {
+        }).finally(async () => {
             if (runId === model.runId) {
                 model.busy = false;
                 await this.finishResult();
-                this.refresh();
+                this.refreshBattleView();
             }
-        }
+        });
     }
-
-    async changePhase() {
-        await this.endTurn();
+    // 转交玩家结束回合的结算任务。
+    changePhase(): Promise<void> {
+        return this.endPlayerTurn();
     }
-
-    async endTurn() {
+    // 等待手牌、状态、敌人行动和下一回合准备依次完成。
+    endPlayerTurn(): Promise<void> {
         const model = this.ent.BattleModel;
-        if (model.busy || model.phase !== BattlePhase.PlayerAction || this.isFinished()) {
-            return;
+        if (model.busy || model.phase !== BattlePhase.PlayerAction || this.isBattleFinished()) {
+            return Promise.resolve();
         }
         model.busy = true;
         model.message = '';
         const runId = model.runId;
-        try {
+        return (async () => {
             this.setPhase(BattlePhase.PlayerEnd);
-            await this.ent.BattleCardBll.endTurn();
-            await this.endEffects(BattleSide.Player, runId);
+            await this.ent.BattleCardBll.settleHandAtTurnEnd();
+            await this.settleTurnEndEffects(BattleSide.Player, runId);
             this.ent.BattlePlayerModel.energy = 0;
             this.ent.BattlePlayerModel.diceUsed = [];
             this.ent.BattlePlayerModel.diceLocked = [];
@@ -62,56 +61,55 @@ export class BattleBll extends CCBusiness<Battle> {
                 return;
             }
             this.setPhase(BattlePhase.EnemyStart);
-            await this.ent.BattleBuffBll.startTurn(BattleSide.Enemy);
+            await this.ent.BattleBuffBll.settleTurnStartBuffs(BattleSide.Enemy);
             if (this.checkResult(runId)) {
                 return;
             }
-            await this.ent.BattleTriggerBll.fire('ON_TURN_START', BattleSide.Enemy);
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.TurnStart, BattleSide.Enemy);
             if (this.checkResult(runId)) {
                 return;
             }
             this.setPhase(BattlePhase.EnemyAction);
-            await this.ent.BattleEnemyBll.act();
+            await this.ent.BattleEnemyBll.executePlannedActions();
             if (this.checkResult(runId)) {
                 return;
             }
             this.setPhase(BattlePhase.EnemyEnd);
-            await this.endEffects(BattleSide.Enemy, runId);
+            await this.settleTurnEndEffects(BattleSide.Enemy, runId);
             if (this.checkResult(runId)) {
                 return;
             }
-            await this.ent.BattleTriggerBll.fire('AFTER_ENEMY_TURN', BattleSide.Player);
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.AfterEnemyTurn, BattleSide.Player);
             if (this.checkResult(runId)) {
                 return;
             }
             model.turn++;
-            await this.playerStart(runId);
-        } catch (error) {
+            await this.startPlayerTurn(runId);
+        })().catch((error: Error) => {
             if (runId === model.runId) {
-                this.fail(error);
+                this.handleBattleError(error);
             }
-        } finally {
+        }).finally(async () => {
             if (runId === model.runId) {
                 model.busy = false;
                 await this.finishResult();
-                this.refresh();
+                this.refreshBattleView();
             }
-        }
+        });
     }
-
-    private async endEffects(side: BattleSide, runId: number) {
-        if (!this.isFinished(runId)) {
-            await this.ent.BattleTriggerBll.fire('ON_TURN_END', side);
-            if (this.isFinished(runId)) {
+    // 等待回合末事件和状态效果结算后清理临时触发器。
+    private async settleTurnEndEffects(side: BattleSide, runId: number): Promise<void> {
+        if (!this.isBattleFinished(runId)) {
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.TurnEnd, side);
+            if (this.isBattleFinished(runId)) {
                 return;
             }
-            await this.ent.BattleBuffBll.endTurn(side);
-            this.ent.BattleTriggerBll.expire(side);
+            await this.ent.BattleBuffBll.settleTurnEndBuffs(side);
+            this.ent.BattleTriggerBll.expireTriggers(side);
         }
     }
-
     // 等待回合开始状态、正常补手牌和装备额外抽牌结算完成。
-    private async playerStart(runId: number) {
+    private async startPlayerTurn(runId: number): Promise<void> {
         if (this.checkResult(runId)) {
             return;
         }
@@ -121,11 +119,11 @@ export class BattleBll extends CCBusiness<Battle> {
         player.turn = this.ent.BattleModel.turn;
         this.ent.BattleEquipmentBll.beginTurn();
         player.energy = Math.min(player.baseEnergy, player.maxEnergy);
-        await this.ent.BattleBuffBll.startTurn(BattleSide.Player);
+        await this.ent.BattleBuffBll.settleTurnStartBuffs(BattleSide.Player);
         if (this.checkResult(runId)) {
             return;
         }
-        await this.ent.BattleTriggerBll.fire('ON_TURN_START', BattleSide.Player);
+        await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.TurnStart, BattleSide.Player);
         if (this.checkResult(runId)) {
             return;
         }
@@ -133,7 +131,7 @@ export class BattleBll extends CCBusiness<Battle> {
         if (this.checkResult(runId)) {
             return;
         }
-        await this.ent.BattleTriggerBll.fire('ON_HAND_READY', BattleSide.Player);
+        await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.HandReady, BattleSide.Player);
         if (this.checkResult(runId)) {
             return;
         }
@@ -147,100 +145,102 @@ export class BattleBll extends CCBusiness<Battle> {
         this.ent.BattleDiceBll.resetDice();
         this.setPhase(BattlePhase.PlayerAction);
     }
-
-    reroll() {
+    // 重投当前选择的骰子并支付能量。
+    rerollSelectedDice(): false | Promise<boolean> {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
         const selected = player.diceLocked[0];
         if (model.busy || model.phase !== BattlePhase.PlayerAction || player.energy < 2
-            || player.diceLocked.length !== 1 || this.isFinished()) {
+            || player.diceLocked.length !== 1 || this.isBattleFinished()) {
             return false;
         }
         if (player.diceUsed.includes(selected)) {
             return this.activateUsedDie(selected);
         }
-        if (!this.ent.BattleDiceBll.rollOne(selected)) {
+        if (!this.ent.BattleDiceBll.rollOneDie(selected)) {
             return false;
         }
         player.diceLocked = [];
         model.message = '';
         this.setPhase(BattlePhase.PlayerAction);
-        return this.payForDice();
+        return this.payDiceEnergy();
     }
-
-    activateUsedDie(index: number) {
+    // 激活指定失活骰子并支付能量。
+    activateUsedDie(index: number): false | Promise<boolean> {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
         if (model.busy || model.phase !== BattlePhase.PlayerAction || player.energy < 2
-            || !player.diceUsed.includes(index) || this.isFinished()
-            || !this.ent.BattleDiceBll.rollOne(index)) {
+            || !player.diceUsed.includes(index) || this.isBattleFinished()
+            || !this.ent.BattleDiceBll.rollOneDie(index)) {
             if (model.phase === BattlePhase.PlayerAction && player.diceUsed.includes(index) && player.energy < 2) {
                 model.message = '激活失活骰子需要2点能量';
-                this.refresh();
+                this.refreshBattleView();
             }
             return false;
         }
         player.diceLocked = [];
-        player.diceUsed = player.diceUsed.filter(usedIndex => usedIndex !== index);
+        player.diceUsed = player.diceUsed.filter(usedIndex => {
+            return usedIndex !== index;
+        });
         model.message = '';
         this.setPhase(BattlePhase.PlayerAction);
-        return this.payForDice();
+        return this.payDiceEnergy();
     }
-
     // 等待重投或激活的能量触发效果与胜负结算，期间锁定操作避免重复扣费。
-    private async payForDice() {
+    private payDiceEnergy(): Promise<boolean> {
         const model = this.ent.BattleModel;
         const runId = model.runId;
         model.busy = true;
-        try {
+        return (async () => {
             await this.ent.BattleEquipmentBll.changeEnergy(-2, 'DICE');
             await this.finishResult();
             return true;
-        } catch (error) {
+        })().catch((error: Error) => {
             if (model.runId === runId) {
-                this.fail(error);
+                this.handleBattleError(error);
             }
             return false;
-        } finally {
+        }).finally(() => {
             if (model.runId === runId) {
                 model.busy = false;
-                this.refresh();
+                this.refreshBattleView();
             }
-        }
+        });
     }
-
-    isFinished(runId = this.ent.BattleModel.runId) {
+    // 检查战斗关闭、胜负和结算批次是否已失效。
+    isBattleFinished(runId = this.ent.BattleModel.runId): boolean {
         const model = this.ent.BattleModel;
         return runId !== model.runId || model.closed || model.phase === BattlePhase.Victory || model.phase === BattlePhase.Defeat;
     }
-
-    checkResult(runId = this.ent.BattleModel.runId) {
-        if (this.isFinished(runId)) {
+    // 检查双方生命并切换胜负状态。
+    checkResult(runId = this.ent.BattleModel.runId): boolean {
+        if (this.isBattleFinished(runId)) {
             return true;
         }
         if (this.ent.BattlePlayerModel.hp <= 0) {
             this.setPhase(BattlePhase.Defeat);
-        } else if (this.ent.BattleEnemyModel.hp <= 0) {
+        }
+        else if (this.ent.BattleEnemyModel.hp <= 0) {
             this.setPhase(BattlePhase.Victory);
         }
-        return this.isFinished();
+        return this.isBattleFinished();
     }
-
-    async finishResult() {
+    // 等待战斗结束事件与奖励界面打开后完成结算。
+    finishResult(): Promise<void> {
         const model = this.ent.BattleModel;
-        if (model.closed || !this.isFinished() || model.resultHandled) {
-            return;
+        if (model.closed || !this.isBattleFinished() || model.resultHandled) {
+            return Promise.resolve();
         }
         const runId = model.runId;
         model.resultHandled = true;
         model.busy = true;
-        try {
+        return (async () => {
             this.cancelChoice();
             if (model.phase === BattlePhase.Victory) {
-                await this.ent.BattleTriggerBll.fire('ON_ENEMY_DIED', BattleSide.Player);
+                await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.EnemyDied, BattleSide.Player);
             }
-            await this.ent.BattleTriggerBll.fire('ON_COMBAT_END', BattleSide.Player);
-            await this.ent.BattleTriggerBll.fire('ON_COMBAT_END', BattleSide.Enemy);
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.CombatEnd, BattleSide.Player);
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.CombatEnd, BattleSide.Enemy);
             if (model.closed || model.runId !== runId) {
                 return;
             }
@@ -249,30 +249,29 @@ export class BattleBll extends CCBusiness<Battle> {
             this.dispatchEvent(PlayerEvent.statsChanged);
             model.triggers = [];
             if (model.phase === BattlePhase.Victory) {
-                this.ent.BattleRewardBll.prepare();
+                this.ent.BattleRewardBll.prepareRewards();
                 await this.ent.openBattleCleadupDialog();
             }
-        }
-        finally {
+        })().finally(() => {
             if (model.runId === runId) {
                 model.busy = false;
-                this.refresh();
+                this.refreshBattleView();
             }
-        }
+        });
     }
-
-    close() {
+    // 关闭战斗并取消尚未完成的效果选择。
+    closeBattle(): void {
         this.ent.BattleModel.closed = true;
         this.cancelChoice();
     }
-
-    leaveResult() {
+    // 离开战斗结果界面并推进冒险流程。
+    leaveResult(): void {
         const model = this.ent.BattleModel;
-        if (model.busy || !this.isFinished()) {
+        if (model.busy || !this.isBattleFinished()) {
             return;
         }
         if (model.phase === BattlePhase.Victory && !model.rewardsDismissed) {
-            this.ent.BattleRewardBll.prepare();
+            this.ent.BattleRewardBll.prepareRewards();
             this.ent.openBattleCleadupDialog();
             return;
         }
@@ -280,35 +279,36 @@ export class BattleBll extends CCBusiness<Battle> {
         this.ent.closeBattleView();
         if (phase === BattlePhase.Victory) {
             smc.gameFlow.advanceLevel();
-        } else if (phase === BattlePhase.Defeat) {
+        }
+        else if (phase === BattlePhase.Defeat) {
             smc.gameFlow.GameFlowBll.startNewGame();
         }
     }
-
-    private cancelChoice() {
+    // 取消待确认的效果选择并解除等待。
+    private cancelChoice(): void {
         const choice = this.ent.BattleModel.choice;
         this.ent.BattleModel.choice = null;
         choice?.resolve(-1);
     }
-
-    fail(error: unknown) {
-        this.ent.BattleModel.message = error instanceof Error ? error.message : String(error);
+    // 报告结算错误并停止当前战斗。
+    handleBattleError(error: Error): void {
+        this.ent.BattleModel.message = error.message;
         this.ent.BattleModel.closed = true;
         this.cancelChoice();
         console.error('战斗结算失败', error);
     }
-
-    refresh() {
+    // 通知战斗界面刷新数据。
+    refreshBattleView(): void {
         this.dispatchEvent(BattleEvent.refreshBattlePhase);
     }
-
-    private setPhase(phase: BattlePhase) {
+    // 执行setPhase对应的战斗处理。
+    private setPhase(phase: BattlePhase): void {
         this.ent.BattleModel.phase = phase;
-        this.refresh();
+        this.refreshBattleView();
     }
-
-    generateEnemy() {
+    // 设置当前战斗的敌人配置编号。
+    generateEnemy(): void {
         const enemyId = this.ent.BattleModel.enemyId;
-        this.ent.BattleEnemyModel.enemyId = TableEnemy.getConfigById(enemyId) ? enemyId : TableEnemy.createId(1);
+        this.ent.BattleEnemyModel.enemyId = enemyId;
     }
 }
