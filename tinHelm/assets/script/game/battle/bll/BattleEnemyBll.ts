@@ -1,14 +1,14 @@
+import { TableBattleBuff } from '../../common/table/TableBattleBuff';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
 import { TableEnemy } from '../../common/table/TableEnemy';
 import { BattleSide, EnemyActionType, EnemyBehaviorNode, EnemyBehaviorNodeType, EnemyConditionField } from '../model/BattleTypes';
-
 export class BattleEnemyBll extends CCBusiness<Battle> {
-
-    initEnemy() {
-        const enemyInfo = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId)
+    // 根据敌人配置初始化生命、状态与阶段数据。
+    initEnemy(): void {
+        const enemyInfo = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId)!;
         const model = this.ent.BattleEnemyModel;
-        model.hp = enemyInfo?.originHp || 1;
+        model.hp = enemyInfo.originHp;
         model.maxHp = model.hp;
         model.block = 0;
         model.buffs = [];
@@ -23,26 +23,23 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
         model.enteredPhases = [];
         model.changingPhase = false;
     }
-
-    planAction() {
-        const enemy = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId);
-        const actions = this.selectActions(this.ent.BattleEnemyModel.phaseBehavior || enemy?.getBehavior());
-        this.ent.BattleEnemyModel.plannedActions = actions.length ? actions : [{
-            type: EnemyBehaviorNodeType.Action,
-            action: EnemyActionType.Wait
-        }];
+    // 根据当前行为树选择下一次敌人行动。
+    planAction(): void {
+        const enemy = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId)!;
+        const actions = this.selectActions(this.ent.BattleEnemyModel.phaseBehavior ? this.ent.BattleEnemyModel.phaseBehavior : enemy.getBehavior());
+        this.ent.BattleEnemyModel.plannedActions = actions;
     }
-
-    private selectActions(node: EnemyBehaviorNode | undefined, depth = 0): EnemyBehaviorNode[] {
-        if (!node || depth > 20) {
+    // 遍历行为树并选择满足条件的行动。
+    private selectActions(node: EnemyBehaviorNode, depth = 0): EnemyBehaviorNode[] {
+        if (depth > 20) {
             return [];
         }
-        const children = node.children || [];
+        const children = node.children;
         switch (node.type) {
             case EnemyBehaviorNodeType.Action:
                 return [node];
             case EnemyBehaviorNodeType.Condition:
-                return this.checkCondition(node) ? this.selectActions(children[0], depth + 1) : [];
+                return this.checkBehaviorCondition(node) ? this.selectActions(children[0], depth + 1) : [];
             case EnemyBehaviorNodeType.Sequence: {
                 const actions: EnemyBehaviorNode[] = [];
                 for (const child of children) {
@@ -63,12 +60,18 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                 }
                 return [];
             case EnemyBehaviorNodeType.Random: {
-                const choices = children.map(child => ({ child, actions: this.selectActions(child, depth + 1) }))
-                    .filter(choice => choice.actions.length && (choice.child.weight ?? 1) > 0);
-                const total = choices.reduce((sum, choice) => sum + (choice.child.weight ?? 1), 0);
+                const choices = children.map(child => {
+                    return ({ child, actions: this.selectActions(child, depth + 1) });
+                })
+                    .filter(choice => {
+                    return choice.actions.length && (this.ent.BattleValueResolver.resolveNumber(choice.child.weight, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))) > 0;
+                });
+                const total = choices.reduce((sum, choice) => {
+                    return sum + (this.ent.BattleValueResolver.resolveNumber(choice.child.weight, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
+                }, 0);
                 let roll = Math.random() * total;
                 for (const choice of choices) {
-                    roll -= choice.child.weight ?? 1;
+                    roll -= this.ent.BattleValueResolver.resolveNumber(choice.child.weight, this.ent.BattleValueResolver.createContext(BattleSide.Enemy));
                     if (roll < 0) {
                         return choice.actions;
                     }
@@ -87,8 +90,8 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                 return [];
         }
     }
-
-    private checkCondition(node: EnemyBehaviorNode) {
+    // 检查敌人行为树中的回合与角色条件。
+    private checkBehaviorCondition(node: EnemyBehaviorNode): boolean {
         const enemy = this.ent.BattleEnemyModel;
         const player = this.ent.BattlePlayerModel;
         let actual = 0;
@@ -109,7 +112,7 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                 actual = player.block;
                 break;
             case EnemyConditionField.TurnMod:
-                actual = this.ent.BattleModel.turn % Math.max(1, node.modulus ?? 1);
+                actual = this.ent.BattleModel.turn % Math.max(1, this.ent.BattleValueResolver.resolveNumber(node.modulus, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
                 break;
             case EnemyConditionField.RepeatCount:
                 actual = enemy.repeatCount;
@@ -120,7 +123,7 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
             default:
                 return false;
         }
-        const value = node.value ?? 0;
+        const value = this.ent.BattleValueResolver.resolveNumber(node.value, this.ent.BattleValueResolver.createContext(BattleSide.Enemy));
         switch (node.operator) {
             case '<': return actual < value;
             case '<=': return actual <= value;
@@ -131,8 +134,8 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
             default: return false;
         }
     }
-
-    intent() {
+    // 生成当前阶段与计划行动的意图文本。
+    describeIntent(): string {
         const names: Record<EnemyActionType, string> = {
             [EnemyActionType.Attack]: '攻击',
             [EnemyActionType.Defend]: '防御',
@@ -150,91 +153,90 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
         };
         const phaseName = this.ent.BattleEnemyModel.phaseName;
         const intent = this.ent.BattleEnemyModel.plannedActions.map(action => {
-            const label = action.moveName?.trim() || names[action.action || EnemyActionType.Wait];
+            const label = action.moveName ? action.moveName.trim() : names[action.action!];
             if (action.action === EnemyActionType.Attack) {
-                return `${label} ${action.amount ?? 0}${(action.hits ?? 1) > 1 ? `×${action.hits}` : ''}`;
+                return `${label} ${this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))}${(this.ent.BattleValueResolver.resolveNumber(action.hits, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))) > 1 ? `×${action.hits}` : ''}`;
             }
-            if ([EnemyActionType.Defend, EnemyActionType.Heal, EnemyActionType.LoseHp, EnemyActionType.RemoveBlock].includes(action.action || EnemyActionType.Wait)) {
-                return `${label} ${action.amount ?? 0}`;
+            if ([EnemyActionType.Defend, EnemyActionType.Heal, EnemyActionType.LoseHp, EnemyActionType.RemoveBlock].includes(action.action!)) {
+                return `${label} ${this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))}`;
             }
             if (action.action === EnemyActionType.AddCard) {
-                return `${label} ${action.cardId ?? 0} × ${action.count ?? 1}`;
+                return `${label} ${this.ent.BattleValueResolver.resolveNumber(action.cardId, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))} × ${this.ent.BattleValueResolver.resolveNumber(action.count, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))}`;
             }
             if (action.action === EnemyActionType.Effects) {
-                return `${label} ${action.effects?.length ?? 0} 项`;
+                return `${label} ${action.effects!.length} 项`;
             }
             if (action.action === EnemyActionType.Buff || action.action === EnemyActionType.Debuff) {
-                return `${label} ${action.status || ''} ${action.stacks ?? 0}`;
+                return `${label} ${this.ent.BattleBuffBll.getBuffName(TableBattleBuff.requireBuffId(action.status))} ${this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))}`;
             }
             return label;
         }).join(' + ');
         return phaseName ? `【${phaseName}】${intent}` : intent;
     }
-
-    async act() {
+    // 等待阶段变化与敌人多段行动依次完成。
+    async executePlannedActions(): Promise<void> {
         // 玩家行动结束后的阶段切换可能改变招式；当前敌人行动一旦开始则保留快照。
         await this.ent.BattleEnemyMechanicBll.updatePhases();
         const actions = this.ent.BattleEnemyModel.plannedActions;
         const model = this.ent.BattleEnemyModel;
-        const moveId = actions.map(action => action.editorId || action.action || '').join('+');
+        const moveId = actions.map(action => {
+            return action.editorId ? action.editorId : action.action!;
+        }).join('+');
         model.repeatCount = moveId && moveId === model.lastMoveId ? model.repeatCount + 1 : 1;
         model.lastMoveId = moveId;
         for (const action of actions) {
-            if (this.ent.BattleBll.isFinished()) {
+            if (this.ent.BattleBll.isBattleFinished()) {
                 return;
             }
             switch (action.action) {
                 case EnemyActionType.Attack:
-                    for (let hit = 0; hit < Math.min(100, action.hits ?? 1); hit++) {
-                        if (this.ent.BattleBll.isFinished()) {
+                    for (let hit = 0; hit < Math.min(100, this.ent.BattleValueResolver.resolveNumber(action.hits, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))); hit++) {
+                        if (this.ent.BattleBll.isBattleFinished()) {
                             return;
                         }
-                        await this.ent.BattleDamageBll.damage(BattleSide.Enemy, BattleSide.Player, action.amount ?? 0);
+                        await this.ent.BattleDamageBll.applyDamage(BattleSide.Enemy, BattleSide.Player, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
                     }
                     break;
                 case EnemyActionType.Defend:
-                    this.ent.BattleDamageBll.block(BattleSide.Enemy, action.amount ?? 0);
+                    this.ent.BattleDamageBll.addBlock(BattleSide.Enemy, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
                     break;
                 case EnemyActionType.Buff:
-                    this.ent.BattleBuffBll.add(BattleSide.Enemy, action.status || '', action.stacks ?? 0, action.duration || 'DEFAULT');
+                    this.ent.BattleBuffBll.addBuff(BattleSide.Enemy, TableBattleBuff.requireBuffId(action.status), this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.duration);
                     break;
                 case EnemyActionType.Debuff:
-                    this.ent.BattleBuffBll.add(BattleSide.Player, action.status || '', action.stacks ?? 0, action.duration || 'DEFAULT');
+                    this.ent.BattleBuffBll.addBuff(BattleSide.Player, TableBattleBuff.requireBuffId(action.status), this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.duration);
                     break;
                 case EnemyActionType.Heal:
-                    this.ent.BattleDamageBll.heal(BattleSide.Enemy, action.amount ?? 0);
+                    this.ent.BattleDamageBll.restoreHp(BattleSide.Enemy, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
                     break;
                 case EnemyActionType.Wait:
                     break;
                 case EnemyActionType.LoseHp:
-                    await this.ent.BattleDamageBll.damage(BattleSide.Enemy, action.target || BattleSide.Player,
-                        action.amount ?? 0, 'HP_LOSS', true);
+                    await this.ent.BattleDamageBll.applyDamage(BattleSide.Enemy, action.target!, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), 'HP_LOSS', true);
                     break;
                 case EnemyActionType.RemoveBlock:
                     {
-                        const actor = this.ent.BattleValueResolver.actor(action.target || BattleSide.Player);
-                        actor.block = Math.max(0, actor.block - (action.amount ?? 0));
+                        const actor = this.ent.BattleValueResolver.getActor(action.target!);
+                        actor.block = Math.max(0, actor.block - (this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy))));
                     }
                     break;
                 case EnemyActionType.Cleanse:
-                    this.ent.BattleBuffBll.cleanse(action.target || BattleSide.Enemy);
+                    this.ent.BattleBuffBll.cleanseDebuffs(action.target!);
                     break;
                 case EnemyActionType.Discard:
                 case EnemyActionType.Exhaust:
-                    await this.ent.BattleCardBll.discard(action.count ?? 1, 'RANDOM', action.action === EnemyActionType.Exhaust);
+                    await this.ent.BattleCardBll.discardCards(this.ent.BattleValueResolver.resolveNumber(action.count, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), 'RANDOM', action.action === EnemyActionType.Exhaust);
                     break;
                 case EnemyActionType.AddCard:
-                    this.ent.BattleCardBll.addCard(action.cardId ?? 0, action.count ?? 1, action.pile || 'DISCARD');
+                    this.ent.BattleCardBll.addCard(this.ent.BattleValueResolver.resolveNumber(action.cardId, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), this.ent.BattleValueResolver.resolveNumber(action.count, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.pile!);
                     break;
                 case EnemyActionType.Effects:
-                    this.ent.BattleEffectBll.validate(action.effects || []);
-                    await this.ent.BattleEffectBll.execute(action.effects || [],
-                        this.ent.BattleValueResolver.context(BattleSide.Enemy, 0, BattleSide.Player));
+                    this.ent.BattleEffectBll.validateEffects(action.effects!);
+                    await this.ent.BattleEffectBll.executeEffects(action.effects!, this.ent.BattleValueResolver.createContext(BattleSide.Enemy, 0, BattleSide.Player));
                     break;
             }
-            model.lastAction = action.action || EnemyActionType.Wait;
-            this.ent.BattleBll.refresh();
+            model.lastAction = action.action!;
+            this.ent.BattleBll.refreshBattleView();
         }
     }
-
 }

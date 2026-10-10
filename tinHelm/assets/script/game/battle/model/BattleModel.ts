@@ -1,7 +1,6 @@
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { BattleCardPile, BattleChoice, BattleTrigger } from './BattleTypes';
 import { BattleReward } from './BattleReward';
-
 export enum BattlePhase {
     Start,
     PlayerStart,
@@ -14,7 +13,6 @@ export enum BattlePhase {
     Victory,
     Defeat
 }
-
 @ecs.register('BattleModel')
 export class BattleModel extends ecs.Comp {
     /** 不随 reset 清零，隔离关闭后尚未返回的异步结算。 */
@@ -38,8 +36,7 @@ export class BattleModel extends ecs.Comp {
     choice: BattleChoice | null = null;
     turnVariables: Record<string, number> = {};
     combatVariables: Record<string, number> = {};
-
-    reset() {
+    reset(): void {
         this.phase = BattlePhase.Start;
         this.turn = 1;
         this.enemyId = 0;

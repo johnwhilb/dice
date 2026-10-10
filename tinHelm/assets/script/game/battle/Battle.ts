@@ -22,19 +22,17 @@ import { CardRewardDialog } from './view/CardRewardDialog';
 import { BattleEnemyMechanicBll } from './bll/BattleEnemyMechanicBll';
 import { BattleItemBll } from './bll/BattleItemBll';
 import { BattleEquipmentBll } from './bll/BattleEquipmentBll';
-
 @ecs.register('Battle')
 export class Battle extends CCEntity {
-
-    BattleModel!: BattleModel
-    BattleBll!: BattleBll
-    BattleView!: BattleView
+    BattleModel!: BattleModel;
+    BattleBll!: BattleBll;
+    BattleView!: BattleView;
     CardShowDialog!: CardShowDialog;
-    BattlePlayerModel!: BattlePlayerModel
-    BattleEnemyModel!: BattleEnemyModel
-    BattleEnemyBll!: BattleEnemyBll
-    BattlePlayerBll!: BattlePlayerBll
-    BattleDiceBll!: BattleDiceBll
+    BattlePlayerModel!: BattlePlayerModel;
+    BattleEnemyModel!: BattleEnemyModel;
+    BattleEnemyBll!: BattleEnemyBll;
+    BattlePlayerBll!: BattlePlayerBll;
+    BattleDiceBll!: BattleDiceBll;
     BattleCardBll!: BattleCardBll;
     BattleEffectBll!: BattleEffectBll;
     BattleValueResolver!: BattleValueResolver;
@@ -47,11 +45,9 @@ export class Battle extends CCEntity {
     BattleEnemyMechanicBll!: BattleEnemyMechanicBll;
     BattleItemBll!: BattleItemBll;
     BattleEquipmentBll!: BattleEquipmentBll;
-
-    static create(): Battle {
+    static createBattle(): Battle {
         return ecs.getEntity<Battle>(Battle);
     }
-
     init(): void {
         this.BattleBll = this.addBusiness<BattleBll>(BattleBll);
         this.addComponents(BattleModel);
@@ -71,27 +67,24 @@ export class Battle extends CCEntity {
         this.BattleItemBll = this.addBusiness<BattleItemBll>(BattleItemBll);
         this.BattleEquipmentBll = this.addBusiness<BattleEquipmentBll>(BattleEquipmentBll);
     }
-
-    openBattleView() {
+    openBattleView(): Promise<import("cc").Node> | undefined {
         if (this.has(BattleView)) {
             return Promise.resolve(this.BattleView.node);
         }
         this.addUi(BattleView);
     }
-
-    closeBattleView() {
+    closeBattleView(): void {
         this.closeCardRewardDialog();
         if (this.has(BattleCleadupDialog)) {
             this.removeUi(BattleCleadupDialog);
         }
         this.closeCardShowDialog();
-        this.BattleBll.close();
+        this.BattleBll.closeBattle();
         if (this.has(BattleView)) {
             this.removeUi(BattleView);
         }
     }
-
-    openCardShowDialog(pile: BattleCardPile) {
+    openCardShowDialog(pile: BattleCardPile): Promise<import("cc").Node | null> | undefined {
         const model = this.BattleModel;
         if (model.busy || model.closed || this.has(CardShowDialog)) {
             return;
@@ -99,91 +92,81 @@ export class Battle extends CCEntity {
         model.shownCardPile = pile;
         return this.addUi(CardShowDialog);
     }
-
-    closeCardShowDialog() {
+    closeCardShowDialog(): void {
         if (this.has(CardShowDialog)) {
             this.removeUi(CardShowDialog);
         }
     }
-
-    changePhase() {
+    changePhase(): void {
         this.BattleBll.changePhase();
     }
-
-    async openBattleCleadupDialog() {
+    // 等待界面资源加载和交互结果完成后更新状态。
+    openBattleCleadupDialog(): Promise<void> {
         const model = this.BattleModel;
         if (model.closed || model.rewardsDismissed || model.rewardDialogOpening || this.has(BattleCleadupDialog)) {
-            return;
+            return Promise.resolve();
         }
         const runId = model.runId;
         model.rewardDialogOpening = true;
         this.closeCardShowDialog();
-        try {
-            const node = await this.addUi(BattleCleadupDialog);
+        return (async () => {
+            await this.addUi(BattleCleadupDialog);
             if (model.closed || model.runId !== runId) {
-                if (node) {
+                if (this.has(BattleCleadupDialog)) {
                     this.removeUi(BattleCleadupDialog);
                 }
             }
-        }
-        catch (error) {
+        })().catch((error: Error) => {
             console.error('战斗奖励界面打开失败', error);
-        }
-        finally {
+        }).finally(() => {
             if (model.runId === runId) {
                 model.rewardDialogOpening = false;
             }
-        }
+        });
     }
-
-    async openCardRewardDialog() {
+    // 等待界面资源加载和交互结果完成后更新状态。
+    openCardRewardDialog(): Promise<void> {
         const model = this.BattleModel;
         if (model.closed || model.selectedRewardIndex < 0 || model.cardRewardDialogOpening || this.has(CardRewardDialog)) {
-            return;
+            return Promise.resolve();
         }
         const runId = model.runId;
         model.cardRewardDialogOpening = true;
-        try {
-            const node = await this.addUi(CardRewardDialog);
+        return (async () => {
+            await this.addUi(CardRewardDialog);
             if (model.closed || model.runId !== runId) {
-                if (node) {
+                if (this.has(CardRewardDialog)) {
                     this.removeUi(CardRewardDialog);
                 }
             }
-            else if (!node) {
+            else if (!this.has(CardRewardDialog)) {
                 this.closeCardRewardDialog();
             }
-        }
-        catch (error) {
+        })().catch((error: Error) => {
             if (model.runId === runId) {
                 this.closeCardRewardDialog();
             }
             console.error('卡牌奖励界面打开失败', error);
-        }
-        finally {
+        }).finally(() => {
             if (model.runId === runId) {
                 model.cardRewardDialogOpening = false;
             }
-        }
+        });
     }
-
-    closeCardRewardDialog() {
+    closeCardRewardDialog(): void {
         this.BattleModel.selectedRewardIndex = -1;
         if (this.has(CardRewardDialog)) {
             this.removeUi(CardRewardDialog);
         }
-        this.BattleRewardBll.refresh();
+        this.BattleRewardBll.refreshRewards();
     }
-
-    setEnemy(enemyId: number) {
+    setEnemy(enemyId: number): void {
         this.BattleModel.enemyId = enemyId;
     }
-
-    initBattleSceneInfo() {
+    initBattleSceneInfo(): void {
         this.BattleBll.generateEnemy();
         this.BattleEnemyBll.initEnemy();
         this.BattlePlayerBll.initPlayer();
-        this.BattleEnemyMechanicBll.initialize();
+        this.BattleEnemyMechanicBll.initializeMechanics();
     }
-
 }

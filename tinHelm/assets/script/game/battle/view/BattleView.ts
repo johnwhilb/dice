@@ -22,21 +22,17 @@ import { GraphView } from '../../ui/GraphView';
 import { BattleCardPile, BattleChoice, BattleSide } from '../model/BattleTypes';
 import { TableItem } from '../../common/table/TableItem';
 import { PlayerEvent } from '../../player/PlayerEvent';
-
 const { ccclass, property } = _decorator;
-
 @ccclass("BattleView")
 @ecs.register("BattleView", false)
 @gui.register('BattleView', { layer: LayerType.UI, prefab: 'gui/battle/BattleView' })
 export class BattleView extends CCView<Battle> {
-
     @property({ type: Prefab })
     prefabDice: Prefab = null!;
     @property({ type: Prefab })
     prefabCard: Prefab = null!;
     @property({ type: Prefab })
     prefabItem: Prefab = null!;
-
     private readonly cardGestureJudgeThreshold = 8;
     private readonly cardTouchStartPos = new Vec3();
     private selectedCardIndex = -1;
@@ -48,9 +44,8 @@ export class BattleView extends CCView<Battle> {
     private selectedItemId = 0;
     private itemSignature = '';
     private itemsVisible = false;
-
     // 等待战斗数据初始化完成后，再加载双方立绘和刷新界面。
-    async start() {
+    async start(): Promise<void> {
         this.nodeTreeInfoLite();
         this.setButton();
         const itemLayout = this.getNode('itemLayout')!;
@@ -68,17 +63,16 @@ export class BattleView extends CCView<Battle> {
             text.lineHeight = 24;
             text.maxWidth = 260;
         }
-        this.on(BattleEvent.refreshBattlePhase, this.refresh, this);
-        this.on(PlayerEvent.statsChanged, this.refresh, this);
+        this.on(BattleEvent.refreshBattlePhase, this.refreshBattleView, this);
+        this.on(PlayerEvent.statsChanged, this.refreshBattleView, this);
         this.startBattleAnimation();
         this.initDiceView();
-        await this.ent.BattleBll.start();
+        await this.ent.BattleBll.startBattle();
         this.initPlayerView();
         this.initEnemyView();
-        this.refresh();
+        this.refreshBattleView();
     }
-
-    refresh() {
+    refreshBattleView(): void {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
         const phaseNames = ['战斗准备', '玩家回合开始', '玩家行动', '玩家回合结束',
@@ -86,8 +80,8 @@ export class BattleView extends CCView<Battle> {
         this.updatePlayerStatus();
         this.updateEnemyStatus();
         this.getNode('lbtPlayerEnergy')!.getComponent(Label)!.string = `${player.energy}/${player.maxEnergy}`;
-        this.getNode('lbtPlayerBuff')!.getComponent(RichText)!.string = this.ent.BattleBuffBll.describe(BattleSide.Player);
-        this.getNode('lbtEnemyBuff')!.getComponent(RichText)!.string = `${this.ent.BattleBuffBll.describe(BattleSide.Enemy)}<br/>意图：${this.ent.BattleEnemyBll.intent()}`;
+        this.getNode('lbtPlayerBuff')!.getComponent(RichText)!.string = this.ent.BattleBuffBll.describeBuffs(BattleSide.Player);
+        this.getNode('lbtEnemyBuff')!.getComponent(RichText)!.string = `${this.ent.BattleBuffBll.describeBuffs(BattleSide.Enemy)}<br/>意图：${this.ent.BattleEnemyBll.describeIntent()}`;
         this.getNode('lbtCurrentPhase')!.getComponent(Label)!.string = model.message || phaseNames[model.phase];
         this.getNode('lbtCurrentRound')!.getComponent(Label)!.string = `第 ${model.turn} 回合`;
         const selectedDiceIndex = player.diceLocked[0];
@@ -96,7 +90,7 @@ export class BattleView extends CCView<Battle> {
         this.getNode('txtDraw')!.getComponent(Label)!.string = '抽牌 -1';
         this.getNode('txtContinue')!.getComponent(Label)!.string = model.phase === BattlePhase.Victory ? '继续前进'
             : model.phase === BattlePhase.Defeat ? '重新开始' : model.closed ? '关闭' : '结束回合';
-        const actionable = !model.busy && model.phase === BattlePhase.PlayerAction && !this.ent.BattleBll.isFinished();
+        const actionable = !model.busy && model.phase === BattlePhase.PlayerAction && !this.ent.BattleBll.isBattleFinished();
         this.getNode('txtDrawPile')!.getComponent(Label)!.string = `抽牌堆 ${player.drawPile.length}`;
         this.getNode('txtDiscardPile')!.getComponent(Label)!.string = `弃牌堆 ${player.discardPile.length}`;
         const canInspect = !model.busy && !model.closed;
@@ -108,18 +102,24 @@ export class BattleView extends CCView<Battle> {
             && player.handCards.length < player.handLimit
             && (!!player.drawPile.length || !!player.discardPile.length);
         this.getNode('btnEnd')!.getComponent(Button)!.interactable = actionable
-            || (!model.busy && this.ent.BattleBll.isFinished());
+            || (!model.busy && this.ent.BattleBll.isBattleFinished());
         this.updateCardList();
         this.updateItemList();
-        const diceConfigs = TableDice.getAllConfig().filter(dice => dice.role === player.playerId);
+        const diceConfigs = TableDice.getAllConfig().filter(dice => {
+            return dice.role === player.playerId;
+        });
         this.getNode('diceLayout')!.children.forEach((dice, index) => {
-            if (dice.getComponent(nodeDice)!.setValue(player.dice[index] ?? 0)) {
-                const config = diceConfigs.find(config => config.diceNum.includes(player.dice[index]));
+            dice.active = index < player.dice.length;
+            if (index >= player.dice.length) {
+                return;
+            }
+            if (dice.getComponent(nodeDice)!.setValue(player.dice[index])) {
+                const config = diceConfigs.find(config => {
+                    return config.diceNum.includes(player.dice[index]);
+                })!;
                 const icon = dice.getChildByName('spIcon')!.getComponent(Sprite)!;
-                icon.node.active = !!config;
-                if (config) {
-                    this.setSprite(icon, ResPath.getSpriteDice(config.id));
-                }
+                icon.node.active = true;
+                this.setSprite(icon, ResPath.getSpriteDice(config.id));
             }
             const scale = this.diceScales[index];
             const factor = player.diceLocked.includes(index) ? 0.9 : 1;
@@ -127,22 +127,19 @@ export class BattleView extends CCView<Battle> {
             dice.getChildByName('usedMask')!.active = player.diceUsed.includes(index);
         });
         this.updateChoice();
-
     }
-
-    private toggleItems() {
+    private toggleItems(): void {
         this.cancelCardGesture();
         this.itemsVisible = !this.itemsVisible;
         this.getNode('itemLayout')!.active = this.itemsVisible;
     }
-
-    private updateItemList() {
+    private updateItemList(): void {
         const layout = this.getNode('itemLayout')!;
         const inventory = smc.player.PlayerModel.items;
         const ids: number[] = [];
         for (const [key, count] of Object.entries(inventory)) {
             const id = Number(key);
-            if (!TableItem.getConfigById(id) || !Number.isSafeInteger(count) || count <= 0) {
+            if (!Number.isSafeInteger(count) || count <= 0) {
                 continue;
             }
             for (let index = 0; index < count; index++) {
@@ -156,7 +153,7 @@ export class BattleView extends CCView<Battle> {
         const signature = ids.join(',');
         if (signature === this.itemSignature && layout.children.length === ids.length) {
             layout.children.forEach((node, index) => {
-                node.getComponent(UIOpacity)!.opacity = this.ent.BattleItemBll.canUse(ids[index]) ? 255 : 140;
+                node.getComponent(UIOpacity)!.opacity = this.ent.BattleItemBll.canUseItem(ids[index]) ? 255 : 140;
             });
             return;
         }
@@ -175,9 +172,9 @@ export class BattleView extends CCView<Battle> {
             node.getChildByName('lbtName')!.getComponent(Label)!.string =
                 `${item.name}\n${item.target === 'SELF' ? '拖向自己' : '拖向敌人'}`;
             const opacity = node.getComponent(UIOpacity) || node.addComponent(UIOpacity);
-            opacity.opacity = this.ent.BattleItemBll.canUse(itemId) ? 255 : 140;
+            opacity.opacity = this.ent.BattleItemBll.canUseItem(itemId) ? 255 : 140;
             node.on(Node.EventType.TOUCH_START, (event: EventTouch) => {
-                if (this.selectedTouchId !== null || !this.ent.BattleItemBll.canUse(itemId)) {
+                if (this.selectedTouchId !== null || !this.ent.BattleItemBll.canUseItem(itemId)) {
                     return;
                 }
                 this.selectedItemId = itemId;
@@ -190,14 +187,13 @@ export class BattleView extends CCView<Battle> {
             node.on(Node.EventType.TOUCH_CANCEL, this.onCardTouchCancel, this);
         }
     }
-
-    updateCardList() {
+    updateCardList(): void {
         const cardLayout = this.getNode('cardLayout')!;
         const player = this.ent.BattlePlayerModel;
         const signature = player.handCards.join(',');
         if (signature === this.handSignature && cardLayout.children.length === player.handCards.length) {
             cardLayout.children.forEach((cardNode, index) => {
-                cardNode.getComponent(UIOpacity)!.opacity = this.ent.BattleCardBll.canPlay(index) ? 255 : 140;
+                cardNode.getComponent(UIOpacity)!.opacity = this.ent.BattleCardBll.canPlayCard(index) ? 255 : 140;
             });
             return;
         }
@@ -209,20 +205,16 @@ export class BattleView extends CCView<Battle> {
             cardNode.destroy();
         });
         player.handCards.forEach((cardId, index) => {
-            const card = TableCard.getConfigById(cardId);
-            if (!card) {
-                return;
-            }
+            const card = TableCard.getConfigById(cardId)!;
             const cardNode = instantiate(this.prefabCard);
             cardNode.parent = cardLayout;
             cardNode.getComponent(nodeCard)!.setData(card);
             const opacity = cardNode.getComponent(UIOpacity) || cardNode.addComponent(UIOpacity);
-            opacity.opacity = this.ent.BattleCardBll.canPlay(index) ? 255 : 140;
+            opacity.opacity = this.ent.BattleCardBll.canPlayCard(index) ? 255 : 140;
             this.bindCardGesture(cardNode, index);
         });
     }
-
-    private bindCardGesture(cardNode: Node, index: number) {
+    private bindCardGesture(cardNode: Node, index: number): void {
         cardNode.on(Node.EventType.TOUCH_START, (event: EventTouch) => {
             if (this.selectedTouchId !== null || this.ent.BattleModel.busy
                 || this.ent.BattleModel.phase !== BattlePhase.PlayerAction) {
@@ -236,13 +228,11 @@ export class BattleView extends CCView<Battle> {
         cardNode.on(Node.EventType.TOUCH_END, this.onCardTouchEnd, this);
         cardNode.on(Node.EventType.TOUCH_CANCEL, this.onCardTouchCancel, this);
     }
-
-    private onCardTouchStart(event: EventTouch) {
+    private onCardTouchStart(event: EventTouch): void {
         const touchPos = event.getUILocation();
         this.cardTouchStartPos.set(touchPos.x, touchPos.y, 0);
     }
-
-    private onCardTouchMove(event: EventTouch) {
+    private onCardTouchMove(event: EventTouch): void {
         if ((this.selectedCardIndex < 0 && !this.selectedItemId) || event.getID() !== this.selectedTouchId) {
             return;
         }
@@ -252,19 +242,16 @@ export class BattleView extends CCView<Battle> {
         if (moveDistance < this.cardGestureJudgeThreshold) {
             return;
         }
-
         const layout = this.getNode(this.selectedItemId ? 'itemLayout' : 'cardLayout')!;
         if (this.isWorldPosInsideNode(touchWorldPos, layout)) {
             return;
         }
-
         this.getNode('nodeGraphView')!
             .getComponent(GraphView)!
             .drawBezierCurveByWorldPos(this.cardTouchStartPos, touchWorldPos);
     }
-
     // 等待道具或卡牌效果（包括玩家选择和胜负结算）执行完毕，再完成拖拽处理。
-    private async onCardTouchEnd(event: EventTouch) {
+    private async onCardTouchEnd(event: EventTouch): Promise<void> {
         if (event.getID() !== this.selectedTouchId) {
             return;
         }
@@ -272,32 +259,25 @@ export class BattleView extends CCView<Battle> {
         const itemId = this.selectedItemId;
         this.cancelCardGesture();
         if (itemId) {
-            const item = TableItem.getConfigById(itemId);
-            if (!item) {
-                return;
-            }
+            const item = TableItem.getConfigById(itemId)!;
             const targetNode = this.getNode(item.target === 'SELF' ? 'spRole' : 'spEnemy')!;
             if (targetNode.getComponent(UITransform)!.hitTest(event.getLocation(), event.windowId)) {
-                await this.ent.BattleItemBll.use(itemId);
+                await this.ent.BattleItemBll.useItem(itemId);
             }
-            this.refresh();
+            this.refreshBattleView();
             return;
         }
-        if (index < 0) {
+        if (index < 0 || index >= this.ent.BattlePlayerModel.handCards.length) {
             return;
         }
-        const card = TableCard.getConfigById(this.ent.BattlePlayerModel.handCards[index]);
-        if (!card) {
-            return;
-        }
-        const targetNode = this.getNode(card?.target === 'SELF' ? 'spRole' : 'spEnemy')!;
+        const card = TableCard.getConfigById(this.ent.BattlePlayerModel.handCards[index])!;
+        const targetNode = this.getNode(card.target === 'SELF' ? 'spRole' : 'spEnemy')!;
         // 引擎按屏幕坐标、UI 相机和窗口转换，避免将 UI 坐标误当世界坐标。
         if (targetNode.getComponent(UITransform)!.hitTest(event.getLocation(), event.windowId)) {
-            await this.ent.BattleCardBll.play(index);
+            await this.ent.BattleCardBll.playCard(index);
         }
     }
-
-    private onCardTouchCancel(event: EventTouch) {
+    private onCardTouchCancel(event: EventTouch): Promise<void> | undefined {
         if (event.getID() !== this.selectedTouchId) {
             return;
         }
@@ -305,20 +285,19 @@ export class BattleView extends CCView<Battle> {
         // 真正的系统取消只清理手势，不执行出牌。
         if (event.getEventCode() === Node.EventType.TOUCH_END) {
             return this.onCardTouchEnd(event);
-        } else {
+        }
+        else {
             this.cancelCardGesture();
-            this.refresh();
+            this.refreshBattleView();
         }
     }
-
-    private cancelCardGesture() {
+    private cancelCardGesture(): void {
         this.selectedCardIndex = -1;
         this.selectedItemId = 0;
         this.selectedTouchId = null;
         this.getNode('nodeGraphView')!.getComponent(GraphView)!.reset();
     }
-
-    private isWorldPosInsideNode(worldPos: Vec3, node: Node) {
+    private isWorldPosInsideNode(worldPos: Vec3, node: Node): boolean {
         const uiTransform = node.getComponent(UITransform)!;
         const localPos = uiTransform.convertToNodeSpaceAR(worldPos);
         const minX = -uiTransform.width * uiTransform.anchorX;
@@ -330,36 +309,29 @@ export class BattleView extends CCView<Battle> {
             && localPos.y >= minY
             && localPos.y <= maxY;
     }
-
-    initPlayerView() {
+    initPlayerView(): void {
         const spRole = this.getNode('spRole')!.getComponent(Sprite);
         const currentSelectedAvatarId = smc.player.getSelectedRoleId();
         this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
     }
-
-    initEnemyView() {
+    initEnemyView(): void {
         const spEnemy = this.getNode('spEnemy')!.getComponent(Sprite);
         const currentSelectedAvatarId = this.ent.BattleEnemyModel.enemyId;
         this.setSprite(spEnemy, ResPath.getSpriteEnemyBody(currentSelectedAvatarId));
     }
-
-    updatePlayerStatus() {
+    updatePlayerStatus(): void {
         const lbtPlayerHP = this.getNode('lbtPlayerHP')!.getComponent(Label);
         lbtPlayerHP.string = this.ent.BattlePlayerModel.hp + "/" + this.ent.BattlePlayerModel.maxHp;
     }
-
-    updateEnemyStatus() {
+    updateEnemyStatus(): void {
         const lbtEnemyHP = this.getNode('lbtEnemyHP')!.getComponent(Label);
         lbtEnemyHP.string = this.ent.BattleEnemyModel.hp + "/" + this.ent.BattleEnemyModel.maxHp;
-
     }
-
-    startBattleAnimation() {
+    startBattleAnimation(): void {
         TweenAnimUtil.move(this.getNode("nodeCurrentPhase")!, 250, 0);
         TweenAnimUtil.move(this.getNode("nodeCurrentRound")!, -250, 0);
     }
-
-    initDiceView() {
+    initDiceView(): void {
         const diceLayout = this.getNode('diceLayout')!;
         for (const child of [...diceLayout.children]) {
             child.removeFromParent();
@@ -367,7 +339,8 @@ export class BattleView extends CCView<Battle> {
         }
         this.diceScales = [];
         const playerId = smc.player.getSelectedRoleId();
-        const diceInfo: number[][] = TableRole.getConfigById(playerId)?.originDice ?? [];
+        const role = TableRole.getConfigById(playerId)!;
+        const diceInfo: number[][] = role.originDice;
         diceInfo.forEach((faces, index) => {
             const diceNode = instantiate(this.prefabDice);
             diceNode.parent = diceLayout;
@@ -375,34 +348,28 @@ export class BattleView extends CCView<Battle> {
             diceNode.getComponent(nodeDice)!.setIndex(index);
         });
     }
-
-    btnThrow() {
-        this.ent.BattleBll.reroll();
+    btnThrow(): void {
+        this.ent.BattleBll.rerollSelectedDice();
     }
-
-    btnDraw() {
-        return this.ent.BattleCardBll.draw();
+    btnDraw(): Promise<boolean> {
+        return this.ent.BattleCardBll.drawPaidCard();
     }
-
-    btnDrawPile() {
+    btnDrawPile(): Promise<Node | null> | undefined {
         this.cancelCardGesture();
         return this.ent.openCardShowDialog(BattleCardPile.Draw);
     }
-
-    btnDiscardPile() {
+    btnDiscardPile(): Promise<Node | null> | undefined {
         this.cancelCardGesture();
         return this.ent.openCardShowDialog(BattleCardPile.Discard);
     }
-
-    btnEnd() {
-        if (this.ent.BattleBll.isFinished()) {
+    btnEnd(): Promise<void> | undefined {
+        if (this.ent.BattleBll.isBattleFinished()) {
             this.ent.BattleBll.leaveResult();
             return;
         }
-        return this.ent.BattleBll.endTurn();
+        return this.ent.BattleBll.endPlayerTurn();
     }
-
-    private updateChoice() {
+    private updateChoice(): void {
         const choice = this.ent.BattleModel.choice;
         if (choice === this.displayedChoice) {
             return;
@@ -429,18 +396,17 @@ export class BattleView extends CCView<Battle> {
         graphics.fill();
         const width = Math.min(size.width - 60, 720);
         const height = Math.min(110, (size.height - 180) / Math.max(1, choice.options.length));
-        this.choiceLabel(panel, choice.title, width, 60, size.height / 2 - 65);
+        this.createChoiceLabel(panel, choice.title, width, 60, size.height / 2 - 65);
         choice.options.forEach((option, index) => {
             const y = (choice.options.length - 1) * (height + 12) / 2 - index * (height + 12);
-            const button = this.choiceLabel(panel, `${index + 1}. ${option}`, width, height, y);
+            const button = this.createChoiceLabel(panel, `${index + 1}. ${option}`, width, height, y);
             button.addComponent(Button);
             button.on(Button.EventType.CLICK, () => {
-                this.ent.BattleEffectBll.select(index);
+                this.ent.BattleEffectBll.selectEffect(index);
             }, this);
         });
     }
-
-    private choiceLabel(parent: Node, text: string, width: number, height: number, y: number) {
+    private createChoiceLabel(parent: Node, text: string, width: number, height: number, y: number): Node {
         const node = new Node('choiceOption');
         node.layer = parent.layer;
         parent.addChild(node);
@@ -464,11 +430,9 @@ export class BattleView extends CCView<Battle> {
         label.verticalAlign = Label.VerticalAlign.CENTER;
         return node;
     }
-
-    btnClose() {
+    btnClose(): void {
         this.ent.closeBattleView();
     }
-
     reset(): void {
         this.itemSignature = '';
         this.handSignature = '';
