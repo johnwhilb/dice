@@ -6,25 +6,20 @@ import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
 import { Battle } from '../Battle';
 import { TableCard } from '../../common/table/TableCard';
 import { nodeCard } from '../../card/nodeCard';
-
 const { ccclass } = _decorator;
-
 @ccclass('CardRewardDialog')
 @ecs.register('CardRewardDialog', false)
 @gui.register('CardRewardDialog', { layer: LayerType.PopUp, prefab: 'gui/battle/CardRewardDialog' })
 export class CardRewardDialog extends CCView<Battle> {
-    start() {
+    start(): void {
         this.nodeTreeInfoLite();
         this.setButton();
         const reward = this.ent.BattleModel.rewards[this.ent.BattleModel.selectedRewardIndex];
         const template = this.getNode('nodeRewardCard')!;
         const layout = this.getNode('nodeCardRewardLayout')!;
         const types: Record<string, string> = { ATTACK: '攻击', SKILL: '技能', POWER: '能力' };
-        for (const cardId of reward?.cardIds || []) {
-            const card = TableCard.getConfigById(cardId);
-            if (!card) {
-                continue;
-            }
+        for (const cardId of reward.cardIds) {
+            const card = TableCard.getConfigById(cardId)!;
             const node = instantiate(template);
             node.name = `rewardCard${cardId}`;
             node.active = true;
@@ -40,11 +35,9 @@ export class CardRewardDialog extends CCView<Battle> {
         template.active = false;
         layout.getComponent(Layout)!.updateLayout();
     }
-
-    btnClose() {
+    btnClose(): void {
         this.ent.closeCardRewardDialog();
     }
-
-    reset() {
+    reset(): void {
     }
 }

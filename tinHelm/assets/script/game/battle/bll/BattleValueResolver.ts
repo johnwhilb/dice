@@ -1,68 +1,86 @@
+import { TableBattleBuff } from '../../common/table/TableBattleBuff';
+import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
-import { BattleActor, BattleCondition, BattleContext, BattleSide } from '../model/BattleTypes';
-
+import { BattleActor, BattleCondition, BattleContext, BattleSide, BattleEventData } from '../model/BattleTypes';
 /** 只解析数值语法，不执行 JSON 中的 JavaScript。 */
 export class BattleValueResolver extends CCBusiness<Battle> {
-    actor(side: BattleSide): BattleActor {
+    // 读取指定阵营的战斗角色数据。
+    getActor(side: BattleSide): BattleActor {
         return side === BattleSide.Player ? this.ent.BattlePlayerModel : this.ent.BattleEnemyModel;
     }
-
-    opposite(side: BattleSide) {
+    // 读取指定阵营的对手阵营。
+    getOppositeSide(side: BattleSide): BattleSide {
         return side === BattleSide.Player ? BattleSide.Enemy : BattleSide.Player;
     }
-
-    target(target: string | undefined, context: BattleContext) {
-        return target === 'ENEMY' ? this.opposite(context.source) : context.source;
+    // 根据效果目标解析实际作用阵营。
+    resolveTargetSide(target: string, context: BattleContext): BattleSide {
+        if (target === 'ENEMY') {
+            return this.getOppositeSide(context.source);
+        }
+        if (target !== 'SELF') {
+            throw new Error(`效果目标无效：${target}`);
+        }
+        return context.source;
     }
-
-    stacks(side: BattleSide, id: string) {
-        return this.actor(side).buffs.filter(buff => buff.id === id.toUpperCase())
-            .reduce((sum, buff) => sum + buff.stacks, 0);
+    // 汇总指定Buff编号的状态层数。
+    getBuffStacks(side: BattleSide, id: BattleBuffTypeEnum): number {
+        return this.getActor(side).buffs.filter(buff => {
+            return buff.id === id;
+        })
+            .reduce((sum, buff) => {
+            return sum + buff.stacks;
+        }, 0);
     }
-
-    context(source = BattleSide.Player, cardId = 0, target = this.opposite(source)): BattleContext {
-        return { runId: this.ent.BattleModel.runId, source, target, cardId, variables: {}, event: {} };
+    // 创建当前战斗批次的效果上下文。
+    createContext(source = BattleSide.Player, cardId = 0, target = this.getOppositeSide(source)): BattleContext {
+        return { runId: this.ent.BattleModel.runId, source, target, cardId, variables: { totalHpLoss: 0, cardDamageBonus: 0, nextCardDamageBonus: 0, cardBlockGained: 0, exhaustThisCard: 0 }, event: {}, activeCardEvents: [] };
     }
-
-    number(value: unknown, context: BattleContext, fallback = 0): number {
+    // 解析有限数值或受限的数学表达式。
+    resolveNumber(value: number | string | boolean | BattleEventData | undefined, context: BattleContext): number {
         if (typeof value === 'number') {
-            return Number.isFinite(value) ? value : fallback;
+            if (!Number.isFinite(value)) {
+                throw new Error(`数值无效：${value}`);
+            }
+            return value;
         }
         if (typeof value === 'boolean') {
             return value ? 1 : 0;
         }
         if (typeof value !== 'string' || !value.trim()) {
-            return fallback;
+            throw new Error(`数值或表达式缺失：${value}`);
         }
-        const tokens = value.match(/@[\w.]+|\d*\.?\d+(?:e[+-]?\d+)?|[A-Za-z]+|[()+\-*/%,]/g) || [];
+        const tokens = value.match(/@[\w.]+|\d*\.?\d+(?:e[+-]?\d+)?|[A-Za-z]+|[()+\-*/%,]/g);
+        if (!tokens) {
+            throw new Error(`数值表达式为空：${value}`);
+        }
         if (tokens.join('') !== value.replace(/\s/g, '')) {
             throw new Error(`无效的数值表达式：${value}`);
         }
         let position = 0;
-        const primary = (): number => {
+        const parsePrimary = (): number => {
             const token = tokens[position++];
             if (token === '-' || token === '+') {
-                return (token === '-' ? -1 : 1) * primary();
+                return (token === '-' ? -1 : 1) * parsePrimary();
             }
             if (token === '(') {
-                const result = expression();
+                const result = parseExpression();
                 if (tokens[position++] !== ')') {
                     throw new Error('表达式括号不匹配');
                 }
                 return result;
             }
             if (token?.startsWith('@')) {
-                return this.reference(token, context);
+                return this.resolveReference(token, context);
             }
             if (/^(min|max|floor|ceil|round|abs)$/.test(token)) {
                 if (tokens[position++] !== '(') {
                     throw new Error('函数缺少左括号');
                 }
-                const args = [expression()];
+                const args = [parseExpression()];
                 while (tokens[position] === ',') {
                     position++;
-                    args.push(expression());
+                    args.push(parseExpression());
                 }
                 if (tokens[position++] !== ')') {
                     throw new Error('函数缺少右括号');
@@ -82,36 +100,36 @@ export class BattleValueResolver extends CCBusiness<Battle> {
             }
             return result;
         };
-        const product = (): number => {
-            let result = primary();
+        const parseProduct = (): number => {
+            let result = parsePrimary();
             while (['*', '/', '%'].includes(tokens[position])) {
                 const operator = tokens[position++];
-                const right = primary();
+                const right = parsePrimary();
                 result = operator === '*' ? result * right : operator === '/' ? result / right : result % right;
             }
             return result;
         };
-        const expression = (): number => {
-            let result = product();
+        const parseExpression = (): number => {
+            let result = parseProduct();
             while (['+', '-'].includes(tokens[position])) {
                 const operator = tokens[position++];
-                const right = product();
+                const right = parseProduct();
                 result += operator === '+' ? right : -right;
             }
             return result;
         };
-        const result = expression();
+        const result = parseExpression();
         if (position !== tokens.length || !Number.isFinite(result)) {
             throw new Error(`表达式结果无效：${value}`);
         }
         return result;
     }
-
-    private reference(path: string, context: BattleContext) {
+    // 解析角色、事件与作用域变量引用。
+    private resolveReference(path: string, context: BattleContext): number {
         const [scope, field, status] = path.slice(1).split('.');
         if (scope === 'self' || scope === 'target') {
             const side = scope === 'self' ? context.source : context.target;
-            const actor = this.actor(side);
+            const actor = this.getActor(side);
             switch (field) {
                 case 'turn': return this.ent.BattleModel.turn;
                 case 'hp': return actor.hp;
@@ -119,33 +137,41 @@ export class BattleValueResolver extends CCBusiness<Battle> {
                 case 'block': return actor.block;
                 case 'energy': return side === BattleSide.Player ? this.ent.BattlePlayerModel.energy : 0;
                 case 'buff':
-                case 'buffs': return this.stacks(side, status || '');
-                default: return this.stacks(side, field || '');
+                case 'buffs': return this.getBuffStacks(side, TableBattleBuff.requireBuffId(Number(status)));
+                default: return this.getBuffStacks(side, TableBattleBuff.requireBuffId(Number(field)));
             }
         }
         if (scope === 'event') {
-            return Number(context.event[field]) || 0;
+            return this.resolveNumber(context.event[field], context);
         }
         if (scope === 'last_damage') {
-            return context.variables.totalHpLoss || 0;
+            return context.variables.totalHpLoss;
         }
-        const variable = field || scope;
+        const variable = field ? field : scope;
         const name = context.equipmentKey ? context.equipmentKey + '.' + variable : variable;
-        return context.variables[name] ?? this.ent.BattleModel.turnVariables[name]
-            ?? this.ent.BattleModel.combatVariables[name] ?? 0;
+        for (const variables of [context.variables, this.ent.BattleModel.turnVariables, this.ent.BattleModel.combatVariables]) {
+            if (Object.prototype.hasOwnProperty.call(variables, name)) {
+                return variables[name];
+            }
+        }
+        throw new Error(`变量尚未初始化：${name}`);
     }
-
-    condition(condition: BattleCondition | undefined, context: BattleContext): boolean {
+    // 检查组合条件与数值比较结果。
+    checkCondition(condition: BattleCondition | undefined, context: BattleContext): boolean {
         if (!condition) {
             return true;
         }
         if (condition.rules) {
             return condition.op === 'OR'
-                ? condition.rules.some(rule => this.condition(rule, context))
-                : condition.rules.every(rule => this.condition(rule, context));
+                ? condition.rules.some(rule => {
+                    return this.checkCondition(rule, context);
+                })
+                : condition.rules.every(rule => {
+                    return this.checkCondition(rule, context);
+                });
         }
-        const left = this.number(condition.lhs, context);
-        const right = this.number(condition.rhs, context);
+        const left = this.resolveNumber(condition.lhs, context);
+        const right = this.resolveNumber(condition.rhs, context);
         switch (condition.cmp) {
             case '==': return left === right;
             case '!=': return left !== right;

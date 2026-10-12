@@ -1,10 +1,7 @@
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { BattleBuff } from './BattleTypes';
-
-
 @ecs.register('BattlePlayerModel')
 export class BattlePlayerModel extends ecs.Comp {
-
     turn: number = 1;
     dice: number[] = [];
     diceLocked: number[] = [];
@@ -35,8 +32,7 @@ export class BattlePlayerModel extends ecs.Comp {
     hp: number = 0;
     maxHp: number = 0;
     playerId: number = 0;
-
-    reset() {
+    reset(): void {
         this.turn = 1;
         this.dice = [];
         this.diceLocked = [];
