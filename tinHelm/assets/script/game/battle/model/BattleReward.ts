@@ -3,7 +3,6 @@ export enum BattleRewardKind {
     Resource,
     Card
 }
-
 export interface BattleReward {
     kind: BattleRewardKind;
     id: number;

@@ -10,16 +10,13 @@ import { TableItem } from '../../common/table/TableItem';
 import { TableEnemy } from '../../common/table/TableEnemy';
 import { TableGameResource } from '../../common/table/TableGameResource';
 import { smc } from '../../common/SingletonModuleComp';
-
 const { ccclass } = _decorator;
-
 @ccclass('BattleCleadupDialog')
 @ecs.register('BattleCleadupDialog', false)
 @gui.register('BattleCleadupDialog', { layer: LayerType.PopUp, prefab: 'gui/battle/BattleCleadupDialog' })
 export class BattleCleadupDialog extends CCView<Battle> {
     private rewardNodes: Node[] = [];
-
-    start() {
+    start(): void {
         this.nodeTreeInfoLite();
         this.setButton();
         const template = this.getNode('nodeReward')!;
@@ -30,30 +27,29 @@ export class BattleCleadupDialog extends CCView<Battle> {
             node.name = `reward${index}`;
             node.parent = layout;
             node.on(Button.EventType.CLICK, () => {
-                this.ent.BattleRewardBll.claim(index);
+                this.ent.BattleRewardBll.claimReward(index);
             }, this);
             this.rewardNodes.push(node);
         });
         template.active = false;
-        this.on(BattleEvent.rewardsChanged, this.refresh, this);
-        this.refresh();
+        this.on(BattleEvent.rewardsChanged, this.refreshRewardList, this);
+        this.refreshRewardList();
         layout.getComponent(Layout)!.updateLayout();
         this.getNode('nodeRewardList')!.getComponent(ScrollView)!.scrollToTop(0);
     }
-
-    refresh() {
-        const enemy = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId);
-        this.getNode('txtCleaup')!.getComponent(Label)!.string = `战斗胜利 · ${enemy?.name || '敌人'}`;
+    refreshRewardList(): void {
+        const enemy = TableEnemy.getConfigById(this.ent.BattleEnemyModel.enemyId)!;
+        this.getNode('txtCleaup')!.getComponent(Label)!.string = `战斗胜利 · ${enemy.name}`;
         this.getNode('lbtEmpty')!.active = this.ent.BattleModel.rewards.length === 0;
         this.rewardNodes.forEach((node, index) => {
             const reward = this.ent.BattleModel.rewards[index];
             const title = reward.kind === BattleRewardKind.Item
-                ? TableItem.getConfigById(reward.id)?.name || '道具'
+                ? TableItem.getConfigById(reward.id)!.name
                 : reward.kind === BattleRewardKind.Resource
-                    ? TableGameResource.getConfigById(reward.id)?.name || '资源'
+                    ? TableGameResource.getConfigById(reward.id)!.name
                     : '卡牌奖励（三选一）';
             const description = reward.kind === BattleRewardKind.Item
-                ? TableItem.getConfigById(reward.id)?.des || ''
+                ? TableItem.getConfigById(reward.id)!.des
                 : reward.kind === BattleRewardKind.Card ? '选择一张加入当前牌组' : '';
             node.active = true;
             node.getChildByName('lbtName')!.getComponent(Label)!.string = `${title} ×${reward.count}`;
@@ -66,12 +62,10 @@ export class BattleCleadupDialog extends CCView<Battle> {
                 && this.ent.BattleModel.selectedRewardIndex < 0;
         });
     }
-
-    btnClose() {
-        this.ent.BattleRewardBll.leave();
+    btnClose(): void {
+        this.ent.BattleRewardBll.leaveRewards();
     }
-
-    reset() {
+    reset(): void {
         this.rewardNodes = [];
     }
 }

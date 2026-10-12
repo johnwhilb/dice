@@ -1,10 +1,7 @@
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { BattleBuff, EnemyBehaviorNode } from './BattleTypes';
-
-
 @ecs.register('BattleEnemyModel')
 export class BattleEnemyModel extends ecs.Comp {
-
     enemyId: number = 0;
     hp: number = 0;
     maxHp: number = 0;
@@ -20,9 +17,7 @@ export class BattleEnemyModel extends ecs.Comp {
     phaseBehavior: EnemyBehaviorNode | null = null;
     enteredPhases: string[] = [];
     changingPhase: boolean = false;
-
-
-    reset() {
+    reset(): void {
         this.enemyId = 0;
         this.hp = 0;
         this.maxHp = 0;

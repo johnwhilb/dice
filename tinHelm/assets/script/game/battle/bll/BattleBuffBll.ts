@@ -1,158 +1,222 @@
+import { TableBattleBuff, BattleBuffCategory, BattleBuffStackMode } from '../../common/table/TableBattleBuff';
+import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
 import { BattleSide } from '../model/BattleTypes';
-
 export class BattleBuffBll extends CCBusiness<Battle> {
-    private readonly debuffs = ['WEAK', 'VULNERABLE', 'FRAIL', 'POISON', 'BURN', 'CONSTRICTED'];
-
-    incomingDamage(side: BattleSide, amount: number, kind: string) {
+    // 计算闪避、飞行与硬甲对本次伤害的修正。
+    calculateIncomingDamage(side: BattleSide, amount: number, kind: string): number {
         if (kind === 'HP_LOSS' || amount <= 0) {
             return amount;
         }
         const resolver = this.ent.BattleValueResolver;
-        if (kind === 'ATTACK' && resolver.stacks(side, 'EVASION') > 0) {
-            this.remove(side, 'EVASION', 1);
+        if (kind === 'ATTACK' && resolver.getBuffStacks(side, BattleBuffTypeEnum.EVASION) > 0) {
+            this.removeBuff(side, BattleBuffTypeEnum.EVASION, 1);
             return 0;
         }
-        const flight = kind === 'ATTACK' && resolver.stacks(side, 'FLIGHT') > 0;
-        return Math.max(0, amount * (flight ? 0.5 : 1) - Math.max(0, resolver.stacks(side, 'ARMOR')));
+        const flight = kind === 'ATTACK' && resolver.getBuffStacks(side, BattleBuffTypeEnum.FLIGHT) > 0;
+        return Math.max(0, amount * (flight ? 0.5 : 1) - Math.max(0, resolver.getBuffStacks(side, BattleBuffTypeEnum.ARMOR)));
     }
-
-    attackHpLoss(side: BattleSide) {
+    // 结算攻击穿透生命后的护甲衰减与暴怒。
+    applyAttackHpLoss(side: BattleSide): void {
         const resolver = this.ent.BattleValueResolver;
-        this.remove(side, 'PLATED_ARMOR', 1);
-        this.remove(side, 'FLIGHT', 1);
-        const fury = resolver.stacks(side, 'FURY');
+        this.removeBuff(side, BattleBuffTypeEnum.PLATED_ARMOR, 1);
+        this.removeBuff(side, BattleBuffTypeEnum.FLIGHT, 1);
+        const fury = resolver.getBuffStacks(side, BattleBuffTypeEnum.FURY);
         if (fury > 0) {
-            this.add(side, 'STRENGTH', fury, 'COMBAT');
+            this.addBuff(side, BattleBuffTypeEnum.STRENGTH, fury, 'COMBAT');
         }
     }
-
-    add(side: BattleSide, id: string, stacks: number, duration = 'DEFAULT') {
+    // 按配置分类添加状态，并结算人工制品抵消减益。
+    addBuff(side: BattleSide, id: BattleBuffTypeEnum, stacks: number, duration = 'DEFAULT'): void {
         if (!Number.isFinite(stacks)) {
             throw new Error('状态层数必须是有限数值');
         }
-        id = id.toUpperCase();
         stacks = Math.trunc(stacks);
         if (!stacks) {
             return;
         }
         const resolver = this.ent.BattleValueResolver;
-        if (this.debuffs.includes(id) && stacks > 0 && resolver.stacks(side, 'ARTIFACT') > 0) {
-            this.remove(side, 'ARTIFACT', 1);
+        const config = TableBattleBuff.requireBuffConfig(id);
+        if (config.category === BattleBuffCategory.Debuff && stacks > 0 && resolver.getBuffStacks(side, BattleBuffTypeEnum.ARTIFACT) > 0) {
+            this.removeBuff(side, BattleBuffTypeEnum.ARTIFACT, 1);
             return;
         }
-        const buffs = resolver.actor(side).buffs;
+        const currentStacks = resolver.getBuffStacks(side, id);
+        let desiredStacks = currentStacks + stacks;
+        if (config.stackMode === BattleBuffStackMode.Max) {
+            desiredStacks = Math.max(currentStacks, stacks);
+            if (desiredStacks === currentStacks) {
+                return;
+            }
+        }
+        else if (config.stackMode === BattleBuffStackMode.Replace) {
+            desiredStacks = stacks;
+        }
+        desiredStacks = Math.max(-config.maxStacks, Math.min(config.maxStacks, desiredStacks));
+        if (config.stackMode !== BattleBuffStackMode.Add) {
+            this.removeBuff(side, id);
+            stacks = desiredStacks;
+        }
+        else {
+            stacks = desiredStacks - currentStacks;
+        }
+        if (!stacks) {
+            return;
+        }
         const expiresTurn = this.ent.BattleModel.turn + (duration === 'NEXT_TURN' ? 1 : 0);
         const expires = ['TURN', 'NEXT_TURN'].includes(duration);
-        const existing = buffs.find(buff => buff.id === id && buff.duration === duration
-            && (!expires || buff.expiresTurn === expiresTurn));
+        const activeBuffs = resolver.getActor(side).buffs;
+        const existing = activeBuffs.find(buff => {
+            return buff.id === id && buff.duration === duration
+                && (!expires || buff.expiresTurn === expiresTurn);
+        });
         if (existing) {
             existing.stacks += stacks;
-        } else {
-            buffs.push({ id, stacks, duration, expiresTurn });
         }
-        resolver.actor(side).buffs = buffs.filter(buff => buff.stacks !== 0);
+        else {
+            activeBuffs.push({ id, stacks, duration, expiresTurn });
+        }
+        resolver.getActor(side).buffs = activeBuffs.filter(buff => {
+            return buff.stacks !== 0;
+        });
     }
-
-    remove(side: BattleSide, id: string, amount = Infinity) {
-        const actor = this.ent.BattleValueResolver.actor(side);
+    // 移除指定状态的部分层数或全部状态。
+    removeBuff(side: BattleSide, id: BattleBuffTypeEnum | 'ALL', amount = Infinity): void {
+        const actor = this.ent.BattleValueResolver.getActor(side);
         if (id === 'ALL' && amount === Infinity) {
             actor.buffs = [];
             return;
         }
         let remaining = Math.max(0, amount);
         for (const buff of actor.buffs) {
-            if (id === 'ALL' || buff.id === id.toUpperCase()) {
+            if (id === 'ALL' || buff.id === id) {
                 const removed = Math.min(Math.abs(buff.stacks), remaining);
                 buff.stacks -= Math.sign(buff.stacks) * removed;
                 remaining -= removed;
             }
         }
-        actor.buffs = actor.buffs.filter(buff => buff.stacks !== 0);
+        actor.buffs = actor.buffs.filter(buff => {
+            return buff.stacks !== 0;
+        });
     }
-
-    cleanse(side: BattleSide) {
-        const actor = this.ent.BattleValueResolver.actor(side);
-        actor.buffs = actor.buffs.filter(buff => !this.debuffs.includes(buff.id) && buff.stacks > 0);
+    // 按Buff表分类清除减益和负层数状态。
+    cleanseDebuffs(side: BattleSide): void {
+        const actor = this.ent.BattleValueResolver.getActor(side);
+        actor.buffs = actor.buffs.filter(buff => {
+            return TableBattleBuff.requireBuffConfig(buff.id).category !== BattleBuffCategory.Debuff && buff.stacks > 0;
+        });
     }
-
-    async startTurn(side: BattleSide) {
+    // 按倍率修改状态并限制总层数，保留每份状态的持续范围。
+    multiplyBuffStacks(side: BattleSide, id: BattleBuffTypeEnum, factor: number): void {
+        if (!Number.isFinite(factor) || factor < 0) {
+            throw new Error('状态倍率必须是非负有限数值');
+        }
+        const actor = this.ent.BattleValueResolver.getActor(side);
+        const config = TableBattleBuff.requireBuffConfig(id);
+        const buffs = actor.buffs.filter(item => {
+            return item.id === id;
+        });
+        for (const buff of buffs) {
+            const stacks = Math.trunc(buff.stacks * factor);
+            if (!Number.isFinite(stacks)) {
+                throw new Error('状态层数超出有限数值范围');
+            }
+            buff.stacks = stacks;
+        }
+        const total = buffs.reduce((sum, buff) => {
+            return sum + buff.stacks;
+        }, 0);
+        let excess = total - Math.max(-config.maxStacks, Math.min(config.maxStacks, total));
+        for (const buff of buffs) {
+            if (Math.sign(buff.stacks) === Math.sign(excess)) {
+                const removed = Math.min(Math.abs(buff.stacks), Math.abs(excess)) * Math.sign(excess);
+                buff.stacks -= removed;
+                excess -= removed;
+            }
+        }
+        actor.buffs = actor.buffs.filter(buff => {
+            return buff.stacks !== 0;
+        });
+    }
+    // 等待中毒伤害结算后减少层数并处理格挡保留。
+    async settleTurnStartBuffs(side: BattleSide): Promise<void> {
         const runId = this.ent.BattleModel.runId;
         const resolver = this.ent.BattleValueResolver;
-        const actor = resolver.actor(side);
+        const actor = resolver.getActor(side);
         // 格挡保留至自己的下一回合开始，保证能抵挡敌人攻击。
-        if (resolver.stacks(side, 'BARRICADE') <= 0) {
+        if (resolver.getBuffStacks(side, BattleBuffTypeEnum.BARRICADE) <= 0) {
             actor.block = side === BattleSide.Player
                 ? Math.min(actor.block, this.ent.BattlePlayerModel.retainedBlockLimit) : 0;
         }
-        const poison = resolver.stacks(side, 'POISON');
+        const poison = resolver.getBuffStacks(side, BattleBuffTypeEnum.POISON);
         if (poison > 0) {
-            await this.ent.BattleDamageBll.damage(resolver.opposite(side), side, poison, 'HP_LOSS', true);
+            await this.ent.BattleDamageBll.applyDamage(resolver.getOppositeSide(side), side, poison, 'HP_LOSS', true);
             if (runId === this.ent.BattleModel.runId) {
-                this.remove(side, 'POISON', 1);
+                this.removeBuff(side, BattleBuffTypeEnum.POISON, 1);
             }
         }
     }
-
-    async endTurn(side: BattleSide) {
+    // 等待回合末状态伤害结算后处理恢复、强化与到期状态。
+    async settleTurnEndBuffs(side: BattleSide): Promise<void> {
         const runId = this.ent.BattleModel.runId;
         const resolver = this.ent.BattleValueResolver;
-        for (const id of ['BURN', 'CONSTRICTED']) {
-            const amount = resolver.stacks(side, id);
-            if (amount > 0 && !this.ent.BattleBll.isFinished(runId)) {
-                await this.ent.BattleDamageBll.damage(resolver.opposite(side), side, amount, 'HP_LOSS', true);
-                if (this.ent.BattleBll.isFinished(runId)) {
+        for (const id of [BattleBuffTypeEnum.BURN, BattleBuffTypeEnum.CONSTRICTED]) {
+            const amount = resolver.getBuffStacks(side, id);
+            if (amount > 0 && !this.ent.BattleBll.isBattleFinished(runId)) {
+                await this.ent.BattleDamageBll.applyDamage(resolver.getOppositeSide(side), side, amount, 'HP_LOSS', true);
+                if (this.ent.BattleBll.isBattleFinished(runId)) {
                     return;
                 }
-                this.remove(side, id, 1);
+                this.removeBuff(side, id, 1);
             }
         }
-        const ritual = resolver.stacks(side, 'RITUAL');
-        if (ritual > 0 && !this.ent.BattleBll.isFinished(runId)) {
-            this.add(side, 'STRENGTH', ritual, 'COMBAT');
+        const ritual = resolver.getBuffStacks(side, BattleBuffTypeEnum.RITUAL);
+        if (ritual > 0 && !this.ent.BattleBll.isBattleFinished(runId)) {
+            this.addBuff(side, BattleBuffTypeEnum.STRENGTH, ritual, 'COMBAT');
         }
-        const regeneration = resolver.stacks(side, 'REGENERATION');
-        if (regeneration > 0 && !this.ent.BattleBll.isFinished()) {
-            this.ent.BattleDamageBll.heal(side, regeneration);
-            this.remove(side, 'REGENERATION', 1);
+        const regeneration = resolver.getBuffStacks(side, BattleBuffTypeEnum.REGENERATION);
+        if (regeneration > 0 && !this.ent.BattleBll.isBattleFinished()) {
+            this.ent.BattleDamageBll.restoreHp(side, regeneration);
+            this.removeBuff(side, BattleBuffTypeEnum.REGENERATION, 1);
         }
-        const metallicize = resolver.stacks(side, 'METALLICIZE') + resolver.stacks(side, 'PLATED_ARMOR');
+        const metallicize = resolver.getBuffStacks(side, BattleBuffTypeEnum.METALLICIZE) + resolver.getBuffStacks(side, BattleBuffTypeEnum.PLATED_ARMOR);
         if (metallicize > 0) {
-            this.ent.BattleDamageBll.block(side, metallicize, false);
+            this.ent.BattleDamageBll.addBlock(side, metallicize, false);
         }
-        const actor = resolver.actor(side);
+        const actor = resolver.getActor(side);
         for (const buff of actor.buffs) {
-            if (buff.duration === 'DEFAULT' && ['WEAK', 'VULNERABLE', 'FRAIL', 'INTANGIBLE'].includes(buff.id)) {
+            if (buff.duration === 'DEFAULT' && TableBattleBuff.requireBuffConfig(buff.id).decayAtTurnEnd) {
                 buff.stacks = Math.max(0, buff.stacks - 1);
             }
         }
-        actor.buffs = actor.buffs.filter(buff => buff.stacks !== 0
-            && !(['TURN', 'NEXT_TURN'].includes(buff.duration) && buff.expiresTurn <= this.ent.BattleModel.turn));
+        actor.buffs = actor.buffs.filter(buff => {
+            return buff.stacks !== 0
+                && !(['TURN', 'NEXT_TURN'].includes(buff.duration) && buff.expiresTurn <= this.ent.BattleModel.turn);
+        });
     }
-
-    name(id: string) {
-        const names: Record<string, string> = {
-            STRENGTH: '力量', DEXTERITY: '敏捷', WEAK: '虚弱', VULNERABLE: '易伤',
-            FRAIL: '脆弱', POISON: '中毒', ARTIFACT: '人工制品', INTANGIBLE: '无实体',
-            THORNS: '荆棘', REGENERATION: '再生', METALLICIZE: '金属化', BARRICADE: '壁垒',
-            ARMOR: '硬甲', EVASION: '闪避', FLIGHT: '飞行', PLATED_ARMOR: '多层护甲',
-            FURY: '受击暴怒', RITUAL: '仪式', BURN: '灼烧', CONSTRICTED: '紧缚'
-        };
-        return names[id] || id;
+    // 读取Buff表中的状态名称。
+    getBuffName(id: BattleBuffTypeEnum): string {
+        return TableBattleBuff.requireBuffConfig(id).name;
     }
-
-    describe(side: BattleSide) {
-        const actor = this.ent.BattleValueResolver.actor(side);
+    // 生成当前格挡与状态层数的显示文本。
+    describeBuffs(side: BattleSide): string {
+        const actor = this.ent.BattleValueResolver.getActor(side);
         // 微信构建会把 Set 展开编译为 concat，使用 Array.from 显式转为数组。
-        const ids = Array.from(new Set(actor.buffs.map(buff => buff.id)));
-        return [`格挡 ${actor.block}`, ...ids.map(id => `${this.name(id)} ${this.ent.BattleValueResolver.stacks(side, id)}`)].join('  ');
+        const ids = Array.from(new Set(actor.buffs.map(buff => {
+            return buff.id;
+        })));
+        return [`格挡 ${actor.block}`, ...ids.map(id => {
+                return `${this.getBuffName(id)} ${this.ent.BattleValueResolver.getBuffStacks(side, id)}`;
+            })].join('  ');
     }
-
-    clearAction() {
+    // 移除本次行动结束时到期的状态。
+    clearActionBuffs(): void {
         for (const side of [BattleSide.Player, BattleSide.Enemy]) {
-            const actor = this.ent.BattleValueResolver.actor(side);
-            actor.buffs = actor.buffs.filter(buff => buff.duration !== 'ACTION');
+            const actor = this.ent.BattleValueResolver.getActor(side);
+            actor.buffs = actor.buffs.filter(buff => {
+                return buff.duration !== 'ACTION';
+            });
         }
     }
 }
