@@ -1,0 +1,134 @@
+{
+  "ver": "1.0.27",
+  "importer": "image",
+  "imported": true,
+  "uuid": "1ca0387f-36cd-48e3-9d02-e81a28f589de",
+  "files": [
+    ".json",
+    ".png"
+  ],
+  "subMetas": {
+    "f9941": {
+      "importer": "sprite-frame",
+      "uuid": "1ca0387f-36cd-48e3-9d02-e81a28f589de@f9941",
+      "displayName": "holdh18",
+      "id": "f9941",
+      "name": "spriteFrame",
+      "userData": {
+        "trimType": "none",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 348,
+        "height": 388,
+        "rawWidth": 348,
+        "rawHeight": 388,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "1ca0387f-36cd-48e3-9d02-e81a28f589de@6c48a",
+        "atlasUuid": "",
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -174,
+            -194,
+            0,
+            174,
+            -194,
+            0,
+            -174,
+            194,
+            0,
+            174,
+            194,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            0,
+            388,
+            348,
+            388,
+            0,
+            0,
+            348,
+            0
+          ],
+          "nuv": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "minPos": [
+            -174,
+            -194,
+            0
+          ],
+          "maxPos": [
+            174,
+            194,
+            0
+          ]
+        }
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "1ca0387f-36cd-48e3-9d02-e81a28f589de@6c48a",
+      "displayName": "holdh18",
+      "id": "6c48a",
+      "name": "texture",
+      "userData": {
+        "wrapModeS": "clamp-to-edge",
+        "wrapModeT": "clamp-to-edge",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "1ca0387f-36cd-48e3-9d02-e81a28f589de",
+        "visible": false
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "type": "sprite-frame",
+    "fixAlphaTransparencyArtifacts": false,
+    "hasAlpha": true,
+    "redirect": "1ca0387f-36cd-48e3-9d02-e81a28f589de@6c48a"
+  }
+}

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0d1721" />
+<title>CRUX · 全图片素材版攀岩游戏</title>
+<style>
+:root{--bg:#0b1520;--panel:#14232e;--panel2:#172b36;--muted:#93a5af;--cream:#f6f2df;--lime:#c8fb74;--orange:#fa8960;--line:rgba(226,243,243,.13)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--cream);font-family:Inter,"PingFang SC","Microsoft YaHei",Arial,sans-serif}button{font:inherit}button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+body{background:radial-gradient(ellipse at 85% 0%,#1c3640 0,transparent 39%),radial-gradient(ellipse at 0 92%,#242b3d 0,transparent 45%),#0a141e;overflow-x:hidden}
+.topbar{height:76px;max-width:1540px;margin:auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;font-weight:1000;letter-spacing:.04em;font-size:23px}.brand-mark{width:39px;height:39px;border-radius:12px;background:var(--lime);display:grid;place-items:center;transform:rotate(-9deg);box-shadow:0 0 30px #c8fb741e}.brand-mark svg{transform:rotate(9deg)}.brand sup{font-size:10px;color:var(--lime);vertical-align:top;letter-spacing:.13em;margin-left:3px}.header-right{display:flex;gap:12px;align-items:center}.pill{padding:9px 13px;border:1px solid #ffffff21;border-radius:99px;color:#b7c7cb;font-size:12px;letter-spacing:.07em}.pill strong{color:var(--lime)}.icon-button{border:1px solid var(--line);background:#192b35;color:#dce7e5;width:39px;height:39px;display:grid;place-items:center;border-radius:12px;cursor:pointer;transition:.2s}.icon-button:hover{background:#26404b;border-color:#c8fb7470;transform:translateY(-1px)}
+.layout{max-width:1500px;margin:0 auto;display:grid;grid-template-columns:minmax(220px,275px) minmax(450px,740px) minmax(215px,270px);align-items:start;gap:18px;padding:21px 24px 26px;justify-content:center}.left-col,.right-col{display:flex;flex-direction:column;gap:16px}.intro{padding:26px 14px 20px 6px}.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:11px;font-weight:900;letter-spacing:.23em;color:var(--lime)}.eyebrow:before{content:"";width:20px;height:2px;background:var(--lime)}.intro h1{font-size:clamp(38px,3.6vw,60px);line-height:1.07;letter-spacing:-.055em;margin:20px 0 16px;font-weight:950}.intro h1 em{font-style:normal;color:var(--lime)}.intro p{font-size:14px;line-height:1.95;color:var(--muted);max-width:260px}.info-card{border:1px solid var(--line);background:linear-gradient(160deg,#172a36d9,#10212bdf);border-radius:21px;padding:20px}.section-label{color:#829aa6;font-size:10px;font-weight:900;letter-spacing:.18em;margin-bottom:14px}.route-title{font-size:24px;font-weight:950;letter-spacing:-.035em;margin-bottom:8px}.route-meta{display:flex;gap:7px;flex-wrap:wrap}.mini-tag{font-size:11px;padding:6px 9px;border:1px solid #ffffff25;color:#c6d4d5;border-radius:7px}.mini-tag.pop{background:#d0ff7840;border-color:#d0ff7877;color:#d6ffa0}.progress-caption{display:flex;justify-content:space-between;align-items:baseline;margin-top:23px}.progress-caption span{color:#a4b6bb;font-size:12px}.progress-caption b{font-size:30px;color:var(--lime);font-variant-numeric:tabular-nums}.progress-track{height:8px;border-radius:12px;background:#07151b;overflow:hidden;margin-top:9px}.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#57d5d6,#cefb78);border-radius:12px;transition:width .35s ease;box-shadow:0 0 13px #bdfb89}
+.game-col{min-width:0}.stage-wrap{position:relative;background:#263742;border:1px solid #ffffff32;border-radius:25px;box-shadow:0 24px 65px #0007,0 0 0 5px #132530;overflow:hidden;height:clamp(570px,calc(100dvh - 128px),790px);isolation:isolate}.stage-wrap:after{content:"";pointer-events:none;position:absolute;inset:0;border-radius:24px;box-shadow:inset 0 0 55px #07142050;z-index:4}.stage{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;background:#354650}.stage:active{cursor:grabbing}
+.stage-top{pointer-events:none;position:absolute;top:16px;left:19px;right:19px;display:flex;justify-content:space-between;gap:12px;z-index:7}.stage-tag{font-size:11px;font-weight:900;letter-spacing:.13em;padding:9px 12px;border-radius:10px;background:#0b1b26d9;border:1px solid #ffffff2b;backdrop-filter:blur(10px);box-shadow:0 4px 15px #0002}.stage-tag .dot{display:inline-block;width:7px;height:7px;background:var(--lime);border-radius:50%;margin-right:7px;box-shadow:0 0 12px var(--lime)}.stage-tag.accent{background:#d4ff83;color:#10251e;border-color:#e5ffb0}.stage-bottom{pointer-events:none;position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;z-index:6}.tutorial-bubble{padding:11px 16px;text-align:center;border-radius:12px;color:#e8f5ec;background:#0b1a25df;border:1px solid #ffffff30;box-shadow:0 6px 23px #0005;backdrop-filter:blur(6px);font-size:12px;font-weight:750;max-width:90%;transition:opacity .2s}.tutorial-bubble kbd{background:#ffffff24;padding:2px 5px;border-radius:4px;font-family:inherit;margin:0 2px}.toast{position:absolute;left:50%;top:79px;transform:translateX(-50%) translateY(-12px);opacity:0;pointer-events:none;z-index:15;background:#16292eea;border:1px solid #ccfa8199;padding:10px 16px;border-radius:12px;color:#f1ffe5;font-weight:800;font-size:12px;white-space:nowrap;max-width:94%;text-align:center;transition:all .2s}.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.control-title{display:flex;justify-content:space-between;align-items:center;gap:10px}.control-title b{font-size:17px}.small-note{font-size:11px;color:#8098a3}.limb-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}.limb-btn{border:1px solid #ffffff23;background:#101f28;border-radius:12px;padding:12px 9px;color:#e5eeeb;display:flex;align-items:center;gap:9px;cursor:pointer;text-align:left;min-width:0;transition:.15s}.limb-btn:hover{border-color:#cbff93b0;background:#1f3440}.limb-btn.active{border-color:#cafa76;background:#334639;box-shadow:inset 0 0 0 1px #cafa7699}.limb-icon{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#263947;flex-shrink:0;font-size:16px}.limb-btn.active .limb-icon{background:var(--lime);color:#1c2b21}.limb-label{display:block;font-weight:850;font-size:12px}.limb-status{display:block;font-size:10px;color:#88a1a8;margin-top:2px}.limb-status.gripped{color:#bbef87}.limb-status.free{color:#e9a484}.instructions{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:17px}.instructions li{display:flex;gap:13px;color:#d3ddda;font-size:13px;line-height:1.65}.step-num{width:25px;height:25px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;background:#2d404a;color:#baf67b;font-size:12px;font-weight:900}.instructions strong{color:#fff}.keychips{display:flex;gap:6px;flex-wrap:wrap;margin-top:15px}.keychips span{background:#0a1a24;border:1px solid #ffffff26;padding:5px 8px;border-radius:7px;font-size:10px;color:#b6c8cc}.right-col .tipbox{border:1px solid #cff17b36;background:radial-gradient(ellipse at 100% 0%,#d0fc781b,transparent 70%),#18292e;border-radius:21px;padding:19px}.tip-icon{display:grid;place-items:center;background:#d1fb77;color:#193223;border-radius:10px;width:30px;height:30px;font-size:18px;margin-bottom:12px}.tipbox b{font-size:16px}.tipbox p{font-size:12px;line-height:1.85;color:#aabcbb;margin:9px 0 0}.tipbox strong{color:#e8f4cd}.muted-bottom{color:#708994;font-size:10px;letter-spacing:.13em;text-align:center;margin:12px 0}.mobile-tools{display:none}
+/* SVG */
+.hold{cursor:crosshair;transition:opacity .15s}.hold .hold-glow{opacity:0;transition:opacity .15s}.hold.reachable .hold-glow{opacity:.46}.hold.hover .hold-glow{opacity:1}.hold.hover{filter:brightness(1.2)}.hold.unreachable{opacity:.66}.hold .hold-outline{transition:stroke-width .15s}.hold.hover .hold-outline{stroke-width:4}.hold.finish .finish-glow{animation:pulseGlow 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.limb-hit{cursor:grab;pointer-events:all;touch-action:none}.limb-hit:hover + .interaction-outline{opacity:1}.interaction-outline{pointer-events:none;opacity:0}.climber-hand.chosen .interaction-outline,.climber-foot.chosen .interaction-outline{opacity:.95}.select-ring{animation:ringPulse 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center}.blink{animation:eyeBlink 6s infinite}@keyframes pulseGlow{0%,100%{opacity:.3}50%{opacity:.9}}@keyframes ringPulse{0%{opacity:.8;transform:scale(.82)}100%{opacity:0;transform:scale(1.65)}}@keyframes eyeBlink{0%,92%,96%,100%{transform:scaleY(1)}94%{transform:scaleY(.16)}}
+.end-overlay{position:absolute;inset:0;z-index:25;background:#06151dd0;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;transition:.25s;opacity:0;pointer-events:none}.end-overlay.visible{opacity:1;pointer-events:auto}.result-box{width:min(100%,410px);border:1px solid #ffffff37;background:linear-gradient(155deg,#213843,#142732);padding:32px 30px 28px;border-radius:25px;text-align:center;box-shadow:0 25px 60px #0009;transform:translateY(15px) scale(.97);transition:transform .3s}.end-overlay.visible .result-box{transform:translateY(0) scale(1)}.result-icon{width:76px;height:76px;border-radius:24px;display:grid;place-items:center;margin:0 auto 22px;font-size:40px;background:var(--lime);color:#20321e;transform:rotate(-7deg)}.result-icon.fail{background:#ffad83;color:#422a24}.result-eyebrow{font-size:12px;font-weight:950;letter-spacing:.22em;color:#cafa7e}.result-box h2{margin:10px 0;font-size:37px;line-height:1.2}.result-box p{color:#aebec1;font-size:13px;line-height:1.9;margin:10px 0 25px}.big-action{width:100%;cursor:pointer;background:var(--lime);border:0;color:#14251d;padding:16px 20px;border-radius:13px;font-weight:950;font-size:15px;transition:.15s}.big-action:hover{transform:translateY(-2px);background:#e2ffa8}.ghost-action{cursor:pointer;background:transparent;color:#a4b9be;border:0;padding:14px;font-size:12px;margin-top:5px}.ghost-action:hover{color:#fff}
+/* Hard ascent challenge HUD */
+.hard-mark{font-size:10px;letter-spacing:.1em;display:inline-block;padding:5px 6px;margin-left:4px;vertical-align:middle;border-radius:5px;background:#fa8d69;color:#321f24;transform:translateY(-2px)}
+.difficulty-picker{display:flex;gap:6px;margin-top:17px;padding:4px;border:1px solid #ffffff24;background:#0c1b24;border-radius:12px}
+.difficulty-picker button{flex:1;background:transparent;border:1px solid transparent;color:#aabcc0;padding:10px 5px;border-radius:9px;font-size:12px;font-weight:850;cursor:pointer;transition:.2s}.difficulty-picker button.active{background:#caf67c;color:#172b1e;box-shadow:0 3px 10px #0004}.difficulty-picker button:not(.active):hover{color:white;background:#29404a}
+.run-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:16px 0 17px}.run-stats>div{border-radius:10px;padding:10px 6px;text-align:center;background:#0a1b25;border:1px solid #ffffff15}.run-stats small{display:block;color:#91aab1;font-size:10px;white-space:nowrap}.run-stats strong{display:block;font-variant-numeric:tabular-nums;font-size:19px;letter-spacing:-.03em;color:#eaf7df;margin-top:4px}
+.grip-panel{padding:13px;border-radius:12px;background:#10212b;border:1px solid #ffffff1a}.grip-line{display:flex;justify-content:space-between;font-size:11px;color:#c6d9ce;font-weight:850;margin-bottom:5px}.grip-line:not(:first-child){margin-top:12px}.grip-line b{font-variant-numeric:tabular-nums;color:#dbffa4}.grip-track{height:7px;border-radius:30px;overflow:hidden;background:#06151b}.grip-bar{height:100%;width:100%;border-radius:20px;background:linear-gradient(90deg,#65c89c,#c7f883);transition:width .13s}.grip-bar.caution{background:linear-gradient(90deg,#fc9c61,#ffe28a)}.grip-bar.danger{background:linear-gradient(90deg,#dc5361,#ff9266);animation:warnbar .55s ease-in-out infinite alternate}.grip-help{font-size:10px;color:#92a9af;line-height:1.6;margin-top:10px;min-height:32px}
+@keyframes warnbar{to{opacity:.55}}
+.hold.broken{opacity:.2!important;filter:grayscale(1) brightness(.55);pointer-events:none!important}.hold.broken *{pointer-events:none!important}.hold.broken .hold-glow{opacity:0!important}
+@media(max-width:1120px){.layout{grid-template-columns:200px minmax(420px,690px);gap:16px}.right-col{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}.intro h1{font-size:39px}.right-col .tipbox{align-self:stretch}}@media(max-width:750px){.topbar{height:59px;padding:0 13px}.brand{font-size:19px}.brand-mark{width:31px;height:31px}.pill{display:none}.layout{display:flex;flex-direction:column;gap:12px;padding:13px 12px 20px}.left-col{display:contents}.intro{order:0;display:none}.game-col{order:1;width:100%}.left-col .info-card{order:0;width:100%;padding:12px 15px;border-radius:14px}.left-col .info-card .section-label,.left-col .info-card .route-meta{display:none}.route-title{font-size:15px;margin:0}.progress-caption{margin-top:3px}.progress-caption b{font-size:19px}.progress-track{height:5px;margin-top:2px}.stage-wrap{height:clamp(450px,calc(100dvh - 365px),710px);border-radius:18px}.right-col{order:2;display:flex;width:100%}.right-col .info-card{padding:14px}.right-col .tipbox{display:none}.instructions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.instructions li{font-size:11px;gap:7px}.step-num{width:21px;height:21px}.mobile-tools{display:flex;position:absolute;bottom:58px;left:50%;transform:translateX(-50%);gap:6px;z-index:9;background:#0a1b26de;border:1px solid #ffffff30;padding:6px;border-radius:13px;box-shadow:0 8px 25px #0008}.mobile-tools button{border:0;border-radius:8px;background:transparent;color:#e9f5e9;padding:9px 12px;font-size:12px;font-weight:850;white-space:nowrap}.mobile-tools button.active{background:var(--lime);color:#132b1d}.stage-bottom{bottom:11px}.tutorial-bubble{font-size:10px;padding:8px 12px}.stage-top{top:9px;left:9px;right:9px}.stage-tag{font-size:9px;padding:7px 9px}.left-col .info-card{background:#172934}.difficulty-picker{margin-top:10px}.difficulty-picker button{padding:7px 4px;font-size:11px}.run-stats{margin:8px 0;gap:6px}.run-stats>div{padding:7px 3px}.run-stats strong{font-size:15px}.grip-panel{padding:9px 12px;display:grid;grid-template-columns:1fr 1fr;column-gap:12px;row-gap:0}.grip-panel .grip-line{grid-row:1;margin:0 0 5px}.grip-panel .grip-line:nth-of-type(3){grid-row:1;grid-column:2}.grip-panel .grip-track{grid-row:2}.grip-panel .grip-track:nth-of-type(4){grid-row:2;grid-column:2}.grip-help{grid-column:1/-1;margin-top:5px;min-height:0}.progress-caption{margin-top:12px}.control-title b{font-size:15px}.limb-grid{grid-template-columns:repeat(4,1fr)}.limb-btn{padding:8px 5px;justify-content:center}.limb-icon{display:none}.limb-label{font-size:10px}.limb-status{font-size:9px}.muted-bottom{display:none}}@media(max-width:390px){.mobile-tools button{padding:8px 8px;font-size:11px}.stage-wrap{height:calc(100dvh - 340px);min-height:445px}.keychips{display:none}.right-col .info-card{display:none}}
+.grip-panel .stamina-track{height:11px;margin-top:6px}.grip-panel .grip-line{font-size:13px;margin-bottom:5px}.grip-panel .grip-line b{font-size:18px}.support-row{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:12px;font-size:10px;color:#9db5bd}.support-row b{font-size:10px;font-weight:800;color:#d6e3d8;white-space:nowrap}.support-row #supportDots{font-size:12px;letter-spacing:3px;color:#c6f895;white-space:nowrap}.support-row #drainText{color:#bffb9e}.support-row #drainText.danger{color:#ff9e84}.hold.occupied:not(.broken) .hold-glow{opacity:.23;stroke:#ffd49e;stroke-dasharray:3 9}.hold.occupied:not(.broken) .hold-outline{filter:brightness(.79)}.hold.occupied .hold-glow{transition:opacity .1s}.hold .hold-glow{pointer-events:none}.hold.crumble-hold:not(.broken) .hold-outline{stroke:#a94c3b}.limb-status.gripped{color:#c2f997}.grip-panel .grip-help{font-size:11px;line-height:1.65;margin-top:9px}.hold.unreachable{opacity:.8}
+@media(max-width:750px){.grip-panel{display:block}.grip-panel .grip-line{display:flex;justify-content:space-between}.grip-panel .grip-track{width:100%}.grip-panel .grip-help{grid-column:auto}.support-row{margin-top:7px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+/* Raster art is click-through; invisible SVG hit regions remain interactive. */
+#game image{pointer-events:none}
+#game .select-ring{transform-origin:center;transform-box:fill-box}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark" aria-hidden="true"><img width="27" height="27" alt="" src="assets/ui/brand_icon.png"></span>CRUX <sup>CLIMB CLUB</sup></div>
+  <div class="header-right"><div class="pill">INDOOR BOULDERING &nbsp; <strong>●</strong> &nbsp; SPARSE ROUTE</div><button id="soundBtn" class="icon-button" title="开关音效" aria-label="开关音效">♫</button><button id="restartBtn" class="icon-button" title="重新开始 R" aria-label="重新开始"><img width="19" height="19" alt="" src="assets/ui/restart_icon.png"></button></div>
+</header>
+<main class="layout">
+ <aside class="left-col">
+   <section class="intro"><div class="eyebrow">THE SPARSE ASCENT</div><h1>抓住<br/><em>下一步.</em></h1><p>岩点稀少，没有捷径。每颗岩点只能站稳一只手或脚；四肢支撑齐全才能停止消耗体力。每次换点都是一场判断。</p></section>
+   <section class="info-card"><div class="section-label">CURRENT ROUTE / 当前路线</div><div class="route-title">01 / 孤点险线 <span class="hard-mark">HARDCORE</span></div>
+   <div class="route-meta"><span class="mini-tag pop">仅 24 个岩点</span><span class="mini-tag">每点限 1 肢</span></div>
+   <div class="difficulty-picker" role="group" aria-label="选择攀爬难度"><button data-mode="hard" class="active">挑战 · V6</button><button data-mode="extreme">地狱 · V8</button></div>
+   <div class="run-stats"><div><small>本次动作</small><strong id="moveText">0</strong></div><div><small>攀爬时间</small><strong id="timerText">00:00</strong></div><div><small>最佳动作</small><strong id="bestText">--</strong></div></div>
+   <div class="grip-panel" id="staminaPanel">
+    <div class="grip-line"><span>⚡ 全身剩余体力</span><b id="staminaText">100%</b></div>
+    <div class="grip-track stamina-track"><div class="grip-bar" id="staminaBar"></div></div>
+    <div class="support-row"><span id="supportDots" aria-label="四肢支撑情况">● ● ● ●</span><b id="supportText">4 / 4 支撑</b><b id="drainText">消耗 0 /秒</b></div>
+    <div class="grip-help" id="gripHelp">四肢全部固定不耗体力。少一处支撑，就会持续消耗体力，归零立即坠落。</div>
+   </div>
+   <div class="progress-caption"><span>当前最高进度</span><b id="progressText">0%</b></div><div class="progress-track"><div class="progress-bar" id="progressBar"></div></div></section>
+ </aside>
+ <section class="game-col" aria-label="交互式攀岩游戏">
+  <div class="stage-wrap" id="stageWrap">
+    <svg id="game" class="stage" viewBox="0 1320 760 760" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="application" aria-label="拖拽小人的四肢到岩点，每个岩点只能占一只肢体，体力耗尽或双手同时离开即失败"></svg>
+    <div class="stage-top"><div class="stage-tag"><span class="dot"></span><span id="stageMode">SPARSE ROUTE · 攀登中</span></div><div class="stage-tag accent" id="topBadge">⚡ 4 点支撑</div></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="mobile-tools" id="mobileTools"><button data-select="lh">✋ 左手</button><button data-select="rh">✋ 右手</button><button data-select="lf">👟 左脚</button><button data-select="rf">👟 右脚</button></div>
+    <div class="stage-bottom"><div class="tutorial-bubble" id="hint">每颗岩点只许一肢 · <strong>支撑越少体力耗得越快</strong></div></div>
+    <div class="end-overlay" id="endOverlay" aria-hidden="true"><div class="result-box"><div class="result-icon" id="resultIcon">★</div><div class="result-eyebrow" id="resultOverline">ROUTE COMPLETED</div><h2 id="resultTitle">挑战成功！</h2><p id="resultDesc">成功登顶。</p><button id="againBtn" class="big-action">↻ 再攀登一次</button><button id="closeResultBtn" class="ghost-action">查看岩壁</button></div></div>
+  </div>
+ </section>
+ <aside class="right-col">
+  <section class="info-card"><div class="section-label">HOW TO PLAY / 操作方法</div><div class="control-title"><b>控制四肢</b><span class="small-note">拖拽 / 点击选择</span></div>
+   <div class="limb-grid" id="limbControls">
+    <button class="limb-btn" data-select="lh"><span class="limb-icon">✋</span><span><span class="limb-label">左手</span><small class="limb-status gripped" id="status-lh">已抓牢</small></span></button>
+    <button class="limb-btn" data-select="rh"><span class="limb-icon">✋</span><span><span class="limb-label">右手</span><small class="limb-status gripped" id="status-rh">已抓牢</small></span></button>
+    <button class="limb-btn" data-select="lf"><span class="limb-icon">👟</span><span><span class="limb-label">左脚</span><small class="limb-status gripped" id="status-lf">已踩稳</small></span></button>
+    <button class="limb-btn" data-select="rf"><span class="limb-icon">👟</span><span><span class="limb-label">右脚</span><small class="limb-status gripped" id="status-rf">已踩稳</small></span></button>
+   </div>
+   <div class="keychips"><span>拖动手脚 → 新岩点</span><span>或点选四肢后点击岩点</span><span>一颗岩点只能放一肢</span><span>A/D 侧倾 · R 重开</span></div>
+  </section>
+  <section class="info-card"><div class="section-label">THE RULES / 游戏规则</div><ol class="instructions">
+   <li><span class="step-num">01</span><span><strong>一个岩点只能容纳一只手或脚。</strong>被占用的岩点不可落脚，也不能双手共用换点。</span></li>
+   <li><span class="step-num">02</span><span><strong>4 点支撑，体力不减。</strong>剩 3 点开始掉体力，2 点掉得更快，1 点消耗暴涨；体力归零会立刻坠落。</span></li>
+   <li><span class="step-num">03</span><span><strong>只有普通点与易碎点。</strong>橙色带裂纹的岩点在被踩住或抓住时倒计时，碎裂就会失去这处支撑。</span></li>
+   <li><span class="step-num">04</span><span><strong>判断下一步。</strong>伸展距离有限，抓点稀疏；两只手必须分别抓住顶端金色终点，双手全松也算失败。</span></li>
+  </ol></section>
+  <section class="tipbox"><div class="tip-icon">✦</div><b>攀登策略</b><p>不要只顾着抬手。<strong>先想好腾出的旧岩点留给哪只脚</strong>，否则下一步就可能没有空位。四肢稳稳抓牢时可以花时间规划；易碎点则不能久留。</p></section>
+  <p class="muted-bottom">SPARSE ROUTE · ONLY TWO HOLD TYPES · 2026</p>
+ </aside>
+</main>
+<script>
+(()=>{'use strict';
+const svg=document.getElementById('game'), NS='http://www.w3.org/2000/svg';
+const byId=id=>document.getElementById(id);
+const W=760, H=2220, VIEW_H=760, SNAP_RANGE=51;
+const DIFFICULTIES={
+ hard:{arm:182,leg:176,brittle:6.1,drain3:1.2,drain2:4.1,drain1:12,label:'挑战 V6'},
+ extreme:{arm:173,leg:168,brittle:4.6,drain3:2.05,drain2:6.7,drain1:18,label:'地狱 V8'}
+};
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const vec=(x,y)=>({x,y});
+const names={lh:'左手',rh:'右手',lf:'左脚',rf:'右脚'};
+// Only two climbable types: ordinary holds, or crumbling holds.
+// Sparse, deliberately staggered route: 24 holds total including the start and finish.
+const HOLD_DATA=[
+ ['S1',336,1792,'blue',1.06],['S2',491,1814,'blue',1.02],
+ ['P1',322,1970,'blue',.83],['P2',493,1970,'blue',.87],
+ ['h01',315,1690,'blue',.95],['h02',505,1634,'blue',1.03],
+ ['h03',385,1562,'coral',.96],['h04',516,1481,'blue',1.00],
+ ['h05',340,1427,'blue',.96],['h06',418,1321,'blue',1.07],
+ ['h07',485,1250,'coral',1.05],['h08',348,1165,'blue',1.0],
+ ['h09',445,1080,'blue',1.0],['h10',495,995,'blue',.96],
+ ['h11',343,910,'coral',1.03],['h12',440,825,'blue',1.03],
+ ['h13',344,740,'blue',1.05],['h14',480,655,'coral',1.0],
+ ['h15',398,570,'blue',1.02],['h16',485,475,'blue',1.02],
+ ['h17',405,393,'coral',1.04],['h18',467,305,'blue',1.03],
+ ['F1',370,220,'finish',1.15],['F2',486,220,'finish',1.15]
+];
+const CRUMBLE_IDS=new Set(['h03','h07','h11','h14','h17']);
+const holdType=(id)=>CRUMBLE_IDS.has(id)?'crumble':'normal';
+const holds=HOLD_DATA.map(([id,x,y,color,scale],i)=>({id,x,y,baseX:x,baseY:y,color,scale,i,rotation:((i*29)%43)-21,finish:color==='finish',type:holdType(id),durability:1,broken:false,ring:null}));
+const holdsById=new Map(holds.map(h=>[h.id,h]));
+const colors={coral:['#ffb18e','#de7659','#8f433f'],blue:['#c7efde','#61bdaf','#2c7c84'],finish:['#ffef94','#fbc83e','#c27e31']};
+function el(tag,attrs={},parent=svg){const n=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,String(v)));parent.appendChild(n);return n}
+const seedRand=(()=>{let a=8950321;return()=>{a=(Math.imul(a,1664525)+1013904223)>>>0;return a/4294967296}})();
+const rand=(a,b)=>a+(b-a)*seedRand();
+
+// All stage art is extracted from the uploaded game's original SVG and converted to PNG.
+// The SVG stage remains ONLY as an interaction/coordinate container for raster image sprites.
+const PNG_ASSETS = {"background":"assets/world/background.png","wall":"assets/world/climbing_wall.png","hold_S1":"assets/holds/S1.png","hold_S2":"assets/holds/S2.png","hold_P1":"assets/holds/P1.png","hold_P2":"assets/holds/P2.png","hold_h01":"assets/holds/S1.png","hold_h02":"assets/holds/S2.png","hold_h03":"assets/holds/h03.png","hold_h04":"assets/holds/P2.png","hold_h05":"assets/holds/S1.png","hold_h06":"assets/holds/S2.png","hold_h07":"assets/holds/h03.png","hold_h08":"assets/holds/P2.png","hold_h09":"assets/holds/S1.png","hold_h10":"assets/holds/S2.png","hold_h11":"assets/holds/h03.png","hold_h12":"assets/holds/P2.png","hold_h13":"assets/holds/S1.png","hold_h14":"assets/holds/h14.png","hold_h15":"assets/holds/P1.png","hold_h16":"assets/holds/P2.png","hold_h17":"assets/holds/h17.png","hold_h18":"assets/holds/S2.png","hold_F1":"assets/holds/F1.png","hold_F2":"assets/holds/F2.png","torso":"assets/character/torso.png","head":"assets/character/head.png","arm_segment":"assets/character/arm_segment.png","arm_joint":"assets/character/arm_joint.png","leg_segment":"assets/character/leg_segment.png","leg_joint":"assets/character/arm_joint.png","hand":"assets/character/hand.png","hand_select":"assets/effects/hand_select.png","hand_hover":"assets/effects/hand_hover.png","foot":"assets/character/foot.png","foot_select":"assets/effects/foot_select.png","foot_hover":"assets/effects/foot_hover.png","reach_disc":"assets/effects/reach_disc.png","reach_dot":"assets/effects/reach_dot.png","glow_normal":"assets/effects/glow_normal.png","glow_finish":"assets/effects/glow_finish.png","finish_aura":"assets/effects/finish_aura.png","crumble_frame_00":"assets/effects/crumble_frame_00.png","crumble_frame_01":"assets/effects/crumble_frame_01.png","crumble_frame_02":"assets/effects/crumble_frame_02.png","crumble_frame_03":"assets/effects/crumble_frame_03.png","crumble_frame_04":"assets/effects/crumble_frame_04.png","crumble_frame_05":"assets/effects/crumble_frame_05.png","crumble_frame_06":"assets/effects/crumble_frame_06.png","crumble_frame_07":"assets/effects/crumble_frame_07.png","crumble_frame_08":"assets/effects/crumble_frame_08.png","crumble_frame_09":"assets/effects/crumble_frame_09.png","crumble_frame_10":"assets/effects/crumble_frame_10.png","crumble_frame_11":"assets/effects/crumble_frame_11.png","crumble_frame_12":"assets/effects/crumble_frame_12.png","particle_normal":"assets/effects/particle_normal.png","particle_crumble":"assets/effects/particle_crumble.png","particle_finish":"assets/effects/particle_finish.png","particle_burst":"assets/effects/particle_burst.png","particle_gold":"assets/effects/particle_gold.png","particle_lime":"assets/effects/particle_lime.png","particle_slip":"assets/effects/particle_slip.png","brand_icon":"assets/ui/brand_icon.png","restart_icon":"assets/ui/restart_icon.png"};
+const sprite=(key)=>PNG_ASSETS[key];
+function paintSprite(key,attrs,parent=svg){
+  return el('image',{'href':sprite(key),'preserveAspectRatio':'none','pointer-events':'none',...attrs},parent);
+}
+function drawWorld(){
+  paintSprite('background',{x:0,y:0,width:W,height:H});
+  paintSprite('wall',{x:0,y:0,width:W,height:H});
+}
+drawWorld();
+const holdGroup=el('g',{id:'holds'});
+const holdEls=new Map();
+
+function makeHold(h){
+  const g=el('g',{'class':'hold'+(h.finish?' finish':'')+(h.type==='crumble'?' crumble-hold':''),
+    'data-hold':h.id,'transform':`translate(${h.x} ${h.y}) rotate(${h.rotation}) scale(${h.scale})`},holdGroup);
+  const rad=h.finish?42:30+(h.i%4)*2;
+  if(h.finish){paintSprite('finish_aura',{'x':-76,'y':-76,'width':152,'height':152,'class':'finish-glow'},g)}
+  paintSprite('glow_'+(h.finish?'finish':'normal'),{'x':-(rad+28),'y':-(rad+28),'width':2*(rad+28),'height':2*(rad+28),'class':'hold-glow'},g);
+  paintSprite('hold_'+h.id,{'x':-87,'y':-97,'width':174,'height':194,'class':'hold-outline'},g);
+  if(h.type==='crumble'){
+    const r=rad+14;
+    h.ring=paintSprite('crumble_frame_12',{'x':-r,'y':-r,'width':2*r,'height':2*r,'class':'crumble-ring'},g);
+  }
+  // Transparent SVG hit region: logic only. Visible art is entirely PNG.
+  el('circle',{'r':rad+5,'fill':'transparent','pointer-events':'all'},g);
+  holdEls.set(h.id,g);
+}
+
+holds.forEach(makeHold);
+
+const reachG=el('g',{'pointer-events':'none'});
+const reachDisc=paintSprite('reach_disc',{x:0,y:0,width:360,height:360,opacity:0},reachG);
+const reachOrigin=paintSprite('reach_dot',{x:0,y:0,width:16,height:16,opacity:0},reachG);
+const particlesLayer=el('g',{'pointer-events':'none'});
+const avatar=el('g',{id:'avatar'});
+const limbPathEls={};
+function segmentGraphic(id,parent,color='arm'){
+  const layer=el('g',{id},parent);
+  const upper=paintSprite((color==='arm'?'arm':'leg')+'_segment',{x:-13,y:-13,width:131,height:26},el('g',{},layer));
+  const lower=paintSprite((color==='arm'?'arm':'leg')+'_segment',{x:-13,y:-13,width:131,height:26},el('g',{},layer));
+  const joint=paintSprite((color==='arm'?'arm':'leg')+'_joint',{x:-13,y:-13,width:26,height:26},layer);
+  limbPathEls[id]={upper:upper.parentNode,lower:lower.parentNode,upperImg:upper,lowerImg:lower,joint};
+  return layer;
+}
+segmentGraphic('leg-l',avatar,'leg');segmentGraphic('leg-r',avatar,'leg');
+const bodyTransform=el('g',{id:'body-transform'},avatar);
+paintSprite('torso',{x:-55,y:-73,width:110,height:148},bodyTransform);
+paintSprite('head',{x:-45,y:-141,width:90,height:87},bodyTransform);
+el('ellipse',{'data-limb':'body',cx:0,cy:-7,rx:39,ry:52,fill:'transparent','pointer-events':'all','class':'limb-hit'},bodyTransform);
+segmentGraphic('arm-l',avatar,'arm');segmentGraphic('arm-r',avatar,'arm');
+const limbEndEls={};
+for(const k of ['lh','rh','lf','rf']){
+ const arm=k.endsWith('h'),typ=arm?'hand':'foot';
+ const g=el('g',{id:'endpoint-'+k,'class':arm?'climber-hand':'climber-foot'},avatar);
+ paintSprite(typ+'_select',{x:-42,y:-42,width:84,height:84,'class':'select-ring',opacity:0},g);
+ paintSprite(typ,{x:-40,y:-39,width:80,height:78},g);
+ el('circle',{'data-limb':k,'class':'limb-hit',r:29,fill:'transparent','pointer-events':'all'},g);
+ paintSprite(typ+'_hover',{x:-42,y:-42,width:84,height:84,'class':'interaction-outline'},g);
+ limbEndEls[k]=g;
+}
+
+const state={mode:'playing',difficulty:'hard',stamina:100,camera:1320,selected:null,drag:null,peak:1792,sound:false,lastTime:performance.now(),time:0,frame:0,tipTimer:0,elapsed:0,moves:0,hudTick:0,runId:0,balanceX:0,
+ body:{x:412,y:1885,vx:0,vy:0,tilt:0},limbs:{},particles:[],fallAge:0};
+const START_LIMBS={lh:'S1',rh:'S2',lf:'P1',rf:'P2'};
+const bestCache={hard:null,extreme:null};
+function savedBest(mode){if(bestCache[mode]!=null)return bestCache[mode];try{return localStorage.getItem('crux-sparse-best-'+mode)||'--'}catch(e){return '--'}}
+function saveBest(mode,moves){const previous=Number(savedBest(mode));if(!previous||moves<previous){bestCache[mode]=moves;try{localStorage.setItem('crux-sparse-best-'+mode,String(moves))}catch(e){}}}
+function reset(){
+ for(const p of state.particles)p.node?.remove();state.runId++;state.mode='playing';state.time=0;state.camera=1320;state.peak=1792;state.drag=null;state.selected=null;clearTimeout(toastTimer);byId('toast').classList.remove('show');state.body={x:412,y:1885,vx:0,vy:0,tilt:0};state.particles=[];state.fallAge=0;state.elapsed=0;state.moves=0;state.hudTick=0;state.balanceX=0;state.stamina=100;state.drain=0;
+ for(const h of holds){h.x=h.baseX;h.y=h.baseY;h.broken=false;h.durability=cfg().brittle;const g=holdEls.get(h.id);g.classList.remove('broken');g.setAttribute('transform',`translate(${h.x} ${h.y}) rotate(${h.rotation}) scale(${h.scale})`);if(h.ring){h.lastFrame=12;h.ring.setAttribute('href',sprite('crumble_frame_12'));}}
+ for(const k in START_LIMBS){const h=holdsById.get(START_LIMBS[k]);state.limbs[k]={key:k,side:k[0]==='l'?-1:1,kind:k[1]==='h'?'hand':'foot',x:h.x,y:h.y,holdId:h.id,travel:null};}
+ byId('endOverlay').classList.remove('visible');byId('endOverlay').setAttribute('aria-hidden','true');byId('stageMode').textContent='SPARSE ROUTE · '+cfg().label;byId('topBadge').textContent='⚡ 4 / 4 支撑';byId('hint').innerHTML='每颗岩点只许一肢 · <strong>支撑越少体力耗得越快</strong>';
+ for(const btn of document.querySelectorAll('[data-mode]')){btn.classList.toggle('active',btn.dataset.mode===state.difficulty);btn.setAttribute('aria-pressed',String(btn.dataset.mode===state.difficulty))}
+ updateHUD();updateHighlights();render();
+}
+function cfg(){return DIFFICULTIES[state.difficulty]}
+function maxReach(key){return key.endsWith('h')?cfg().arm:cfg().leg}
+function rotateOffset(x,y,ang){return vec(x*Math.cos(ang)-y*Math.sin(ang),x*Math.sin(ang)+y*Math.cos(ang))}
+function rootOf(key){const b=state.body,l=state.limbs[key],arm=l.kind==='hand',p=rotateOffset((arm?29:20)*l.side,arm?-42:42,b.tilt);return vec(b.x+p.x,b.y+p.y)}
+function solveIK(start,end,l1,l2,side,isLeg){
+ let dx=end.x-start.x,dy=end.y-start.y,d=Math.max(.01,Math.hypot(dx,dy));let nd=Math.min(d,l1+l2-.01);
+ const along=(l1*l1-l2*l2+nd*nd)/(2*nd),height=Math.sqrt(Math.max(0,l1*l1-along*along)),ax=dx/d,ay=dy/d;
+ const a=vec(start.x+ax*along-ay*height,start.y+ay*along+ax*height);
+ const b=vec(start.x+ax*along+ay*height,start.y+ay*along-ax*height);
+ if(isLeg){return (side<0?a.x<b.x:a.x>b.x)?a:b}
+ return (side<0?a.x<b.x:a.x>b.x)?a:b;
+}
+
+function drawLimb(key){
+ const l=state.limbs[key],start=rootOf(key),end=vec(l.x,l.y),arm=l.kind==='hand';
+ const joint=solveIK(start,end,arm?105:93,arm?105:95,l.side,!arm);
+ const obj=limbPathEls[(arm?'arm-':'leg-')+(l.side<0?'l':'r')];
+ for(const [part,a,b,img] of [['upper',start,joint,obj.upperImg],['lower',joint,end,obj.lowerImg]]){
+   const length=dist(a,b),ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI;
+   obj[part].setAttribute('transform',`translate(${a.x.toFixed(2)} ${a.y.toFixed(2)}) rotate(${ang.toFixed(2)})`);
+   img.setAttribute('width',(length+26).toFixed(2));
+ }
+ obj.joint.setAttribute('x',(joint.x-13).toFixed(2));obj.joint.setAttribute('y',(joint.y-13).toFixed(2));
+ const endG=limbEndEls[key];let theta=arm?0:clamp(Math.atan2(end.y-joint.y,end.x-joint.x)*180/Math.PI+75,-65,45);
+ endG.setAttribute('transform',`translate(${end.x.toFixed(2)},${end.y.toFixed(2)}) rotate(${theta.toFixed(1)})`);
+ endG.classList.toggle('chosen',state.selected===key ||(state.drag&&state.drag.key===key));
+}
+
+function render(){
+ svg.setAttribute('viewBox',`0 ${state.camera.toFixed(2)} 760 ${VIEW_H}`);
+ const b=state.body;bodyTransform.setAttribute('transform',`translate(${b.x.toFixed(2)} ${b.y.toFixed(2)}) rotate(${(b.tilt*180/Math.PI).toFixed(2)})`);
+ // Feet rendered before body, arms after it by SVG stacking order
+ for(const key of ['lf','rf','lh','rh'])drawLimb(key);
+ if(state.selected && state.mode==='playing'){
+   const r=rootOf(state.selected);const radius=maxReach(state.selected);reachDisc.setAttribute('x',r.x-radius);reachDisc.setAttribute('y',r.y-radius);reachDisc.setAttribute('width',2*radius);reachDisc.setAttribute('height',2*radius);reachOrigin.setAttribute('x',r.x-8);reachOrigin.setAttribute('y',r.y-8);
+   reachDisc.setAttribute('opacity',state.drag?.key===state.selected?'.63':'.27');reachOrigin.setAttribute('opacity','.65');
+ }else{reachDisc.setAttribute('opacity','0');reachOrigin.setAttribute('opacity','0')}
+}
+function handCount(){return Number(!!state.limbs.lh.holdId)+Number(!!state.limbs.rh.holdId)}
+function footCount(){return Number(!!state.limbs.lf.holdId)+Number(!!state.limbs.rf.holdId)}
+function supportCount(){return handCount()+footCount()}
+function holderOf(id,excludeKey){
+ for(const k of ['lh','rh','lf','rf']){if(k===excludeKey)continue;const l=state.limbs[k];if(l.holdId===id||l.travel?.targetId===id)return k}
+ return null;
+}
+function canReach(key,h){
+ if(state.mode!=='playing')return false;
+ const l=state.limbs[key];
+ if(!l || h.broken || (l.kind==='foot'&&h.finish)||l.travel?.targetId)return false;
+ if(holderOf(h.id,key))return false;
+ return dist(rootOf(key),h)<=maxReach(key)+2;
+}
+function findHold(key,x,y){let best=null,bd=SNAP_RANGE;const target=vec(x,y);for(const h of holds){let d=dist(target,h);if(d<bd && canReach(key,h)){best=h;bd=d}}return best}
+function updateHighlights(){
+ const key=state.selected,drag=state.drag;
+ for(const h of holds){const node=holdEls.get(h.id),can=key&&canReach(key,h),occupant=holderOf(h.id);
+  node.classList.toggle('occupied',!!occupant);
+  node.classList.toggle('reachable',!!can);
+  node.classList.toggle('unreachable',!!key&&!can);
+  node.classList.toggle('hover',!!key&&!!drag&&drag.key===key&&can&&dist(state.limbs[key],h)<SNAP_RANGE);
+ }
+}
+function currentDrain(){
+ switch(supportCount()){case 4:return 0;case 3:return cfg().drain3;case 2:return cfg().drain2;case 1:return cfg().drain1;default:return cfg().drain1*2}
+}
+function updateHUD(){
+ const progress=state.mode==='won'?100:clamp(Math.round((1792-state.peak)/(1792-195)*100),0,99);
+ byId('progressText').textContent=progress+'%';byId('progressBar').style.width=progress+'%';
+ for(const k of ['lh','rh','lf','rf']){const l=state.limbs[k],status=byId('status-'+k);status.textContent=l.travel?.targetId?'移动中…':l.holdId?'已固定':'悬空';status.className='limb-status '+(l.holdId?'gripped':'free');}
+ const stamina=clamp(state.stamina,0,100),supported=supportCount(),drain=state.mode==='playing'?currentDrain():0;
+ byId('staminaText').textContent=Number(stamina.toFixed(1))+'%';byId('staminaBar').style.width=stamina+'%';
+ byId('staminaBar').classList.toggle('danger',stamina<26);byId('staminaBar').classList.toggle('caution',stamina<55&&stamina>=26);
+ byId('supportText').textContent=supported+' / 4 支撑';
+ byId('supportDots').textContent=['lh','rh','lf','rf'].map(k=>state.limbs[k].holdId?'●':'○').join(' ');
+ byId('drainText').textContent=drain?'-'+drain.toFixed(1)+' /秒':'消耗 0 /秒';
+ byId('drainText').classList.toggle('danger',supported<=2);
+ byId('moveText').textContent=state.moves;const secs=Math.floor(state.elapsed);byId('timerText').textContent=String(Math.floor(secs/60)).padStart(2,'0')+':'+String(secs%60).padStart(2,'0');
+ byId('bestText').textContent=savedBest(state.difficulty);
+ byId('gripHelp').textContent=state.mode!=='playing'?'挑战结束 · 按 R 重新开始':supported===4?'四肢已固定：体力暂停消耗，可以判断下一步':supported===3?'三点支撑：体力缓慢流失，尽快让悬空肢体抓稳':supported===2?'⚠ 两点支撑！体力快速下降':supported===1?'⚠ 危险！只剩一个支撑点，体力暴跌':'没有支撑！';
+ byId('topBadge').textContent=state.mode==='playing'?'⚡ '+supported+' / 4 支撑':byId('topBadge').textContent;
+ for(const button of document.querySelectorAll('[data-select]')){button.classList.toggle('active',button.dataset.select===state.selected);button.setAttribute('aria-pressed',String(button.dataset.select===state.selected))}
+}
+let toastTimer=0;
+function toast(msg){const t=byId('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1700)}
+function sound(freq=480,dur=.1,type='sine',volume=.04){if(!state.sound)return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const ac=window._cruxAC||(window._cruxAC=new AC());if(ac.state==='suspended')ac.resume();const o=ac.createOscillator(),gain=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime);o.frequency.exponentialRampToValueAtTime(freq*.81,ac.currentTime+dur);gain.gain.setValueAtTime(volume,ac.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+dur);o.connect(gain).connect(ac.destination);o.start();o.stop(ac.currentTime+dur)}catch(e){}}
+function burst(x,y,color,n=9){
+ const cmap={'#c7efde':'normal','#ffb18e':'crumble','#ffef94':'finish','#ffc18a':'burst','#ffe97d':'gold','#d6ff82':'lime','#ede3c4':'slip'};
+ for(let i=0;i<n;i++){
+  const angle=rand(0,6.283),spd=rand(45,135),size=rand(3,7);
+  state.particles.push({x,y,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-45,t:0,life:rand(.4,.8),color,size,
+    node:paintSprite('particle_'+(cmap[color]||'normal'),{x:x-size,y:y-size,width:size*2,height:size*2,opacity:1},particlesLayer)});
+ }
+}
+function setSelected(key){if(state.mode!=='playing')return;state.selected=state.selected===key?null:key;updateHUD();updateHighlights();if(state.selected){byId('hint').innerHTML=`已选中 <strong>${names[state.selected]}</strong> · 拖动，或直接点击发光岩点`;}}
+function checkWin(){
+ if((state.limbs.lh.holdId==='F1'&&state.limbs.rh.holdId==='F2')||(state.limbs.lh.holdId==='F2'&&state.limbs.rh.holdId==='F1'))win();
+}
+function completeMove(key,h){
+ const l=state.limbs[key];
+ if(state.mode!=='playing'||h.broken||holderOf(h.id,key)){l.travel=null;toast('目标岩点不可用！');return;}
+ l.x=h.x;l.y=h.y;l.holdId=h.id;l.travel=null;
+ if(h.y<state.peak&&l.kind==='hand')state.peak=h.y;
+ sound(l.kind==='hand'?650:490,.095,'sine');burst(h.x,h.y,colors[h.color][0],h.finish?17:8);
+ if(h.finish)toast(`${names[key]}抓住终点！另一只手也要抓住另一个金色岩点`);
+ else if(h.type==='crumble')toast('⚠ 易碎岩点开始倒计时，尽快转移！');
+ state.selected=null;updateHUD();updateHighlights();checkWin();
+}
+function takeHold(key,h,instant=false){
+ const l=state.limbs[key];
+ if(l.travel?.targetId){toast(names[key]+'正在移动中');return false}
+ const occupying=holderOf(h.id,key);
+ if(occupying){toast('这个岩点已被'+names[occupying]+'占用！每点只能放一个四肢');sound(180,.09,'triangle');return false}
+ if(!canReach(key,h)){toast(h.broken?'这个岩点已经碎裂！':'够不到！试试换支撑点或用 A/D 侧倾');sound(200,.09,'triangle');return false}
+ const was=l.holdId;
+ if(was===h.id){state.selected=null;updateHUD();updateHighlights();return true}
+ if(l.kind==='hand'&&handCount()===1&&was){l.holdId=null;fail('hands');return false}
+ state.moves++;
+ l.holdId=null;
+ if(instant){completeMove(key,h)}
+ else{l.travel={sx:l.x,sy:l.y,tx:h.x,ty:h.y,age:0,dur:clamp(.22+dist(l,h)/550,.28,.48),targetId:h.id};state.selected=null;updateHUD();updateHighlights()}
+ return true;
+}
+function breakHold(h){
+ if(h.broken||state.mode!=='playing')return;
+ h.broken=true;holdEls.get(h.id).classList.add('broken');burst(h.x,h.y,'#ffc18a',17);sound(122,.29,'sawtooth',.028);
+ for(const l of Object.values(state.limbs)){if(l.holdId===h.id){l.holdId=null;l.travel=null;}}
+ toast('岩点崩裂！赶紧换支撑！');if(handCount()===0)fail('hands');else{updateHUD();updateHighlights()}
+}
+function updateHolds(dt){
+ for(const h of holds){
+  if(h.type!=='crumble'||h.broken)continue;
+  const occupied=Object.values(state.limbs).some(l=>l.holdId===h.id);
+  if(occupied)h.durability-=dt;
+  const percent=Math.max(0,h.durability/cfg().brittle),frame=String(Math.round(percent*12)).padStart(2,'0');
+   if(h.lastFrame!==frame){h.ring.setAttribute('href',sprite('crumble_frame_'+frame));h.lastFrame=frame;}
+  if(h.durability<=0)breakHold(h);
+ }
+}
+function updateStamina(dt){
+ const drain=currentDrain();state.drain=drain;
+ if(drain<=0)return;
+ state.stamina=Math.max(0,state.stamina-drain*dt);
+ if(state.stamina<=0){toast('体力耗尽，立即坠落！');fail('stamina')}
+}
+function fail(reason='hands'){
+ if(state.mode!=='playing')return;
+ state.mode='fallen';state.fallAge=0;state.selected=null;state.drag=null;state.failReason=reason;
+ for(const k of ['lh','rh','lf','rf']){state.limbs[k].holdId=null;state.limbs[k].travel=null;}
+ sound(170,.33,'sawtooth',.035);
+ byId('stageMode').textContent=reason==='stamina'?'体力耗尽！':'失去双手支撑！';
+ byId('hint').innerHTML=reason==='stamina'?'体力归零 · <strong>坠落！</strong>':'双手全部脱离 · <strong>坠落！</strong>';
+ updateHUD();updateHighlights();
+}
+function win(){
+ if(state.mode!=='playing')return;
+ state.mode='won';saveBest(state.difficulty,state.moves);state.peak=195;state.selected=null;
+ burst(370,195,'#ffe97d',40);burst(486,195,'#d6ff82',40);
+ sound(660,.14,'triangle',.07);setTimeout(()=>sound(880,.18,'triangle',.06),150);
+ byId('stageMode').textContent='挑战完成 · 登顶成功';byId('topBadge').textContent='★ ROUTE CLEAR';
+ byId('hint').textContent='两只手分别抓住金色终点，通关！';updateHUD();
+ const run=state.runId;setTimeout(()=>{if(state.runId===run&&state.mode==='won')showResult(true)},620);
+}
+function showResult(isWin){
+ byId('resultIcon').textContent=isWin?'★':'↘';byId('resultIcon').classList.toggle('fail',!isWin);
+ byId('resultOverline').textContent=isWin?'ROUTE COMPLETED':state.failReason==='stamina'?'STAMINA DEPLETED':'NO HAND SUPPORT';
+ byId('resultOverline').style.color=isWin?'#cafa7e':'#ffb594';
+ byId('resultTitle').textContent=isWin?'漂亮，成功登顶！':state.failReason==='stamina'?'体力耗尽，坠落！':'双手松开，坠落！';
+ byId('resultDesc').textContent=isWin?`你用 ${state.moves} 次动作、${state.elapsed.toFixed(1)} 秒完成 ${cfg().label}，剩余体力 ${Math.ceil(state.stamina)}%！再试试更少的动作。`:`本次到达 ${byId('progressText').textContent}，完成 ${state.moves} 次移动。四点支撑时不掉体力；每点只能放一只手或脚。少一处支撑就会持续消耗体力。`;
+ byId('endOverlay').classList.add('visible');byId('endOverlay').setAttribute('aria-hidden','false');
+}
+function screenToWorld(e){try{const matrix=svg.getScreenCTM();if(matrix){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(matrix.inverse());return vec(q.x,q.y)}}catch(e){}return vec(380,state.camera+380)}
+function onPointerDown(e){if(state.mode!=='playing')return;
+ const limbNode=e.target.closest('[data-limb]'),holdNode=e.target.closest('[data-hold]');
+ if(holdNode){const h=holdsById.get(holdNode.dataset.hold);if(state.selected){takeHold(state.selected,h,false);return}}
+ if(limbNode){const key=limbNode.dataset.limb;if(key==='body'){state.drag={key:'body',pointerId:e.pointerId,startClientX:e.clientX,startClientY:e.clientY,startWorld:screenToWorld(e),startLean:state.balanceX,active:false};}else{if(state.limbs[key].travel?.targetId){toast('这只手/脚正在移动中');return}state.selected=key;state.drag={key,pointerId:e.pointerId,startClientX:e.clientX,startClientY:e.clientY,active:false,initialHold:state.limbs[key].holdId};updateHUD();updateHighlights();}e.preventDefault();try{svg.setPointerCapture(e.pointerId)}catch(err){} }
+ else if(!holdNode&&state.selected){state.selected=null;updateHUD();updateHighlights()}
+}
+function onPointerMove(e){const drag=state.drag;if(!drag||drag.pointerId!==e.pointerId||state.mode!=='playing')return;
+ if(!drag.active){if(Math.hypot(e.clientX-drag.startClientX,e.clientY-drag.startClientY)<8)return;drag.active=true;if(drag.key!=='body'){const l=state.limbs[drag.key];l.holdId=null;l.travel=null;if(l.kind==='hand'&&handCount()===0){state.drag=null;fail('hands');return;}}}
+ const p=screenToWorld(e);
+ if(drag.key==='body'){
+   state.balanceX=clamp(drag.startLean+(p.x-drag.startWorld.x)*.85,-76,76);
+ }else{
+   const l=state.limbs[drag.key],r=rootOf(drag.key),limit=maxReach(drag.key);
+   const dx=p.x-r.x,dy=p.y-r.y,d=Math.max(.01,Math.hypot(dx,dy)),f=Math.min(1,limit/d);
+   l.x=clamp(r.x+dx*f,148,615);l.y=clamp(r.y+dy*f,170,2043);
+ }
+ updateHighlights();e.preventDefault();
+}
+function onPointerUp(e){const d=state.drag;if(!d||d.pointerId!==e.pointerId)return;
+ state.drag=null;try{if(svg.hasPointerCapture(e.pointerId))svg.releasePointerCapture(e.pointerId)}catch(err){}
+ if(state.mode!=='playing')return;
+ if(!d.active){if(d.key!=='body'){state.selected=d.key;updateHUD();updateHighlights();byId('hint').innerHTML=`已选中 <strong>${names[d.key]}</strong> · 拖动，或直接点击发光岩点`;}else{state.selected=null;updateHUD();updateHighlights()}return}
+ if(d.key!=='body'){
+   const l=state.limbs[d.key],h=findHold(d.key,l.x,l.y);
+   if(h){takeHold(d.key,h,true)}else{
+     if(l.kind==='hand'&&handCount()===0){fail('hands');return}
+     toast('没有抓稳！靠近带光圈的岩点再松手');sound(205,.09,'triangle');
+     state.selected=d.key;updateHUD();updateHighlights();
+   }
+ }
+}
+function update(dt){state.time+=dt;state.frame++;if(state.mode==='playing'){state.elapsed+=dt;updateHolds(dt);if(state.mode==='playing')updateStamina(dt);state.hudTick+=dt;if(state.hudTick>.15){state.hudTick=0;updateHUD()}}
+ // Particle effects live through the entire scene
+ for(let i=state.particles.length-1;i>=0;i--){const p=state.particles[i];p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=240*dt;p.vx*=.985;const pr=p.size*(1-p.t/p.life*.65);p.node.setAttribute('x',p.x-pr);p.node.setAttribute('y',p.y-pr);p.node.setAttribute('width',pr*2);p.node.setAttribute('height',pr*2);p.node.setAttribute('opacity',Math.max(0,1-p.t/p.life));if(p.t>=p.life){p.node.remove();state.particles.splice(i,1)}}
+ if(state.mode==='fallen'){
+   state.fallAge+=dt;const b=state.body;b.vy+=1050*dt;b.y+=b.vy*dt;b.tilt+=1.3*dt;
+   for(const k in state.limbs){const l=state.limbs[k];const r=rootOf(k);l.x+=(r.x+l.side*30-l.x)*Math.min(1,dt*5);l.y+=(r.y+115-l.y)*Math.min(1,dt*5)}
+   if(state.fallAge>.8){state.mode='lost';showResult(false)}
+ }else if(state.mode==='playing'){
+   const b=state.body;let sx=0,sy=0,weights=0;
+   for(const key of ['lh','rh']){const l=state.limbs[key];if(!l.holdId)continue;
+     // The support hand pulls the shoulders up under the reached hold.
+     const h=holdsById.get(l.holdId);sx+=(h.x-l.side*70)*1;sy+=(h.y+76)*1;weights+=1;
+   }
+   for(const key of ['lf','rf']){const l=state.limbs[key];if(!l.holdId)continue;
+     const h=holdsById.get(l.holdId);const footSupport=clamp((b.y+195-h.y)/115,0,1)*.20;sx+=(h.x-l.side*22)*footSupport;sy+=(h.y-85)*footSupport;weights+=footSupport;
+   }
+   if(weights===0){fail();return}
+   let tx=sx/weights+state.balanceX,ty=sy/weights+(handCount()===1?14:0);
+   tx=clamp(tx,220,550);ty=clamp(ty,250,2020);
+   const pullingBody=state.drag?.key==='body'&&state.drag.active;
+   if(!pullingBody)state.balanceX=lerp(state.balanceX,0,Math.min(1,dt*.5));
+   b.vx+=(tx-b.x)*32*dt;b.vy+=(ty-b.y)*32*dt;
+   const damp=Math.exp(-9*dt);b.vx*=damp;b.vy*=damp;b.x+=b.vx*dt;b.y+=b.vy*dt;
+   // Non-extensible arms: body can sway, but anchored grips hold its weight.
+   for(let iter=0;iter<4;iter++){
+     for(const key of ['lh','rh']){const l=state.limbs[key];if(!l.holdId)continue;const r=rootOf(key),d=dist(r,l);if(d>cfg().arm-3){const correction=(d-(cfg().arm-3))*.72;b.x+=(l.x-r.x)/d*correction;b.y+=(l.y-r.y)/d*correction;b.vx*=.8;b.vy*=.8}}
+   }
+   b.x=clamp(b.x,211,555);b.y=clamp(b.y,230,2045);
+   // Lean a little into the route while maintaining recognizable anatomy.
+   const hl=state.limbs.lh,hr=state.limbs.rh;let lean=0;
+   if(hl.holdId&&hr.holdId)lean=clamp(((hl.x+hr.x)/2-b.x)*.0011,-.15,.15);
+   else if(hl.holdId||hr.holdId){const l=hl.holdId?hl:hr;lean=clamp((l.x-b.x)*.0016,-.20,.20)}
+   b.tilt=lerp(b.tilt,clamp(lean+b.vx*.00025,-.24,.24),Math.min(1,dt*4));
+   for(const key of ['lh','rh','lf','rf']){
+     const l=state.limbs[key];
+     if(l.travel){const flight=l.travel;flight.age+=dt;const t=clamp(flight.age/flight.dur,0,1),ease=1-Math.pow(1-t,3);l.x=lerp(flight.sx,flight.tx,ease);l.y=lerp(flight.sy,flight.ty,ease);if(t>=1){const h=holdsById.get(flight.targetId);if(h)completeMove(key,h);else l.travel=null;}}
+     if(state.drag?.active&&state.drag.key===key)continue;
+     if(!l.holdId && !l.travel){
+       const r=rootOf(key),kind=l.kind==='hand',base=kind?vec(r.x+l.side*54,r.y+90):vec(r.x+l.side*33,r.y+123);
+       base.x+=Math.sin(state.time*2.2+(l.side<0?0:1.8))*4;
+       l.x=lerp(l.x,base.x,Math.min(1,dt*7));l.y=lerp(l.y,base.y,Math.min(1,dt*7));
+     }
+     if(l.kind==='foot'&&l.holdId && dist(rootOf(key),l)>cfg().leg+17){l.holdId=null;l.travel=null;burst(l.x,l.y,'#ede3c4',5);toast('脚伸得太远，失去一处支撑！')}
+   }
+ }
+ const camGoal=clamp(state.body.y-510,0,H-VIEW_H);
+ state.camera=lerp(state.camera,camGoal,Math.min(1,dt*4.8));
+ if(state.frame%5===0)updateHighlights();
+ render();
+}
+function loop(now){const dt=clamp((now-state.lastTime)/1000,0,.043);state.lastTime=now;update(dt);requestAnimationFrame(loop)}
+svg.addEventListener('pointerdown',onPointerDown);svg.addEventListener('pointermove',onPointerMove);svg.addEventListener('pointerup',onPointerUp);svg.addEventListener('pointercancel',onPointerUp);
+for(const b of document.querySelectorAll('[data-select]'))b.addEventListener('click',()=>setSelected(b.dataset.select));
+byId('restartBtn').addEventListener('click',()=>reset());byId('againBtn').addEventListener('click',()=>reset());
+byId('closeResultBtn').addEventListener('click',()=>{byId('endOverlay').classList.remove('visible');byId('endOverlay').setAttribute('aria-hidden','true')});
+for(const btn of document.querySelectorAll('[data-mode]'))btn.addEventListener('click',()=>{if(state.difficulty!==btn.dataset.mode){state.difficulty=btn.dataset.mode;reset();toast(state.difficulty==='hard'?'挑战 V6：抓点稀疏，每点仅一肢':'地狱 V8：体力掉得更快，伸展更短！')}});
+byId('soundBtn').addEventListener('click',()=>{state.sound=!state.sound;byId('soundBtn').textContent=state.sound?'♫':'♩';byId('soundBtn').style.color=state.sound?'#c9fb7c':'#dce7e5';if(state.sound)sound(800,.08)});
+document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='r'){e.preventDefault();reset()}if(['a','ArrowLeft','d','ArrowRight'].includes(e.key)&&state.mode==='playing'){state.balanceX=e.key==='a'||e.key==='ArrowLeft'?-70:70}if(e.key==='Escape'&&state.selected){state.selected=null;updateHUD();updateHighlights()}});
+reset();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

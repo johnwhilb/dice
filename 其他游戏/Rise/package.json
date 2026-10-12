@@ -1,0 +1,18 @@
+{
+  "_sourceId": "c30b28da-749e-479b-bcb6-cecd8d7be9e3",
+  "creator": {
+    "version": "3.8.8"
+  },
+  "description": "OopsFramework Game",
+  "name": "oops-framework-project",
+  "uuid": "00d7d957-a3e8-4ad6-80f4-2fcfb235bca4",
+  "version": "3.6.3",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-unused-imports": "^4.3.0"
+  }
+}

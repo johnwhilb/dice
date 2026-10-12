@@ -1,0 +1,652 @@
+{
+  "background": {
+    "svg": "assets/world/background.svg",
+    "png": "assets/world/background.png",
+    "source_px": [
+      760,
+      2220
+    ],
+    "viewBox": "0 0 760 2220",
+    "category": "world"
+  },
+  "wall": {
+    "svg": "assets/world/climbing_wall.svg",
+    "png": "assets/world/climbing_wall.png",
+    "source_px": [
+      760,
+      2220
+    ],
+    "viewBox": "0 0 760 2220",
+    "category": "world"
+  },
+  "hold_S1": {
+    "svg": "assets/holds/S1.svg",
+    "png": "assets/holds/S1.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_S2": {
+    "svg": "assets/holds/S2.svg",
+    "png": "assets/holds/S2.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_P1": {
+    "svg": "assets/holds/P1.svg",
+    "png": "assets/holds/P1.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_P2": {
+    "svg": "assets/holds/P2.svg",
+    "png": "assets/holds/P2.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h01": {
+    "svg": "assets/holds/h01.svg",
+    "png": "assets/holds/h01.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h02": {
+    "svg": "assets/holds/h02.svg",
+    "png": "assets/holds/h02.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h03": {
+    "svg": "assets/holds/h03.svg",
+    "png": "assets/holds/h03.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h04": {
+    "svg": "assets/holds/h04.svg",
+    "png": "assets/holds/h04.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h05": {
+    "svg": "assets/holds/h05.svg",
+    "png": "assets/holds/h05.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h06": {
+    "svg": "assets/holds/h06.svg",
+    "png": "assets/holds/h06.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h07": {
+    "svg": "assets/holds/h07.svg",
+    "png": "assets/holds/h07.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h08": {
+    "svg": "assets/holds/h08.svg",
+    "png": "assets/holds/h08.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h09": {
+    "svg": "assets/holds/h09.svg",
+    "png": "assets/holds/h09.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h10": {
+    "svg": "assets/holds/h10.svg",
+    "png": "assets/holds/h10.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h11": {
+    "svg": "assets/holds/h11.svg",
+    "png": "assets/holds/h11.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h12": {
+    "svg": "assets/holds/h12.svg",
+    "png": "assets/holds/h12.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h13": {
+    "svg": "assets/holds/h13.svg",
+    "png": "assets/holds/h13.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h14": {
+    "svg": "assets/holds/h14.svg",
+    "png": "assets/holds/h14.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h15": {
+    "svg": "assets/holds/h15.svg",
+    "png": "assets/holds/h15.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h16": {
+    "svg": "assets/holds/h16.svg",
+    "png": "assets/holds/h16.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h17": {
+    "svg": "assets/holds/h17.svg",
+    "png": "assets/holds/h17.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_h18": {
+    "svg": "assets/holds/h18.svg",
+    "png": "assets/holds/h18.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_F1": {
+    "svg": "assets/holds/F1.svg",
+    "png": "assets/holds/F1.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "hold_F2": {
+    "svg": "assets/holds/F2.svg",
+    "png": "assets/holds/F2.png",
+    "source_px": [
+      174,
+      194
+    ],
+    "viewBox": "-87 -97 174 194",
+    "category": "holds"
+  },
+  "torso": {
+    "svg": "assets/character/torso.svg",
+    "png": "assets/character/torso.png",
+    "source_px": [
+      110,
+      148
+    ],
+    "viewBox": "-55 -73 110 148",
+    "category": "character"
+  },
+  "head": {
+    "svg": "assets/character/head.svg",
+    "png": "assets/character/head.png",
+    "source_px": [
+      90,
+      87
+    ],
+    "viewBox": "-45 -141 90 87",
+    "category": "character"
+  },
+  "arm_segment": {
+    "svg": "assets/character/arm_segment.svg",
+    "png": "assets/character/arm_segment.png",
+    "source_px": [
+      131,
+      26
+    ],
+    "viewBox": "0 0 131 26",
+    "category": "character"
+  },
+  "arm_joint": {
+    "svg": "assets/character/arm_joint.svg",
+    "png": "assets/character/arm_joint.png",
+    "source_px": [
+      26,
+      26
+    ],
+    "viewBox": "0 0 26 26",
+    "category": "character"
+  },
+  "leg_segment": {
+    "svg": "assets/character/leg_segment.svg",
+    "png": "assets/character/leg_segment.png",
+    "source_px": [
+      119,
+      26
+    ],
+    "viewBox": "0 0 119 26",
+    "category": "character"
+  },
+  "leg_joint": {
+    "svg": "assets/character/leg_joint.svg",
+    "png": "assets/character/leg_joint.png",
+    "source_px": [
+      26,
+      26
+    ],
+    "viewBox": "0 0 26 26",
+    "category": "character"
+  },
+  "hand": {
+    "svg": "assets/character/hand.svg",
+    "png": "assets/character/hand.png",
+    "source_px": [
+      80,
+      78
+    ],
+    "viewBox": "-40 -39 80 78",
+    "category": "character"
+  },
+  "hand_select": {
+    "svg": "assets/effects/hand_select.svg",
+    "png": "assets/effects/hand_select.png",
+    "source_px": [
+      84,
+      84
+    ],
+    "viewBox": "-42 -42 84 84",
+    "category": "effects"
+  },
+  "hand_hover": {
+    "svg": "assets/effects/hand_hover.svg",
+    "png": "assets/effects/hand_hover.png",
+    "source_px": [
+      84,
+      84
+    ],
+    "viewBox": "-42 -42 84 84",
+    "category": "effects"
+  },
+  "foot": {
+    "svg": "assets/character/foot.svg",
+    "png": "assets/character/foot.png",
+    "source_px": [
+      80,
+      78
+    ],
+    "viewBox": "-40 -39 80 78",
+    "category": "character"
+  },
+  "foot_select": {
+    "svg": "assets/effects/foot_select.svg",
+    "png": "assets/effects/foot_select.png",
+    "source_px": [
+      84,
+      84
+    ],
+    "viewBox": "-42 -42 84 84",
+    "category": "effects"
+  },
+  "foot_hover": {
+    "svg": "assets/effects/foot_hover.svg",
+    "png": "assets/effects/foot_hover.png",
+    "source_px": [
+      84,
+      84
+    ],
+    "viewBox": "-42 -42 84 84",
+    "category": "effects"
+  },
+  "reach_disc": {
+    "svg": "assets/effects/reach_disc.svg",
+    "png": "assets/effects/reach_disc.png",
+    "source_px": [
+      400,
+      400
+    ],
+    "viewBox": "0 0 400 400",
+    "category": "effects"
+  },
+  "reach_dot": {
+    "svg": "assets/effects/reach_dot.svg",
+    "png": "assets/effects/reach_dot.png",
+    "source_px": [
+      16,
+      16
+    ],
+    "viewBox": "0 0 16 16",
+    "category": "effects"
+  },
+  "glow_normal": {
+    "svg": "assets/effects/glow_normal.svg",
+    "png": "assets/effects/glow_normal.png",
+    "source_px": [
+      144,
+      144
+    ],
+    "viewBox": "-72 -72 144 144",
+    "category": "effects"
+  },
+  "glow_finish": {
+    "svg": "assets/effects/glow_finish.svg",
+    "png": "assets/effects/glow_finish.png",
+    "source_px": [
+      144,
+      144
+    ],
+    "viewBox": "-72 -72 144 144",
+    "category": "effects"
+  },
+  "finish_aura": {
+    "svg": "assets/effects/finish_aura.svg",
+    "png": "assets/effects/finish_aura.png",
+    "source_px": [
+      152,
+      152
+    ],
+    "viewBox": "-76 -76 152 152",
+    "category": "effects"
+  },
+  "crumble_frame_00": {
+    "svg": "assets/effects/crumble_frame_00.svg",
+    "png": "assets/effects/crumble_frame_00.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_01": {
+    "svg": "assets/effects/crumble_frame_01.svg",
+    "png": "assets/effects/crumble_frame_01.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_02": {
+    "svg": "assets/effects/crumble_frame_02.svg",
+    "png": "assets/effects/crumble_frame_02.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_03": {
+    "svg": "assets/effects/crumble_frame_03.svg",
+    "png": "assets/effects/crumble_frame_03.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_04": {
+    "svg": "assets/effects/crumble_frame_04.svg",
+    "png": "assets/effects/crumble_frame_04.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_05": {
+    "svg": "assets/effects/crumble_frame_05.svg",
+    "png": "assets/effects/crumble_frame_05.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_06": {
+    "svg": "assets/effects/crumble_frame_06.svg",
+    "png": "assets/effects/crumble_frame_06.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_07": {
+    "svg": "assets/effects/crumble_frame_07.svg",
+    "png": "assets/effects/crumble_frame_07.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_08": {
+    "svg": "assets/effects/crumble_frame_08.svg",
+    "png": "assets/effects/crumble_frame_08.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_09": {
+    "svg": "assets/effects/crumble_frame_09.svg",
+    "png": "assets/effects/crumble_frame_09.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_10": {
+    "svg": "assets/effects/crumble_frame_10.svg",
+    "png": "assets/effects/crumble_frame_10.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_11": {
+    "svg": "assets/effects/crumble_frame_11.svg",
+    "png": "assets/effects/crumble_frame_11.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "crumble_frame_12": {
+    "svg": "assets/effects/crumble_frame_12.svg",
+    "png": "assets/effects/crumble_frame_12.png",
+    "source_px": [
+      108,
+      108
+    ],
+    "viewBox": "-54 -54 108 108",
+    "category": "effects"
+  },
+  "particle_normal": {
+    "svg": "assets/effects/particle_normal.svg",
+    "png": "assets/effects/particle_normal.png",
+    "source_px": [
+      24,
+      24
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "effects"
+  },
+  "particle_crumble": {
+    "svg": "assets/effects/particle_crumble.svg",
+    "png": "assets/effects/particle_crumble.png",
+    "source_px": [
+      24,
+      24
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "effects"
+  },
+  "particle_finish": {
+    "svg": "assets/effects/particle_finish.svg",
+    "png": "assets/effects/particle_finish.png",
+    "source_px": [
+      24,
+      24
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "effects"
+  },
+  "particle_burst": {
+    "svg": "assets/effects/particle_burst.svg",
+    "png": "assets/effects/particle_burst.png",
+    "source_px": [
+      24,
+      24
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "effects"
+  },
+  "particle_gold": {
+    "svg": "assets/effects/particle_gold.svg",
+    "png": "assets/effects/particle_gold.png",
+    "source_px": [
+      24,
+      24
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "effects"
+  },
+  "particle_lime": {
+    "svg": "assets/effects/particle_lime.svg",
+    "png": "assets/effects/particle_lime.png",
+    "source_px": [
+      24,
+      24
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "effects"
+  },
+  "particle_slip": {
+    "svg": "assets/effects/particle_slip.svg",
+    "png": "assets/effects/particle_slip.png",
+    "source_px": [
+      24,
+      24
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "effects"
+  },
+  "brand_icon": {
+    "svg": "assets/ui/brand_icon.svg",
+    "png": "assets/ui/brand_icon.png",
+    "source_px": [
+      27,
+      27
+    ],
+    "viewBox": "0 0 26 26",
+    "category": "ui"
+  },
+  "restart_icon": {
+    "svg": "assets/ui/restart_icon.svg",
+    "png": "assets/ui/restart_icon.png",
+    "source_px": [
+      19,
+      19
+    ],
+    "viewBox": "0 0 24 24",
+    "category": "ui"
+  }
+}

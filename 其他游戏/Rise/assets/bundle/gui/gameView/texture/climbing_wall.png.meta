@@ -1,0 +1,134 @@
+{
+  "ver": "1.0.27",
+  "importer": "image",
+  "imported": true,
+  "uuid": "287de19a-3010-4ed9-9a3d-353ad195c974",
+  "files": [
+    ".json",
+    ".png"
+  ],
+  "subMetas": {
+    "f9941": {
+      "importer": "sprite-frame",
+      "uuid": "287de19a-3010-4ed9-9a3d-353ad195c974@f9941",
+      "displayName": "climbing_wall",
+      "id": "f9941",
+      "name": "spriteFrame",
+      "userData": {
+        "trimType": "none",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 0,
+        "width": 1520,
+        "height": 4440,
+        "rawWidth": 1520,
+        "rawHeight": 4440,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "287de19a-3010-4ed9-9a3d-353ad195c974@6c48a",
+        "atlasUuid": "",
+        "packable": false,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -760,
+            -2220,
+            0,
+            760,
+            -2220,
+            0,
+            -760,
+            2220,
+            0,
+            760,
+            2220,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            0,
+            4440,
+            1520,
+            4440,
+            0,
+            0,
+            1520,
+            0
+          ],
+          "nuv": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "minPos": [
+            -760,
+            -2220,
+            0
+          ],
+          "maxPos": [
+            760,
+            2220,
+            0
+          ]
+        }
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "287de19a-3010-4ed9-9a3d-353ad195c974@6c48a",
+      "displayName": "climbing_wall",
+      "id": "6c48a",
+      "name": "texture",
+      "userData": {
+        "wrapModeS": "clamp-to-edge",
+        "wrapModeT": "clamp-to-edge",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "287de19a-3010-4ed9-9a3d-353ad195c974",
+        "visible": false
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "type": "sprite-frame",
+    "fixAlphaTransparencyArtifacts": false,
+    "hasAlpha": true,
+    "redirect": "287de19a-3010-4ed9-9a3d-353ad195c974@6c48a"
+  }
+}
