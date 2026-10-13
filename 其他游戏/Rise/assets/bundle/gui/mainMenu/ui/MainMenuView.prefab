@@ -1222,7 +1222,15 @@
     "__prefab": {
       "__id__": 51
     },
-    "_id": ""
+    "_id": "",
+    "gamePrefab": {
+      "__uuid__": "a2c8b168-0b0a-4861-b532-0075be815cbb",
+      "__expectedType__": "cc.Prefab"
+    },
+    "levelSelectPrefab": {
+      "__uuid__": "59b826d9-d559-428c-8081-5cd8791a8f19",
+      "__expectedType__": "cc.Prefab"
+    }
   },
   {
     "__type__": "cc.CompPrefabInfo",

@@ -7,7 +7,7 @@ import { UIConfigData } from './game/common/config/GameUIConfig';
 import { smc } from './game/common/SingletonModuleComp';
 import { Initialize } from './game/initialize/Initialize';
 import { MainMenu } from './game/mainManue/MainMenu';
-import { Battle } from './game/game/Battle';
+import { Climb } from './game/game/Climb';
 
 const { ccclass, property } = _decorator;
 
@@ -33,7 +33,7 @@ export class Main extends Root {
     protected run() {
         smc.initialize = ecs.getEntity(Initialize);
         smc.mainMenu = ecs.getEntity(MainMenu);
-        smc.battle = ecs.getEntity(Battle);
+        smc.climb = ecs.getEntity(Climb);
         smc.initialize.load(this.initial);
     }
 }
