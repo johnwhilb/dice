@@ -2,15 +2,39 @@
   "ver": "1.0.27",
   "importer": "image",
   "imported": true,
-  "uuid": "89ece0a9-7055-40ff-b9c7-558777448dd3",
+  "uuid": "cf1f1484-acdd-4ad4-9e75-8bef21932bf9",
   "files": [
     ".json",
     ".png"
   ],
   "subMetas": {
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "cf1f1484-acdd-4ad4-9e75-8bef21932bf9@6c48a",
+      "displayName": "holdh01",
+      "id": "6c48a",
+      "name": "texture",
+      "userData": {
+        "wrapModeS": "clamp-to-edge",
+        "wrapModeT": "clamp-to-edge",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "cf1f1484-acdd-4ad4-9e75-8bef21932bf9",
+        "visible": false
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
     "f9941": {
       "importer": "sprite-frame",
-      "uuid": "89ece0a9-7055-40ff-b9c7-558777448dd3@f9941",
+      "uuid": "cf1f1484-acdd-4ad4-9e75-8bef21932bf9@f9941",
       "displayName": "holdh01",
       "id": "f9941",
       "name": "spriteFrame",
@@ -31,7 +55,7 @@
         "borderLeft": 0,
         "borderRight": 0,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "89ece0a9-7055-40ff-b9c7-558777448dd3@6c48a",
+        "imageUuidOrDatabaseUri": "cf1f1484-acdd-4ad4-9e75-8bef21932bf9@6c48a",
         "atlasUuid": "",
         "packable": true,
         "pixelsToUnit": 100,
@@ -99,36 +123,12 @@
         ".json"
       ],
       "subMetas": {}
-    },
-    "6c48a": {
-      "importer": "texture",
-      "uuid": "89ece0a9-7055-40ff-b9c7-558777448dd3@6c48a",
-      "displayName": "holdh01",
-      "id": "6c48a",
-      "name": "texture",
-      "userData": {
-        "wrapModeS": "clamp-to-edge",
-        "wrapModeT": "clamp-to-edge",
-        "minfilter": "linear",
-        "magfilter": "linear",
-        "mipfilter": "none",
-        "anisotropy": 0,
-        "isUuid": true,
-        "imageUuidOrDatabaseUri": "89ece0a9-7055-40ff-b9c7-558777448dd3",
-        "visible": false
-      },
-      "ver": "1.0.22",
-      "imported": true,
-      "files": [
-        ".json"
-      ],
-      "subMetas": {}
     }
   },
   "userData": {
     "type": "sprite-frame",
     "fixAlphaTransparencyArtifacts": false,
     "hasAlpha": true,
-    "redirect": "89ece0a9-7055-40ff-b9c7-558777448dd3@6c48a"
+    "redirect": "cf1f1484-acdd-4ad4-9e75-8bef21932bf9@6c48a"
   }
 }

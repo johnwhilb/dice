@@ -1,6 +1,6 @@
 import { _decorator, Color, Graphics, Node, Sprite, UITransform } from 'cc';
 import { GameComponent } from 'db://oops-framework/module/common/GameComponent';
-import type { Battle } from './Battle';
+import type { Climb } from './Climb';
 import { ClimbPoint, LimbId, TableClimbRoute } from './TableClimbRoute';
 
 const { ccclass } = _decorator;
@@ -15,13 +15,13 @@ interface ClimberLimbDisplay {
 
 @ccclass('ClimberView')
 export class ClimberView extends GameComponent {
-    private battle!: Battle;
+    private climb!: Climb;
     private body!: Node;
     private selection!: Graphics;
     private limbs = new Map<LimbId, ClimberLimbDisplay>();
 
-    init(battle: Battle) {
-        this.battle = battle;
+    init(climb: Climb) {
+        this.climb = climb;
         this.nodeTreeInfoLite();
         this.body = this.getNode('Body')!;
         this.selection = this.getNode('Selection')!.addComponent(Graphics);
@@ -37,12 +37,12 @@ export class ClimberView extends GameComponent {
     }
 
     render() {
-        const model = this.battle.model;
+        const model = this.climb.model;
         this.selection.clear();
         this.body.setPosition(model.body.x, -model.body.y);
         this.body.angle = -model.body.tilt * 180 / Math.PI;
         model.limbs.forEach((limb) => {
-            const root = this.battle.bll.rootOf(limb.id);
+            const root = this.climb.bll.rootOf(limb.id);
             const joint = this.solveJoint(root, limb, limb.hand ? 105 : 93, limb.hand ? 105 : 95, limb.side);
             const display = this.limbs.get(limb.id)!;
             this.renderSegment(display.upper, root, joint, limb.hand);

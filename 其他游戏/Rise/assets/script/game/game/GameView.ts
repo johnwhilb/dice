@@ -1,19 +1,21 @@
-import { _decorator, Color, EventKeyboard, EventTouch, Graphics, input, Input, KeyCode, Label, Layers, Mask, Node, Sprite, UITransform, Vec3, view } from 'cc';
+import { _decorator, Color, EventKeyboard, EventTouch, Graphics, input, Input, instantiate, KeyCode, Label, Layers, Mask, Node, NodePool, Prefab, Sprite, UITransform, Vec3, view } from 'cc';
 import { oops } from 'db://oops-framework/core/Oops';
 import { gui } from 'db://oops-framework/core/gui/Gui';
 import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { CCView } from 'db://oops-framework/module/common/CCView';
 import { smc } from '../common/SingletonModuleComp';
-import type { Battle } from './Battle';
+import { HoldTypeKindEnum } from '../common/table/HoldTypeKindEnum';
+import type { Climb } from './Climb';
 import { ClimberView } from './ClimberView';
-import { ClimbPoint, ClimbState, HoldType, TableClimbRoute } from './TableClimbRoute';
+import { ClimbHold, ClimbPoint, ClimbState, TableClimbRoute } from './TableClimbRoute';
 
-const { ccclass } = _decorator;
+const { ccclass, property } = _decorator;
 
 interface HoldDisplay {
     node: Node;
     sprite: Sprite;
+    pool: NodePool;
 }
 
 interface ClimbParticle extends ClimbPoint {
@@ -27,7 +29,22 @@ interface ClimbParticle extends ClimbPoint {
 @ccclass('GameView')
 @ecs.register('GameView', false)
 @gui.register('GameView', { layer: LayerType.UI, prefab: 'gui/gameView/GameView' })
-export class GameView extends CCView<Battle> {
+export class GameView extends CCView<Climb> {
+    @property({ type: Prefab, tooltip: '人物预制体' })
+    climberPrefab!: Prefab;
+
+    @property({ type: Prefab, tooltip: 'holdh01 易碎岩点预制体' })
+    crumbleHoldPrefab!: Prefab;
+
+    @property({ type: Prefab, tooltip: 'holdh02 普通岩点预制体' })
+    normalHoldPrefab!: Prefab;
+
+    @property({ type: Prefab, tooltip: 'holdF1 左侧终点预制体' })
+    finishLeftHoldPrefab!: Prefab;
+
+    @property({ type: Prefab, tooltip: 'holdF2 右侧终点预制体' })
+    finishRightHoldPrefab!: Prefab;
+
     private board!: Node;
     private stage!: Node;
     private world!: Node;
@@ -39,6 +56,11 @@ export class GameView extends CCView<Battle> {
     private timerText!: Label;
     private staminaBar!: Graphics;
     private holds = new Map<string, HoldDisplay>();
+    private holdRoot!: Node;
+    private holdSource: ClimbHold[] = [];
+    private holdPrefabs = new Map<HoldTypeKindEnum, Prefab>();
+    private holdPools = new Map<HoldTypeKindEnum, NodePool>();
+    private wallLoops: Node[] = [];
     private particles: ClimbParticle[] = [];
     private previousMoves = 0;
     private previousTime = 0;
@@ -64,16 +86,14 @@ export class GameView extends CCView<Battle> {
         this.stage.on(Node.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
         this.resize();
         this.renderHud();
-        this.buildWorld().then((loaded) => {
-            this.ready = loaded;
-            if (loaded) {
-                this.render(0);
-            }
-            else {
-                this.ent.model.paused = true;
-                oops.gui.toast('游戏资源加载失败');
-            }
-        });
+        if (!this.climberPrefab || !this.crumbleHoldPrefab || !this.normalHoldPrefab || !this.finishLeftHoldPrefab || !this.finishRightHoldPrefab) {
+            this.ent.model.paused = true;
+            oops.gui.toast('GameView 缺少人物或岩点预制体，请检查静态绑定');
+            return;
+        }
+        this.buildWorld();
+        this.ready = true;
+        this.render(0);
     }
 
     protected onEnable() {
@@ -103,33 +123,111 @@ export class GameView extends CCView<Battle> {
         this.stage.addComponent(Mask);
         const scale = 720 / TableClimbRoute.width;
         this.world.setScale(scale, scale, 1);
-        const loading: Promise<boolean>[] = [];
-        this.createSprite('background', 760, 2220, loading).node.setPosition(380, -1110);
-        this.createSprite('climbing_wall', 760, 2220, loading).node.setPosition(380, -1110);
-        this.ent.model.holds.forEach((hold) => {
-            const sprite = this.createSprite(`hold${hold.id}`, 174, 194, loading);
-            sprite.node.setPosition(hold.x, -hold.y);
-            this.holds.set(hold.id, { node: sprite.node, sprite });
-        });
+        this.world.setPosition(-TableClimbRoute.width / 2 * scale, (TableClimbRoute.viewHeight / 2 + this.ent.model.camera) * scale);
+        this.buildWall();
+        this.holdPrefabs.set(HoldTypeKindEnum.Danger, this.crumbleHoldPrefab);
+        this.holdPrefabs.set(HoldTypeKindEnum.Normal, this.normalHoldPrefab);
+        this.holdPrefabs.set(HoldTypeKindEnum.FinishLeft, this.finishLeftHoldPrefab);
+        this.holdPrefabs.set(HoldTypeKindEnum.FinishRight, this.finishRightHoldPrefab);
+        for (const type of this.holdPrefabs.keys()) {
+            this.holdPools.set(type, new NodePool());
+        }
+        this.holdRoot = this.createNode('Holds');
+        this.rebuildHolds();
         this.highlights = this.createNode('Highlights').addComponent(Graphics);
-        return this.createPrefabNode('gui/gameView/Climber').then((node) => {
-            const climber = node?.getComponent(ClimberView);
-            if (!climber) {
-                return false;
+        const node = instantiate(this.climberPrefab);
+        this.climber = node.getComponent(ClimberView)!;
+        node.parent = this.world;
+        node.active = true;
+        this.climber.init(this.ent);
+        this.effects = this.createNode('Effects').addComponent(Graphics);
+    }
+
+    private rebuildHolds() {
+        this.recycleHolds();
+        this.holdSource = this.ent.model.holds;
+        this.holdSource.forEach((hold) => {
+            if (hold.broken) {
+                return;
             }
-            this.climber = climber;
-            climber.node.parent = this.world;
-            climber.init(this.ent);
-            this.effects = this.createNode('Effects').addComponent(Graphics);
-            return Promise.all(loading).then((results) => {
-                return results.every((loaded) => {
-                    return loaded;
-                });
-            });
-        }).then((loaded) => {
-            return loaded;
-        }, () => {
-            return false;
+            const pool = this.holdPools.get(hold.type)!;
+            const node = pool.get() || instantiate(this.holdPrefabs.get(hold.type)!);
+            const sprite = node.getComponent(Sprite)!;
+            node.name = hold.id;
+            node.parent = this.holdRoot;
+            node.setPosition(hold.x, -hold.y);
+            node.setScale(hold.scale, hold.scale, 1);
+            node.angle = 0;
+            node.active = true;
+            sprite.color = Color.WHITE;
+            this.holds.set(hold.id, { node, sprite, pool });
+        });
+    }
+
+    private recycleHolds() {
+        this.holds.forEach((display) => {
+            display.node.active = false;
+            display.pool.put(display.node);
+        });
+        this.holds.clear();
+    }
+
+    private buildWall() {
+        const wall = this.getNode('wall')!;
+        const finish = this.getNode('wall_finish_top')!;
+        const middle = this.getNode('WallMiddle')!;
+        const loop = this.getNode('wall_middle_loop')!;
+        const bottom = this.getNode('wall_start_bottom')!;
+        const loopTransform = loop.getComponent(UITransform)!;
+        const finishTransform = finish.getComponent(UITransform)!;
+        const bottomTransform = bottom.getComponent(UITransform)!;
+        const loopSprite = loop.getComponent(Sprite)!;
+        const finishSprite = finish.getComponent(Sprite)!;
+        const bottomSprite = bottom.getComponent(Sprite)!;
+        const wallWidth = loopSprite.spriteFrame?.originalSize.width || loopTransform.width;
+        const scale = TableClimbRoute.width / wallWidth;
+        const height = TableClimbRoute.height / scale;
+        const finishHeight = finishSprite.spriteFrame?.originalSize.height || finishTransform.height;
+        const bottomHeight = bottomSprite.spriteFrame?.originalSize.height || bottomTransform.height;
+        const loopHeight = loopSprite.spriteFrame?.originalSize.height || loopTransform.height;
+        const middleHeight = Math.max(0, height - finishHeight - bottomHeight);
+        const count = Math.ceil(middleHeight / loopHeight);
+        wall.parent = this.world;
+        wall.setSiblingIndex(0);
+        wall.setScale(scale, scale, 1);
+        wall.setPosition(TableClimbRoute.width / 2, 0);
+        wall.getComponent(UITransform)!.setContentSize(wallWidth, height);
+        finishTransform.setAnchorPoint(0.5, 1);
+        finishTransform.setContentSize(wallWidth, finishHeight);
+        bottomTransform.setAnchorPoint(0.5, 0);
+        bottomTransform.setContentSize(wallWidth, bottomHeight);
+        loopTransform.setAnchorPoint(0.5, 1);
+        loopTransform.setContentSize(wallWidth, loopHeight);
+        for (const sprite of [finishSprite, bottomSprite, loopSprite]) {
+            sprite.sizeMode = Sprite.SizeMode.CUSTOM;
+            sprite.trim = false;
+            sprite.node.setScale(1, 1, 1);
+        }
+        finish.setPosition(0, 0);
+        bottom.setPosition(0, -height);
+        middle.setPosition(0, -finishHeight);
+        middle.setScale(1, 1, 1);
+        middle.getComponent(UITransform)!.setAnchorPoint(0.5, 1);
+        middle.getComponent(UITransform)!.setContentSize(wallWidth, middleHeight);
+        middle.active = middleHeight > 0;
+        if (!middle.getComponent(Mask)) {
+            middle.addComponent(Mask);
+        }
+        loop.setPosition(0, 0);
+        loop.active = count > 0;
+        while (this.wallLoops.length < Math.max(0, count - 1)) {
+            const node = instantiate(loop);
+            node.parent = middle;
+            this.wallLoops.push(node);
+        }
+        this.wallLoops.forEach((node, index) => {
+            node.active = index < count - 1;
+            node.setPosition(0, -(index + 1) * loopHeight);
         });
     }
 
@@ -139,15 +237,6 @@ export class GameView extends CCView<Battle> {
         node.addComponent(UITransform).setContentSize(width, height);
         node.parent = this.world;
         return node;
-    }
-
-    private createSprite(name: string, width: number, height: number, loading: Promise<boolean>[]) {
-        const node = this.createNode(name, width, height);
-        const sprite = node.addComponent(Sprite);
-        sprite.sizeMode = Sprite.SizeMode.CUSTOM;
-        sprite.trim = false;
-        loading.push(this.setSprite(sprite, `gui/gameView/texture/${name}/spriteFrame`));
-        return sprite;
     }
 
     private bindButton(name: string, callback: (event: EventTouch) => void) {
@@ -165,8 +254,8 @@ export class GameView extends CCView<Battle> {
     btnReturn(event: EventTouch) {
         event.propagationStopped = true;
         this.ent.close();
-        smc.mainMenu.MainMenuView.node.active = true;
-        smc.mainMenu.MainMenuView.refresh();
+        const menu = smc.mainMenu.MainMenuView;
+        this.ent.openLevelSelect(menu.levelSelectPrefab, this.node.parent!);
     }
 
     btnRestart(event: EventTouch) {
@@ -200,11 +289,10 @@ export class GameView extends CCView<Battle> {
 
     private touchPoint(event: EventTouch) {
         const location = event.getUILocation();
-        const point = this.stage.getComponent(UITransform)!.convertToNodeSpaceAR(new Vec3(location.x, location.y));
-        const scale = 720 / TableClimbRoute.width;
+        const point = this.world.getComponent(UITransform)!.convertToNodeSpaceAR(new Vec3(location.x, location.y));
         return {
-            x: point.x / scale + TableClimbRoute.width / 2,
-            y: this.ent.model.camera + TableClimbRoute.viewHeight / 2 - point.y / scale
+            x: point.x,
+            y: -point.y
         };
     }
 
@@ -236,6 +324,7 @@ export class GameView extends CCView<Battle> {
 
     private render(dt: number) {
         const scale = 720 / TableClimbRoute.width;
+        this.world.setScale(scale, scale, 1);
         this.world.setPosition(-TableClimbRoute.width / 2 * scale, (TableClimbRoute.viewHeight / 2 + this.ent.model.camera) * scale);
         this.renderHolds();
         this.climber.render();
@@ -245,6 +334,15 @@ export class GameView extends CCView<Battle> {
 
     private renderHolds() {
         const model = this.ent.model;
+        if (this.holdSource !== model.holds) {
+            this.buildWall();
+            this.rebuildHolds();
+            this.particles = [];
+            this.broken.clear();
+            this.previousMoves = 0;
+            this.previousTime = 0;
+            this.previousState = model.state;
+        }
         const graphics = this.highlights;
         graphics.clear();
         if (model.selected && model.state === ClimbState.Playing) {
@@ -257,18 +355,28 @@ export class GameView extends CCView<Battle> {
             graphics.stroke();
         }
         model.holds.forEach((hold) => {
+            if (hold.broken) {
+                const display = this.holds.get(hold.id);
+                if (display) {
+                    display.node.active = false;
+                    display.pool.put(display.node);
+                    this.holds.delete(hold.id);
+                }
+                return;
+            }
             const display = this.holds.get(hold.id)!;
-            display.node.active = !hold.broken;
+            display.node.active = true;
             const reachable = !!model.selected && this.ent.bll.canReach(model.selected, hold);
             const occupied = !!this.ent.bll.holderOf(hold.id);
             display.sprite.color = model.selected && !reachable ? new Color(183, 183, 183) : Color.WHITE;
-            if (reachable || occupied || hold.type === HoldType.Finish) {
-                graphics.strokeColor = reachable ? this.lime : hold.type === HoldType.Finish ? new Color(255, 224, 120, 160) : new Color(255, 212, 158, 110);
+            const finish = TableClimbRoute.isFinish(hold.type);
+            if (reachable || occupied || finish) {
+                graphics.strokeColor = reachable ? this.lime : finish ? new Color(255, 224, 120, 160) : new Color(255, 212, 158, 110);
                 graphics.lineWidth = reachable ? 3 : 2;
                 graphics.circle(hold.x, -hold.y, reachable ? 41 : 35);
                 graphics.stroke();
             }
-            if (hold.type === HoldType.Crumble && !hold.broken) {
+            if (hold.type === HoldTypeKindEnum.Danger && !hold.broken) {
                 graphics.strokeColor = new Color(255, 173, 131);
                 graphics.lineWidth = 4;
                 graphics.arc(hold.x, -hold.y, 44, Math.PI / 2, Math.PI / 2 - Math.PI * 2 * Math.max(0, hold.durability / TableClimbRoute.get().brittle), false);
@@ -280,7 +388,7 @@ export class GameView extends CCView<Battle> {
     private renderHud() {
         const model = this.ent.model;
         const seconds = Math.floor(model.elapsed);
-        this.timerText.string = `时间 ${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+        this.timerText.string = `LV${TableClimbRoute.getLevel()?.level || 1} ${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
         this.staminaText.string = `体力 ${model.stamina.toFixed(1)}%`;
         this.staminaText.color = model.stamina < 26 ? new Color(255, 146, 102) : this.lime;
         this.staminaBar.clear();
@@ -315,8 +423,11 @@ export class GameView extends CCView<Battle> {
             });
         }
         if (model.state === ClimbState.Won && this.previousState !== ClimbState.Won) {
-            this.burst({ x: 370, y: 220 }, new Color(255, 233, 125), 45);
-            this.burst({ x: 486, y: 220 }, this.lime, 45);
+            model.holds.filter((hold) => {
+                return TableClimbRoute.isFinish(hold.type);
+            }).forEach((hold) => {
+                this.burst(hold, hold.type === HoldTypeKindEnum.FinishLeft ? new Color(255, 233, 125) : this.lime, 45);
+            });
         }
         this.previousMoves = model.moves;
         this.previousTime = model.time;
@@ -347,9 +458,24 @@ export class GameView extends CCView<Battle> {
         });
     }
 
+    protected onDestroy() {
+        this.holdPools.forEach((pool) => {
+            pool.clear();
+        });
+        super.onDestroy();
+    }
+
     reset() {
         this.ready = false;
         this.particles = [];
-        this.holds.clear();
+        this.recycleHolds();
+        this.holdPools.forEach((pool) => {
+            pool.clear();
+        });
+        this.holdPools.clear();
+        this.holdPrefabs.clear();
+        this.holdSource = [];
+        this.wallLoops = [];
+        this.broken.clear();
     }
 }

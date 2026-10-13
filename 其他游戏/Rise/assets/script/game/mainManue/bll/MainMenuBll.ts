@@ -5,23 +5,32 @@ import { oops } from 'db://oops-framework/core/Oops';
 
 export class MainMenuBll extends CCBusiness<MainMenu> {
 
-    /** 从主菜单开始新一局，游戏界面打开后隐藏菜单。 */
+    /** 从主菜单进入关卡选择界面，选择界面打开后隐藏菜单。 */
     entryGame() {
-        this.openBattle(true);
+        const view = this.ent.MainMenuView;
+        const node = smc.climb.openLevelSelect(view.levelSelectPrefab, view.node.parent!);
+        view.node.active = !node;
+        if (!node) {
+            oops.gui.toast('关卡选择预制体未绑定，请检查配置');
+        }
     }
 
-    /** 继续暂停的攀爬进度，无进度时直接开始第一局。 */
+    /** 继续暂停的攀爬进度，无进度时进入关卡选择界面。 */
     continueGame() {
-        this.openBattle(false);
+        if (!smc.climb.model.hasRun) {
+            this.entryGame();
+            return;
+        }
+        this.openClimb(false);
     }
 
-    /** 打开战斗界面，newGame 决定重置本局或恢复当前状态。 */
-    private openBattle(newGame: boolean) {
-        smc.battle.open(newGame).then((node) => {
-            this.ent.MainMenuView.node.active = !node;
-            if (!node) {
-                oops.gui.toast('游戏界面加载失败，请重新进入');
-            }
-        });
+    /** 打开攀岩界面，newGame 决定重置本局或恢复当前状态。 */
+    private openClimb(newGame: boolean) {
+        const view = this.ent.MainMenuView;
+        const node = smc.climb.open(newGame, view.gamePrefab, view.node.parent!);
+        view.node.active = !node;
+        if (!node) {
+            oops.gui.toast('关卡配置无效或游戏预制体未绑定，请检查配置');
+        }
     }
 }

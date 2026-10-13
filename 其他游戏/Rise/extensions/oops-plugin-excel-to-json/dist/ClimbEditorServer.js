@@ -1,0 +1,276 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.stopClimbEditorServer = exports.startClimbEditorServer = exports.saveClimbLevel = void 0;
+const http_1 = __importDefault(require("http"));
+const path_1 = __importDefault(require("path"));
+const fs_1 = require("fs");
+const exceljs_1 = require("exceljs");
+let server = null;
+let busy = false;
+function isRecord(value) {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+function isPoint(value) {
+    if (!isRecord(value)) {
+        return false;
+    }
+    return typeof value.id === 'number' && Number.isInteger(value.id)
+        && typeof value.levelId === 'number' && Number.isInteger(value.levelId)
+        && typeof value.point === 'string' && !!value.point.trim() && value.point.length <= 32
+        && typeof value.x === 'number' && Number.isFinite(value.x)
+        && typeof value.y === 'number' && Number.isFinite(value.y)
+        && typeof value.typeId === 'number' && Number.isInteger(value.typeId)
+        && typeof value.order === 'number' && Number.isInteger(value.order);
+}
+function isPayload(value) {
+    return isRecord(value) && typeof value.levelId === 'number'
+        && Number.isInteger(value.levelId) && Array.isArray(value.points)
+        && value.points.length >= 6 && value.points.length <= 9999 && value.points.every(isPoint);
+}
+function columns(sheet) {
+    const fields = {};
+    sheet.getRow(2).eachCell((cell, index) => {
+        fields[cell.text.replace(/_ENUM$/, '')] = index;
+    });
+    return fields;
+}
+function sheetRows(sheet) {
+    const rows = [];
+    sheet.eachRow((row, index) => {
+        if (index > 5 && row.getCell(1).text) {
+            const values = [];
+            const styles = [];
+            row.eachCell({ includeEmpty: true }, (cell, column) => {
+                values[column - 1] = cell.value;
+                styles[column - 1] = cell.style;
+            });
+            rows.push({ values, styles, height: row.height });
+        }
+    });
+    return rows;
+}
+function result(success, message) {
+    return { success, message };
+}
+/** 等待三个源工作簿读取、原子写回岩点表，再运行项目原有配置生成器。 */
+async function saveClimbLevel(value, settings, regenerate) {
+    if (!isPayload(value) || !settings.PathExcel || !settings.PathJsonClient || !settings.PathTsClient) {
+        return result(false, '保存参数无效，未修改 Excel');
+    }
+    const root = settings.PathExcel.replace('project://', path_1.default.resolve(__dirname, '../../..') + path_1.default.sep);
+    const file = path_1.default.join(root, '3_ClimbHold.xlsx');
+    const holds = new exceljs_1.Workbook();
+    const levels = new exceljs_1.Workbook();
+    const types = new exceljs_1.Workbook();
+    await Promise.all([
+        holds.xlsx.readFile(file),
+        levels.xlsx.readFile(path_1.default.join(root, '1_ClimbLevel.xlsx')),
+        types.xlsx.readFile(path_1.default.join(root, '2_HoldType.xlsx'))
+    ]);
+    const sheet = holds.getWorksheet('3_ClimbHold');
+    const levelSheet = levels.getWorksheet('1_ClimbLevel');
+    const typeSheet = types.getWorksheet('2_HoldType');
+    if (!sheet || !levelSheet || !typeSheet) {
+        return result(false, '源工作表不存在，未修改 Excel');
+    }
+    const fields = columns(sheet);
+    const levelFields = columns(levelSheet);
+    const typeFields = columns(typeSheet);
+    const required = ['id', 'levelId', 'point', 'x', 'y', 'typeId', 'order'];
+    if (required.some((key) => {
+        return !fields[key];
+    })) {
+        return result(false, '岩点表字段不完整，未修改 Excel');
+    }
+    const level = sheetRows(levelSheet).find((row) => {
+        return Number(row.values[levelFields.id - 1]) === value.levelId;
+    });
+    if (!level) {
+        return result(false, '关卡不存在，未修改 Excel');
+    }
+    const width = Number(level.values[levelFields.width - 1]);
+    const height = Number(level.values[levelFields.height - 1]);
+    const levelNumber = Number(level.values[levelFields.level - 1]);
+    const starts = ['leftHandStart', 'rightHandStart', 'leftFootStart', 'rightFootStart'].map((key) => {
+        return Number(level.values[levelFields[key] - 1]);
+    });
+    const kinds = new Map(sheetRows(typeSheet).map((row) => {
+        return [Number(row.values[typeFields.id - 1]), String(row.values[typeFields.kind - 1])];
+    }));
+    const rows = sheetRows(sheet);
+    const others = rows.filter((row) => {
+        return Number(row.values[fields.levelId - 1]) !== value.levelId;
+    });
+    const occupied = new Set(others.map((row) => {
+        return Number(row.values[fields.id - 1]);
+    }));
+    const validPoints = value.points.every((point) => {
+        const kind = kinds.get(point.typeId);
+        return point.levelId === value.levelId && Math.floor(point.id / 10000) === 3 && point.id % 10000 > 0
+            && !occupied.has(point.id) && point.x >= 0 && point.x <= width && point.y >= 0 && point.y <= height
+            && !!kind && !(levelNumber <= 3 && kind === 'Danger') && point.point === point.point.trim();
+    });
+    const validStarts = starts.every((id) => {
+        return value.points.some((point) => {
+            return point.id === id && kinds.get(point.typeId) === 'Normal';
+        });
+    });
+    const validFinish = ['FinishLeft', 'FinishRight'].every((kind) => {
+        return value.points.filter((point) => {
+            return kinds.get(point.typeId) === kind;
+        }).length === 1;
+    });
+    if (!validPoints || !validStarts || !validFinish || new Set(value.points.map((point) => {
+        return point.id;
+    })).size !== value.points.length || new Set(value.points.map((point) => {
+        return point.point;
+    })).size !== value.points.length) {
+        return result(false, '主键、坐标、初始抓点或终点配置无效，未修改 Excel');
+    }
+    const existing = new Map(rows.map((row) => {
+        return [Number(row.values[fields.id - 1]), row];
+    }));
+    const styleTemplate = rows.find((row) => {
+        return Number(row.values[fields.levelId - 1]) === value.levelId;
+    }) || rows[0];
+    if (!styleTemplate) {
+        return result(false, '岩点源表没有数据，未修改 Excel');
+    }
+    const replacement = value.points.map((point, index) => {
+        const old = existing.get(point.id) || styleTemplate;
+        const values = old.values.slice();
+        const data = { id: point.id, levelId: point.levelId, point: point.point, x: point.x, y: point.y, typeId: point.typeId, order: index + 1 };
+        required.forEach((key) => {
+            values[fields[key] - 1] = data[key];
+        });
+        return { values, styles: old.styles, height: old.height };
+    });
+    const output = [];
+    let inserted = false;
+    rows.forEach((row) => {
+        if (Number(row.values[fields.levelId - 1]) === value.levelId) {
+            if (!inserted) {
+                output.push(...replacement);
+                inserted = true;
+            }
+        }
+        else {
+            output.push(row);
+        }
+    });
+    if (!inserted) {
+        output.push(...replacement);
+    }
+    const oldCount = sheet.rowCount;
+    output.forEach((data, index) => {
+        const row = sheet.getRow(index + 6);
+        row.values = data.values;
+        row.height = data.height;
+        data.styles.forEach((style, column) => {
+            row.getCell(column + 1).style = style;
+        });
+    });
+    Array.from({ length: Math.max(0, oldCount - output.length - 5) }, (entry, index) => {
+        sheet.getRow(output.length + 6 + index).values = [];
+    });
+    const temporary = file + '.editor-tmp';
+    await holds.xlsx.writeFile(temporary);
+    await fs_1.promises.rename(temporary, file);
+    return regenerate().then(() => {
+        return result(true, 'Excel 和客户端配置已保存');
+    }, (error) => {
+        console.error('Excel 已写入，但配置生成失败', error);
+        return result(false, 'Excel 已写入，但配置生成失败，请检查配表插件控制台后重试');
+    });
+}
+exports.saveClimbLevel = saveClimbLevel;
+function send(response, success, message, status = 200) {
+    response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+    response.end(JSON.stringify(result(success, message)));
+}
+/** 仅为当前 Creator 项目的本机预览提供保存服务，路径由配表插件配置决定。 */
+function startClimbEditorServer(getSettings, regenerate) {
+    if (server) {
+        return;
+    }
+    server = http_1.default.createServer((request, response) => {
+        var _a;
+        const origin = request.headers.origin || '';
+        if (origin && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+            send(response, false, '仅支持本机 Creator 预览', 403);
+            return;
+        }
+        if (origin) {
+            response.setHeader('Access-Control-Allow-Origin', origin);
+        }
+        response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        response.setHeader('Access-Control-Allow-Private-Network', 'true');
+        if (request.method === 'OPTIONS') {
+            response.writeHead(204);
+            response.end();
+            return;
+        }
+        if (request.method !== 'POST' || request.url !== '/climb-editor/save' || !((_a = request.headers['content-type']) === null || _a === void 0 ? void 0 : _a.startsWith('application/json'))) {
+            send(response, false, '接口不存在', 404);
+            return;
+        }
+        if (busy) {
+            send(response, false, '配表工具正在保存，请稍后重试', 409);
+            return;
+        }
+        let body = '';
+        let exceeded = false;
+        request.setEncoding('utf8');
+        request.on('data', (chunk) => {
+            if (!exceeded) {
+                body += chunk;
+                if (Buffer.byteLength(body) > 1024 * 1024) {
+                    exceeded = true;
+                    body = '';
+                }
+            }
+        });
+        request.on('end', () => {
+            if (exceeded) {
+                send(response, false, '关卡数据过大', 413);
+                return;
+            }
+            if (busy) {
+                send(response, false, '配表工具正在保存，请稍后重试', 409);
+                return;
+            }
+            busy = true;
+            Promise.resolve().then(() => {
+                const value = JSON.parse(body);
+                return getSettings().then((settings) => {
+                    return saveClimbLevel(value, settings, regenerate);
+                });
+            }).then((saved) => {
+                busy = false;
+                send(response, saved.success, saved.message);
+            }, (error) => {
+                busy = false;
+                console.error('关卡编辑器保存失败', error);
+                send(response, false, '保存未完成：请关闭占用 Excel 的程序，并检查配表插件控制台', 500);
+            });
+        });
+    });
+    server.on('error', (error) => {
+        console.warn('关卡编辑器保存接口无法启动', error.message);
+        server = null;
+    });
+    server.listen(17381, '127.0.0.1');
+}
+exports.startClimbEditorServer = startClimbEditorServer;
+/** 扩展卸载时关闭编辑器保存接口。 */
+function stopClimbEditorServer() {
+    if (server) {
+        server.close();
+        server = null;
+    }
+}
+exports.stopClimbEditorServer = stopClimbEditorServer;
