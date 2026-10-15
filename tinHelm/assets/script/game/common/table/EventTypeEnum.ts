@@ -4,4 +4,5 @@
 export enum EventTypeEnum {
     SHOP = 60001,
     FIGHT = 60002,
+    UNKONWN = 60003,
 }

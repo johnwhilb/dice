@@ -12,6 +12,7 @@ import { GameFlowState } from '../../gameFlow/model/GameFlowModel';
 import { TableFightEvent } from '../../common/table/TableFightEvent';
 import { TableEnemy } from '../../common/table/TableEnemy';
 import { TableShopEvent } from '../../common/table/TableShopEvent';
+import { TableUnknownEvent } from '../../common/table/TableUnknownEvent';
 import { TableRelmEvent } from '../../common/table/TableRelmEvent';
 import { RouteSelectEvent } from '../RouteSelectEvent';
 
@@ -27,6 +28,7 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         return TableEvent.getConfigById(eventId);
     }
 
+    /** 读取当前事件详情，并为未知事件加载对应选项。 */
     getCurrentEventDetail() {
         const currentEvent = this.getCurrentEvent();
         const level = this.getCurrentRealmLevel();
@@ -45,9 +47,15 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
             this.ent.RouteSelectModel.currentEventDetailId = fightEvent?.id ?? 0;
             return fightEvent;
         }
+        if (currentEvent?.id === EventTypeEnum.UNKONWN) {
+            const unknownEvent = smc.unknownEvent.prepare(detailId);
+            this.ent.RouteSelectModel.currentEventDetailId = unknownEvent?.id ?? 0;
+            return unknownEvent;
+        }
 
         this.ent.RouteSelectModel.currentEventDetailId = 0;
         smc.shop.clear();
+        smc.unknownEvent.clear();
         return null;
     }
 
@@ -122,6 +130,9 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
             case EventTypeEnum.SHOP:
                 smc.shop.openShopView();
                 break;
+            case EventTypeEnum.UNKONWN:
+                smc.unknownEvent.openUnknownEventView();
+                break;
             default:
                 return false;
         }
@@ -190,6 +201,7 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         return this.selectCurrentEvent();
     }
 
+    /** 进入指定世界，realmId 为世界配置 ID。 */
     private enterRealm(realmId: number) {
         if (!TableRealms.getConfigById(realmId)) {
             return false;
@@ -198,6 +210,7 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         this.ent.RouteSelectModel.currentRealmId = realmId;
         this.ent.RouteSelectModel.currentEventDetailId = 0;
         smc.shop.clear();
+        smc.unknownEvent.clear();
         const level = this.getCurrentRealmLevel();
         if (level) {
             level.visited = true;
@@ -211,6 +224,7 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         return true;
     }
 
+    /** 完成当前事件并清理事件界面及数据，推进世界层数。 */
     completeCurrentEvent() {
         const level = this.getCurrentRealmLevel();
         if (!level || level.completed) {
@@ -220,6 +234,7 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         level.currentEventIndex += 1;
         this.ent.RouteSelectModel.currentEventDetailId = 0;
         smc.shop.clear();
+        smc.unknownEvent.clear();
         level.completed = level.currentEventIndex >= level.eventIds.length;
         if (level.completed && level.realmId !== RealmsRealmsEnum.ASGARD) {
             this.ent.RouteSelectModel.anchorCount += 1;
@@ -228,6 +243,7 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
         this.updateTravelRoute();
     }
 
+    /** 根据世界 ID 和各层事件池生成可用事件及详情 ID。 */
     private createRealmLevel(realmId: number): RealmLevelState {
         const floorCount = this.getUniversalValue(UniversalNameEnum.REALM_EVENT_NUM, 10);
         const floorConfigs = TableRelmEvent.getAllConfig().filter((item) => {
@@ -251,16 +267,23 @@ export class RouteSelectBll extends CCBusiness<RouteSelect> {
             const shopPool = config.shopPool.filter((id): id is number => {
                 return typeof id === 'number' && !!TableShopEvent.getConfigById(id);
             });
+            const unknownPool = (config.unknownEvent ?? []).filter((id): id is number => {
+                return typeof id === 'number' && !!TableUnknownEvent.getConfigById(id);
+            });
+            const eventPools = new Map<number, number[]>([
+                [EventTypeEnum.FIGHT, fightPool],
+                [EventTypeEnum.SHOP, shopPool],
+                [EventTypeEnum.UNKONWN, unknownPool],
+            ]);
             const candidates = config.maybeEvent.filter((id): id is number => {
-                return (id === EventTypeEnum.FIGHT && !!fightPool.length)
-                    || (id === EventTypeEnum.SHOP && !!shopPool.length);
+                return typeof id === 'number' && !!eventPools.get(id)?.length;
             });
             if (!candidates.length) {
                 throw new Error(`世界 ${realmId} 第 ${floor} 层没有可用事件`);
             }
 
             const eventId = candidates[Math.floor(Math.random() * candidates.length)];
-            const pool = eventId === EventTypeEnum.FIGHT ? fightPool : shopPool;
+            const pool = eventPools.get(eventId) ?? [];
             eventIds.push(eventId);
             eventDetailIds.push(pool[Math.floor(Math.random() * pool.length)]);
         }

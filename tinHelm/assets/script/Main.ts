@@ -15,6 +15,7 @@ import { Battle } from './game/battle/Battle';
 import { StoryEvent } from './game/StoryEvent/StoryEvent';
 import { Save } from './game/save/Save';
 import { Shop } from './game/shop/Shop';
+import { UnknownEvent } from './game/unknownEvent/UnknownEvent';
 
 const { ccclass, property } = _decorator;
 
@@ -48,6 +49,7 @@ export class Main extends Root {
         smc.storyEvent = ecs.getEntity(StoryEvent);
         smc.save = ecs.getEntity(Save);
         smc.shop = ecs.getEntity(Shop);
+        smc.unknownEvent = ecs.getEntity(UnknownEvent);
         smc.initialize.load(this.initial);
     }
 }

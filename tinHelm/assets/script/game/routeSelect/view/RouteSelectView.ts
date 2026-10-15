@@ -15,7 +15,6 @@ const { ccclass } = _decorator;
 @gui.register('RouteSelectView', { layer: LayerType.UI, prefab: 'gui/routeSelect/RouteSelectView' })
 export class RouteSelectView extends CCView<RouteSelect> {
 
-
     start() {
         this.nodeTreeInfoLite();
         this.setButton();
