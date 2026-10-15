@@ -9,6 +9,7 @@ export class GameFlowBll extends CCBusiness<GameFlow> {
         this.ent.closeRoleSelectView();
         smc.routeSelect.closeMapView();
         smc.shop.closeShopView();
+        smc.unknownEvent.clear();
         smc.routeSelect.closeRouteSelectView();
         smc.storyEvent.closeStoryDialog();
         smc.storyEvent.closeStoryEventView();

@@ -9,6 +9,7 @@ import { RouteSelect } from '../routeSelect/RouteSelect';
 import { Battle } from '../battle/Battle';
 import { StoryEvent } from '../StoryEvent/StoryEvent';
 import { Shop } from '../shop/Shop';
+import { UnknownEvent } from '../unknownEvent/UnknownEvent';
 
 /** 游戏单例业务模块 */
 @ecs.register('SingletonModule')
@@ -33,6 +34,7 @@ export class SingletonModuleComp extends ecs.Comp {
     storyEvent: StoryEvent = null!;
     /** 游戏商店模块 */
     shop: Shop = null!;
+    unknownEvent: UnknownEvent = null!;
 
      
 

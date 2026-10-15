@@ -10,6 +10,7 @@ interface RelmEventConfigData {
     name: string;
     level: number;
     fightPool: any[];
+    unknownEvent: any[];
     shopPool: any[];
     maybeEvent: any[];
 }
@@ -177,6 +178,11 @@ export class BaseRelmEvent {
     /** 战斗事件池 */
     get fightPool(): any[] {
         return this.data.fightPool;
+    }
+
+    /** 未知事件池 */
+    get unknownEvent(): any[] {
+        return this.data.unknownEvent;
     }
 
     /** 商店事件池 */
