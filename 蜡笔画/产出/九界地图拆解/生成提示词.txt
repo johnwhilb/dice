@@ -1,0 +1,35 @@
+背景
+This is asset extraction/editing of the supplied Helm hand drawn game screenshot, NOT a new design. Preserve its warm cream parchment, rough uneven black ink, colored pencil/wax crayon dry strokes and original shapes/colors. No polished vector, no 3D, no photorealism. No text, letters, numerals, labels or captions anywhere. Output a 1672x941 16:9 opaque clean background plate. Remove ALL interface: the top-left small tree logo, title panel and subtitle; all four top resource boxes and their contents; all NINE rounded realm node cards, their circular badges, colored status labels and selection tick marks; bottom red/yellow/blue buttons and long bottom information bar. Inpaint the exposed locations seamlessly with the existing parchment/map scenery. Preserve the gigantic blue sea serpent encircling the image with its open head at upper left, blue patterned body along top/right/bottom edges, cream belly, mountains and foaming waves at lower sides; preserve the central brown branching world tree and its connecting branches spanning the former 3x3 node locations, small green leaves, clouds, golden concentric map route arcs, and the three sacred golden diamond/circle ornaments on the trunk. Reconstruct the tree and branches that were hidden behind the cards. Keep the composition and visual scale exactly as the reference. Remove decorative runic letter-like glyphs as well, but keep simple gold path arcs and sacred geometric ornaments. No interface border or badge ghost remnants. Do not introduce new scenery, characters or labels.
+
+UI整层-无字
+This is asset extraction/editing of the supplied Helm hand drawn game screenshot, NOT a new design. Preserve its warm cream parchment, rough uneven black ink, colored pencil/wax crayon dry strokes and original shapes/colors. No polished vector, no 3D, no photorealism. No text, letters, numerals, labels or captions anywhere. Output a true transparent 1672x941 full canvas UI layer with all interface elements in their EXACT original screen positions, sizes and shapes. Remove ALL background scene: serpent, large central tree, branches, leaves, mountains, clouds, waves, route arcs and runic glyphs. Retain only the small top-left tree logo; its yellow title banner now EMPTY and remove subtitle entirely; top-right four resource boxes with coin/key/blue swirl/purple crystal icons, but remove every name and amount; the original nine realm cards in the original 3x3 layout, retaining their circular leaf/sun/moon/blue mountain/tree/gray mountain/fire/purple spiral/skull badges, rounded cream panels, gold/green current/target accents and colored EMPTY status strips, and gray lock icons in bottom three strips; bottom red back button with arrow icon but no word, empty yellow details button, empty blue teleport button, and empty long cream information footer. Erase all Chinese words and digits even tiny ones inside status strips. Also erase footer separator vertical strokes that were part of text. Preserve hand drawn line quality and pale paper texture INSIDE UI panels. Everything outside the isolated UI objects truly transparent, including gaps. Do not move UI elements, do not add any elements.
+
+图标图集
+This is asset extraction/editing of the supplied Helm hand drawn game screenshot, NOT a new design. Preserve its warm cream parchment, rough uneven black ink, colored pencil/wax crayon dry strokes and original shapes/colors. No polished vector, no 3D, no photorealism. No text, letters, numerals, labels or captions anywhere. Produce a transparent 1536x1536 extraction atlas with EXACTLY 16 separate objects in a strict FOUR COLUMNS by FOUR ROWS grid; each object wholly inside its cell with at least40px clear gap. No contact, no extra objects. True alpha outside each object. Preserve original hand drawn contours and crayon fills.
+Row1 left to right: circular green LEAF realm badge; circular golden SUN realm badge; circular pale blue crescent MOON realm badge; circular pale blue snowy MOUNTAIN realm badge.
+Row2: circular green WORLD TREE realm badge; circular gray jagged MOUNTAIN realm badge; circular red FIRE realm badge; circular lavender purple SPIRAL realm badge.
+Row3: circular dark purple SKULL realm badge; silver COIN resource icon with white star emblem; golden KEY resource icon; blue circular teleport ENERGY SWIRL resource icon.
+Row4: purple faceted CRYSTAL resource icon; small brown trunk green leafy TREE LOGO from top left (no surrounding circle); small dark gray PADLOCK status icon; bold black LEFT ARROW from back button.
+The nine realm badges keep their round black ink outlines and colored crayon disk fills, no rectangular cream card behind. Resource icons, logo, lock and arrow have NO panel/card or cream rectangle behind. Circle icon interiors opaque, spaces outside actual contour transparent. Do not copy text from screenshot. No shadows, halos, glow or background.
+
+底板图集
+This is asset extraction/editing of the supplied Helm hand drawn game screenshot, NOT a new design. Preserve its warm cream parchment, rough uneven black ink, colored pencil/wax crayon dry strokes and original shapes/colors. No polished vector, no 3D, no photorealism. No text, letters, numerals, labels or captions anywhere. Produce a true transparent 2048x1228 UI base atlas of EXACTLY FIFTEEN objects in a strict FIVE COLUMNS by THREE ROWS grid. Each object centered in its own cell, generous at least30px transparent gap. Do not draw grid or labels. Isolate each object completely. Keep original aspect ratios and irregular handmade thin black outlines.
+Row1 left to right:
+1 EMPTY normal rounded cream realm card, aspect310:140, nothing inside.
+2 EMPTY target rounded cream realm card with thin golden accent rim, same shape and aspect, nothing inside.
+3 EMPTY current rounded cream realm card with thin green accent rim, same shape and aspect, nothing inside.
+4 EMPTY rectangular cream resource counter box, aspect165:73, no icon or text.
+5 EMPTY yellow crayon title banner with black uneven rectangular border, aspect280:72.
+Row2 left to right:
+1 EMPTY very long cream information footer with black border, aspect880:70, no divider strokes.
+2 EMPTY red crayon back button with black border, aspect225:85, remove arrow as well as lettering.
+3 EMPTY yellow crayon details button with black border, aspect235:85.
+4 EMPTY blue crayon teleport button with black border, aspect145:85.
+5 EMPTY gray crayon status strip with thin gray border, aspect140:43, no lock or text.
+Row3 left to right:
+1 EMPTY pale green status strip with thin green border, aspect140:43.
+2 EMPTY pale blue status strip with thin blue border, aspect140:43.
+3 EMPTY yellow status strip with thin ochre border, aspect140:43.
+4 EMPTY coral red status strip with thin red border, aspect140:43.
+5 A small cluster of 5 short red/gold hand drawn highlight tick marks, no card or icon, as around selected nodes.
+All panel interiors remain opaque warm paper or their specified crayon color, no text, no symbols, no icons. Outside objects is true transparency, no shadows, no glow. These are reusable separated base layers, not an assembled interface. Do not add more items.

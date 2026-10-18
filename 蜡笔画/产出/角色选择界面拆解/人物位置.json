@@ -1,0 +1,59 @@
+[
+  {
+    "role": "暗影刺客",
+    "sourceAlphaBounds": [
+      702,
+      35,
+      862,
+      876
+    ],
+    "alignedBounds": [
+      753,
+      41,
+      674,
+      685
+    ],
+    "canvas": [
+      1672,
+      941
+    ]
+  },
+  {
+    "role": "流浪剑士",
+    "sourceAlphaBounds": [
+      644,
+      71,
+      947,
+      842
+    ],
+    "alignedBounds": [
+      737,
+      47,
+      729,
+      648
+    ],
+    "canvas": [
+      1672,
+      941
+    ]
+  },
+  {
+    "role": "森林游侠",
+    "sourceAlphaBounds": [
+      915,
+      88,
+      689,
+      814
+    ],
+    "alignedBounds": [
+      910,
+      29,
+      567,
+      670
+    ],
+    "canvas": [
+      1672,
+      941
+    ]
+  }
+]

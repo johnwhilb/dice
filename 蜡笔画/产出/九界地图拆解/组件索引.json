@@ -1,0 +1,629 @@
+[
+  {
+    "file": "世界图标/华纳海姆-叶片.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      40,
+      56,
+      256,
+      253
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/阿斯加德-太阳.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      345,
+      55,
+      254,
+      254
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/亚尔夫海姆-月亮.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      652,
+      55,
+      251,
+      253
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/约顿海姆-雪山.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      956,
+      55,
+      255,
+      254
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/米德加德-世界树.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      37,
+      353,
+      264,
+      257
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/斯瓦塔尔法海姆-灰山.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      343,
+      353,
+      261,
+      255
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/穆斯贝尔海姆-火焰.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      646,
+      352,
+      261,
+      257
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/尼福尔海姆-漩涡.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      952,
+      353,
+      260,
+      256
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "世界图标/赫尔海姆-骷髅.png",
+    "width": 126,
+    "height": 126,
+    "source": "icons",
+    "sourceRect": [
+      41,
+      656,
+      264,
+      259
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/银币.png",
+    "width": 64,
+    "height": 64,
+    "source": "icons",
+    "sourceRect": [
+      362,
+      668,
+      238,
+      238
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/钥匙.png",
+    "width": 64,
+    "height": 64,
+    "source": "icons",
+    "sourceRect": [
+      675,
+      661,
+      224,
+      249
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/传送能量.png",
+    "width": 64,
+    "height": 64,
+    "source": "icons",
+    "sourceRect": [
+      973,
+      677,
+      236,
+      236
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/碎片.png",
+    "width": 64,
+    "height": 64,
+    "source": "icons",
+    "sourceRect": [
+      74,
+      960,
+      192,
+      251
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/世界树标志.png",
+    "width": 120,
+    "height": 128,
+    "source": "icons",
+    "sourceRect": [
+      356,
+      957,
+      257,
+      259
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/锁定.png",
+    "width": 38,
+    "height": 42,
+    "source": "icons",
+    "sourceRect": [
+      686,
+      982,
+      197,
+      223
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/返回箭头.png",
+    "width": 60,
+    "height": 52,
+    "source": "icons",
+    "sourceRect": [
+      983,
+      999,
+      220,
+      186
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用底板/节点-普通.png",
+    "width": 318,
+    "height": 148,
+    "source": "bases",
+    "sourceRect": [
+      33,
+      220,
+      291,
+      130
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用底板/节点-目标.png",
+    "width": 318,
+    "height": 148,
+    "source": "bases",
+    "sourceRect": [
+      351,
+      215,
+      302,
+      138
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用底板/节点-当前.png",
+    "width": 318,
+    "height": 148,
+    "source": "bases",
+    "sourceRect": [
+      679,
+      214,
+      311,
+      139
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用底板/资源栏.png",
+    "width": 173,
+    "height": 81,
+    "source": "bases",
+    "sourceRect": [
+      1029,
+      236,
+      220,
+      99
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用底板/标题栏.png",
+    "width": 288,
+    "height": 80,
+    "source": "bases",
+    "sourceRect": [
+      1280,
+      230,
+      304,
+      103
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用底板/底部信息栏.png",
+    "width": 888,
+    "height": 78,
+    "source": "bases",
+    "sourceRect": [
+      42,
+      474,
+      732,
+      105
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "按钮/返回-空白底板.png",
+    "width": 233,
+    "height": 93,
+    "source": "bases",
+    "sourceRect": [
+      774,
+      482,
+      216,
+      93
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "按钮/查看详情-空白底板.png",
+    "width": 243,
+    "height": 93,
+    "source": "bases",
+    "sourceRect": [
+      991,
+      481,
+      239,
+      94
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "按钮/传送-空白底板.png",
+    "width": 153,
+    "height": 93,
+    "source": "bases",
+    "sourceRect": [
+      1229,
+      481,
+      160,
+      92
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "状态底板/未解锁-灰.png",
+    "width": 148,
+    "height": 51,
+    "source": "bases",
+    "sourceRect": [
+      1424,
+      493,
+      148,
+      60
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "状态底板/已探索-绿.png",
+    "width": 148,
+    "height": 51,
+    "source": "bases",
+    "sourceRect": [
+      83,
+      725,
+      191,
+      73
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "状态底板/可前往-蓝.png",
+    "width": 148,
+    "height": 51,
+    "source": "bases",
+    "sourceRect": [
+      408,
+      725,
+      190,
+      73
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "状态底板/当前所在-黄.png",
+    "width": 148,
+    "height": 51,
+    "source": "bases",
+    "sourceRect": [
+      718,
+      727,
+      185,
+      70
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "状态底板/目标-红.png",
+    "width": 148,
+    "height": 51,
+    "source": "bases",
+    "sourceRect": [
+      1022,
+      724,
+      177,
+      76
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "通用图标/节点选中标记.png",
+    "width": 108,
+    "height": 55,
+    "source": "bases",
+    "sourceRect": [
+      1287,
+      707,
+      248,
+      108
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "节点成品/华纳海姆-无字.png",
+    "width": 320,
+    "height": 153,
+    "source": "ui",
+    "sourceRect": [
+      295,
+      186,
+      312,
+      145
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      291,
+      182
+    ]
+  },
+  {
+    "file": "节点成品/阿斯加德-无字.png",
+    "width": 324,
+    "height": 201,
+    "source": "ui",
+    "sourceRect": [
+      674,
+      135,
+      316,
+      193
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      670,
+      131
+    ]
+  },
+  {
+    "file": "节点成品/亚尔夫海姆-无字.png",
+    "width": 323,
+    "height": 151,
+    "source": "ui",
+    "sourceRect": [
+      1062,
+      185,
+      315,
+      143
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1058,
+      181
+    ]
+  },
+  {
+    "file": "节点成品/约顿海姆-无字.png",
+    "width": 329,
+    "height": 156,
+    "source": "ui",
+    "sourceRect": [
+      293,
+      396,
+      321,
+      148
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      289,
+      392
+    ]
+  },
+  {
+    "file": "节点成品/米德加德-无字.png",
+    "width": 363,
+    "height": 185,
+    "source": "ui",
+    "sourceRect": [
+      661,
+      373,
+      355,
+      177
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      657,
+      369
+    ]
+  },
+  {
+    "file": "节点成品/斯瓦塔尔法海姆-无字.png",
+    "width": 333,
+    "height": 155,
+    "source": "ui",
+    "sourceRect": [
+      1057,
+      397,
+      325,
+      147
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1053,
+      393
+    ]
+  },
+  {
+    "file": "节点成品/穆斯贝尔海姆-无字.png",
+    "width": 333,
+    "height": 161,
+    "source": "ui",
+    "sourceRect": [
+      282,
+      620,
+      325,
+      153
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      278,
+      616
+    ]
+  },
+  {
+    "file": "节点成品/尼福尔海姆-无字.png",
+    "width": 337,
+    "height": 160,
+    "source": "ui",
+    "sourceRect": [
+      671,
+      623,
+      329,
+      152
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      667,
+      619
+    ]
+  },
+  {
+    "file": "节点成品/赫尔海姆-无字.png",
+    "width": 331,
+    "height": 161,
+    "source": "ui",
+    "sourceRect": [
+      1061,
+      622,
+      323,
+      153
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1057,
+      618
+    ]
+  }
+]

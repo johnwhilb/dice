@@ -1,0 +1,83 @@
+[
+  {
+    "role": "寒雾林地",
+    "file": "场景-透明.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 0
+  },
+  {
+    "role": "寒雾林地",
+    "file": "UI整层-无字.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 0
+  },
+  {
+    "role": "寒雾林地",
+    "file": "背景-无字.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 255
+  },
+  {
+    "role": "沼泽边地",
+    "file": "场景-透明.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 0
+  },
+  {
+    "role": "沼泽边地",
+    "file": "UI整层-无字.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 0
+  },
+  {
+    "role": "沼泽边地",
+    "file": "背景-无字.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 255
+  },
+  {
+    "role": "石崖小道",
+    "file": "场景-透明.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 0
+  },
+  {
+    "role": "石崖小道",
+    "file": "UI整层-无字.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 0
+  },
+  {
+    "role": "石崖小道",
+    "file": "背景-无字.png",
+    "canvas": [
+      1672,
+      941
+    ],
+    "cornerAlpha": 255
+  }
+]

@@ -1,0 +1,1358 @@
+[
+  {
+    "file": "共用图标/斧头.png",
+    "width": 93,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      55,
+      84,
+      180,
+      187
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/护盾.png",
+    "width": 81,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      315,
+      86,
+      153,
+      185
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/符文.png",
+    "width": 85,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      557,
+      88,
+      160,
+      182
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/生命.png",
+    "width": 96,
+    "height": 91,
+    "source": "共用图标图集",
+    "sourceRect": [
+      801,
+      101,
+      166,
+      156
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/乌鸦.png",
+    "width": 96,
+    "height": 83,
+    "source": "共用图标图集",
+    "sourceRect": [
+      37,
+      334,
+      215,
+      184
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/叶片.png",
+    "width": 76,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      323,
+      324,
+      149,
+      194
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/中毒.png",
+    "width": 89,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      560,
+      327,
+      163,
+      178
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/灼烧.png",
+    "width": 79,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      806,
+      310,
+      167,
+      208
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/虚弱.png",
+    "width": 85,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      67,
+      578,
+      155,
+      178
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/专注.png",
+    "width": 95,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      307,
+      578,
+      179,
+      182
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/治疗药水.png",
+    "width": 75,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      553,
+      555,
+      164,
+      215
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/能量.png",
+    "width": 95,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      816,
+      599,
+      141,
+      142
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/靴子.png",
+    "width": 89,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      53,
+      815,
+      172,
+      186
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/增益箭头.png",
+    "width": 86,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      309,
+      809,
+      164,
+      186
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/目标.png",
+    "width": 95,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      544,
+      811,
+      191,
+      193
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/锁定.png",
+    "width": 75,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      816,
+      807,
+      144,
+      189
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/重投.png",
+    "width": 86,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      51,
+      1048,
+      188,
+      211
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/抽牌.png",
+    "width": 96,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      293,
+      1054,
+      194,
+      193
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/道具袋.png",
+    "width": 82,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      548,
+      1040,
+      183,
+      219
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/设置.png",
+    "width": 96,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      790,
+      1050,
+      197,
+      198
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/帮助.png",
+    "width": 94,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      39,
+      1290,
+      197,
+      201
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/山脉.png",
+    "width": 96,
+    "height": 63,
+    "source": "共用图标图集",
+    "sourceRect": [
+      271,
+      1329,
+      238,
+      149
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/连击双斧.png",
+    "width": 96,
+    "height": 89,
+    "source": "共用图标图集",
+    "sourceRect": [
+      538,
+      1296,
+      210,
+      194
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/重击锤.png",
+    "width": 88,
+    "height": 96,
+    "source": "共用图标图集",
+    "sourceRect": [
+      810,
+      1302,
+      176,
+      193
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/卡框-红.png",
+    "width": 183,
+    "height": 288,
+    "source": "共用底板图集",
+    "sourceRect": [
+      96,
+      18,
+      208,
+      295
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/卡框-蓝.png",
+    "width": 183,
+    "height": 288,
+    "source": "共用底板图集",
+    "sourceRect": [
+      382,
+      19,
+      208,
+      293
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/卡框-绿.png",
+    "width": 183,
+    "height": 288,
+    "source": "共用底板图集",
+    "sourceRect": [
+      666,
+      18,
+      209,
+      294
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/卡框-紫.png",
+    "width": 183,
+    "height": 288,
+    "source": "共用底板图集",
+    "sourceRect": [
+      953,
+      18,
+      206,
+      294
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/卡框-黄.png",
+    "width": 183,
+    "height": 288,
+    "source": "共用底板图集",
+    "sourceRect": [
+      101,
+      333,
+      200,
+      284
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/骰子-普通.png",
+    "width": 113,
+    "height": 113,
+    "source": "共用底板图集",
+    "sourceRect": [
+      400,
+      406,
+      162,
+      157
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/骰子-选中.png",
+    "width": 153,
+    "height": 153,
+    "source": "共用底板图集",
+    "sourceRect": [
+      646,
+      364,
+      234,
+      237
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/骰子-已使用.png",
+    "width": 113,
+    "height": 113,
+    "source": "共用底板图集",
+    "sourceRect": [
+      975,
+      406,
+      166,
+      157
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/状态槽.png",
+    "width": 63,
+    "height": 63,
+    "source": "共用底板图集",
+    "sourceRect": [
+      79,
+      654,
+      117,
+      105
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/血条.png",
+    "width": 213,
+    "height": 32,
+    "source": "共用底板图集",
+    "sourceRect": [
+      250,
+      684,
+      306,
+      46
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/结束回合-空白.png",
+    "width": 258,
+    "height": 98,
+    "source": "共用底板图集",
+    "sourceRect": [
+      598,
+      637,
+      325,
+      117
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/操作按钮-蓝.png",
+    "width": 183,
+    "height": 88,
+    "source": "共用底板图集",
+    "sourceRect": [
+      947,
+      645,
+      242,
+      103
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/标题标签.png",
+    "width": 188,
+    "height": 53,
+    "source": "共用底板图集",
+    "sourceRect": [
+      52,
+      820,
+      253,
+      69
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/玩家面板-空白.png",
+    "width": 288,
+    "height": 528,
+    "source": "共用底板图集",
+    "sourceRect": [
+      342,
+      786,
+      283,
+      445
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/记录面板-空白.png",
+    "width": 308,
+    "height": 508,
+    "source": "共用底板图集",
+    "sourceRect": [
+      656,
+      788,
+      277,
+      444
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/意图面板-空白.png",
+    "width": 168,
+    "height": 168,
+    "source": "共用底板图集",
+    "sourceRect": [
+      971,
+      851,
+      233,
+      227
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "寒雾林地/UI组件/重投-无字.png",
+    "width": 169,
+    "height": 80,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      1108,
+      485,
+      161,
+      72
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1104,
+      481
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/抽牌-无字.png",
+    "width": 168,
+    "height": 83,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      1109,
+      564,
+      160,
+      75
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1105,
+      560
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/道具袋-无字.png",
+    "width": 179,
+    "height": 106,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      1282,
+      802,
+      171,
+      98
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1278,
+      798
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/结束回合-无字.png",
+    "width": 203,
+    "height": 107,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      1462,
+      802,
+      195,
+      99
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1458,
+      798
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/巨人信息-无字.png",
+    "width": 238,
+    "height": 225,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      228,
+      107,
+      230,
+      217
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      224,
+      103
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/萨满信息-无字.png",
+    "width": 238,
+    "height": 224,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      1281,
+      109,
+      230,
+      216
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1277,
+      105
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/目标信息-无字.png",
+    "width": 374,
+    "height": 160,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      1294,
+      494,
+      366,
+      152
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1290,
+      490
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/牌堆信息-无字.png",
+    "width": 361,
+    "height": 127,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      1304,
+      664,
+      353,
+      119
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1300,
+      660
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/重投-无字.png",
+    "width": 290,
+    "height": 79,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      18,
+      781,
+      282,
+      71
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      14,
+      777
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/抽牌-无字.png",
+    "width": 290,
+    "height": 82,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      17,
+      856,
+      282,
+      74
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      13,
+      852
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/结束回合-无字.png",
+    "width": 299,
+    "height": 126,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      1364,
+      796,
+      291,
+      118
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1360,
+      792
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/玩家信息-无字.png",
+    "width": 306,
+    "height": 717,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      9,
+      67,
+      298,
+      709
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      5,
+      63
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/战斗记录-无字.png",
+    "width": 320,
+    "height": 519,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      1352,
+      65,
+      312,
+      511
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1348,
+      61
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/敌人意图-无字.png",
+    "width": 220,
+    "height": 152,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      1130,
+      263,
+      212,
+      144
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1126,
+      259
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/重投-无字.png",
+    "width": 198,
+    "height": 105,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      311,
+      521,
+      190,
+      97
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      307,
+      517
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/抽牌-无字.png",
+    "width": 189,
+    "height": 103,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      1161,
+      522,
+      181,
+      95
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1157,
+      518
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/结束回合-无字.png",
+    "width": 280,
+    "height": 123,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      1387,
+      801,
+      272,
+      115
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1383,
+      797
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/玩家信息-无字.png",
+    "width": 296,
+    "height": 881,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      0,
+      60,
+      288,
+      873
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      -4,
+      56
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/敌人信息-无字.png",
+    "width": 325,
+    "height": 888,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      1355,
+      53,
+      317,
+      880
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1351,
+      49
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/骰子-斧头-选中.png",
+    "width": 149,
+    "height": 145,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      470,
+      480,
+      141,
+      137
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      466,
+      476
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/骰子-护盾.png",
+    "width": 104,
+    "height": 110,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      619,
+      502,
+      96,
+      102
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      615,
+      498
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/骰子-符文-选中.png",
+    "width": 146,
+    "height": 152,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      712,
+      480,
+      138,
+      144
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      708,
+      476
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/骰子-生命.png",
+    "width": 114,
+    "height": 109,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      851,
+      502,
+      106,
+      101
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      847,
+      498
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/骰子-乌鸦.png",
+    "width": 107,
+    "height": 110,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      979,
+      502,
+      99,
+      102
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      975,
+      498
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/骰子-斧头-选中.png",
+    "width": 188,
+    "height": 151,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      429,
+      504,
+      180,
+      143
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      425,
+      500
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/骰子-护盾-已使用.png",
+    "width": 124,
+    "height": 126,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      620,
+      523,
+      116,
+      118
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      616,
+      519
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/骰子-符文.png",
+    "width": 125,
+    "height": 124,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      769,
+      522,
+      117,
+      116
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      765,
+      518
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/骰子-叶片-锁定.png",
+    "width": 141,
+    "height": 125,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      924,
+      523,
+      133,
+      117
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      920,
+      519
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/骰子-乌鸦.png",
+    "width": 131,
+    "height": 125,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      1083,
+      522,
+      123,
+      117
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1079,
+      518
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/骰子-护盾.png",
+    "width": 117,
+    "height": 111,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      540,
+      507,
+      109,
+      103
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      536,
+      503
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/骰子-斧头-选中.png",
+    "width": 127,
+    "height": 158,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      648,
+      480,
+      119,
+      150
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      644,
+      476
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/骰子-符文-已使用.png",
+    "width": 111,
+    "height": 111,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      774,
+      506,
+      103,
+      103
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      770,
+      502
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/骰子-叶片-锁定.png",
+    "width": 112,
+    "height": 124,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      894,
+      493,
+      104,
+      116
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      890,
+      489
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/骰子-乌鸦.png",
+    "width": 118,
+    "height": 111,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      1014,
+      506,
+      110,
+      103
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1010,
+      502
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/卡牌-狂斧重击-无字.png",
+    "width": 217,
+    "height": 307,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      316,
+      642,
+      209,
+      299
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      312,
+      638
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/卡牌-坚盾防御-无字.png",
+    "width": 206,
+    "height": 307,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      529,
+      642,
+      198,
+      299
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      525,
+      638
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/卡牌-影步闪袭-无字.png",
+    "width": 211,
+    "height": 303,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      729,
+      646,
+      203,
+      295
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      725,
+      642
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/卡牌-自然疗愈-无字.png",
+    "width": 213,
+    "height": 304,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      931,
+      645,
+      205,
+      296
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      927,
+      641
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/卡牌-符文抽牌-无字.png",
+    "width": 218,
+    "height": 307,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      1137,
+      642,
+      210,
+      299
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      1133,
+      638
+    ]
+  },
+  {
+    "file": "寒雾林地/UI组件/手牌整组-无字.png",
+    "width": 915,
+    "height": 325,
+    "source": "寒雾林地/UI整层-无字",
+    "sourceRect": [
+      386,
+      624,
+      907,
+      317
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      382,
+      620
+    ]
+  },
+  {
+    "file": "沼泽边地/UI组件/手牌整组-无字.png",
+    "width": 1045,
+    "height": 307,
+    "source": "沼泽边地/UI整层-无字",
+    "sourceRect": [
+      313,
+      642,
+      1037,
+      299
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      309,
+      638
+    ]
+  },
+  {
+    "file": "石崖小道/UI组件/手牌整组-无字.png",
+    "width": 1081,
+    "height": 314,
+    "source": "石崖小道/UI整层-无字",
+    "sourceRect": [
+      284,
+      635,
+      1073,
+      306
+    ],
+    "padding": 4,
+    "cornerAlpha": 0,
+    "screenPosition": [
+      280,
+      631
+    ]
+  }
+]

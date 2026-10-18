@@ -1,0 +1,752 @@
+[
+  {
+    "file": "共用图标/山脉.png",
+    "width": 111,
+    "height": 73,
+    "source": "icons",
+    "sourceRect": [
+      36,
+      96,
+      241,
+      153
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/生命.png",
+    "width": 57,
+    "height": 56,
+    "source": "icons",
+    "sourceRect": [
+      354,
+      99,
+      167,
+      157
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/卡牌.png",
+    "width": 63,
+    "height": 61,
+    "source": "icons",
+    "sourceRect": [
+      611,
+      90,
+      182,
+      167
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/金币.png",
+    "width": 58,
+    "height": 58,
+    "source": "icons",
+    "sourceRect": [
+      890,
+      91,
+      168,
+      169
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/叶片.png",
+    "width": 61,
+    "height": 63,
+    "source": "icons",
+    "sourceRect": [
+      64,
+      350,
+      171,
+      191
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/背包.png",
+    "width": 62,
+    "height": 64,
+    "source": "icons",
+    "sourceRect": [
+      320,
+      349,
+      200,
+      189
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/森林群.png",
+    "width": 108,
+    "height": 57,
+    "source": "icons",
+    "sourceRect": [
+      581,
+      379,
+      245,
+      152
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/设置.png",
+    "width": 56,
+    "height": 56,
+    "source": "icons",
+    "sourceRect": [
+      884,
+      344,
+      193,
+      197
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/帮助.png",
+    "width": 56,
+    "height": 56,
+    "source": "icons",
+    "sourceRect": [
+      48,
+      622,
+      197,
+      193
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/调查.png",
+    "width": 65,
+    "height": 73,
+    "source": "icons",
+    "sourceRect": [
+      330,
+      618,
+      198,
+      207
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/金币堆.png",
+    "width": 71,
+    "height": 63,
+    "source": "icons",
+    "sourceRect": [
+      599,
+      634,
+      206,
+      170
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/祈祷.png",
+    "width": 65,
+    "height": 71,
+    "source": "icons",
+    "sourceRect": [
+      875,
+      624,
+      209,
+      195
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/生命消耗.png",
+    "width": 56,
+    "height": 73,
+    "source": "icons",
+    "sourceRect": [
+      66,
+      889,
+      149,
+      207
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/折叠地图.png",
+    "width": 120,
+    "height": 100,
+    "source": "icons",
+    "sourceRect": [
+      304,
+      894,
+      241,
+      196
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/卷轴地图.png",
+    "width": 136,
+    "height": 118,
+    "source": "icons",
+    "sourceRect": [
+      590,
+      894,
+      238,
+      195
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/离开-橙箭头.png",
+    "width": 65,
+    "height": 53,
+    "source": "icons",
+    "sourceRect": [
+      895,
+      911,
+      179,
+      159
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/离开-弯箭头.png",
+    "width": 75,
+    "height": 68,
+    "source": "icons",
+    "sourceRect": [
+      60,
+      1172,
+      196,
+      176
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/右侧箭头.png",
+    "width": 28,
+    "height": 42,
+    "source": "icons",
+    "sourceRect": [
+      393,
+      1177,
+      83,
+      151
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/竖分隔线.png",
+    "width": 16,
+    "height": 51,
+    "source": "icons",
+    "sourceRect": [
+      690,
+      1155,
+      23,
+      201
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用图标/选中强调线.png",
+    "width": 49,
+    "height": 74,
+    "source": "icons",
+    "sourceRect": [
+      935,
+      1170,
+      129,
+      161
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-蓝.png",
+    "width": 548,
+    "height": 84,
+    "source": "bases",
+    "sourceRect": [
+      29,
+      192,
+      325,
+      96
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-黄.png",
+    "width": 548,
+    "height": 84,
+    "source": "bases",
+    "sourceRect": [
+      386,
+      192,
+      322,
+      95
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-绿.png",
+    "width": 548,
+    "height": 84,
+    "source": "bases",
+    "sourceRect": [
+      738,
+      191,
+      329,
+      95
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-桃.png",
+    "width": 548,
+    "height": 84,
+    "source": "bases",
+    "sourceRect": [
+      1094,
+      190,
+      327,
+      96
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-黄色选中.png",
+    "width": 588,
+    "height": 108,
+    "source": "bases",
+    "sourceRect": [
+      14,
+      498,
+      391,
+      114
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-红色内框.png",
+    "width": 488,
+    "height": 93,
+    "source": "bases",
+    "sourceRect": [
+      431,
+      500,
+      310,
+      104
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-蓝色内框.png",
+    "width": 488,
+    "height": 93,
+    "source": "bases",
+    "sourceRect": [
+      772,
+      499,
+      324,
+      105
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/选项-灰.png",
+    "width": 488,
+    "height": 93,
+    "source": "bases",
+    "sourceRect": [
+      1126,
+      500,
+      302,
+      102
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/标题-矩形.png",
+    "width": 348,
+    "height": 84,
+    "source": "bases",
+    "sourceRect": [
+      43,
+      797,
+      282,
+      89
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/标题-石叶装饰.png",
+    "width": 558,
+    "height": 158,
+    "source": "bases",
+    "sourceRect": [
+      352,
+      760,
+      480,
+      165
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/黄色提示条.png",
+    "width": 508,
+    "height": 53,
+    "source": "bases",
+    "sourceRect": [
+      868,
+      825,
+      356,
+      57
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "共用底板/功能按钮.png",
+    "width": 143,
+    "height": 73,
+    "source": "bases",
+    "sourceRect": [
+      1266,
+      804,
+      149,
+      87
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": null
+  },
+  {
+    "file": "冰晶祭坛/独立UI/调查-无字.png",
+    "width": 560,
+    "height": 92,
+    "source": "iceUi",
+    "sourceRect": [
+      1094,
+      573,
+      552,
+      84
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1090,
+      569
+    ]
+  },
+  {
+    "file": "冰晶祭坛/独立UI/献币-无字.png",
+    "width": 560,
+    "height": 89,
+    "source": "iceUi",
+    "sourceRect": [
+      1094,
+      663,
+      552,
+      81
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1090,
+      659
+    ]
+  },
+  {
+    "file": "冰晶祭坛/独立UI/祈祷-无字.png",
+    "width": 560,
+    "height": 91,
+    "source": "iceUi",
+    "sourceRect": [
+      1094,
+      752,
+      552,
+      83
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1090,
+      748
+    ]
+  },
+  {
+    "file": "冰晶祭坛/独立UI/离开-无字.png",
+    "width": 560,
+    "height": 81,
+    "source": "iceUi",
+    "sourceRect": [
+      1094,
+      839,
+      552,
+      73
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1090,
+      835
+    ]
+  },
+  {
+    "file": "冰晶祭坛/独立UI/地图导航-无字.png",
+    "width": 278,
+    "height": 116,
+    "source": "iceUi",
+    "sourceRect": [
+      11,
+      820,
+      270,
+      108
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      7,
+      816
+    ]
+  },
+  {
+    "file": "冰晶祭坛/独立UI/事件角标-无字.png",
+    "width": 239,
+    "height": 87,
+    "source": "iceUi",
+    "sourceRect": [
+      39,
+      118,
+      231,
+      79
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      35,
+      114
+    ]
+  },
+  {
+    "file": "冰晶祭坛/独立UI/红色事件条-无字.png",
+    "width": 343,
+    "height": 61,
+    "source": "iceUi",
+    "sourceRect": [
+      1205,
+      195,
+      335,
+      53
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1201,
+      191
+    ]
+  },
+  {
+    "file": "冰晶祭坛/独立UI/顶部状态栏-无字.png",
+    "width": 1671,
+    "height": 87,
+    "source": "iceUi",
+    "sourceRect": [
+      8,
+      7,
+      1663,
+      79
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      4,
+      3
+    ]
+  },
+  {
+    "file": "森林祭坛/独立UI/调查-无字.png",
+    "width": 587,
+    "height": 109,
+    "source": "forestUi",
+    "sourceRect": [
+      1087,
+      483,
+      579,
+      101
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1083,
+      479
+    ]
+  },
+  {
+    "file": "森林祭坛/独立UI/献币-无字.png",
+    "width": 498,
+    "height": 107,
+    "source": "forestUi",
+    "sourceRect": [
+      1136,
+      588,
+      490,
+      99
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1132,
+      584
+    ]
+  },
+  {
+    "file": "森林祭坛/独立UI/献血-无字.png",
+    "width": 499,
+    "height": 107,
+    "source": "forestUi",
+    "sourceRect": [
+      1137,
+      692,
+      491,
+      99
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1133,
+      688
+    ]
+  },
+  {
+    "file": "森林祭坛/独立UI/离开-无字.png",
+    "width": 499,
+    "height": 110,
+    "source": "forestUi",
+    "sourceRect": [
+      1139,
+      795,
+      491,
+      102
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1135,
+      791
+    ]
+  },
+  {
+    "file": "森林祭坛/独立UI/地图导航-无字.png",
+    "width": 285,
+    "height": 156,
+    "source": "forestUi",
+    "sourceRect": [
+      26,
+      769,
+      277,
+      148
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      22,
+      765
+    ]
+  },
+  {
+    "file": "森林祭坛/独立UI/蓝色事件条-无字.png",
+    "width": 184,
+    "height": 50,
+    "source": "forestUi",
+    "sourceRect": [
+      1253,
+      249,
+      176,
+      42
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      1249,
+      245
+    ]
+  },
+  {
+    "file": "森林祭坛/独立UI/顶部状态栏-无字.png",
+    "width": 1643,
+    "height": 80,
+    "source": "forestUi",
+    "sourceRect": [
+      19,
+      10,
+      1635,
+      72
+    ],
+    "padding": 4,
+    "alphaCorner": 0,
+    "screenPosition": [
+      15,
+      6
+    ]
+  }
+]

@@ -1,0 +1,135 @@
+[
+  {
+    "type": "scene",
+    "name": "寒雾林地",
+    "sourceBounds": [
+      0,
+      5,
+      1672,
+      521
+    ],
+    "screenRect": [
+      0,
+      6,
+      1672,
+      478
+    ]
+  },
+  {
+    "type": "scene",
+    "name": "沼泽边地",
+    "sourceBounds": [
+      32,
+      131,
+      1609,
+      611
+    ],
+    "screenRect": [
+      307,
+      75,
+      1045,
+      457
+    ]
+  },
+  {
+    "type": "scene",
+    "name": "石崖小道",
+    "sourceBounds": [
+      13,
+      108,
+      1658,
+      733
+    ],
+    "screenRect": [
+      287,
+      62,
+      1070,
+      444
+    ]
+  },
+  {
+    "type": "monster",
+    "name": "独眼巨人",
+    "role": "寒雾林地",
+    "screenRect": [
+      317,
+      78,
+      445,
+      366
+    ],
+    "sourceBounds": [
+      46,
+      53,
+      1261,
+      1037
+    ]
+  },
+  {
+    "type": "monster",
+    "name": "鸦羽萨满",
+    "role": "寒雾林地",
+    "screenRect": [
+      910,
+      88,
+      367,
+      366
+    ],
+    "sourceBounds": [
+      119,
+      26,
+      1090,
+      1087
+    ]
+  },
+  {
+    "type": "monster",
+    "name": "沼泽巨魔",
+    "role": "沼泽边地",
+    "screenRect": [
+      468,
+      64,
+      626,
+      440
+    ],
+    "sourceBounds": [
+      54,
+      34,
+      1356,
+      953
+    ]
+  },
+  {
+    "type": "monster",
+    "name": "岩石守卫",
+    "role": "石崖小道",
+    "screenRect": [
+      432,
+      205,
+      441,
+      265
+    ],
+    "sourceBounds": [
+      76,
+      96,
+      1396,
+      839
+    ]
+  },
+  {
+    "type": "monster",
+    "name": "哥布林萨满",
+    "role": "石崖小道",
+    "screenRect": [
+      995,
+      224,
+      251,
+      254
+    ],
+    "sourceBounds": [
+      189,
+      57,
+      988,
+      1001
+    ]
+  }
+]

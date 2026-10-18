@@ -1,0 +1,74 @@
+[
+  {
+    "role": "暗影刺客",
+    "file": "背景.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format24bppRgb",
+    "cornerAlpha": 255
+  },
+  {
+    "role": "暗影刺客",
+    "file": "人物.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format32bppArgb",
+    "cornerAlpha": 0
+  },
+  {
+    "role": "暗影刺客",
+    "file": "UI-无字.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format32bppArgb",
+    "cornerAlpha": 0
+  },
+  {
+    "role": "流浪剑士",
+    "file": "背景.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format24bppRgb",
+    "cornerAlpha": 255
+  },
+  {
+    "role": "流浪剑士",
+    "file": "人物.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format32bppArgb",
+    "cornerAlpha": 0
+  },
+  {
+    "role": "流浪剑士",
+    "file": "UI-无字.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format32bppArgb",
+    "cornerAlpha": 0
+  },
+  {
+    "role": "森林游侠",
+    "file": "背景.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format24bppRgb",
+    "cornerAlpha": 255
+  },
+  {
+    "role": "森林游侠",
+    "file": "人物.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format32bppArgb",
+    "cornerAlpha": 0
+  },
+  {
+    "role": "森林游侠",
+    "file": "UI-无字.png",
+    "width": 1672,
+    "height": 941,
+    "format": "Format32bppArgb",
+    "cornerAlpha": 0
+  }
+]

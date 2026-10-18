@@ -1,0 +1,20 @@
+{
+  "Canvas": [
+    177,
+    177
+  ],
+  "TransparentOpening": [
+    32,
+    32,
+    113,
+    113
+  ],
+  "CenterNonTransparentPixels": 0,
+  "RelativeRayLength": 0.8,
+  "InnerFrameRemoved": true,
+  "PaperRemoved": true,
+  "Anchor": [
+    0.5,
+    0.5
+  ]
+}

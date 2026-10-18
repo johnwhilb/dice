@@ -1,0 +1,51 @@
+### STYLE MASTER PROMPT — Hand-Drawn Fantasy Paper Game UI
+
+**Art style and medium**
+
+A charming, rough, handmade fantasy game interface illustration, drawn directly on warm ivory-colored textured paper. A distinctive combination of naive children's storybook illustration, hand-drawn tabletop RPG prototype, rough sketchbook doodles, wax crayon coloring, colored pencil textures, and thick black felt-tip marker outlines.
+
+**1. Linework**
+
+Bold, irregular, hand-drawn black marker outlines with visibly imperfect strokes. Uneven line weight, slight hand tremors, rough corners, wobbly contours, occasional doubled strokes, loose sketch marks, imperfect intersections, and spontaneous pen movements. Lines should feel physically drawn by hand, never mathematically perfect. Thick black contours define the main shapes, while thinner scribbles, short hatching strokes, and sketchy marks add internal details and shadows.
+
+**2. Coloring and texture**
+
+Rough wax crayon and colored pencil fills, with occasional dry watercolor-marker qualities. Visible individual strokes, grainy pigment, uneven color density, small uncolored gaps, overlapping scribbles, slightly streaky fills, and occasional coloring outside the outlines. Colors appear physically deposited onto absorbent paper. No perfectly smooth digital fills. No polished gradients. Every illustrated element has a tactile, handmade quality.
+
+**3. Paper surface**
+
+A continuous warm cream, pale ivory, slightly yellowed sketchbook-paper background. Fine visible paper fibers, subtle grain, faint natural tonal variations, and delicate organic surface imperfections. The paper texture remains visible across the entire image, including inside panels, buttons, icons, illustrations, and empty spaces. Everything feels drawn on the same physical sheet of paper.
+
+**4. Color palette**
+
+A restrained, warm, earthy palette: creamy beige, warm ivory, charcoal black, brick red, muted coral red, cobalt blue, sky blue, forest green, sage green, mustard yellow, ochre, burnt orange, rust brown, and earthy gray.
+
+Colors are vivid enough to distinguish interface elements, yet slightly muted and pigment-like rather than digitally saturated. Black ink provides strong contrast. Yellow highlighter marks create selective emphasis. Red, blue, and green provide simple, playful color coding.
+
+**5. Shape language**
+
+Simple, bold, slightly clumsy, organically imperfect shapes. Hand-drawn rectangles, irregular frames, asymmetrical icons, simplified fantasy illustrations, playful symbols, naive proportions, and expressive silhouettes. Shapes should be immediately recognizable but retain the charming imperfections of handmade artwork. The aesthetic is deliberately rough, not careless or illegible.
+
+**6. Hand-drawn UI treatment**
+
+Every interface element must look physically sketched and colored by hand. Panel borders are thick, black, uneven, and slightly wobbly. Cards, frames, buttons, containers, dividers, icons, counters, meters, and decorative marks use imperfect hand-inked outlines. Section headers may use irregular mustard-yellow marker swashes, as if highlighted with a broad felt-tip marker. Empty areas retain the natural paper background. Small icons resemble quick, expressive pen-and-crayon doodles rather than standardized digital iconography.
+
+**7. Typography**
+
+Handwritten Chinese lettering in bold black felt-tip marker, with organic stroke variation, slightly uneven baselines, natural spacing, and the informal character of handwritten game-design notes. Labels should feel manually written onto the paper rather than typeset. Preserve the supplied wording and information hierarchy. Text should remain as legible as possible without losing its handmade character.
+
+**8. Lighting and rendering**
+
+Flat, illustration-first presentation with no photographic lighting. Minimal shading created through scribbles, cross-hatching, overlapping pencil strokes, and rough marker patches. No realistic 3D depth. No glossy surfaces. No sophisticated digital rendering. Consistent linework, pigment texture, and paper grain across every element.
+
+**9. Overall aesthetic**
+
+Authentic handmade indie fantasy game art, a charming hand-drawn RPG interface prototype, tactile sketchbook illustration, nostalgic children's adventure book, rough tabletop game concept art, playful and slightly primitive visual storytelling. Warm, imperfect, expressive, cohesive, tactile, and full of handmade personality.
+
+**Style consistency is mandatory:** maintain the same black-marker outlines, crayon-and-colored-pencil fills, warm paper texture, earthy palette, rough hand-lettering, and naive fantasy illustration language across the entire interface, regardless of its content or layout.
+
+**Reference usage:** use the reference image exclusively as a visual style reference. Transfer its drawing technique, line quality, coloring method, paper texture, palette, and handmade aesthetic. Do not copy its specific characters, objects, icons, text, layout, or interface composition. Follow the content and structure of the new interface description instead.
+
+
+
+photorealistic, 3D rendering, glossy UI, polished vector graphics, clean SVG illustration, flat corporate design, modern mobile app UI, minimalist interface, pixel-perfect geometric shapes, perfectly straight borders, smooth digital outlines, airbrushed shading, smooth gradients, glassmorphism, neumorphism, futuristic holographic interface, cyberpunk neon, metallic materials, realistic lighting, cinematic shadows, sophisticated digital painting, polished concept art, anime cel shading, photorealistic textures, hyperrealistic details, overly refined linework, uniform stroke widths, sterile perfection, overly clean surfaces, glossy buttons, stock iconography, standardized vector icons, excessive decorative effects, excessive distressing, illegible text, random typography, inconsistent art styles, mixed media inconsistency, copied reference composition, copied reference objects, copied reference characters, copied reference layout, watermarks, signatures.

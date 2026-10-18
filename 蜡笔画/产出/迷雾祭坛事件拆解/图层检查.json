@@ -1,0 +1,30 @@
+[
+  {
+    "role": "冰晶祭坛",
+    "layer": "背景-无字.png",
+    "width": 1672,
+    "height": 941,
+    "cornerAlpha": 255
+  },
+  {
+    "role": "冰晶祭坛",
+    "layer": "UI整层-无字.png",
+    "width": 1672,
+    "height": 941,
+    "cornerAlpha": 0
+  },
+  {
+    "role": "森林祭坛",
+    "layer": "背景-无字.png",
+    "width": 1672,
+    "height": 941,
+    "cornerAlpha": 255
+  },
+  {
+    "role": "森林祭坛",
+    "layer": "UI整层-无字.png",
+    "width": 1672,
+    "height": 941,
+    "cornerAlpha": 0
+  }
+]

@@ -1,0 +1,110 @@
+{
+  "sources": {
+    "寒雾林地/场景-透明": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-ddcb2f87-f44d-4314-b2a6-ed3d066c2548.png",
+    "寒雾林地/UI整层-无字": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-4d874f73-4e60-4205-8aa4-99be049bddbd.png",
+    "沼泽边地/场景-透明": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-b3a8722f-eedc-4567-b4b1-6ee12c6d383a.png",
+    "沼泽边地/UI整层-无字": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-81b899e3-cca2-46db-ab3c-e7010b8316e7.png",
+    "石崖小道/场景-透明": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-f8b12200-15c3-4368-91ca-a08319f52df9.png",
+    "石崖小道/UI整层-无字": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-a2eae119-73c8-4fcf-9d31-07fd3d04d311.png",
+    "怪物/独眼巨人": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-a6a07e95-009a-4ae0-bb97-cad6fcf77642.png",
+    "怪物/鸦羽萨满": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-67a02126-b731-4ae5-8ac0-82b54f668b46.png",
+    "怪物/沼泽巨魔": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-057d3318-971b-401b-8571-d22744f9bac7.png",
+    "怪物/岩石守卫": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-84d4f440-9351-4f7a-b778-6007797aafa0.png",
+    "怪物/哥布林萨满": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-2f78b966-62e7-476a-a9e7-1b97811b4d94.png",
+    "共用图标图集": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-49b510c2-91d5-4cff-b629-03d2cd18ac07.png",
+    "共用底板图集": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-26d8358b-d566-49e0-b81e-887e4aa58b84.png"
+  },
+  "paper": "C:\\Users\\Administrator\\.codex\\generated_images\\01a144f0-afa2-7603-8b0a-0b0624d360a3\\exec-437338dd-c96e-4928-9225-309b0cc3ad83.png",
+  "screens": [
+    {
+      "role": "寒雾林地",
+      "sceneRect": [
+        0,
+        6,
+        1672,
+        478
+      ],
+      "monsters": [
+        "独眼巨人",
+        "鸦羽萨满"
+      ]
+    },
+    {
+      "role": "沼泽边地",
+      "sceneRect": [
+        307,
+        75,
+        1045,
+        457
+      ],
+      "monsters": [
+        "沼泽巨魔"
+      ]
+    },
+    {
+      "role": "石崖小道",
+      "sceneRect": [
+        287,
+        62,
+        1070,
+        444
+      ],
+      "monsters": [
+        "岩石守卫",
+        "哥布林萨满"
+      ]
+    }
+  ],
+  "monsters": [
+    {
+      "name": "独眼巨人",
+      "role": "寒雾林地",
+      "rect": [
+        317,
+        74,
+        445,
+        370
+      ]
+    },
+    {
+      "name": "鸦羽萨满",
+      "role": "寒雾林地",
+      "rect": [
+        910,
+        86,
+        367,
+        368
+      ]
+    },
+    {
+      "name": "沼泽巨魔",
+      "role": "沼泽边地",
+      "rect": [
+        468,
+        57,
+        626,
+        447
+      ]
+    },
+    {
+      "name": "岩石守卫",
+      "role": "石崖小道",
+      "rect": [
+        430,
+        205,
+        444,
+        265
+      ]
+    },
+    {
+      "name": "哥布林萨满",
+      "role": "石崖小道",
+      "rect": [
+        995,
+        216,
+        251,
+        262
+      ]
+    }
+  ]
+}

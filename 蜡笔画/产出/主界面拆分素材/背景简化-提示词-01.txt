@@ -1,0 +1,26 @@
+Generator: built-in image_gen
+Target: current separated 背景.png. Style: official visual-anchor folder, all three images inspected; one representative anchor supplied to generation.
+Edit IMAGE 1, the separated background asset. IMAGE 2 is the official SAME-GAME drawing style reference, for STYLE ONLY. Output a clean 16:9 BACKGROUND with no title, text, buttons, storage selector or interface.
+
+PRIMARY REQUEST: substantially reduce visual noise and fine detail, then align the drawing construction with IMAGE 2. Remove roughly 70–80% of the tiny scratches, hatching, scattered specks, small contour subdivisions and decorative marks in IMAGE 1. This must be an intentional simpler hand-drawn repaint, not a blurred or denoised copy of the same detailed illustration.
+
+PRESERVE THE COMPOSITION:
+Same canvas, camera, right-heavy cliffside harbor and giant pale sacred tree in the background. Keep the overall cliff/building silhouettes, bridge positions, ships, foreground dock, large wooden crane/lantern and hanging blue banners in their established locations and approximate sizes. Preserve the quiet warm-paper left half reserved for later UI. No new scene objects, buildings, characters or ornamental features. Do not bring previously removed UI back.
+
+MATCH THE REFERENCE'S SHAPE AND MARK ECONOMY:
+Primitive clear silhouettes, blunt thick slightly irregular dark ink contours on foreground objects, large matte muted color areas, only a few broad uneven wax-crayon/colored-pencil strokes and small paper gaps. Interior lines support object recognition rather than describing every material detail. The simple broad coloring and few black marks in IMAGE 2 are the actual benchmark. Avoid elaborate concept-art drawing under a crayon texture.
+
+SPECIFIC SIMPLIFICATION:
+- Buildings: keep the main roof masses and settlement arrangement but merge tiny facade details into broad brown/ochre shapes. Only a few visible posts/doorways/windows per major building; distant buildings are simple grouped silhouettes. No individual roof shingles or grids of tiny windows.
+- Cliffs: 2–3 large muted gray planes per major rock mass, a few dark structural contours. Remove the hundreds of scratches, stone flecks and tiny facets. Preserve white waterfall shapes as simple broad pale ribbons with minimal lines.
+- Bridges and tower: preserve major outline and function with few blocky supports; no dense railings, masonry grids or repeated ornamental marks.
+- Crane, pier, barrels, boxes: bold simple outlines, one brown fill each, 1–3 broad structural divisions. Keep key dock posts. Remove fine plank grain, rope hairlines, metal-rivet specks and tightly packed hatch marks. Group minor cargo into a handful of simple readable shapes.
+- Boats: same two boats and sail positions, broad brown hulls and simple cream/blue sail areas, minimal rigging. Keep established banner/sail motifs simple, without adding new emblems.
+- Far world tree: preserve its huge pale background silhouette, broad ivory/pale-ochre inner core and main branching directions. Redraw it with only 5–7 dominant boughs, broad pale blue-gray body shapes and very few interior marks. Remove all tiny twig/leaf networks and bark scratch patterns. Cloud masses become a few broad pale shapes.
+- Sea: retain its footprint and relation to boats/dock, but replace the dense blue scratch carpet with about 10–15 broad separated wavering muted-blue strokes/patches, generous cream gaps and no micro-wavelets. No realistic reflections.
+- Paper: same light warm cream as IMAGE 2, very subtle clean grain. Remove heavy mottling, stains and granular noise. Do not make it sterile pure white.
+
+DEPTH/READABILITY:
+Foreground has stronger black contours and clearer color masses; distant cliffs, settlement and tree become paler, simpler and quieter. Warm ochre is restrained. Limited brown/gray/blue/green colors from the same game. Left UI-safe area remains simple parchment and at most a few very faint distant shapes at its lower/right boundary.
+Preserve a little handmade edge variation and a few broad fill strokes; do not replace it with perfect vector geometry. No smooth digital gradients, photorealistic light, airbrushed shading, glossy rendering, cinematic effects, heavy texture overlay or fine pencil engraving.
+The result should feel like a native environmental illustration from IMAGE 2's game, with the SAME existing scene arranged as in IMAGE 1 and dramatically lower detail density. Opaque full-bleed 16:9 image. No text or UI.
