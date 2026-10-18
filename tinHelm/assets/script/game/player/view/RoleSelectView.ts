@@ -41,11 +41,18 @@ export class RoleSelectView extends CCView<GameFlow> {
         this.roleList = TableRole.getAllConfig();
         this.refresh();
         this.on(PlayerEvent.currentSelectedRoleIdChanged, this.refresh, this);
+
     }
 
     refresh() {
         this.updateTab();
+        this.updateRoleBody();
     }
+
+    updateRoleBody() {
+        this.setSprite(this.getNode("spRoleBody")!.getComponent(Sprite)!, ResPath.getSpriteRoleBody(smc.player.getSelectedRoleId()));
+    }
+
 
     updateTab() {
         const btnRole = this.getNode('btnRole')!;

@@ -312,7 +312,7 @@ export class BattleView extends CCView<Battle> {
     initPlayerView(): void {
         const spRole = this.getNode('spRole')!.getComponent(Sprite);
         const currentSelectedAvatarId = smc.player.getSelectedRoleId();
-        this.setSprite(spRole, ResPath.getSpriteRoleBody(currentSelectedAvatarId));
+        this.setSprite(spRole, ResPath.getSpriteRoleCard(currentSelectedAvatarId));
     }
     initEnemyView(): void {
         const spEnemy = this.getNode('spEnemy')!.getComponent(Sprite);

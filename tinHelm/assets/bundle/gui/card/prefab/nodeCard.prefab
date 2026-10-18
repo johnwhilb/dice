@@ -25,23 +25,23 @@
         "__id__": 8
       },
       {
-        "__id__": 26
+        "__id__": 24
       },
       {
-        "__id__": 38
+        "__id__": 30
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 44
+        "__id__": 36
       },
       {
-        "__id__": 46
+        "__id__": 38
       }
     ],
     "_prefab": {
-      "__id__": 48
+      "__id__": 40
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -162,10 +162,7 @@
     "__prefab": {
       "__id__": 6
     },
-    "_customMaterial": {
-      "__uuid__": "39c0d581-6af6-432b-a4ef-55b227ec41e6",
-      "__expectedType__": "cc.Material"
-    },
+    "_customMaterial": null,
     "_srcBlendFactor": 2,
     "_dstBlendFactor": 4,
     "_color": {
@@ -176,7 +173,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "7169c462-f132-4812-bd1c-ed06a24fb879@f9941",
+      "__uuid__": "acba3daa-b08e-4829-afaa-a0ec76a5adb6@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -231,13 +228,10 @@
     "_components": [
       {
         "__id__": 21
-      },
-      {
-        "__id__": 23
       }
     ],
     "_prefab": {
-      "__id__": 25
+      "__id__": 23
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -291,8 +285,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -102.981,
-      "y": 0,
+      "x": 0,
+      "y": -2.116,
       "z": 0
     },
     "_lrot": {
@@ -337,7 +331,7 @@
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
-      "x": 0,
+      "x": 0.45,
       "y": 0.5
     },
     "_id": ""
@@ -439,7 +433,7 @@
       "__id__": 8
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 16
@@ -621,51 +615,6 @@
     "fileId": "78fXAS+/9Az77eruANWsAS"
   },
   {
-    "__type__": "cc.Sprite",
-    "_name": "",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "node": {
-      "__id__": 8
-    },
-    "_enabled": true,
-    "__prefab": {
-      "__id__": 24
-    },
-    "_customMaterial": null,
-    "_srcBlendFactor": 2,
-    "_dstBlendFactor": 4,
-    "_color": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
-    },
-    "_spriteFrame": {
-      "__uuid__": "71fc801e-7341-46f2-9f13-4968be8b707f@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
-    "_type": 0,
-    "_fillType": 0,
-    "_sizeMode": 0,
-    "_fillCenter": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_fillStart": 0,
-    "_fillRange": 0,
-    "_isTrimmedMode": true,
-    "_useGrayscale": false,
-    "_atlas": null,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.CompPrefabInfo",
-    "fileId": "e6tSlbiN5Hy6THPpi+lCHz"
-  },
-  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
@@ -680,83 +629,29 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "SpriteSplash",
+    "_name": "nodeIconNeed",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
       "__id__": 1
     },
-    "_children": [
-      {
-        "__id__": 27
-      }
-    ],
-    "_active": true,
-    "_components": [
-      {
-        "__id__": 33
-      },
-      {
-        "__id__": 35
-      }
-    ],
-    "_prefab": {
-      "__id__": 37
-    },
-    "_lpos": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 76.448,
-      "z": 0
-    },
-    "_lrot": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    },
-    "_lscale": {
-      "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
-      "z": 1
-    },
-    "_mobility": 0,
-    "_layer": 33554432,
-    "_euler": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_id": ""
-  },
-  {
-    "__type__": "cc.Node",
-    "_name": "nodeIconNeed",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "_parent": {
-      "__id__": 26
-    },
     "_children": [],
     "_active": true,
     "_components": [
       {
-        "__id__": 28
+        "__id__": 25
       },
       {
-        "__id__": 30
+        "__id__": 27
       }
     ],
     "_prefab": {
-      "__id__": 32
+      "__id__": 29
     },
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0.934,
+      "y": 77.382,
       "z": 0
     },
     "_lrot": {
@@ -788,11 +683,11 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 27
+      "__id__": 24
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 29
+      "__id__": 26
     },
     "_contentSize": {
       "__type__": "cc.Size",
@@ -816,11 +711,11 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 27
+      "__id__": 24
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 31
+      "__id__": 28
     },
     "_resizeMode": 1,
     "_layoutType": 1,
@@ -862,92 +757,6 @@
     "nestedPrefabInstanceRoots": null
   },
   {
-    "__type__": "cc.UITransform",
-    "_name": "",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "node": {
-      "__id__": 26
-    },
-    "_enabled": true,
-    "__prefab": {
-      "__id__": 34
-    },
-    "_contentSize": {
-      "__type__": "cc.Size",
-      "width": 180,
-      "height": 100
-    },
-    "_anchorPoint": {
-      "__type__": "cc.Vec2",
-      "x": 0.5,
-      "y": 0.5
-    },
-    "_id": ""
-  },
-  {
-    "__type__": "cc.CompPrefabInfo",
-    "fileId": "3cRjBdkktJ7KN02vyrHwnW"
-  },
-  {
-    "__type__": "cc.Sprite",
-    "_name": "",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "node": {
-      "__id__": 26
-    },
-    "_enabled": true,
-    "__prefab": {
-      "__id__": 36
-    },
-    "_customMaterial": null,
-    "_srcBlendFactor": 2,
-    "_dstBlendFactor": 4,
-    "_color": {
-      "__type__": "cc.Color",
-      "r": 213,
-      "g": 255,
-      "b": 197,
-      "a": 255
-    },
-    "_spriteFrame": {
-      "__uuid__": "7d8f9b89-4fd1-4c9f-a3ab-38ec7cded7ca@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
-    "_type": 0,
-    "_fillType": 0,
-    "_sizeMode": 0,
-    "_fillCenter": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_fillStart": 0,
-    "_fillRange": 0,
-    "_isTrimmedMode": true,
-    "_useGrayscale": false,
-    "_atlas": null,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.CompPrefabInfo",
-    "fileId": "fb4qtT+WhOhY1WTa6d3gpf"
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 1
-    },
-    "asset": {
-      "__id__": 0
-    },
-    "fileId": "6eaQLlqXxB7akNu69bGfUT",
-    "instance": null,
-    "targetOverrides": null,
-    "nestedPrefabInstanceRoots": null
-  },
-  {
     "__type__": "cc.Node",
     "_name": "lbtDes",
     "_objFlags": 0,
@@ -959,18 +768,18 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 39
+        "__id__": 31
       },
       {
-        "__id__": 41
+        "__id__": 33
       }
     ],
     "_prefab": {
-      "__id__": 43
+      "__id__": 35
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -88.785,
+      "x": 0,
       "y": -24.816,
       "z": 0
     },
@@ -1003,20 +812,20 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 38
+      "__id__": 30
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 40
+      "__id__": 32
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 180,
-      "height": 102.24
+      "width": 170,
+      "height": 71.72
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
-      "x": 0,
+      "x": 0.5,
       "y": 1
     },
     "_id": ""
@@ -1031,11 +840,11 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 38
+      "__id__": 30
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 42
+      "__id__": 34
     },
     "_customMaterial": null,
     "_srcBlendFactor": 2,
@@ -1047,13 +856,13 @@
       "b": 0,
       "a": 255
     },
-    "_string": "对敌人施加*8的诅咒，每层诅咒回合末造成八点伤害，诅咒每回合消减1",
+    "_string": "对敌人施加*8的诅咒，每层诅咒回合末造成八点伤害",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 22,
-    "_fontSize": 22,
+    "_actualFontSize": 20,
+    "_fontSize": 20,
     "_fontFamily": "Arial",
-    "_lineHeight": 24,
+    "_lineHeight": 22,
     "_overflow": 3,
     "_enableWrapText": true,
     "_font": {
@@ -1119,7 +928,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 45
+      "__id__": 37
     },
     "_contentSize": {
       "__type__": "cc.Size",
@@ -1147,7 +956,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 47
+      "__id__": 39
     },
     "diceIcon": {
       "__uuid__": "3d8ea471-1ac1-4e1f-9d48-ada924fc4bdf",
