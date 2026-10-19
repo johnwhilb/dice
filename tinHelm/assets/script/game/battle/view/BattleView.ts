@@ -65,7 +65,6 @@ export class BattleView extends CCView<Battle> {
         }
         this.on(BattleEvent.refreshBattlePhase, this.refreshBattleView, this);
         this.on(PlayerEvent.statsChanged, this.refreshBattleView, this);
-        this.startBattleAnimation();
         this.initDiceView();
         await this.ent.BattleBll.startBattle();
         this.initPlayerView();
@@ -326,10 +325,6 @@ export class BattleView extends CCView<Battle> {
     updateEnemyStatus(): void {
         const lbtEnemyHP = this.getNode('lbtEnemyHP')!.getComponent(Label);
         lbtEnemyHP.string = this.ent.BattleEnemyModel.hp + "/" + this.ent.BattleEnemyModel.maxHp;
-    }
-    startBattleAnimation(): void {
-        TweenAnimUtil.move(this.getNode("nodeCurrentPhase")!, 250, 0);
-        TweenAnimUtil.move(this.getNode("nodeCurrentRound")!, -250, 0);
     }
     initDiceView(): void {
         const diceLayout = this.getNode('diceLayout')!;

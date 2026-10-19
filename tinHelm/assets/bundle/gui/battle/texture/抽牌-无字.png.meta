@@ -1,0 +1,134 @@
+{
+  "ver": "1.0.27",
+  "importer": "image",
+  "imported": true,
+  "uuid": "061c815c-ca3d-40dc-b3c2-a379eba2b537",
+  "files": [
+    ".json",
+    ".png"
+  ],
+  "subMetas": {
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "061c815c-ca3d-40dc-b3c2-a379eba2b537@6c48a",
+      "displayName": "抽牌-无字",
+      "id": "6c48a",
+      "name": "texture",
+      "userData": {
+        "wrapModeS": "clamp-to-edge",
+        "wrapModeT": "clamp-to-edge",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "061c815c-ca3d-40dc-b3c2-a379eba2b537",
+        "visible": false
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "f9941": {
+      "importer": "sprite-frame",
+      "uuid": "061c815c-ca3d-40dc-b3c2-a379eba2b537@f9941",
+      "displayName": "抽牌-无字",
+      "id": "f9941",
+      "name": "spriteFrame",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 4,
+        "trimY": 4,
+        "width": 160,
+        "height": 75,
+        "rawWidth": 168,
+        "rawHeight": 83,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -80,
+            -37.5,
+            0,
+            80,
+            -37.5,
+            0,
+            -80,
+            37.5,
+            0,
+            80,
+            37.5,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            4,
+            79,
+            164,
+            79,
+            4,
+            4,
+            164,
+            4
+          ],
+          "nuv": [
+            0.023809523809523808,
+            0.04819277108433735,
+            0.9761904761904762,
+            0.04819277108433735,
+            0.023809523809523808,
+            0.9518072289156626,
+            0.9761904761904762,
+            0.9518072289156626
+          ],
+          "minPos": [
+            -80,
+            -37.5,
+            0
+          ],
+          "maxPos": [
+            80,
+            37.5,
+            0
+          ]
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "061c815c-ca3d-40dc-b3c2-a379eba2b537@6c48a",
+        "atlasUuid": "",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "type": "sprite-frame",
+    "fixAlphaTransparencyArtifacts": false,
+    "hasAlpha": true,
+    "redirect": "061c815c-ca3d-40dc-b3c2-a379eba2b537@6c48a"
+  }
+}
