@@ -16,13 +16,13 @@ node 策划/equipmentEffectEditor/equipmentEffectEditorServer.cjs
 
 现有20件装备已按 effectDes 填写完整 effect，名称、描述、价格和合成配方保持原样。修改描述仍需同步修改效果节点，编辑器不会自动推导效果。
 
-新增装备效果：MODIFY_CARD_VALUE（仅卡牌的伤害/格挡）、GAIN_ENERGY（增加当前能量）、DRAW（免费额外抽牌，可临时超过5张）、RETAIN_BLOCK（保留现有格挡上限）、FREE_DICE（下一张合法卡牌免骰子）。每回合/每场一次用 TURN/COMBAT 变量记录，装备变量按穿戴槽隔离。
+新增装备效果：MODIFY_CARD_VALUE（仅卡牌的伤害/格挡）、GAIN_ENERGY（增加当前能量）、DRAW（免费额外抽牌，手牌上限10张）、RETAIN_BLOCK（保留现有格挡上限）、FREE_DICE（下一张合法卡牌免骰子）。每回合/每场一次用 TURN/COMBAT 变量记录，装备变量按穿戴槽隔离。
 
 PlayerBll.addEquipment(id) / removeEquipment(id) 管理穿戴和生命上限，equipmentIds 随冒险存档保存。BattleEquipmentBll 在每场战斗初始化时读取穿戴列表并注册配置效果。装备获取、合成和槽位界面继续调用这两个接口，本次不自动给玩家装备。
 
 ON_BEFORE_CARD_PLAYED 包含本回合 cardCount、attackCount 和 requiredDiceCount / diceCount。ON_BLOCK_CARD_PLAYED 只在本次出牌实际获得格挡后触发。ON_CARD_DAMAGE_DEALT 的 amount 为实际生命损失，damage 为格挡前伤害。ON_ENERGY_SPENT 的 spent 为补牌、抽牌、重投或激活的实际消耗，不包含回合结束清空能量。ON_HAND_READY 在正常补足手牌后触发，用于首回合额外抽牌。
 
-打牌本身不消耗能量；打出后有牌可补且能量足够时，消耗1点能量自动补一张。装备额外抽牌免费，零能量仍可用满足骰子条件的牌；免骰子不会减免补牌能量。
+打牌本身不消耗能量，打出后不自动补牌；手动抽牌每次消耗1点能量。卡牌和装备效果抽牌免费，手牌上限为10张，抽牌堆不足时洗回弃牌堆，全部用尽后停止。回合开始仍补足5张手牌；零能量仍可用满足骰子条件的牌。
 
 点击“保存并生成配置”会校验并写回原工作簿，再通过项目 oops-plugin-excel-to-json 生成器同步客户端 JSON、BaseEquipment、TableEquipment。保留五行表头、字段类型、现有工作表和样式。生成器会扫描所有配置表，与项目现有导表行为一致。如果生成失败，界面明确提示“表格已保存，但客户端配置生成失败”，可以修正问题后再次保存或运行项目导表。
 

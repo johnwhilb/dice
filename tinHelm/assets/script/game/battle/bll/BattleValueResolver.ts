@@ -1,3 +1,4 @@
+import { BattlePhase } from '../model/BattleModel';
 import { TableBattleBuff } from '../../common/table/TableBattleBuff';
 import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
@@ -34,7 +35,7 @@ export class BattleValueResolver extends CCBusiness<Battle> {
     }
     // 创建当前战斗批次的效果上下文。
     createContext(source = BattleSide.Player, cardId = 0, target = this.getOppositeSide(source)): BattleContext {
-        return { runId: this.ent.BattleModel.runId, source, target, cardId, variables: { totalHpLoss: 0, cardDamageBonus: 0, nextCardDamageBonus: 0, cardBlockGained: 0, exhaustThisCard: 0 }, event: {}, activeCardEvents: [] };
+        return { runId: this.ent.BattleModel.runId, source, target, cardId, variables: { totalHpLoss: 0, cardDamageBonus: 0, nextCardDamageBonus: 0, cardBlockGained: 0 }, event: {}, activeCardEvents: [] };
     }
     // 解析有限数值或受限的数学表达式。
     resolveNumber(value: number | string | boolean | BattleEventData | undefined, context: BattleContext): number {
@@ -140,6 +141,25 @@ export class BattleValueResolver extends CCBusiness<Battle> {
                 case 'buffs': return this.getBuffStacks(side, TableBattleBuff.requireBuffId(Number(status)));
                 default: return this.getBuffStacks(side, TableBattleBuff.requireBuffId(Number(field)));
             }
+        }
+        if (scope === 'battle') {
+            const player = this.ent.BattlePlayerModel;
+            const counts: Record<string, number> = {
+                exhaustCount: player.exhaustPile.length, exhaustedThisTurn: player.exhaustedThisTurn,
+                hpLossCount: player.hpLossCount, hpLossThisTurn: player.hpLossThisTurn,
+                attacksPlayed: player.attacksPlayed,
+                playerTurn: [BattlePhase.PlayerStart, BattlePhase.PlayerAction, BattlePhase.PlayerEnd].includes(this.ent.BattleModel.phase) ? 1 : 0,
+                handAttackCount: player.handCards.filter(id => {
+                    return this.ent.BattleCardBll.getCard(id).type === 'ATTACK';
+                }).length,
+                strikeCount: [...player.handCards, ...player.drawPile, ...player.discardPile, ...player.resolvingCards].filter(id => {
+                    return this.ent.BattleCardBll.getCard(id).name.includes('打击');
+                }).length
+            };
+            if (!Object.prototype.hasOwnProperty.call(counts, field)) {
+                throw new Error('未知战斗计数：' + field);
+            }
+            return counts[field];
         }
         if (scope === 'event') {
             return this.resolveNumber(context.event[field], context);

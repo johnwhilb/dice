@@ -103,7 +103,10 @@ function validateCards(cards, data) {
     if (!Array.isArray(cards)) {
         throw new Error('cards 必须是数组');
     }
-    const BattleEffectTypeEnum = Object.fromEntries(data.effects.map(row => [row.type, row.id]));
+    const BattleEffectTypeEnum = data.effects.reduce((types, row) => {
+        types[row.type] = row.id;
+        return types;
+    }, {});
     const effectRows = new Map(data.effects.map(row => [row.id, row]));
     const buffIds = new Set(data.buffs.map(buff => {
         return buff.id;
@@ -130,21 +133,67 @@ function validateCards(cards, data) {
         if (!Array.isArray(card.effect)) {
             throw new Error(`${id}：effect 必须是数组`);
         }
+        if (!['ATTACK', 'SKILL', 'POWER', 'STATUS', 'CURSE'].includes(card.type)
+            || !card.flags || typeof card.flags !== 'object' || Array.isArray(card.flags)) {
+            throw new Error(`${id}：卡牌类型或特殊属性无效`);
+        }
+        if (card.flags.discountDice && !data.dice.some(dice => {
+            return dice.id === card.flags.discountDice && dice.role === Number(card.role);
+        }) || card.flags.discountMax !== undefined && (!Number.isSafeInteger(card.flags.discountMax)
+            || card.flags.discountMax < 0 || card.flags.discountMax > 5)) {
+            throw new Error(`${id}：减免骰子必须属于当前角色，数量必须是 0–5 的整数`);
+        }
         /**
  * @returns {void}
  */
         const inspectEffects = nodes => {
             for (const node of nodes) {
-                if (!['SELF', 'ENEMY'].includes(node.target) || !effectRows.get(node.type)?.cardEnabled) {
+                const effectRow = effectRows.get(node.type);
+                if (!['SELF', 'ENEMY'].includes(node.target) || !effectRow || !effectRow.cardEnabled) {
                     throw new Error(`${id}：效果包含不支持的目标或机制`);
                 }
                 const params = node.params;
-                if ([BattleEffectTypeEnum.APPLY_STATUS, BattleEffectTypeEnum.REMOVE_STATUS, BattleEffectTypeEnum.MULTIPLY_STATUS, BattleEffectTypeEnum.TRANSFER_STATUS].includes(node.type)) {
+                if ([BattleEffectTypeEnum.MOVE_CARD, BattleEffectTypeEnum.COPY_CARD, BattleEffectTypeEnum.PLAY_CARD,
+                    BattleEffectTypeEnum.TRANSFORM_CARD, BattleEffectTypeEnum.GENERATE_CARD,
+                    BattleEffectTypeEnum.GROW_CARD, BattleEffectTypeEnum.CARD_RULE].includes(node.type) && node.target !== 'SELF') {
+                    throw new Error(`${id}：卡牌机制只支持 SELF`);
+                }
+                if (!params || typeof params !== 'object' || Array.isArray(params)
+                    || !Array.isArray(node.children) || !Array.isArray(node.elseEffects)) {
+                    throw new Error(`${id}：效果参数或分支格式无效`);
+                }
+                for (const field of effectRow.fields) {
+                    const value = params[field.key];
+                    if (value === undefined || ['status', 'stat', 'powerId'].includes(field.key)) {
+                        continue;
+                    }
+                    if (field.kind === 'enum' && field.options && !field.options.includes(value)
+                        || field.kind === 'bool' && typeof value !== 'boolean') {
+                        throw new Error(`${id}：${field.label} 参数无效`);
+                    }
+                }
+                if (node.type === BattleEffectTypeEnum.TRANSFORM_CARD
+                    && !cards.some(targetCard => {
+                        return Number(targetCard.id) === params.cardId && Number(targetCard.role) === Number(card.role);
+                    })) {
+                    throw new Error(`${id}：变化目标必须是当前角色的有效卡牌`);
+                }
+                if ([BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.GAIN_ENERGY].includes(node.type)) {
+                    if (node.target !== 'SELF') {
+                        throw new Error(`${id}：抽牌和补充能量效果只支持 SELF`);
+                    }
+                    const key = node.type === BattleEffectTypeEnum.DRAW ? 'count' : 'amount';
+                    const value = params && params[key];
+                    if (typeof value === 'number' ? !Number.isSafeInteger(value) || value < 0 : typeof value !== 'string' || !value.trim()) {
+                        throw new Error(`${id}：${key} 必须是非负整数或数值表达式`);
+                    }
+                }
+                if ([BattleEffectTypeEnum.APPLY_STATUS, BattleEffectTypeEnum.REMOVE_STATUS, BattleEffectTypeEnum.MULTIPLY_STATUS].includes(node.type)) {
                     if (!params || !buffIds.has(params.status) && !(node.type === BattleEffectTypeEnum.REMOVE_STATUS && params.status === 'ALL')) {
                         throw new Error(id + '：状态编号不在 Buff 表中');
                     }
                 }
-                if ([BattleEffectTypeEnum.MODIFY_STAT, BattleEffectTypeEnum.SET_STAT, BattleEffectTypeEnum.DOUBLE_STAT].includes(node.type)
+                if (node.type === BattleEffectTypeEnum.MODIFY_STAT
                     && (!params || !buffIds.has(params.stat) && !['HP', 'MAX_HP', 'BLOCK'].includes(params.stat))) {
                     throw new Error(id + '：属性编号不在 Buff 表中');
                 }

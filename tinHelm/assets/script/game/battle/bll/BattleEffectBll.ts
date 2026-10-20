@@ -1,11 +1,13 @@
-import { CardEvent } from './BattleCardBll';
+import { smc } from '../../common/SingletonModuleComp';
+import { TableCard } from '../../common/table/TableCard';
+import { CardEvent, BattleTriggerEvent } from './BattleCardBll';
 import { BattleEffectTypeEnum } from '../../common/table/BattleEffectTypeEnum';
 import { TableBattleEffect } from '../../common/table/TableBattleEffect';
 import { TableBattleBuff } from '../../common/table/TableBattleBuff';
 import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
-import { BattleContext, BattleEffect, BattleEventData } from '../model/BattleTypes';
+import { BattleContext, BattleEffect, BattleEventData, BattleSide } from '../model/BattleTypes';
 /** JSON 顺序解释器；选择节点等待界面确认后继续同一条结算链。 */
 export class BattleEffectBll extends CCBusiness<Battle> {
     // 校验效果类型、状态编号和嵌套结构。
@@ -23,20 +25,31 @@ export class BattleEffectBll extends CCBusiness<Battle> {
             if (!TableBattleEffect.isEffectId(effect.type)) {
                 throw new Error(`战斗尚不支持效果：${effect.type}，请调整该卡配置`);
             }
-            if ([BattleEffectTypeEnum.APPLY_STATUS, BattleEffectTypeEnum.REMOVE_STATUS, BattleEffectTypeEnum.MULTIPLY_STATUS, BattleEffectTypeEnum.TRANSFER_STATUS].includes(effect.type)) {
+            if ([BattleEffectTypeEnum.APPLY_STATUS, BattleEffectTypeEnum.REMOVE_STATUS, BattleEffectTypeEnum.MULTIPLY_STATUS].includes(effect.type)) {
                 if (effect.type !== BattleEffectTypeEnum.REMOVE_STATUS || effect.params.status !== 'ALL') {
                     TableBattleBuff.requireBuffId(effect.params.status);
                 }
             }
-            if ([BattleEffectTypeEnum.MODIFY_STAT, BattleEffectTypeEnum.SET_STAT, BattleEffectTypeEnum.DOUBLE_STAT].includes(effect.type)) {
+            if (effect.type === BattleEffectTypeEnum.MODIFY_STAT) {
                 const stat = effect.params.stat;
                 if (stat !== 'HP' && stat !== 'MAX_HP' && stat !== 'BLOCK') {
                     TableBattleBuff.requireBuffId(stat);
                 }
             }
-            if ([BattleEffectTypeEnum.MODIFY_CARD_VALUE, BattleEffectTypeEnum.GAIN_ENERGY, BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.RETAIN_BLOCK, BattleEffectTypeEnum.FREE_DICE].includes(effect.type)
+            if ([BattleEffectTypeEnum.MODIFY_CARD_VALUE, BattleEffectTypeEnum.GAIN_ENERGY, BattleEffectTypeEnum.DRAW,
+                BattleEffectTypeEnum.RETAIN_BLOCK, BattleEffectTypeEnum.FREE_DICE,
+                BattleEffectTypeEnum.MOVE_CARD, BattleEffectTypeEnum.COPY_CARD, BattleEffectTypeEnum.PLAY_CARD,
+                BattleEffectTypeEnum.TRANSFORM_CARD, BattleEffectTypeEnum.GENERATE_CARD,
+                BattleEffectTypeEnum.GROW_CARD, BattleEffectTypeEnum.CARD_RULE].includes(effect.type)
                 && effect.target !== 'SELF') {
-                throw new Error('该装备效果只支持 SELF：' + effect.type);
+                throw new Error('该效果只支持 SELF：' + effect.type);
+            }
+            if ([BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.GAIN_ENERGY].includes(effect.type)) {
+                const key = effect.type === BattleEffectTypeEnum.DRAW ? 'count' : 'amount';
+                const value = effect.params[key];
+                if (typeof value === 'number' ? !Number.isSafeInteger(value) || value < 0 : typeof value !== 'string' || !value.trim()) {
+                    throw new Error(`抽牌或补充能量的 ${key} 必须是非负整数或数值表达式`);
+                }
             }
             if (effect.type === BattleEffectTypeEnum.EXHAUST && effect.params.zone && effect.params.zone !== 'HAND') {
                 throw new Error('EXHAUST 当前仅支持 HAND');
@@ -93,10 +106,11 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                     const damageKind = readTextParam('damageKind');
                     const cardDamage = context.cardPlay && damageKind === 'ATTACK'
                         ? context.variables.cardDamageBonus + context.variables.nextCardDamageBonus : 0;
+                    const instanceBonus = damageKind === 'ATTACK' ? this.ent.BattlePlayerModel.cardGrowth.get(context.cardId) || 0 : 0;
                     if (context.cardPlay && damageKind === 'ATTACK') {
                         context.variables.nextCardDamageBonus = 0;
                     }
-                    const loss = await damage.applyDamage(context.source, target, readNumberParam('amount') + cardDamage, damageKind, params.ignoreBlock === true, context);
+                    const loss = await damage.applyDamage(context.source, target, readNumberParam('amount') + cardDamage + instanceBonus, damageKind, params.ignoreBlock === true, context);
                     context.variables.lastDamage = loss;
                     context.variables.totalHpLoss = context.variables.totalHpLoss + loss;
                     if (context.cardId && loss > 0) {
@@ -112,7 +126,14 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 const player = this.ent.BattlePlayerModel;
                 const cardBlock = context.cardPlay && target === context.source && readAmount() > 0;
                 const bonus = cardBlock ? player.cardBlockBonus + player.nextCardBlockBonus : 0;
-                const gained = damage.addBlock(target, readAmount() + bonus, params.scale !== false);
+                let multiplier = 1;
+                if (cardBlock && player.cardBlocksThisTurn === 0 && player.cardRules.FIRST_BLOCK_DOUBLE) {
+                    multiplier = Math.pow(2, player.cardRules.FIRST_BLOCK_DOUBLE);
+                }
+                if (cardBlock && readAmount() + bonus > 0) {
+                    player.cardBlocksThisTurn++;
+                }
+                const gained = await damage.addBlock(target, readAmount() + bonus, params.scale !== false, multiplier);
                 if (cardBlock && gained > 0) {
                     player.nextCardBlockBonus = 0;
                     context.variables.cardBlockGained = context.variables.cardBlockGained + gained;
@@ -123,19 +144,16 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 this.ent.BattleEquipmentBll.modifyCardValue(readTextParam('kind'), readAmount(), readTextParam('timing'));
                 break;
             case BattleEffectTypeEnum.GAIN_ENERGY:
-                await this.ent.BattleEquipmentBll.changeEnergy(readAmount(), 'EFFECT');
+                await this.ent.BattleEquipmentBll.changeEnergy(Math.max(0, Math.floor(readNumberParam('amount'))), 'EFFECT');
                 break;
             case BattleEffectTypeEnum.DRAW:
-                await this.ent.BattleCardBll.drawExtraCards(readNumberParam('count'));
+                await this.ent.BattleCardBll.drawExtraCards(readNumberParam('count'), params.untilNonAttack === true);
                 break;
             case BattleEffectTypeEnum.RETAIN_BLOCK:
                 this.ent.BattlePlayerModel.retainedBlockLimit = Math.max(0, this.ent.BattlePlayerModel.retainedBlockLimit + Math.floor(readAmount()));
                 break;
             case BattleEffectTypeEnum.FREE_DICE:
                 this.ent.BattleEquipmentBll.grantFreeDice(readNumberParam('count'), readTextParam('scope'));
-                break;
-            case BattleEffectTypeEnum.BLOCK_NEXT_TURN:
-                this.ent.BattleTriggerBll.scheduleEffects('NEXT_TURN_START', 1, [{ type: BattleEffectTypeEnum.BLOCK, target: effect.target, params: { amount: readAmount(), scale: true }, children: [], elseEffects: [] }], context);
                 break;
             case BattleEffectTypeEnum.HEAL:
                 damage.restoreHp(target, readAmount());
@@ -151,16 +169,15 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                     }
                 }
                 break;
-            case BattleEffectTypeEnum.MULTIPLY_BLOCK:
-                actor.block = Math.max(0, Math.floor(actor.block * readNumberParam('factor')));
+            case BattleEffectTypeEnum.APPLY_STATUS: {
+                const id = TableBattleBuff.requireBuffId(status);
+                const previous = resolver.getBuffStacks(target, id);
+                buffs.addBuff(target, id, readNumberParam('stacks'), readTextParam('duration'));
+                if (resolver.getBuffStacks(target, id) > previous) {
+                    await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.StatusApplied, context.source, { status: id, target });
+                }
                 break;
-            case BattleEffectTypeEnum.REMOVE_BLOCK:
-            case BattleEffectTypeEnum.PIERCE_BLOCK:
-                actor.block = Math.max(0, actor.block - (params.amount === 'ALL' ? actor.block : readAmount()));
-                break;
-            case BattleEffectTypeEnum.APPLY_STATUS:
-                buffs.addBuff(target, TableBattleBuff.requireBuffId(status), readNumberParam('stacks'), readTextParam('duration'));
-                break;
+            }
             case BattleEffectTypeEnum.REMOVE_STATUS:
                 buffs.removeBuff(target, status === 'ALL' ? 'ALL' : TableBattleBuff.requireBuffId(status), params.stacks === 'ALL' ? Infinity : readNumberParam('stacks'));
                 break;
@@ -168,17 +185,8 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 buffs.multiplyBuffStacks(target, TableBattleBuff.requireBuffId(status), readNumberParam('factor'));
                 break;
             }
-            case BattleEffectTypeEnum.TRANSFER_STATUS: {
-                const stacks = Math.min(resolver.getBuffStacks(target, TableBattleBuff.requireBuffId(status)), params.amount === 'ALL' ? Infinity : readAmount());
-                buffs.removeBuff(target, TableBattleBuff.requireBuffId(status), stacks);
-                buffs.addBuff(resolver.resolveTargetSide(readTextParam('destination'), context), TableBattleBuff.requireBuffId(status), stacks);
-                break;
-            }
             case BattleEffectTypeEnum.CLEANSE:
                 buffs.cleanseDebuffs(target);
-                break;
-            case BattleEffectTypeEnum.SET_INTANGIBLE:
-                buffs.addBuff(target, BattleBuffTypeEnum.INTANGIBLE, readNumberParam('stacks'));
                 break;
             case BattleEffectTypeEnum.MODIFY_STAT: {
                 const stat = params.stat;
@@ -191,37 +199,18 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                     }
                 }
                 else if (stat === 'MAX_HP') {
-                    actor.maxHp = Math.max(1, actor.maxHp + readAmount());
+                    const gained = Math.max(1, actor.maxHp + readAmount()) - actor.maxHp;
+                    actor.maxHp += gained;
                     actor.hp = Math.min(actor.hp, actor.maxHp);
+                    if (params.persistent === true && target === BattleSide.Player) {
+                        smc.player.PlayerModel.maxHp += gained;
+                    }
                 }
                 else if (stat === 'BLOCK') {
                     actor.block = Math.max(0, Math.floor(actor.block + readAmount()));
                 }
                 else {
                     buffs.addBuff(target, TableBattleBuff.requireBuffId(stat), readAmount(), readTextParam('duration'));
-                }
-                break;
-            }
-            case BattleEffectTypeEnum.SET_STAT:
-            case BattleEffectTypeEnum.DOUBLE_STAT: {
-                const stat = params.stat;
-                const current = stat === 'BLOCK' ? actor.block : stat === 'HP' ? actor.hp : stat === 'MAX_HP' ? actor.maxHp : resolver.getBuffStacks(target, TableBattleBuff.requireBuffId(stat));
-                const value = effect.type === BattleEffectTypeEnum.DOUBLE_STAT
-                    ? current * 2
-                    : readNumberParam('value');
-                if (stat === 'BLOCK') {
-                    actor.block = Math.max(0, Math.floor(value));
-                }
-                else if (stat === 'HP') {
-                    actor.hp = Math.min(actor.maxHp, Math.max(0, Math.floor(value)));
-                }
-                else if (stat === 'MAX_HP') {
-                    actor.maxHp = Math.max(1, Math.floor(value));
-                    actor.hp = Math.min(actor.hp, actor.maxHp);
-                }
-                else {
-                    buffs.removeBuff(target, TableBattleBuff.requireBuffId(stat));
-                    buffs.addBuff(target, TableBattleBuff.requireBuffId(stat), value, 'COMBAT');
                 }
                 break;
             }
@@ -259,35 +248,82 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 }
                 break;
             }
-            case BattleEffectTypeEnum.RANDOM_CHOICE: {
-                const options = [...children];
-                const count = Math.min(100, Math.max(0, readNumberParam('count')));
-                for (let index = 0; index < count && options.length; index++) {
-                    const selected = Math.floor(Math.random() * options.length);
-                    await this.executeEffects([options[selected]], context, allowFinished);
-                    if (params.unique !== false) {
-                        options.splice(selected, 1);
+            case BattleEffectTypeEnum.DISCARD:
+            case BattleEffectTypeEnum.EXHAUST:
+                context.variables.exhaustedCount = 0;
+                context.variables.exhaustedDamage = 0;
+                await this.ent.BattleCardBll.discardCards(params.count === 'ALL' ? Infinity : readNumberParam('count'),
+                    readTextParam('mode'), effect.type === BattleEffectTypeEnum.EXHAUST,
+                    this.readEventFilter(params.filter), context, children);
+                break;
+            case BattleEffectTypeEnum.GAIN_GOLD:
+                this.ent.BattleModel.gold += Math.max(0, Math.floor(readAmount()));
+                break;
+            case BattleEffectTypeEnum.MOVE_CARD:
+                await this.ent.BattleCardBll.moveCard(readTextParam('pile'), readTextParam('destination'), readTextParam('mode'), context);
+                break;
+            case BattleEffectTypeEnum.PLAY_CARD:
+                await this.ent.BattleCardBll.moveCard(readTextParam('pile'), 'PLAY', readTextParam('mode'), context, params.exhaustAfter === true);
+                break;
+            case BattleEffectTypeEnum.COPY_CARD:
+                this.ent.BattleCardBll.addCard(params.source === 'EVENT' ? Number(context.event.cardId) : context.cardId, 1, readTextParam('pile'));
+                break;
+            case BattleEffectTypeEnum.GROW_CARD: {
+                const growth = this.ent.BattlePlayerModel.cardGrowth;
+                growth.set(context.cardId, (growth.get(context.cardId) || 0) + readAmount());
+                break;
+            }
+            case BattleEffectTypeEnum.TRANSFORM_CARD: {
+                const player = this.ent.BattlePlayerModel;
+                player.handCards = player.handCards.map(id => {
+                    return params.type === 'ALL' || this.ent.BattleCardBll.getCard(id).type === params.type
+                        ? this.ent.BattleCardBll.createInstance(readNumberParam('cardId')) : id;
+                });
+                break;
+            }
+            case BattleEffectTypeEnum.GENERATE_CARD: {
+                const player = this.ent.BattlePlayerModel;
+                const pool = TableCard.getAllConfig().filter(card => {
+                    return card.role === player.playerId && card.isNormalReward() && (params.type === 'ALL' || card.type === params.type);
+                });
+                const count = Math.min(player.handLimit - player.handCards.length, Math.max(0, Math.floor(readNumberParam('count'))));
+                for (let index = 0; index < count && pool.length; index++) {
+                    const card = pool[Math.floor(Math.random() * pool.length)];
+                    const id = this.ent.BattleCardBll.createInstance(card.id);
+                    player.handCards.push(id);
+                    if (params.freeThisTurn === true) {
+                        player.freeInstanceTurns.set(id, this.ent.BattleModel.turn);
                     }
                 }
                 break;
             }
-            case BattleEffectTypeEnum.DISCARD:
-            case BattleEffectTypeEnum.EXHAUST:
-            case BattleEffectTypeEnum.DISCARD_HAND:
-            case BattleEffectTypeEnum.EXHAUST_HAND:
-                await this.ent.BattleCardBll.discardCards(params.count === 'ALL' || [BattleEffectTypeEnum.DISCARD_HAND, BattleEffectTypeEnum.EXHAUST_HAND].includes(effect.type) ? Infinity : readNumberParam('count'), [BattleEffectTypeEnum.DISCARD_HAND, BattleEffectTypeEnum.EXHAUST_HAND].includes(effect.type) ? 'ALL' : readTextParam('mode'), [BattleEffectTypeEnum.EXHAUST, BattleEffectTypeEnum.EXHAUST_HAND].includes(effect.type), this.readEventFilter(params.filter));
+            case BattleEffectTypeEnum.CARD_RULE: {
+                const player = this.ent.BattlePlayerModel;
+                const kind = readTextParam('kind');
+                const amount = readAmount();
+                switch (kind) {
+                    case 'LOCK_DRAW':
+                        player.drawLocked = true;
+                        break;
+                    case 'LOCK_ENERGY':
+                        player.energyLocked = true;
+                        break;
+                    case 'NEXT_ATTACK_FREE':
+                        player.nextAttackFree += amount;
+                        break;
+                    case 'NEXT_ATTACK_REPEAT':
+                        player.nextAttackRepeats += amount;
+                        break;
+                    case 'SKILL_FREE_EXHAUST':
+                    case 'FIRST_BLOCK_DOUBLE':
+                    case 'VULNERABLE_BONUS':
+                        player.cardRules[kind] = (player.cardRules[kind] || 0) + amount;
+                        break;
+                    default:
+                        throw new Error('不支持的卡牌规则：' + kind);
+                }
                 break;
-            case BattleEffectTypeEnum.ADD_CARD:
-                this.ent.BattleCardBll.addCard(readNumberParam('cardId'), readNumberParam('count'), readTextParam('pile'));
-                break;
-            case BattleEffectTypeEnum.EXHAUST_THIS_CARD:
-                context.variables.exhaustThisCard = 1;
-                break;
-            case BattleEffectTypeEnum.GAIN_GOLD:
-            case BattleEffectTypeEnum.LOSE_GOLD:
-                this.ent.BattleModel.gold = Math.max(0, this.ent.BattleModel.gold
-                    + Math.max(0, Math.floor(readAmount())) * (effect.type === BattleEffectTypeEnum.GAIN_GOLD ? 1 : -1));
-                break;
+            }
             case BattleEffectTypeEnum.SET_VARIABLE:
             case BattleEffectTypeEnum.MODIFY_VARIABLE: {
                 const variable = readTextParam('name');
@@ -366,6 +402,12 @@ export class BattleEffectBll extends CCBusiness<Battle> {
             return name + '（' + children + '）';
         }
         const params = effect.params;
+        if (effect.type === BattleEffectTypeEnum.DRAW) {
+            return name + ' ' + params.count + ' 张';
+        }
+        if (effect.type === BattleEffectTypeEnum.GAIN_ENERGY) {
+            return name + ' ' + params.amount + ' 点';
+        }
         if (effect.type === BattleEffectTypeEnum.APPLY_STATUS) {
             return name + '：' + this.ent.BattleBuffBll.getBuffName(TableBattleBuff.requireBuffId(params.status)) + ' ' + params.stacks + '层';
         }

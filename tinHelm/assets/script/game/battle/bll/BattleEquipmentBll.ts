@@ -32,6 +32,12 @@ export class BattleEquipmentBll extends CCBusiness<Battle> {
     // 初始化本回合的装备次数和卡牌计数。
     beginTurn(): void {
         const player = this.ent.BattlePlayerModel;
+        player.drawLocked = false;
+        player.energyLocked = false;
+        player.exhaustedThisTurn = 0;
+        player.hpLossThisTurn = 0;
+        player.cardBlocksThisTurn = 0;
+        player.nextAttackRepeats = 0;
         player.cardsPlayed = 0;
         player.attacksPlayed = 0;
         player.handLimit = player.baseHandLimit;
@@ -77,6 +83,9 @@ export class BattleEquipmentBll extends CCBusiness<Battle> {
     // 等待能量变化和实际消耗事件完成，装备造成的伤害、护盾与回能依次结算。
     async changeEnergy(amount: number, reason: string): Promise<number> {
         const player = this.ent.BattlePlayerModel;
+        if (amount > 0 && player.energyLocked) {
+            return 0;
+        }
         const previous = player.energy;
         player.energy = Math.max(0, Math.min(player.maxEnergy, previous + Math.trunc(amount)));
         const change = player.energy - previous;

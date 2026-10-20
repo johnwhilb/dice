@@ -198,7 +198,7 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                     }
                     break;
                 case EnemyActionType.Defend:
-                    this.ent.BattleDamageBll.addBlock(BattleSide.Enemy, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
+                    await this.ent.BattleDamageBll.addBlock(BattleSide.Enemy, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
                     break;
                 case EnemyActionType.Buff:
                     this.ent.BattleBuffBll.addBuff(BattleSide.Enemy, TableBattleBuff.requireBuffId(action.status), this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.duration);

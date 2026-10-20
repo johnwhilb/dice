@@ -15,7 +15,6 @@ import { TableDice } from '../../common/table/TableDice';
 import { TableRole } from '../../common/table/TableRole';
 import { Prefab } from 'cc';
 import { BlockInputEvents, Button, Color, EventTouch, Graphics, instantiate, Node, RichText, UITransform, UIOpacity, Vec3 } from 'cc';
-import { TableCard } from '../../common/table/TableCard';
 import { nodeCard } from '../../card/nodeCard';
 import { BattleEvent } from '../BattleEvent';
 import { GraphView } from '../../ui/GraphView';
@@ -189,7 +188,10 @@ export class BattleView extends CCView<Battle> {
     updateCardList(): void {
         const cardLayout = this.getNode('cardLayout')!;
         const player = this.ent.BattlePlayerModel;
-        const signature = player.handCards.join(',');
+        const signature = player.handCards.map(id => {
+            const card = this.ent.BattleCardBll.getCard(id);
+            return id + ':' + card.des + ':' + card.DiceNeed.join(',');
+        }).join('|');
         if (signature === this.handSignature && cardLayout.children.length === player.handCards.length) {
             cardLayout.children.forEach((cardNode, index) => {
                 cardNode.getComponent(UIOpacity)!.opacity = this.ent.BattleCardBll.canPlayCard(index) ? 255 : 140;
@@ -204,7 +206,7 @@ export class BattleView extends CCView<Battle> {
             cardNode.destroy();
         });
         player.handCards.forEach((cardId, index) => {
-            const card = TableCard.getConfigById(cardId)!;
+            const card = this.ent.BattleCardBll.getCard(cardId)!;
             const cardNode = instantiate(this.prefabCard);
             cardNode.parent = cardLayout;
             cardNode.getComponent(nodeCard)!.setData(card);
@@ -269,7 +271,7 @@ export class BattleView extends CCView<Battle> {
         if (index < 0 || index >= this.ent.BattlePlayerModel.handCards.length) {
             return;
         }
-        const card = TableCard.getConfigById(this.ent.BattlePlayerModel.handCards[index])!;
+        const card = this.ent.BattleCardBll.getCard(this.ent.BattlePlayerModel.handCards[index])!;
         const targetNode = this.getNode(card.target === 'SELF' ? 'spRole' : 'spEnemy')!;
         // 引擎按屏幕坐标、UI 相机和窗口转换，避免将 UI 坐标误当世界坐标。
         if (targetNode.getComponent(UITransform)!.hitTest(event.getLocation(), event.windowId)) {

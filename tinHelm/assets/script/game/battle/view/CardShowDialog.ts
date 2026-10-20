@@ -5,7 +5,6 @@ import { gui } from 'db://oops-framework/core/gui/Gui';
 import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
 import { Battle } from '../Battle';
 import { BattleCardPile } from '../model/BattleTypes';
-import { TableCard } from '../../common/table/TableCard';
 import { nodeCard } from '../../card/nodeCard';
 import List from '../../ui/List';
 const { ccclass } = _decorator;
@@ -31,7 +30,7 @@ export class CardShowDialog extends CCView<Battle> {
         this.getNode('nodeCardList')!.getComponent(List)!.numItems = this.cardIds.length;
     }
     updateCardItem(node: Node, index: number): void {
-        const card = TableCard.getConfigById(this.cardIds[index])!;
+        const card = this.ent.BattleCardBll.getCard(this.cardIds[index])!;
         node.active = true;
         const view = node.getComponent(nodeCard)!;
         view.setData(card);
