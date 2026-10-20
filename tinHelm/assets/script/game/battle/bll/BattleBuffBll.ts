@@ -182,7 +182,12 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         }
         const metallicize = resolver.getBuffStacks(side, BattleBuffTypeEnum.METALLICIZE) + resolver.getBuffStacks(side, BattleBuffTypeEnum.PLATED_ARMOR);
         if (metallicize > 0) {
-            this.ent.BattleDamageBll.addBlock(side, metallicize, false);
+            await this.ent.BattleDamageBll.addBlock(side, metallicize, false);
+        }
+        if (side === BattleSide.Enemy) {
+            this.ent.BattlePlayerModel.buffs = this.ent.BattlePlayerModel.buffs.filter(buff => {
+                return buff.duration !== 'UNTIL_ENEMY_END';
+            });
         }
         const actor = resolver.getActor(side);
         for (const buff of actor.buffs) {

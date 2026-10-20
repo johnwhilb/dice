@@ -1,13 +1,15 @@
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
 import { BattleBuff } from './BattleTypes';
+import { TableCard } from '../../common/table/TableCard';
 @ecs.register('BattlePlayerModel')
 export class BattlePlayerModel extends ecs.Comp {
     turn: number = 1;
     dice: number[] = [];
     diceLocked: number[] = [];
     diceUsed: number[] = [];
-    readonly baseHandLimit: number = 5;
-    handLimit: number = 5;
+    readonly baseHandCount: number = 5;
+    readonly baseHandLimit: number = 10;
+    handLimit: number = this.baseHandLimit;
     cardDamageBonus: number = 0;
     cardBlockBonus: number = 0;
     nextCardDamageBonus: number = 0;
@@ -32,6 +34,21 @@ export class BattlePlayerModel extends ecs.Comp {
     hp: number = 0;
     maxHp: number = 0;
     playerId: number = 0;
+    /** 负数为战斗实例编号；基础牌编号保存在实例的 baseId 中。 */
+    cardInstances: Map<number, TableCard> = new Map();
+    cardGrowth: Map<number, number> = new Map();
+    freeInstanceTurns: Map<number, number> = new Map();
+    nextInstanceId: number = -1;
+    cardRules: Record<string, number> = {};
+    drawLocked: boolean = false;
+    energyLocked: boolean = false;
+    exhaustedThisTurn: number = 0;
+    hpLossCount: number = 0;
+    hpLossThisTurn: number = 0;
+    cardBlocksThisTurn: number = 0;
+    nextAttackFree: number = 0;
+    nextAttackRepeats: number = 0;
+    resolutionDepth: number = 0;
     reset(): void {
         this.turn = 1;
         this.dice = [];
@@ -61,5 +78,19 @@ export class BattlePlayerModel extends ecs.Comp {
         this.hp = 0;
         this.maxHp = 0;
         this.playerId = 0;
+        this.cardInstances.clear();
+        this.cardGrowth.clear();
+        this.freeInstanceTurns.clear();
+        this.nextInstanceId = -1;
+        this.cardRules = {};
+        this.drawLocked = false;
+        this.energyLocked = false;
+        this.exhaustedThisTurn = 0;
+        this.hpLossCount = 0;
+        this.hpLossThisTurn = 0;
+        this.cardBlocksThisTurn = 0;
+        this.nextAttackFree = 0;
+        this.nextAttackRepeats = 0;
+        this.resolutionDepth = 0;
     }
 }

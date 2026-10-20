@@ -55,7 +55,7 @@ export class BattleRewardBll extends CCBusiness<Battle> {
     // 根据等级权重生成互不重复的卡牌奖励。
     private generateCards(rawSlots: number[][]): number[] {
         const pool = TableCard.getAllConfig().filter((card) => {
-            return card.role === smc.player.PlayerModel.roleId && card.level >= 1 && card.level <= 3
+            return card.isNormalReward() && card.role === smc.player.PlayerModel.roleId && card.level >= 1 && card.level <= 3
                 && ['ATTACK', 'SKILL', 'POWER'].includes(card.type);
         });
         const result: number[] = [];
@@ -144,7 +144,7 @@ export class BattleRewardBll extends CCBusiness<Battle> {
             return false;
         }
         const card = TableCard.getConfigById(cardId)!;
-        if (card.role !== smc.player.PlayerModel.roleId) {
+        if (!card || !card.isNormalReward() || card.role !== smc.player.PlayerModel.roleId) {
             return false;
         }
         reward.claimed = true;

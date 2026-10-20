@@ -16,7 +16,7 @@ export class BattleDamageBll extends CCBusiness<Battle> {
         if (kind === 'ATTACK') {
             damage = Math.max(0, damage + resolver.getBuffStacks(source, BattleBuffTypeEnum.STRENGTH));
             damage *= resolver.getBuffStacks(source, BattleBuffTypeEnum.WEAK) > 0 ? 0.75 : 1;
-            damage *= resolver.getBuffStacks(target, BattleBuffTypeEnum.VULNERABLE) > 0 ? 1.5 : 1;
+            damage *= resolver.getBuffStacks(target, BattleBuffTypeEnum.VULNERABLE) > 0 ? 1.5 + (source === BattleSide.Player ? this.ent.BattlePlayerModel.cardRules.VULNERABLE_BONUS || 0 : 0) : 1;
         }
         damage = this.ent.BattleBuffBll.calculateIncomingDamage(target, damage, kind);
         if (kind !== 'HP_LOSS' && resolver.getBuffStacks(target, BattleBuffTypeEnum.INTANGIBLE) > 0) {
@@ -31,6 +31,10 @@ export class BattleDamageBll extends CCBusiness<Battle> {
         }
         const hpLoss = Math.min(actor.hp, damage);
         actor.hp -= hpLoss;
+        if (target === BattleSide.Player && hpLoss > 0) {
+            this.ent.BattlePlayerModel.hpLossCount++;
+            this.ent.BattlePlayerModel.hpLossThisTurn++;
+        }
         this.ent.BattleBll.refreshBattleView();
         // 致死伤害立即确定结果，不允许受伤触发器将死亡单位复活。
         if (this.ent.BattleBll.checkResult()) {
@@ -69,15 +73,18 @@ export class BattleDamageBll extends CCBusiness<Battle> {
         }
         return hpLoss;
     }
-    // 结算敏捷与脆弱后增加格挡。
-    addBlock(side: BattleSide, amount: number, scale = true): number {
+    // 等待获得格挡的持续能力触发，格挡数值包含敏捷与脆弱。
+    async addBlock(side: BattleSide, amount: number, scale = true, multiplier = 1): Promise<number> {
         const resolver = this.ent.BattleValueResolver;
         let value = Math.max(0, amount + (scale ? resolver.getBuffStacks(side, BattleBuffTypeEnum.DEXTERITY) : 0));
         if (scale && resolver.getBuffStacks(side, BattleBuffTypeEnum.FRAIL) > 0) {
             value *= 0.75;
         }
-        const gained = Math.floor(value);
+        const gained = Math.floor(value * multiplier);
         resolver.getActor(side).block += gained;
+        if (gained > 0) {
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.BlockGained, side, { amount: gained });
+        }
         return gained;
     }
     // 为存活角色回复生命且不超过上限。

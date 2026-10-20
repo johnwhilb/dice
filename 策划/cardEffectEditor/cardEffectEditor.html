@@ -25,14 +25,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <header class="top"><div class="brand"><div class="logo">◇</div><div><strong>TinHelm</strong><p>角色卡牌配置 · Excel 实时读取</p></div></div><div class="toolbar"><button class="btn" id="guideBtn">使用说明</button><button class="btn" id="importBtn">导入 JSON</button><button class="btn" id="csvBtn">导出 CSV</button><button class="btn" id="exportBtn">导出全部 JSON</button><button class="btn primary" id="saveExcelBtn">保存到 Excel</button><button class="btn primary" id="addCardBtn">＋ 新建卡牌</button></div></header>
 <div class="layout"><aside class="sidebar"><div class="side-section"><div class="side-title"><h3>卡牌库</h3><span id="countTag" class="badgel green">0 张</span></div><div style="margin-top:13px"><label class="helper">选择角色</label><select id="roleSelect" class="select"></select></div><div id="starterDeckSummary" class="notice" style="margin-top:13px"></div><div style="margin-top:13px"><input id="cardSearch" class="search" placeholder="⌕ 搜索名称或 ID…" /></div><div class="status-line"><span>Excel 配置源</span><span id="saveStatus"><span class="dot"></span>已就绪</span></div></div><div class="card-list" id="cardList"></div><div class="side-section" style="border-top:1px solid #29394c"><div class="side-title"><h3>配置表连接</h3></div><p class="helper" id="connectionNotice">每次打开重新读取 Role、Card、Dice 表。</p><button class="btn block" id="loadSamplesBtn">重新读取 Excel</button></div></aside>
 <main class="main"><div class="workspace"><div class="path"><span>卡牌库</span><span>›</span><span id="breadcrumb">打击</span></div><div class="hero"><div><h1 id="heading">卡牌编辑</h1><p id="subheading">单表 effect JSON · 升级版 upId · 嵌套执行流程</p></div><div class="hero-actions"><button class="btn" id="copyCardBtn">复制卡牌</button><button class="btn" id="upgradeBtn">生成升级版 ＋</button><button class="btn danger" id="deleteCardBtn">删除</button></div></div>
-<div class="pane"><div class="pane-head"><h2>卡牌基础配置</h2><span class="badgel">CARD</span></div><div class="pane-body"><div class="notice" style="margin-bottom:14px">战斗开始洗牌并发 5 张手牌。出牌本身不消耗能量；若仍有能量且牌堆有牌，出牌后消耗 1 点能量并自动补 1 张。卡牌效果无需配置抽牌。</div><div id="cardForm"></div></div></div>
+<div class="pane"><div class="pane-head"><h2>卡牌基础配置</h2><span class="badgel">CARD</span></div><div class="pane-body"><div class="notice" style="margin-bottom:14px">回合开始补足 5 张手牌，手牌上限 10 张。出牌不消耗能量，也不自动补牌；手动抽牌每次消耗 1 点能量。可添加“抽取卡牌到手牌”免费抽取指定数量，或添加“补充能量”回复指定数量能量。</div><div id="cardForm"></div></div></div>
 <div class="pane"><div class="pane-head"><div><h2>效果流程（effect）<button type="button" class="help-button" data-help="effect" aria-label="查看 effect 的说明" title="查看说明">!</button></h2><div class="helper" style="margin-top:5px">按顺序结算；条件、循环和持续触发器可嵌套子效果。</div></div><div style="display:flex;align-items:center;gap:8px"><span id="effectCount" class="section-counter">0 个效果</span><button class="btn primary" id="addRootEffect">＋ 添加效果</button></div></div><div id="effectTree" class="effect-stack"></div></div>
 <div class="pane"><div class="pane-head"><h2>结构校验与输出</h2><div class="tabs"><button class="tab active" data-output="validate">校验</button><button class="tab" data-output="json">JSON 预览</button></div></div><div class="pane-body" id="outputPane"></div></div>
 </div></main>
 <aside class="inspector"><div class="inspector-head"><div class="side-title"><h2 id="insTitle">效果属性</h2><span id="insBadge" class="badgel">INSPECTOR</span></div><p id="insSub" class="helper" style="margin:8px 0 0">选择中间的效果，编辑其参数和触发条件。</p></div><div id="inspectorBody" class="inspector-body"></div></aside></div>
 <footer class="footer"><span><span class="dot"></span>配置源：excel/1_Role.xlsx · 2_Card.xlsx · 3_Dice.xlsx · 20_BattleBuff.xlsx · 21_BattleEffect.xlsx</span><span>支持 JSON / CSV 导出 · Ctrl / ⌘ + S 保存 Excel</span></footer></div>
 <div class="overlay" id="catalogOverlay"><div class="modal"><div class="modal-header"><div><h2>添加效果</h2><p class="helper" id="catalogContext" style="margin:4px 0 0">选择效果类型</p></div><button class="btn" data-close="catalogOverlay">关闭 ×</button></div><div class="modal-content"><div class="catalog-toolbar"><input class="search" id="catalogSearch" placeholder="搜索：伤害、格挡、状态、能力触发……" /></div><div class="catalog-chips" id="catalogCategories"></div><div class="catalog-grid" id="catalogGrid"></div></div></div></div>
-<div class="overlay" id="guideOverlay"><div class="modal" style="width:min(740px,100%)"><div class="modal-header"><h2>编辑器说明及 JSON 运行时约定</h2><button class="btn" data-close="guideOverlay">关闭 ×</button></div><div class="modal-content guide"><p>每次打开页面读取最新 Role、Card、Dice、BattleBuff 表。选择角色后可查看、新增、复制、编辑、删除卡牌。</p><p>战斗开始洗牌并发 5 张手牌。出牌本身不消耗能量；有能量且牌堆有牌时，出牌后消耗 1 点能量并自动补 1 张。抽牌与能量消耗不写进卡牌 effect。</p><p>等级 level 为 1–3，价格为非负整数。DiceNeed 最多添加 5 个当前角色的骰子 ID，可以重复。出牌与效果目标仅支持 SELF / ENEMY。</p><p>点击「保存到 Excel」写回 2_Card.xlsx，保存前会校验全部卡牌，并保留上一次表格为 2_Card.xlsx.editor-backup。若 Excel 正在占用文件，请关闭该工作簿后重试。重新读取或关闭页面前请保存修改。</p><p>首次保存会补充 target、type、upId、flags 字段。JSON / CSV 可导出备份。保存后在项目配表插件中生成客户端配置。</p><p>effect 是按顺序执行的效果数组，支持条件、循环与事件。表达式及处理器需要游戏运行时支持。</p></div></div></div>
+<div class="overlay" id="guideOverlay"><div class="modal" style="width:min(740px,100%)"><div class="modal-header"><h2>编辑器说明及 JSON 运行时约定</h2><button class="btn" data-close="guideOverlay">关闭 ×</button></div><div class="modal-content guide"><p>每次打开页面读取最新 Role、Card、Dice、BattleBuff 表。选择角色后可查看、新增、复制、编辑、删除卡牌。</p><p>回合开始补足 5 张手牌，最多持有 10 张。出牌不消耗能量，也不自动补牌；手动抽牌每次消耗 1 点能量。卡牌 effect 可配置 DRAW（抽取卡牌到手牌，count）和 GAIN_ENERGY（补充能量，amount），仅支持 SELF，数量支持非负整数或表达式。效果抽牌不消耗能量，抽牌堆不足时洗回弃牌堆，满手或全部无牌时停止。补充能量不超过角色当前能量上限。</p><p>等级 level 为 1–3，价格为非负整数。DiceNeed 最多添加 5 个当前角色的骰子 ID，可以重复。出牌与效果目标仅支持 SELF / ENEMY。</p><p>点击「保存到 Excel」写回 2_Card.xlsx，保存前会校验全部卡牌，并保留上一次表格为 2_Card.xlsx.editor-backup。若 Excel 正在占用文件，请关闭该工作簿后重试。重新读取或关闭页面前请保存修改。</p><p>首次保存会补充 target、type、upId、flags 字段。JSON / CSV 可导出备份。保存后在项目配表插件中生成客户端配置。</p><p>消耗堆回合末事件、自动出牌、实例成长、随机生成、技能免骰和资源禁用已由运行时代码支持。特殊获取、仅衍生及仅初始牌不进入普通奖励或商店。effect 是按顺序执行的效果数组，支持条件、循环与事件。表达式及处理器需要游戏运行时支持。</p></div></div></div>
 <div class="overlay" id="helpOverlay"><div class="modal" style="width:min(560px,100%)"><div class="modal-header"><h2 id="helpTitle">字段说明</h2><button class="btn" data-close="helpOverlay">关闭 ×</button></div><div class="modal-content guide" id="helpBody"></div></div></div>
 <input id="fileInput" type="file" accept=".json,application/json" hidden /><div class="toast" id="toast" role="status"></div>
 <script>/**
@@ -193,6 +193,9 @@ function normalizeNode(raw) {
     }
     n.target = n.target || 'SELF';
     n.params = n.params && typeof n.params === 'object' && !Array.isArray(n.params) ? n.params : {};
+    if (n.condition && !Array.isArray(n.condition.rules) && n.condition.lhs !== undefined) {
+        n.condition = { op: 'AND', rules: [n.condition] };
+    }
     for (let key of ['children', 'elseEffects']) {
         if (!Object.prototype.hasOwnProperty.call(n, key)) {
             n[key] = [];
@@ -222,6 +225,11 @@ function scheduleSave() {
 }
 /** @returns {Promise<void>|void} */
 function reloadTables() {
+    if (location.protocol === 'file:') {
+        document.getElementById('connectionNotice').innerHTML = '请先双击同目录的 start.cmd 启动服务，再<a href="http://127.0.0.1:3210/">打开卡牌编辑器</a>。本页面需要通过本地服务读取 Excel。';
+        document.getElementById('saveStatus').textContent = '需要启动本地服务';
+        return;
+    }
     if (dirty && !confirm('重新读取会丢弃尚未保存的修改，是否继续？')) {
         return;
     }
@@ -251,7 +259,7 @@ function reloadTables() {
         document.getElementById('saveStatus').textContent = '已读取最新 Excel';
         document.getElementById('connectionNotice').textContent = '每次打开重新读取五个 Excel 表。修改后点击保存到 Excel。';
     })().catch(error => {
-        document.getElementById('connectionNotice').textContent = '读取失败：请在 dice 目录运行 node 策划/cardEffectEditor/cardEffectEditorServer.cjs，再打开 http://127.0.0.1:3210。' + error.message;
+        document.getElementById('connectionNotice').textContent = '读取失败：请双击同目录的 start.cmd（或在 dice 目录运行 node 策划/cardEffectEditor/cardEffectEditorServer.cjs），再打开 http://127.0.0.1:3210。' + error.message;
         document.getElementById('saveStatus').textContent = '读取失败';
     });
 }
@@ -445,8 +453,7 @@ const triggerHelp = {
     ON_KILL_WITH_THIS_CARD: '这张卡击败敌人时执行。',
     ON_HIT_UNBLOCKED: '这张卡造成未被格挡的伤害时执行。',
     ON_RETAINED: '这张卡在回合结束后被保留时执行。',
-    ON_UPGRADED: '这张卡升级时执行。',
-    ON_CREATED: '这张卡被创建时执行。'
+    ON_TURN_END_IN_EXHAUST: '回合结束时，这张卡仍在消耗牌堆中才执行。'
 };
 const fieldHelp = {
     id: '卡牌在配置表中的唯一编号。修改编号会同步更新其他卡牌的升级引用。',
@@ -525,15 +532,24 @@ function renderCardForm() {
         return '<button class="btn tiny ' + (item ? '' : 'danger') + '" data-remove-dice="' + index + '">' + escapeHtml(item ? item.name : '不属于此角色：' + id) + ' ×</button>';
     }).join('') + '</div><div class="split"><select class="select" id="diceSelect">' + available.map(item => {
         return '<option value="' + item.id + '">' + escapeHtml(item.name) + ' · ' + item.id + ' · 骰面 ' + escapeHtml(item.diceNum.join('/')) + '</option>';
-    }).join('') + '</select><button class="btn" id="addDiceBtn" ' + (card.DiceNeed.length >= 5 || !available.length ? 'disabled' : '') + '>＋ 添加触发条件</button></div></div><div class="field span4"><label>描述（des）' + createHelpButton('des') + '</label><textarea class="textarea" data-card-field="des">' + escapeHtml(card.des) + '</textarea></div><div class="field span4"><label>特殊属性（flags）' + createHelpButton('flags') + '</label><div class="flagline">' + ['exhaust', 'retain', 'ethereal', 'innate', 'unplayable'].map(key => {
-        return '<label class="check"><input type="checkbox" data-card-flag="' + key + '" ' + (card.flags[key] ? 'checked' : '') + '/>' + ({ exhaust: '消耗', retain: '保留', ethereal: '虚无', innate: '固有', unplayable: '不可打出' }[key]) + '</label>';
+    }).join('') + '</select><button class="btn" id="addDiceBtn" ' + (card.DiceNeed.length >= 5 || !available.length ? 'disabled' : '') + '>＋ 添加触发条件</button></div></div><div class="field span4"><label>描述（des）' + createHelpButton('des') + '</label><textarea class="textarea" data-card-field="des">' + escapeHtml(card.des) + '</textarea></div><div class="field span4"><label>特殊属性（flags）' + createHelpButton('flags') + '</label><div class="flagline">' + ['exhaust', 'retain', 'ethereal', 'innate', 'unplayable', 'generated', 'special', 'starterOnly'].map(key => {
+        return '<label class="check"><input type="checkbox" data-card-flag="' + key + '" ' + (card.flags[key] ? 'checked' : '') + '/>' + ({ exhaust: '消耗', retain: '保留', ethereal: '虚无', innate: '固有', unplayable: '不可打出', generated: '仅衍生', special: '特殊获取', starterOnly: '仅初始' }[key]) + '</label>';
     }).join('') + '</div></div></div>';
+    form.insertAdjacentHTML('beforeend', '<div class="fields"><div class="field"><label>每打出一张攻击牌，减免的骰子花色</label><select class="select" data-card-flag-number="discountDice"><option value="0">不减免</option>' + available.map(item => {
+        return '<option value="' + item.id + '" ' + (Number(card.flags.discountDice) === item.id ? 'selected' : '') + '>' + escapeHtml(item.name) + '</option>';
+    }).join('') + '</select></div><div class="field"><label>最多减免骰子数量</label><input class="input" type="number" min="0" max="5" data-card-flag-number="discountMax" value="' + escapeAttribute(card.flags.discountMax || 0) + '" /></div></div>');
 }
 /**
  * @returns {string}
  */
 function describeEffect(n) {
     let d = catalog[n.type], p = n.params || {};
+    if (n.type === BattleEffectTypeEnum.DRAW) {
+        return `免费抽取 ${p.count ?? '?'} 张卡牌到手牌 · 手牌上限 10 张`;
+    }
+    if (n.type === BattleEffectTypeEnum.GAIN_ENERGY) {
+        return `补充 ${p.amount ?? '?'} 点能量 · 不超过能量上限`;
+    }
     let keys = d?.fields?.slice(0, 2).map(x => {
         return x.key;
     }) || Object.keys(p).slice(0, 2);
@@ -555,7 +571,7 @@ function describeEffect(n) {
 function renderNodes(arr, branch = 'effect', parent = null) {
     return (arr || []).map((n, i) => {
         let d = catalog[n.type];
-        let container = d?.container || (n.children ? 'children' : '');
+        let container = d ? d.container : (n.children?.length ? 'children' : '');
         let indent = `<div class="effect ${selectedNode === n.id ? 'selected' : ''}" data-effect-node="${escapeAttribute(n.id)}"><div class="effect-row" data-select-node="${escapeAttribute(n.id)}"><span class="step-num">${i + 1}</span><div class="effect-icon">${icons[d?.cat] || '⌘'}</div><div style="min-width:0;flex:1"><div class="effect-title">${escapeHtml(d?.label || n.type)} <span class="badgel" style="margin-left:4px">${escapeHtml(n.target)}</span></div><div class="effect-desc">${n.trigger && n.trigger !== 'ON_PLAY' ? '[' + escapeHtml(n.trigger) + '] · ' : ''}${escapeHtml(describeEffect(n))}${n.condition && n.type !== BattleEffectTypeEnum.IF ? ' · ⚑ 有条件' : ''}</div></div><div class="effect-actions"><button class="round" title="上移" data-move="up" data-id="${escapeAttribute(n.id)}">↑</button><button class="round" title="下移" data-move="down" data-id="${escapeAttribute(n.id)}">↓</button><button class="round" title="复制" data-dup="${escapeAttribute(n.id)}">⧉</button><button class="round danger" title="删除" data-del="${escapeAttribute(n.id)}">×</button></div></div>`;
         if (container) {
             indent += `<div class="nested"><div class="nested-label"><span>${container === 'if' ? 'THEN · 条件成立' : '子效果 · ' + (n.children || []).length + ' 项'}</span><span class="muted">顺序执行</span></div><div class="nested-list">${renderNodes(n.children || [], 'children', n) || '<div class="helper">暂无子效果</div>'}<button class="add-inline" data-add-parent="${escapeAttribute(n.id)}" data-add-branch="children">＋ 在此添加子效果</button></div>`;
@@ -604,9 +620,9 @@ function renderParamField(field, p) {
     }
     return `<div class="field"><label>${escapeHtml(field.label)}（${escapeHtml(field.key)}）${createHelpButton(field.key)}</label>${content}</div>`;
 }
-const TRIGGER_EVENTS = ['ON_PLAY', 'ON_DRAWN', 'ON_DISCARDED', 'ON_EXHAUSTED', 'ON_TURN_END_IN_HAND', 'ON_COMBAT_START', 'ON_KILL_WITH_THIS_CARD', 'ON_HIT_UNBLOCKED', 'ON_RETAINED', 'ON_UPGRADED', 'ON_CREATED'];
+const TRIGGER_EVENTS = ['ON_PLAY', 'ON_DRAWN', 'ON_DISCARDED', 'ON_EXHAUSTED', 'ON_TURN_END_IN_HAND', 'ON_COMBAT_START', 'ON_KILL_WITH_THIS_CARD', 'ON_HIT_UNBLOCKED', 'ON_RETAINED', 'ON_TURN_END_IN_EXHAUST'];
 const commonTargets = ['SELF', 'ENEMY'];
-const cmpOps = ['==', '!=', '>', '>=', '<', '<=', 'IN', 'NOT_IN', 'HAS', 'IS_TRUE', 'IS_FALSE'];
+const cmpOps = ['==', '!=', '>', '>=', '<', '<='];
 /**
  * @returns {string}
  */
@@ -635,7 +651,7 @@ function renderInspector() {
     header.textContent = d?.label || n.type;
     badge.textContent = n.type;
     sub.textContent = d?.hint || '未知扩展类型：使用 JSON 编辑';
-    let form = `<div class="ins-group"><h3>通用配置</h3><div class="ins-stack"><div class="field"><label>效果类型（type）${createHelpButton('type')}</label><input class="input mono" readonly value="${escapeAttribute(n.type)}"/></div><div class="field"><label>作用目标（target）${createHelpButton('target')}</label><select class="select" data-node-field="target">${selectHtml(commonTargets, n.target || 'SELF')}</select></div>${!findNodeLocation(n.id)?.parent ? `<div class="field"><label>该卡效果触发时机（根节点）${createHelpButton('trigger')}</label><select class="select" data-node-field="trigger">${selectHtml(TRIGGER_EVENTS, n.trigger || 'ON_PLAY')}</select></div>` : ''}<div class="field"><label>备注（note）${createHelpButton('note')}</label><input class="input" data-node-field="note" value="${escapeAttribute(n.note || '')}" placeholder="可选" /></div></div></div>`;
+    let form = `<div class="ins-group"><h3>通用配置</h3><div class="ins-stack"><div class="field"><label>效果类型（type）${createHelpButton('type')}</label><input class="input mono" readonly value="${escapeAttribute(n.type)}"/></div><div class="field"><label>作用目标（target）${createHelpButton('target')}</label><select class="select" data-node-field="target">${selectHtml([BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.GAIN_ENERGY, BattleEffectTypeEnum.MOVE_CARD, BattleEffectTypeEnum.COPY_CARD, BattleEffectTypeEnum.PLAY_CARD, BattleEffectTypeEnum.TRANSFORM_CARD, BattleEffectTypeEnum.GENERATE_CARD, BattleEffectTypeEnum.GROW_CARD, BattleEffectTypeEnum.CARD_RULE].includes(n.type) ? ['SELF'] : commonTargets, n.target || 'SELF')}</select></div>${!findNodeLocation(n.id)?.parent ? `<div class="field"><label>该卡效果触发时机（根节点）${createHelpButton('trigger')}</label><select class="select" data-node-field="trigger">${selectHtml(TRIGGER_EVENTS, n.trigger || 'ON_PLAY')}</select></div>` : ''}<div class="field"><label>备注（note）${createHelpButton('note')}</label><input class="input" data-node-field="note" value="${escapeAttribute(n.note || '')}" placeholder="可选" /></div></div></div>`;
     form += `<div class="ins-group"><h3>效果参数</h3><div class="ins-stack">${d?.fields?.length ? d.fields.map(x => {
         return renderParamField(x, n.params);
     }).join('') : '<div class="helper">此类型无需参数。如需扩展，可在下方编辑节点 JSON。</div>'}</div></div>`;
@@ -671,6 +687,16 @@ function getValidationMessages() {
         walkNodes(card.effect, node => {
             if (!catalog[node.type] || !['SELF', 'ENEMY'].includes(node.target)) {
                 messages.push(['error', card.name + '：不支持的效果或目标 ' + node.type]);
+            }
+            if ([BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.GAIN_ENERGY].includes(node.type)) {
+                if (node.target !== 'SELF') {
+                    messages.push(['error', card.name + '：抽牌和补充能量效果只支持 SELF']);
+                }
+                const key = node.type === BattleEffectTypeEnum.DRAW ? 'count' : 'amount';
+                const value = node.params?.[key];
+                if (typeof value === 'number' ? !Number.isSafeInteger(value) || value < 0 : typeof value !== 'string' || !value.trim()) {
+                    messages.push(['error', card.name + '：' + key + ' 必须是非负整数或数值表达式']);
+                }
             }
         });
     }
@@ -714,17 +740,17 @@ function getValidationMessages() {
                 messages.push(['error', `${c.name} 存在空白效果类型`]);
             }
             if (!catalog[n.type]) {
-                messages.push(['warn', `${c.name}：${n.type} 是自定义效果，请在游戏引擎实现`]);
+                messages.push(['error', `${c.name}：${n.type} 不在当前支持的效果表中`]);
             }
             if (n.type === BattleEffectTypeEnum.IF && (!n.condition || !Array.isArray(n.condition.rules) || !n.condition.rules.length)) {
                 messages.push(['warn', `${c.name} 的 IF 分支没有条件`]);
             }
-            if (catalog[n.type]?.container && (!n.children || !n.children.length)) {
+            if (catalog[n.type]?.container && catalog[n.type].container !== 'optionalChildren' && (!n.children || !n.children.length)) {
                 messages.push(['warn', `${c.name} 的 ${n.type} 暂无子效果`]);
             }
             if (catalog[n.type]) {
                 for (const fld of catalog[n.type].fields) {
-                    if (n.params?.[fld.key] === undefined) {
+                    if (n.params?.[fld.key] === undefined && !(fld.kind === 'bool' && catalog[n.type].defaults[fld.key] === false)) {
                         messages.push(['warn', `${c.name} 的 ${n.type} 缺少 ${fld.key} 参数`]);
                     }
                 }
@@ -749,7 +775,7 @@ function renderOutput() {
     let msgs = getValidationMessages();
     el.innerHTML = `<div class="validation">${msgs.length ? msgs.map(([level, msg]) => {
         return `<div class="${level === 'error' ? 'error' : 'muted'}">${level === 'error' ? '✕' : '⚠'} ${escapeHtml(msg)}</div>`;
-    }).join('') : '<div class="ok">✓ 结构校验通过：ID、升级引用、参数和流程节点没有发现明显问题。</div>'}<div class="helper" style="margin-top:7px">结构校验不等于游戏运行时正确性；公式、事件和特殊 CUSTOM 仍需战斗引擎支持。</div></div>`;
+    }).join('') : '<div class="ok">✓ 结构校验通过：ID、升级引用、参数和流程节点没有发现明显问题。</div>'}<div class="helper" style="margin-top:7px">效果库与游戏运行时共用配表；调整公式或触发流程后请进行战斗验证。</div></div>`;
 }
 /**
  * @returns {void}
@@ -1304,7 +1330,11 @@ document.getElementById('cardForm').addEventListener('input', e => {
     }
 });
 document.getElementById('cardForm').addEventListener('change', e => {
-    if (e.target.dataset.cardFlag) {
+    if (e.target.dataset.cardFlagNumber) {
+        getCurrentCard().flags[e.target.dataset.cardFlagNumber] = Number(e.target.value);
+        scheduleSave();
+    }
+    else if (e.target.dataset.cardFlag) {
         getCurrentCard().flags[e.target.dataset.cardFlag] = e.target.checked;
         scheduleSave();
     }

@@ -68,7 +68,7 @@ export class ShopBll extends CCBusiness<Shop> {
         const model = this.ent.ShopModel;
         const card = TableCard.getConfigById(cardId);
         if (model.leaving || !model.initialized || !card || !model.cardIds.includes(cardId)
-            || model.boughtCardIds.includes(cardId) || card.role !== smc.player.PlayerModel.roleId) {
+            || !card.isNormalReward() || model.boughtCardIds.includes(cardId) || card.role !== smc.player.PlayerModel.roleId) {
             return false;
         }
         if (!this.canPay(card.price)) {
@@ -126,7 +126,7 @@ export class ShopBll extends CCBusiness<Shop> {
             const count = typeof rawCount === 'number' && Number.isFinite(rawCount)
                 ? Math.max(Math.floor(rawCount), 0) : 0;
             const ids = TableCard.getAllConfig().filter((card) => {
-                return card.role === roleId && card.level === index + 1;
+                return card.isNormalReward() && card.role === roleId && card.level === index + 1;
             }).map((card) => {
                 return card.id;
             });
