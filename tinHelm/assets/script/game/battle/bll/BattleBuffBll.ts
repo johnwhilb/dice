@@ -1,9 +1,26 @@
-import { TableBattleBuff, BattleBuffCategory, BattleBuffStackMode } from '../../common/table/TableBattleBuff';
+import { TableBattleBuff, BattleBuffCategory, BattleBuffStackMode, BattleBuffRuleKind } from '../../common/table/TableBattleBuff';
 import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
-import { BattleSide } from '../model/BattleTypes';
+import { BattleContext, BattleSide } from '../model/BattleTypes';
 export class BattleBuffBll extends CCBusiness<Battle> {
+    // 汇总当前存活Buff的规则，移除或到期后立即停止生效。
+    getRuleValue(side: BattleSide, kind: BattleBuffRuleKind): number {
+        return this.ent.BattleValueResolver.getActor(side).buffs.reduce((sum, buff) => {
+            return sum + Math.max(0, buff.stacks) * (TableBattleBuff.requireBuffConfig(buff.id).getRules()[kind] || 0);
+        }, 0);
+    }
+    // 检查能力上下文对应的Buff实例是否仍然有效。
+    isContextActive(context: BattleContext): boolean {
+        return !context.buff || !!context.buffSide && context.buff.stacks > 0
+            && this.ent.BattleValueResolver.getActor(context.buffSide).buffs.includes(context.buff);
+    }
+    // 清理被移除、被驱散或到期Buff拥有的监听，包括尚未执行的延迟效果。
+    pruneBuffTriggers(): void {
+        this.ent.BattleModel.triggers = this.ent.BattleModel.triggers.filter(trigger => {
+            return this.isContextActive(trigger.context);
+        });
+    }
     // 计算闪避、飞行与硬甲对本次伤害的修正。
     calculateIncomingDamage(side: BattleSide, amount: number, kind: string): number {
         if (kind === 'HP_LOSS' || amount <= 0) {
@@ -17,18 +34,18 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         const flight = kind === 'ATTACK' && resolver.getBuffStacks(side, BattleBuffTypeEnum.FLIGHT) > 0;
         return Math.max(0, amount * (flight ? 0.5 : 1) - Math.max(0, resolver.getBuffStacks(side, BattleBuffTypeEnum.ARMOR)));
     }
-    // 结算攻击穿透生命后的护甲衰减与暴怒。
-    applyAttackHpLoss(side: BattleSide): void {
+    // 等待攻击穿透生命后的护甲衰减与暴怒强化结算。
+    async applyAttackHpLoss(side: BattleSide): Promise<void> {
         const resolver = this.ent.BattleValueResolver;
         this.removeBuff(side, BattleBuffTypeEnum.PLATED_ARMOR, 1);
         this.removeBuff(side, BattleBuffTypeEnum.FLIGHT, 1);
         const fury = resolver.getBuffStacks(side, BattleBuffTypeEnum.FURY);
         if (fury > 0) {
-            this.addBuff(side, BattleBuffTypeEnum.STRENGTH, fury, 'COMBAT');
+            await this.addBuff(side, BattleBuffTypeEnum.STRENGTH, fury, 'COMBAT');
         }
     }
-    // 按配置分类添加状态，并结算人工制品抵消减益。
-    addBuff(side: BattleSide, id: BattleBuffTypeEnum, stacks: number, duration = 'DEFAULT'): void {
+    // 等待能力获得效果结算后返回，每层能力保留独立监听与生命周期。
+    async addBuff(side: BattleSide, id: BattleBuffTypeEnum, stacks: number, duration = 'DEFAULT', context?: BattleContext): Promise<void> {
         if (!Number.isFinite(stacks)) {
             throw new Error('状态层数必须是有限数值');
         }
@@ -38,6 +55,8 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         }
         const resolver = this.ent.BattleValueResolver;
         const config = TableBattleBuff.requireBuffConfig(id);
+        const effects = config.getEffects();
+        const ability = effects.length > 0 || Object.keys(config.getRules()).length > 0;
         if (config.category === BattleBuffCategory.Debuff && stacks > 0 && resolver.getBuffStacks(side, BattleBuffTypeEnum.ARTIFACT) > 0) {
             this.removeBuff(side, BattleBuffTypeEnum.ARTIFACT, 1);
             return;
@@ -54,7 +73,10 @@ export class BattleBuffBll extends CCBusiness<Battle> {
             desiredStacks = stacks;
         }
         desiredStacks = Math.max(-config.maxStacks, Math.min(config.maxStacks, desiredStacks));
-        if (config.stackMode !== BattleBuffStackMode.Add) {
+        if (config.stackMode === BattleBuffStackMode.Max && ability) {
+            stacks = desiredStacks - currentStacks;
+        }
+        else if (config.stackMode !== BattleBuffStackMode.Add) {
             this.removeBuff(side, id);
             stacks = desiredStacks;
         }
@@ -65,6 +87,33 @@ export class BattleBuffBll extends CCBusiness<Battle> {
             return;
         }
         const expiresTurn = this.ent.BattleModel.turn + (duration === 'NEXT_TURN' ? 1 : 0);
+        if (ability) {
+            if (stacks < 0) {
+                this.removeBuff(side, id, -stacks);
+                return;
+            }
+            const depth = (context?.buffDepth || 0) + 1;
+            if (depth > 20) {
+                throw new Error('能力Buff递归超过安全深度，请检查配置');
+            }
+            this.ent.BattleEffectBll.validateEffects(effects);
+            for (let layer = 0; layer < stacks; layer++) {
+                if (resolver.getBuffStacks(side, id) >= config.maxStacks) {
+                    return;
+                }
+                const buff = { id, stacks: 1, duration, expiresTurn };
+                resolver.getActor(side).buffs.push(buff);
+                const abilityContext = resolver.createContext(side, context?.cardId || 0);
+                abilityContext.buff = buff;
+                abilityContext.buffSide = side;
+                abilityContext.buffDepth = depth;
+                await this.ent.BattleEffectBll.executeEffects(effects, abilityContext);
+                if (abilityContext.runId !== this.ent.BattleModel.runId || this.ent.BattleBll.isBattleFinished()) {
+                    return;
+                }
+            }
+            return;
+        }
         const expires = ['TURN', 'NEXT_TURN'].includes(duration);
         const activeBuffs = resolver.getActor(side).buffs;
         const existing = activeBuffs.find(buff => {
@@ -86,6 +135,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         const actor = this.ent.BattleValueResolver.getActor(side);
         if (id === 'ALL' && amount === Infinity) {
             actor.buffs = [];
+            this.pruneBuffTriggers();
             return;
         }
         let remaining = Math.max(0, amount);
@@ -99,6 +149,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         actor.buffs = actor.buffs.filter(buff => {
             return buff.stacks !== 0;
         });
+        this.pruneBuffTriggers();
     }
     // 按Buff表分类清除减益和负层数状态。
     cleanseDebuffs(side: BattleSide): void {
@@ -106,6 +157,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         actor.buffs = actor.buffs.filter(buff => {
             return TableBattleBuff.requireBuffConfig(buff.id).category !== BattleBuffCategory.Debuff && buff.stacks > 0;
         });
+        this.pruneBuffTriggers();
     }
     // 按倍率修改状态并限制总层数，保留每份状态的持续范围。
     multiplyBuffStacks(side: BattleSide, id: BattleBuffTypeEnum, factor: number): void {
@@ -138,6 +190,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         actor.buffs = actor.buffs.filter(buff => {
             return buff.stacks !== 0;
         });
+        this.pruneBuffTriggers();
     }
     // 等待中毒伤害结算后减少层数并处理格挡保留。
     async settleTurnStartBuffs(side: BattleSide): Promise<void> {
@@ -173,7 +226,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         }
         const ritual = resolver.getBuffStacks(side, BattleBuffTypeEnum.RITUAL);
         if (ritual > 0 && !this.ent.BattleBll.isBattleFinished(runId)) {
-            this.addBuff(side, BattleBuffTypeEnum.STRENGTH, ritual, 'COMBAT');
+            await this.addBuff(side, BattleBuffTypeEnum.STRENGTH, ritual, 'COMBAT');
         }
         const regeneration = resolver.getBuffStacks(side, BattleBuffTypeEnum.REGENERATION);
         if (regeneration > 0 && !this.ent.BattleBll.isBattleFinished()) {
@@ -199,6 +252,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
             return buff.stacks !== 0
                 && !(['TURN', 'NEXT_TURN'].includes(buff.duration) && buff.expiresTurn <= this.ent.BattleModel.turn);
         });
+        this.pruneBuffTriggers();
     }
     // 读取Buff表中的状态名称。
     getBuffName(id: BattleBuffTypeEnum): string {
@@ -223,5 +277,6 @@ export class BattleBuffBll extends CCBusiness<Battle> {
                 return buff.duration !== 'ACTION';
             });
         }
+        this.pruneBuffTriggers();
     }
 }

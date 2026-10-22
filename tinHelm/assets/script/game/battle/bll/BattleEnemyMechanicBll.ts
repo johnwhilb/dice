@@ -4,13 +4,13 @@ import { TableEnemy } from '../../common/table/TableEnemy';
 import { BattleSide, EnemyPhaseCondition } from '../model/BattleTypes';
 /** 所有敌人共用机制执行器，具体状态、触发器和阶段均由配置表提供。 */
 export class BattleEnemyMechanicBll extends CCBusiness<Battle> {
-    // 根据敌人配置注册初始状态与特殊事件。
-    initializeMechanics(): void {
+    // 等待敌人初始能力效果结算后，注册特殊事件。
+    async initializeMechanics(): Promise<void> {
         const model = this.ent.BattleEnemyModel;
         const enemy = TableEnemy.getConfigById(model.enemyId)!;
         const mechanics = enemy.getMechanics();
         for (const initial of mechanics.initialStatuses) {
-            this.ent.BattleBuffBll.addBuff(BattleSide.Enemy, initial.status, initial.stacks, initial.duration);
+            await this.ent.BattleBuffBll.addBuff(BattleSide.Enemy, initial.status, initial.stacks, initial.duration);
         }
         const context = this.ent.BattleValueResolver.createContext(BattleSide.Enemy, 0, BattleSide.Player);
         for (const trigger of mechanics.triggers) {

@@ -3,7 +3,7 @@
  * @typedef {import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyBehaviorNode & {editorX?:number,editorY?:number}} EditorBehaviorNode
  * @typedef {{id:number|string,name:string,role:number,level:number,price:number,DiceNeed:number[],des:string,type:string,target:string,upId?:number|string|null,flags:Record<string,boolean>,effect:BattleEffect[]}} EditorCard
  * @typedef {{id:number,name:string,hp:number,behavior:EditorBehaviorNode,mechanics:import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyMechanics}} EditorEnemy
- * @typedef {{id:number,type:string,name:string,category:string,stackMode:string,maxStacks:number,decayAtTurnEnd:boolean,description:string}} BuffConfig
+ * @typedef {{id:number,type:string,name:string,category:string,stackMode:string,maxStacks:number,decayAtTurnEnd:boolean,description:string,effects:BattleEffect[],rules:Record<string,number>}} BuffConfig
  * @typedef {{key:string,label:string,kind:string,options:(number|string)[]|null}} EffectField
  * @typedef {{id:number,type:string,name:string,category:string,description:string,defaultTarget:string,defaultParams:import('../../tinHelm/assets/script/game/battle/model/BattleTypes').BattleEffectParams,fields:EffectField[],container:string,cardEnabled:boolean,enemyEnabled:boolean}} EffectConfig
  * @typedef {{node:BattleEffect,arr:BattleEffect[],index:number,parent:BattleEffect|null,branch:string}} EffectLocation
@@ -29,11 +29,18 @@ function validateBuffRows(rows) {
     for (const row of rows) {
         if (!Number.isSafeInteger(row.id) || row.id <= 0 || ids.has(row.id) || types.has(row.type)
             || typeof row.type !== 'string' || !row.type || typeof row.name !== 'string' || !row.name
-            || !['BUFF', 'DEBUFF'].includes(row.category) || !['ADD', 'MAX', 'REPLACE'].includes(row.stackMode) || !Number.isSafeInteger(row.maxStacks) || row.maxStacks < 1 || typeof row.description !== 'string' || typeof row.decayAtTurnEnd !== 'boolean') {
+            || !['BUFF', 'DEBUFF'].includes(row.category) || !['ADD', 'MAX', 'REPLACE'].includes(row.stackMode) || !Number.isSafeInteger(row.maxStacks) || row.maxStacks < 1 || typeof row.description !== 'string' || typeof row.decayAtTurnEnd !== 'boolean'
+            || !Array.isArray(row.effects) || !row.rules || typeof row.rules !== 'object' || Array.isArray(row.rules)) {
             throw new Error('Buff表的编号、枚举、名称或分类无效');
         }
         ids.add(row.id);
         types.add(row.type);
+        for (const [kind, amount] of Object.entries(row.rules)) {
+            if (!['SKILL_FREE_EXHAUST', 'FIRST_BLOCK_DOUBLE', 'VULNERABLE_BONUS'].includes(kind)
+                || typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
+                throw new Error(`${row.name}：持续规则或数值无效`);
+            }
+        }
     }
 }
 /**
@@ -94,12 +101,21 @@ async function readTables() {
     });
     validateBuffRows(rows[3]);
     validateEffectRows(rows[4]);
-    return { revision, workbooks, roles: rows[0], cards: rows[1], dice: rows[2], buffs: rows[3], effects: rows[4] };
+    const data = { revision, workbooks, roles: rows[0], cards: rows[1], dice: rows[2], buffs: rows[3], effects: rows[4] };
+    validateBuffEffects(data);
+    return data;
+}
+// 复用卡牌效果校验，Buff中的变化目标只检查卡牌存在性，不限制来源角色。
+function validateBuffEffects(data) {
+    validateCards(data.buffs.map(buff => {
+        return { id: buff.id, name: buff.name, role: data.roles[0].id, level: 1, price: 0,
+            DiceNeed: [], target: 'SELF', type: 'SKILL', flags: {}, effect: buff.effects };
+    }), data, true);
 }
 /**
  * @returns {void}
  */
-function validateCards(cards, data) {
+function validateCards(cards, data, buffEffects = false) {
     if (!Array.isArray(cards)) {
         throw new Error('cards 必须是数组');
     }
@@ -132,6 +148,11 @@ function validateCards(cards, data) {
         }
         if (!Array.isArray(card.effect)) {
             throw new Error(`${id}：effect 必须是数组`);
+        }
+        if (card.type === 'POWER' && (!card.effect.length || card.effect.some(effect => {
+            return effect.type !== BattleEffectTypeEnum.APPLY_STATUS || effect.trigger && effect.trigger !== 'ON_PLAY';
+        }))) {
+            throw new Error(`${id}：能力牌只能在打出时施加Buff，持续行为请配置在Buff表中`);
         }
         if (!['ATTACK', 'SKILL', 'POWER', 'STATUS', 'CURSE'].includes(card.type)
             || !card.flags || typeof card.flags !== 'object' || Array.isArray(card.flags)) {
@@ -173,8 +194,8 @@ function validateCards(cards, data) {
                     }
                 }
                 if (node.type === BattleEffectTypeEnum.TRANSFORM_CARD
-                    && !cards.some(targetCard => {
-                        return Number(targetCard.id) === params.cardId && Number(targetCard.role) === Number(card.role);
+                    && !(buffEffects ? data.cards : cards).some(targetCard => {
+                        return Number(targetCard.id) === params.cardId && (buffEffects || Number(targetCard.role) === Number(card.role));
                     })) {
                     throw new Error(`${id}：变化目标必须是当前角色的有效卡牌`);
                 }

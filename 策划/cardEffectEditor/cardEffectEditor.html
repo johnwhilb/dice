@@ -656,6 +656,12 @@ function renderInspector() {
         return renderParamField(x, n.params);
     }).join('') : '<div class="helper">此类型无需参数。如需扩展，可在下方编辑节点 JSON。</div>'}</div></div>`;
     form += renderCondition(n);
+    if (n.type === BattleEffectTypeEnum.APPLY_STATUS) {
+        const buff = buffRows.find(row => row.id === n.params.status);
+        if (buff) {
+            form += `<div class="ins-group"><h3>Buff 配置 · ${escapeHtml(buff.name)}</h3><p class="helper">${escapeHtml(buff.description)}</p><p class="helper">${escapeHtml(buff.stackMode)} · 最多 ${buff.maxStacks} 层 · ${buff.decayAtTurnEnd ? '默认回合末衰减' : '不自动衰减'}</p>${buff.effects?.length ? `<details><summary>查看能力效果与监听</summary><pre class="pre">${escapeHtml(serializeJson(buff.effects))}</pre></details>` : ''}${Object.keys(buff.rules || {}).length ? `<p class="helper">持续规则</p><pre class="pre">${escapeHtml(serializeJson(buff.rules))}</pre>` : ''}</div>`;
+        }
+    }
     if (d?.container) {
         form += `<div class="notice">${d.container === 'if' ? 'THEN / ELSE' : 'children'} 是有序子效果数组，直接在中间流程树中添加。${n.type === BattleEffectTypeEnum.REGISTER_TRIGGER ? '触发器的监听生命周期由战斗引擎管理。' : ''}</div><div class="divider"></div>`;
     }
@@ -669,6 +675,11 @@ function renderInspector() {
 function getValidationMessages() {
     let messages = [], ids = new Set();
     for (const card of db.cards) {
+        if (card.type === 'POWER' && (!card.effect.length || card.effect.some(effect => {
+            return effect.type !== BattleEffectTypeEnum.APPLY_STATUS || effect.trigger && effect.trigger !== 'ON_PLAY';
+        }))) {
+            messages.push(['error', card.name + '：能力牌只能在打出时施加 Buff，持续行为请配置在 Buff 表中']);
+        }
         if (!Number.isSafeInteger(Number(card.id)) || Number(card.id) <= 0 || !roles.some(role => {
             return role.id === card.role;
         })) {
@@ -816,7 +827,8 @@ function renderCatalog() {
         return `<button class="chip ${x === catalogFilter ? 'active' : ''}" data-cat="${escapeAttribute(x)}">${escapeHtml(x)}</button>`;
     }).join('');
     let matching = Object.values(catalog).filter(x => {
-        return (catalogFilter === '全部' || x.cat === catalogFilter) && (x.label + x.type + x.hint + x.cat).toLowerCase().includes(q);
+        return (getCurrentCard()?.type !== 'POWER' || x.type === BattleEffectTypeEnum.APPLY_STATUS)
+            && (catalogFilter === '全部' || x.cat === catalogFilter) && (x.label + x.type + x.hint + x.cat).toLowerCase().includes(q);
     });
     document.getElementById('catalogGrid').innerHTML = matching.map(d => {
         return `<button class="catalog-option" data-create-type="${d.type}"><strong>${icons[d.cat]} ${escapeHtml(d.label)}</strong><small>${escapeHtml(d.hint)}</small><code>${d.type}</code></button>`;
@@ -830,11 +842,19 @@ function addEffect(type) {
     if (!c) {
         return;
     }
+    if (c.type === 'POWER' && type !== BattleEffectTypeEnum.APPLY_STATUS) {
+        showToast('能力牌通过施加 Buff 生效，请将持续效果配置到 Buff 表中');
+        return;
+    }
     let arr = addContext.parent ? findNode(addContext.parent)?.[addContext.branch] : c.effect;
     if (!Array.isArray(arr)) {
         return showToast('目标节点不可添加子效果');
     }
     let n = createEffect(type);
+    if (c.type === 'POWER') {
+        n.params.duration = 'COMBAT';
+        n.target = 'SELF';
+    }
     arr.push(n);
     selectedNode = n.id;
     document.getElementById('catalogOverlay').classList.remove('show');

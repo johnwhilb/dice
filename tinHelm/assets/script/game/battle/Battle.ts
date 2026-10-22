@@ -167,6 +167,5 @@ export class Battle extends CCEntity {
         this.BattleBll.generateEnemy();
         this.BattleEnemyBll.initEnemy();
         this.BattlePlayerBll.initPlayer();
-        this.BattleEnemyMechanicBll.initializeMechanics();
     }
 }

@@ -18,6 +18,7 @@ export class BattleBll extends CCBusiness<Battle> {
         model.busy = true;
         return (async () => {
             this.ent.initBattleSceneInfo();
+            await this.ent.BattleEnemyMechanicBll.initializeMechanics();
             await this.ent.BattleEquipmentBll.initializeEquipment();
             if (this.checkResult(runId)) {
                 return;

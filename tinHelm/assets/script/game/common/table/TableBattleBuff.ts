@@ -1,5 +1,11 @@
 import { BaseBattleBuff } from "./BaseBattleBuff";
 import { BattleBuffTypeEnum } from "./BattleBuffTypeEnum";
+import type { BattleEffect } from '../../battle/model/BattleTypes';
+export enum BattleBuffRuleKind {
+    SkillFreeExhaust = 'SKILL_FREE_EXHAUST',
+    FirstBlockDouble = 'FIRST_BLOCK_DOUBLE',
+    VulnerableBonus = 'VULNERABLE_BONUS'
+}
 export enum BattleBuffCategory {
     Buff = 'BUFF',
     Debuff = 'DEBUFF'
@@ -17,6 +23,16 @@ export enum BattleBuffStackMode {
  * 可以在这里安全编写项目自己的方法。
  */
 export class TableBattleBuff extends BaseBattleBuff {
+    /** 读取能力获得时执行的效果；事件监听随所属Buff一起移除。 */
+    getEffects(): BattleEffect[] {
+        return this.effects || [];
+    }
+
+    /** 读取持续生效的结算规则，每层按配置数值累计。 */
+    getRules(): Partial<Record<BattleBuffRuleKind, number>> {
+        return this.rules || {};
+    }
+
     static isBuffId(value: number): value is BattleBuffTypeEnum {
         return !!this.getConfigById(value);
     }
@@ -39,6 +55,14 @@ export class TableBattleBuff extends BaseBattleBuff {
             return config.stackMode === mode;
         }) || !Number.isSafeInteger(config.maxStacks) || config.maxStacks < 1) {
             throw new Error(`Buff分类、叠加方式或层数上限无效：${id}`);
+        }
+        if (!Array.isArray(config.effects) || !config.rules || typeof config.rules !== 'object'
+            || Array.isArray(config.rules) || Object.entries(config.rules).some(([key, value]) => {
+                return !Object.values(BattleBuffRuleKind).some(kind => {
+                    return kind === key;
+                }) || typeof value !== 'number' || !Number.isFinite(value) || value < 0;
+            })) {
+            throw new Error(`Buff能力效果或规则无效：${id}`);
         }
         return config;
     }

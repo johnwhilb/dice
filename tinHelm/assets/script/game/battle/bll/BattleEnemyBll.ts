@@ -201,10 +201,10 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                     await this.ent.BattleDamageBll.addBlock(BattleSide.Enemy, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));
                     break;
                 case EnemyActionType.Buff:
-                    this.ent.BattleBuffBll.addBuff(BattleSide.Enemy, TableBattleBuff.requireBuffId(action.status), this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.duration);
+                    await this.ent.BattleBuffBll.addBuff(BattleSide.Enemy, TableBattleBuff.requireBuffId(action.status), this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.duration);
                     break;
                 case EnemyActionType.Debuff:
-                    this.ent.BattleBuffBll.addBuff(BattleSide.Player, TableBattleBuff.requireBuffId(action.status), this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.duration);
+                    await this.ent.BattleBuffBll.addBuff(BattleSide.Player, TableBattleBuff.requireBuffId(action.status), this.ent.BattleValueResolver.resolveNumber(action.stacks, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.duration);
                     break;
                 case EnemyActionType.Heal:
                     this.ent.BattleDamageBll.restoreHp(BattleSide.Enemy, this.ent.BattleValueResolver.resolveNumber(action.amount, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)));

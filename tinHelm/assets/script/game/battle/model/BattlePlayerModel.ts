@@ -39,7 +39,6 @@ export class BattlePlayerModel extends ecs.Comp {
     cardGrowth: Map<number, number> = new Map();
     freeInstanceTurns: Map<number, number> = new Map();
     nextInstanceId: number = -1;
-    cardRules: Record<string, number> = {};
     drawLocked: boolean = false;
     energyLocked: boolean = false;
     exhaustedThisTurn: number = 0;
@@ -82,7 +81,6 @@ export class BattlePlayerModel extends ecs.Comp {
         this.cardGrowth.clear();
         this.freeInstanceTurns.clear();
         this.nextInstanceId = -1;
-        this.cardRules = {};
         this.drawLocked = false;
         this.energyLocked = false;
         this.exhaustedThisTurn = 0;
