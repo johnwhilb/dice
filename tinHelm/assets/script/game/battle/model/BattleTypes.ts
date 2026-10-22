@@ -154,6 +154,9 @@ export interface BattleContext {
     /** 只有实际打出的卡牌使用卡牌加成，装备和持续触发效果不继承。 */
     cardPlay?: boolean;
     equipmentKey?: string;
+    buff?: BattleBuff;
+    buffSide?: BattleSide;
+    buffDepth?: number;
 }
 export interface BattleCardPlayedEvent extends BattleEventData {
     cardId: number;

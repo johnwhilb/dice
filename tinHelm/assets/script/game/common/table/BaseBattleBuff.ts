@@ -13,6 +13,8 @@ interface BattleBuffConfigData {
     maxStacks: number;
     decayAtTurnEnd: boolean;
     description: string;
+    effects: any[];
+    rules: Record<string, any>;
 }
 
 /**
@@ -193,5 +195,15 @@ export class BaseBattleBuff {
     /** 效果说明 */
     get description(): string {
         return this.data.description;
+    }
+
+    /** 能力获得效果与监听 */
+    get effects(): any[] {
+        return this.data.effects;
+    }
+
+    /** 持续结算规则 */
+    get rules(): Record<string, any> {
+        return this.data.rules;
     }
 }

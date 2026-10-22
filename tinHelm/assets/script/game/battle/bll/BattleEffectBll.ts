@@ -3,7 +3,7 @@ import { TableCard } from '../../common/table/TableCard';
 import { CardEvent, BattleTriggerEvent } from './BattleCardBll';
 import { BattleEffectTypeEnum } from '../../common/table/BattleEffectTypeEnum';
 import { TableBattleEffect } from '../../common/table/TableBattleEffect';
-import { TableBattleBuff } from '../../common/table/TableBattleBuff';
+import { TableBattleBuff, BattleBuffRuleKind } from '../../common/table/TableBattleBuff';
 import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
@@ -62,7 +62,8 @@ export class BattleEffectBll extends CCBusiness<Battle> {
     async executeEffects(effects: BattleEffect[], context: BattleContext, allowFinished = false): Promise<void> {
         for (const effect of effects) {
             if (context.runId !== this.ent.BattleModel.runId || this.ent.BattleModel.closed
-                || (!allowFinished && this.ent.BattleBll.isBattleFinished())) {
+                || (!allowFinished && this.ent.BattleBll.isBattleFinished())
+                || !this.ent.BattleBuffBll.isContextActive(context)) {
                 return;
             }
             if (effect.type !== BattleEffectTypeEnum.IF && !this.ent.BattleValueResolver.checkCondition(effect.condition, context)) {
@@ -127,8 +128,8 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                 const cardBlock = context.cardPlay && target === context.source && readAmount() > 0;
                 const bonus = cardBlock ? player.cardBlockBonus + player.nextCardBlockBonus : 0;
                 let multiplier = 1;
-                if (cardBlock && player.cardBlocksThisTurn === 0 && player.cardRules.FIRST_BLOCK_DOUBLE) {
-                    multiplier = Math.pow(2, player.cardRules.FIRST_BLOCK_DOUBLE);
+                if (cardBlock && player.cardBlocksThisTurn === 0 && buffs.getRuleValue(context.source, BattleBuffRuleKind.FirstBlockDouble)) {
+                    multiplier = Math.pow(2, buffs.getRuleValue(context.source, BattleBuffRuleKind.FirstBlockDouble));
                 }
                 if (cardBlock && readAmount() + bonus > 0) {
                     player.cardBlocksThisTurn++;
@@ -172,7 +173,7 @@ export class BattleEffectBll extends CCBusiness<Battle> {
             case BattleEffectTypeEnum.APPLY_STATUS: {
                 const id = TableBattleBuff.requireBuffId(status);
                 const previous = resolver.getBuffStacks(target, id);
-                buffs.addBuff(target, id, readNumberParam('stacks'), readTextParam('duration'));
+                await buffs.addBuff(target, id, readNumberParam('stacks'), readTextParam('duration'), context);
                 if (resolver.getBuffStacks(target, id) > previous) {
                     await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.StatusApplied, context.source, { status: id, target });
                 }
@@ -210,7 +211,7 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                     actor.block = Math.max(0, Math.floor(actor.block + readAmount()));
                 }
                 else {
-                    buffs.addBuff(target, TableBattleBuff.requireBuffId(stat), readAmount(), readTextParam('duration'));
+                    await buffs.addBuff(target, TableBattleBuff.requireBuffId(stat), readAmount(), readTextParam('duration'), context);
                 }
                 break;
             }
@@ -313,11 +314,6 @@ export class BattleEffectBll extends CCBusiness<Battle> {
                         break;
                     case 'NEXT_ATTACK_REPEAT':
                         player.nextAttackRepeats += amount;
-                        break;
-                    case 'SKILL_FREE_EXHAUST':
-                    case 'FIRST_BLOCK_DOUBLE':
-                    case 'VULNERABLE_BONUS':
-                        player.cardRules[kind] = (player.cardRules[kind] || 0) + amount;
                         break;
                     default:
                         throw new Error('不支持的卡牌规则：' + kind);

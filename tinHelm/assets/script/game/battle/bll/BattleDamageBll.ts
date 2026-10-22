@@ -1,3 +1,4 @@
+import { BattleBuffRuleKind } from '../../common/table/TableBattleBuff';
 import { BattleTriggerEvent } from './BattleCardBll';
 import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
@@ -16,7 +17,7 @@ export class BattleDamageBll extends CCBusiness<Battle> {
         if (kind === 'ATTACK') {
             damage = Math.max(0, damage + resolver.getBuffStacks(source, BattleBuffTypeEnum.STRENGTH));
             damage *= resolver.getBuffStacks(source, BattleBuffTypeEnum.WEAK) > 0 ? 0.75 : 1;
-            damage *= resolver.getBuffStacks(target, BattleBuffTypeEnum.VULNERABLE) > 0 ? 1.5 + (source === BattleSide.Player ? this.ent.BattlePlayerModel.cardRules.VULNERABLE_BONUS || 0 : 0) : 1;
+            damage *= resolver.getBuffStacks(target, BattleBuffTypeEnum.VULNERABLE) > 0 ? 1.5 + (source === BattleSide.Player ? this.ent.BattleBuffBll.getRuleValue(source, BattleBuffRuleKind.VulnerableBonus) : 0) : 1;
         }
         damage = this.ent.BattleBuffBll.calculateIncomingDamage(target, damage, kind);
         if (kind !== 'HP_LOSS' && resolver.getBuffStacks(target, BattleBuffTypeEnum.INTANGIBLE) > 0) {
@@ -42,7 +43,7 @@ export class BattleDamageBll extends CCBusiness<Battle> {
         }
         if (hpLoss > 0) {
             if (kind === 'ATTACK') {
-                this.ent.BattleBuffBll.applyAttackHpLoss(target);
+                await this.ent.BattleBuffBll.applyAttackHpLoss(target);
             }
             if (target === BattleSide.Enemy) {
                 if (kind === 'ATTACK') {

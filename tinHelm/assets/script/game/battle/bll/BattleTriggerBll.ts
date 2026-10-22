@@ -42,7 +42,8 @@ export class BattleTriggerBll extends CCBusiness<Battle> {
                 break;
             }
             if (trigger.event !== event || trigger.owner !== owner || trigger.active
-                || trigger.remaining === 0 || trigger.dueTurn > model.turn) {
+                || trigger.remaining === 0 || trigger.dueTurn > model.turn
+                || !this.ent.BattleBuffBll.isContextActive(trigger.context)) {
                 continue;
             }
             if (!Object.entries(trigger.filter).every(([key, value]) => {
@@ -55,9 +56,12 @@ export class BattleTriggerBll extends CCBusiness<Battle> {
                 trigger.remaining--;
             }
             await (async () => {
-                await this.ent.BattleEffectBll.executeEffects(trigger.effects, {
-                    ...trigger.context, variables: { ...trigger.context.variables }, event: data
-                }, event === BattleTriggerEvent.CombatEnd || event === BattleTriggerEvent.EnemyDied);
+                const layers = Math.max(0, trigger.context.buff?.stacks || 1);
+                for (let layer = 0; layer < layers; layer++) {
+                    await this.ent.BattleEffectBll.executeEffects(trigger.effects, {
+                        ...trigger.context, variables: { ...trigger.context.variables }, event: data
+                    }, event === BattleTriggerEvent.CombatEnd || event === BattleTriggerEvent.EnemyDied);
+                }
             })().finally(() => {
                 trigger.active = false;
             });
@@ -66,7 +70,7 @@ export class BattleTriggerBll extends CCBusiness<Battle> {
             return;
         }
         model.triggers = model.triggers.filter(trigger => {
-            return trigger.remaining !== 0;
+            return trigger.remaining !== 0 && this.ent.BattleBuffBll.isContextActive(trigger.context);
         });
         if (event === BattleTriggerEvent.CombatStart) {
             await this.ent.BattleCardBll.triggerCards(CardEvent.CombatStart, owner);

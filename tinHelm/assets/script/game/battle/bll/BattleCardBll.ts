@@ -1,3 +1,4 @@
+import { BattleBuffRuleKind } from '../../common/table/TableBattleBuff';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
 import { TableCard } from '../../common/table/TableCard';
@@ -236,7 +237,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
             player.resolutionDepth--;
             player.resolvingCards.splice(player.resolvingCards.indexOf(cardId), 1);
             if (exhaustAfter || card.flags.exhaust
-                || (card.type === 'SKILL' && player.cardRules.SKILL_FREE_EXHAUST)) {
+                || (card.type === 'SKILL' && this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.SkillFreeExhaust))) {
                 player.exhaustPile.push(cardId);
                 player.exhaustedThisTurn++;
                 await this.runCardEvent(cardId, CardEvent.Exhausted, context);
@@ -438,7 +439,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
     // 读取专属于技能、攻击或当前实例的免骰资格。
     private hasSpecificFreeCard(card: TableCard): boolean {
         const player = this.ent.BattlePlayerModel;
-        return !!(card.type === 'SKILL' && player.cardRules.SKILL_FREE_EXHAUST)
+        return !!(card.type === 'SKILL' && this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.SkillFreeExhaust))
             || (card.type === 'ATTACK' && player.nextAttackFree > 0)
             || player.freeInstanceTurns.get(card.id) === this.ent.BattleModel.turn;
     }
