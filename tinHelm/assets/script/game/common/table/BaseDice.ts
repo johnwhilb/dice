@@ -8,7 +8,7 @@ import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
 interface DiceConfigData {
     name: string;
     des: string;
-    role: number;
+    role: any[];
     diceNum: any[];
 }
 
@@ -167,8 +167,8 @@ export class BaseDice {
         return this.data.des;
     }
 
-    /** 所属角色 */
-    get role(): number {
+    /** 可使用角色 */
+    get role(): any[] {
         return this.data.role;
     }
 

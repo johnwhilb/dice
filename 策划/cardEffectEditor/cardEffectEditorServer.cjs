@@ -1,14 +1,14 @@
 /**
  * @typedef {import('../../tinHelm/assets/script/game/battle/model/BattleTypes').BattleEffect} BattleEffect
  * @typedef {import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyBehaviorNode & {editorX?:number,editorY?:number}} EditorBehaviorNode
- * @typedef {{id:number|string,name:string,role:number,level:number,price:number,DiceNeed:number[],des:string,type:string,target:string,upId?:number|string|null,flags:Record<string,boolean>,effect:BattleEffect[]}} EditorCard
+ * @typedef {{id:number|string,name:string,role:number,level:number,price:number,DiceNeed:number[],des:string,type:string,target:string,upId?:number|string|null,flags:Record<string,boolean|number|string>,effect:BattleEffect[]}} EditorCard
  * @typedef {{id:number,name:string,hp:number,behavior:EditorBehaviorNode,mechanics:import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyMechanics}} EditorEnemy
  * @typedef {{id:number,type:string,name:string,category:string,stackMode:string,maxStacks:number,decayAtTurnEnd:boolean,description:string,effects:BattleEffect[],rules:Record<string,number>}} BuffConfig
  * @typedef {{key:string,label:string,kind:string,options:(number|string)[]|null}} EffectField
  * @typedef {{id:number,type:string,name:string,category:string,description:string,defaultTarget:string,defaultParams:import('../../tinHelm/assets/script/game/battle/model/BattleTypes').BattleEffectParams,fields:EffectField[],container:string,cardEnabled:boolean,enemyEnabled:boolean}} EffectConfig
  * @typedef {{node:BattleEffect,arr:BattleEffect[],index:number,parent:BattleEffect|null,branch:string}} EffectLocation
  */
-/** @typedef {{revision:string,workbooks:import("../../tinHelm/extensions/oops-plugin-excel-to-json/node_modules/exceljs").Workbook[],roles:Array<{id:number,name:string}>,cards:EditorCard[],dice:Array<{id:number,name:string,role:number,diceNum:number[]}>,buffs:BuffConfig[],effects:EffectConfig[]}} EditorTables */
+/** @typedef {{revision:string,workbooks:import("../../tinHelm/extensions/oops-plugin-excel-to-json/node_modules/exceljs").Workbook[],roles:Array<{id:number,name:string}>,cards:EditorCard[],dice:Array<{id:number,name:string,role:number[],diceNum:number[]}>,buffs:BuffConfig[],effects:EffectConfig[]}} EditorTables */
 const http = require('http');
 const fs = require('fs').promises;
 const path = require('path');
@@ -36,7 +36,7 @@ function validateBuffRows(rows) {
         ids.add(row.id);
         types.add(row.type);
         for (const [kind, amount] of Object.entries(row.rules)) {
-            if (!['SKILL_FREE_EXHAUST', 'FIRST_BLOCK_DOUBLE', 'VULNERABLE_BONUS'].includes(kind)
+            if (!['SKILL_FREE_EXHAUST', 'FIRST_BLOCK_DOUBLE', 'VULNERABLE_BONUS', 'SHIV_DAMAGE', 'SHIV_RETAIN', 'FIRST_SHIV_DAMAGE', 'POISON_REPEATS', 'SLY_SKILLS', 'WEAK_ATTACK_DOUBLE', 'BLADE_REPEAT', 'BLADE_BLOCK', 'FREE_CARDS_PER_TURN'].includes(kind)
                 || typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
                 throw new Error(`${row.name}：持续规则或数值无效`);
             }
@@ -141,7 +141,7 @@ function validateCards(cards, data, buffEffects = false) {
         }
         if (!['SELF', 'ENEMY'].includes(card.target) || !Array.isArray(card.DiceNeed) || card.DiceNeed.length > 5 || card.DiceNeed.some(diceId => {
             return !data.dice.some(dice => {
-                return dice.id === diceId && dice.role === Number(card.role);
+                return dice.id === diceId && Array.isArray(dice.role) && dice.role.includes(Number(card.role));
             });
         })) {
             throw new Error(`${id}：目标或骰子条件无效（只能使用所属角色的骰子，最多 5 个）`);
@@ -158,8 +158,13 @@ function validateCards(cards, data, buffEffects = false) {
             || !card.flags || typeof card.flags !== 'object' || Array.isArray(card.flags)) {
             throw new Error(`${id}：卡牌类型或特殊属性无效`);
         }
+        if (card.flags.starCost !== undefined && (!Number.isSafeInteger(card.flags.starCost) || card.flags.starCost < 0 || card.flags.starCost > 999)
+            || card.flags.sly !== undefined && typeof card.flags.sly !== 'boolean'
+            || card.flags.archetype !== undefined && !['SHIV', 'SOVEREIGN_BLADE'].includes(card.flags.archetype)) {
+            throw new Error(`${id}：星星费用、奇巧或衍生牌类型无效`);
+        }
         if (card.flags.discountDice && !data.dice.some(dice => {
-            return dice.id === card.flags.discountDice && dice.role === Number(card.role);
+            return dice.id === card.flags.discountDice && Array.isArray(dice.role) && dice.role.includes(Number(card.role));
         }) || card.flags.discountMax !== undefined && (!Number.isSafeInteger(card.flags.discountMax)
             || card.flags.discountMax < 0 || card.flags.discountMax > 5)) {
             throw new Error(`${id}：减免骰子必须属于当前角色，数量必须是 0–5 的整数`);
@@ -176,7 +181,9 @@ function validateCards(cards, data, buffEffects = false) {
                 const params = node.params;
                 if ([BattleEffectTypeEnum.MOVE_CARD, BattleEffectTypeEnum.COPY_CARD, BattleEffectTypeEnum.PLAY_CARD,
                     BattleEffectTypeEnum.TRANSFORM_CARD, BattleEffectTypeEnum.GENERATE_CARD,
-                    BattleEffectTypeEnum.GROW_CARD, BattleEffectTypeEnum.CARD_RULE].includes(node.type) && node.target !== 'SELF') {
+                    BattleEffectTypeEnum.GROW_CARD, BattleEffectTypeEnum.CARD_RULE,
+                    BattleEffectTypeEnum.GAIN_STARS, BattleEffectTypeEnum.FORGE,
+                    BattleEffectTypeEnum.SUMMON_BLADE, BattleEffectTypeEnum.END_TURN].includes(node.type) && node.target !== 'SELF') {
                     throw new Error(`${id}：卡牌机制只支持 SELF`);
                 }
                 if (!params || typeof params !== 'object' || Array.isArray(params)
@@ -198,6 +205,14 @@ function validateCards(cards, data, buffEffects = false) {
                         return Number(targetCard.id) === params.cardId && (buffEffects || Number(targetCard.role) === Number(card.role));
                     })) {
                     throw new Error(`${id}：变化目标必须是当前角色的有效卡牌`);
+                }
+                if ((node.type === BattleEffectTypeEnum.FORGE || node.type === BattleEffectTypeEnum.GENERATE_CARD && params.cardId)
+                    && !(buffEffects ? data.cards : cards).some(targetCard => {
+                        return Number(targetCard.id) === params.cardId
+                            && (buffEffects || Number(targetCard.role) === Number(card.role))
+                            && (node.type !== BattleEffectTypeEnum.FORGE || targetCard.flags.archetype === 'SOVEREIGN_BLADE');
+                    })) {
+                    throw new Error(`${id}：生成或铸造的目标卡牌不存在、角色不符或不是君王之剑`);
                 }
                 if ([BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.GAIN_ENERGY].includes(node.type)) {
                     if (node.target !== 'SELF') {

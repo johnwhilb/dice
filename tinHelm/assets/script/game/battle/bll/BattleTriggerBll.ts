@@ -21,6 +21,7 @@ export class BattleTriggerBll extends CCBusiness<Battle> {
     scheduleEffects(when: string, times: number, effects: BattleEffect[], context: BattleContext): void {
         const events: Record<string, BattleTriggerEvent> = {
             NEXT_TURN_START: BattleTriggerEvent.TurnStart, NEXT_TURN_END: BattleTriggerEvent.TurnEnd,
+            NEXT_HAND_READY: BattleTriggerEvent.HandReady,
             TURN_END: BattleTriggerEvent.TurnEnd, COMBAT_END: BattleTriggerEvent.CombatEnd, AFTER_ENEMY_TURN: BattleTriggerEvent.AfterEnemyTurn
         };
         const event = events[when];

@@ -104,6 +104,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
                 const buff = { id, stacks: 1, duration, expiresTurn };
                 resolver.getActor(side).buffs.push(buff);
                 const abilityContext = resolver.createContext(side, context?.cardId || 0);
+                abilityContext.equipmentKey = `ability${id}Instance${this.ent.BattlePlayerModel.nextAbilityId--}`;
                 abilityContext.buff = buff;
                 abilityContext.buffSide = side;
                 abilityContext.buffDepth = depth;
@@ -202,8 +203,12 @@ export class BattleBuffBll extends CCBusiness<Battle> {
             actor.block = side === BattleSide.Player
                 ? Math.min(actor.block, this.ent.BattlePlayerModel.retainedBlockLimit) : 0;
         }
-        const poison = resolver.getBuffStacks(side, BattleBuffTypeEnum.POISON);
-        if (poison > 0) {
+        const repeats = 1 + this.getRuleValue(resolver.getOppositeSide(side), BattleBuffRuleKind.PoisonRepeats);
+        for (let tick = 0; tick < Math.min(100, repeats) && !this.ent.BattleBll.isBattleFinished(runId); tick++) {
+            const poison = resolver.getBuffStacks(side, BattleBuffTypeEnum.POISON);
+            if (poison <= 0) {
+                break;
+            }
             await this.ent.BattleDamageBll.applyDamage(resolver.getOppositeSide(side), side, poison, 'HP_LOSS', true);
             if (runId === this.ent.BattleModel.runId) {
                 this.removeBuff(side, BattleBuffTypeEnum.POISON, 1);
@@ -265,7 +270,9 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         const ids = Array.from(new Set(actor.buffs.map(buff => {
             return buff.id;
         })));
-        return [`格挡 ${actor.block}`, ...ids.map(id => {
+        const resources = side === BattleSide.Player && (this.ent.BattlePlayerModel.usesStars || this.ent.BattlePlayerModel.stars > 0)
+            ? [`星星 ${this.ent.BattlePlayerModel.stars}`] : [];
+        return [...resources, `格挡 ${actor.block}`, ...ids.map(id => {
                 return `${this.getBuffName(id)} ${this.ent.BattleValueResolver.getBuffStacks(side, id)}`;
             })].join('  ');
     }

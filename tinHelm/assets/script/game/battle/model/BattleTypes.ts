@@ -23,6 +23,10 @@ export enum BattleSide {
     Player = 'PLAYER',
     Enemy = 'ENEMY'
 }
+export enum BattleCardArchetype {
+    Shiv = 'SHIV',
+    SovereignBlade = 'SOVEREIGN_BLADE'
+}
 export enum EnemyBehaviorNodeType {
     Selector = 'SELECTOR',
     Random = 'RANDOM',

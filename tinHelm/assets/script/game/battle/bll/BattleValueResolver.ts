@@ -148,6 +148,14 @@ export class BattleValueResolver extends CCBusiness<Battle> {
                 exhaustCount: player.exhaustPile.length, exhaustedThisTurn: player.exhaustedThisTurn,
                 hpLossCount: player.hpLossCount, hpLossThisTurn: player.hpLossThisTurn,
                 attacksPlayed: player.attacksPlayed,
+                skillsPlayed: player.skillsPlayed, cardsPlayed: player.cardsPlayed,
+                cardsPlayedLastTurn: player.cardsPlayedLastTurn, cardsCreated: player.cardsCreated,
+                discardedThisTurn: player.discardedThisTurn, cardsDrawn: player.cardsDrawn,
+                stars: player.stars, starsSpentThisTurn: player.starsSpentThisTurn,
+                handCount: player.handCards.length, drawCount: player.drawPile.length,
+                handSkillCount: player.handCards.filter(id => {
+                    return this.ent.BattleCardBll.getCard(id).type === 'SKILL';
+                }).length,
                 playerTurn: [BattlePhase.PlayerStart, BattlePhase.PlayerAction, BattlePhase.PlayerEnd].includes(this.ent.BattleModel.phase) ? 1 : 0,
                 handAttackCount: player.handCards.filter(id => {
                     return this.ent.BattleCardBll.getCard(id).type === 'ATTACK';
@@ -168,13 +176,17 @@ export class BattleValueResolver extends CCBusiness<Battle> {
             return context.variables.totalHpLoss;
         }
         const variable = field ? field : scope;
-        const name = context.equipmentKey ? context.equipmentKey + '.' + variable : variable;
+        const name = this.getVariableName(variable, context);
         for (const variables of [context.variables, this.ent.BattleModel.turnVariables, this.ent.BattleModel.combatVariables]) {
             if (Object.prototype.hasOwnProperty.call(variables, name)) {
                 return variables[name];
             }
         }
         throw new Error(`变量尚未初始化：${name}`);
+    }
+    // 为每件装备与每层能力隔离持久计数，防止不同能力相互覆盖。
+    getVariableName(variable: string, context: BattleContext): string {
+        return context.equipmentKey ? context.equipmentKey + '.' + variable : variable;
     }
     // 检查组合条件与数值比较结果。
     checkCondition(condition: BattleCondition | undefined, context: BattleContext): boolean {

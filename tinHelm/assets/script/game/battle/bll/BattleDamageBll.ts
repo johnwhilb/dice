@@ -17,6 +17,9 @@ export class BattleDamageBll extends CCBusiness<Battle> {
         if (kind === 'ATTACK') {
             damage = Math.max(0, damage + resolver.getBuffStacks(source, BattleBuffTypeEnum.STRENGTH));
             damage *= resolver.getBuffStacks(source, BattleBuffTypeEnum.WEAK) > 0 ? 0.75 : 1;
+            if (resolver.getBuffStacks(target, BattleBuffTypeEnum.WEAK) > 0) {
+                damage *= Math.pow(2, this.ent.BattleBuffBll.getRuleValue(source, BattleBuffRuleKind.WeakAttackDouble));
+            }
             damage *= resolver.getBuffStacks(target, BattleBuffTypeEnum.VULNERABLE) > 0 ? 1.5 + (source === BattleSide.Player ? this.ent.BattleBuffBll.getRuleValue(source, BattleBuffRuleKind.VulnerableBonus) : 0) : 1;
         }
         damage = this.ent.BattleBuffBll.calculateIncomingDamage(target, damage, kind);

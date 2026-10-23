@@ -104,7 +104,7 @@ export class BattleView extends CCView<Battle> {
         this.updateCardList();
         this.updateItemList();
         const diceConfigs = TableDice.getAllConfig().filter(dice => {
-            return dice.role === player.playerId;
+            return dice.canUseBy(player.playerId);
         });
         this.getNode('diceLayout')!.children.forEach((dice, index) => {
             dice.active = index < player.dice.length;
