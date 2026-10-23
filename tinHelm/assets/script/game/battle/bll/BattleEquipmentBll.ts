@@ -40,6 +40,11 @@ export class BattleEquipmentBll extends CCBusiness<Battle> {
         player.nextAttackRepeats = 0;
         player.cardsPlayed = 0;
         player.attacksPlayed = 0;
+        player.skillsPlayed = 0;
+        player.shivsPlayed = 0;
+        player.starsSpentThisTurn = 0;
+        player.discardedThisTurn = 0;
+        player.endTurnRequested = false;
         player.handLimit = player.baseHandLimit;
         if (player.freeDiceExpiresTurn < this.ent.BattleModel.turn) {
             player.freeDiceCards = player.combatFreeDiceCards;

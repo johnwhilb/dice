@@ -38,7 +38,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <script>/**
  * @typedef {import('../../tinHelm/assets/script/game/battle/model/BattleTypes').BattleEffect} BattleEffect
  * @typedef {import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyBehaviorNode & {editorX?:number,editorY?:number}} EditorBehaviorNode
- * @typedef {{id:number|string,name:string,role:number,level:number,price:number,DiceNeed:number[],des:string,type:string,target:string,upId?:number|string|null,flags:Record<string,boolean>,effect:BattleEffect[]}} EditorCard
+ * @typedef {{id:number|string,name:string,role:number,level:number,price:number,DiceNeed:number[],des:string,type:string,target:string,upId?:number|string|null,flags:Record<string,boolean|number|string>,effect:BattleEffect[]}} EditorCard
  * @typedef {{id:number,name:string,hp:number,behavior:EditorBehaviorNode,mechanics:import('../../tinHelm/assets/script/game/battle/model/BattleTypes').EnemyMechanics}} EditorEnemy
  * @typedef {{id:number,type:string,name:string,category:string,stackMode:string,maxStacks:number,decayAtTurnEnd:boolean,description:string}} BuffConfig
  * @typedef {{key:string,label:string,kind:string,options:(number|string)[]|null}} EffectField
@@ -521,7 +521,7 @@ function renderCardForm() {
         return '<div class="field"><label>' + label + '（' + key + '）' + createHelpButton(key) + '</label><select class="select" data-card-field="' + key + '">' + selectHtml(options, card[key]) + '</select></div>';
     };
     const available = dice.filter(item => {
-        return item.role === card.role;
+        return Array.isArray(item.role) && item.role.includes(card.role);
     });
     form.innerHTML = '<div class="fields">' + input('id', '卡牌 ID', 'number') + input('name', '名称') + select('level', '等级（1 最低，3 最高）', [1, 2, 3]) + input('price', '价格', 'number') + select('target', '出牌目标', ['SELF', 'ENEMY']) + select('type', '类型', ['ATTACK', 'SKILL', 'POWER', 'STATUS', 'CURSE']) + input('upId', '升级目标 ID', 'number') + '<div class="field"><label>所属角色（role）' + createHelpButton('role') + '</label><input class="input" readonly value="' + escapeAttribute(roles.find(role => {
         return role.id === card.role;
@@ -532,12 +532,14 @@ function renderCardForm() {
         return '<button class="btn tiny ' + (item ? '' : 'danger') + '" data-remove-dice="' + index + '">' + escapeHtml(item ? item.name : '不属于此角色：' + id) + ' ×</button>';
     }).join('') + '</div><div class="split"><select class="select" id="diceSelect">' + available.map(item => {
         return '<option value="' + item.id + '">' + escapeHtml(item.name) + ' · ' + item.id + ' · 骰面 ' + escapeHtml(item.diceNum.join('/')) + '</option>';
-    }).join('') + '</select><button class="btn" id="addDiceBtn" ' + (card.DiceNeed.length >= 5 || !available.length ? 'disabled' : '') + '>＋ 添加触发条件</button></div></div><div class="field span4"><label>描述（des）' + createHelpButton('des') + '</label><textarea class="textarea" data-card-field="des">' + escapeHtml(card.des) + '</textarea></div><div class="field span4"><label>特殊属性（flags）' + createHelpButton('flags') + '</label><div class="flagline">' + ['exhaust', 'retain', 'ethereal', 'innate', 'unplayable', 'generated', 'special', 'starterOnly'].map(key => {
-        return '<label class="check"><input type="checkbox" data-card-flag="' + key + '" ' + (card.flags[key] ? 'checked' : '') + '/>' + ({ exhaust: '消耗', retain: '保留', ethereal: '虚无', innate: '固有', unplayable: '不可打出', generated: '仅衍生', special: '特殊获取', starterOnly: '仅初始' }[key]) + '</label>';
+    }).join('') + '</select><button class="btn" id="addDiceBtn" ' + (card.DiceNeed.length >= 5 || !available.length ? 'disabled' : '') + '>＋ 添加触发条件</button></div></div><div class="field span4"><label>描述（des）' + createHelpButton('des') + '</label><textarea class="textarea" data-card-field="des">' + escapeHtml(card.des) + '</textarea></div><div class="field span4"><label>特殊属性（flags）' + createHelpButton('flags') + '</label><div class="flagline">' + ['exhaust', 'retain', 'ethereal', 'innate', 'unplayable', 'generated', 'special', 'starterOnly', 'sly'].map(key => {
+        return '<label class="check"><input type="checkbox" data-card-flag="' + key + '" ' + (card.flags[key] ? 'checked' : '') + '/>' + ({ exhaust: '消耗', retain: '保留', ethereal: '虚无', innate: '固有', unplayable: '不可打出', generated: '仅衍生', special: '特殊获取', starterOnly: '仅初始', sly: '奇巧' }[key]) + '</label>';
     }).join('') + '</div></div></div>';
     form.insertAdjacentHTML('beforeend', '<div class="fields"><div class="field"><label>每打出一张攻击牌，减免的骰子花色</label><select class="select" data-card-flag-number="discountDice"><option value="0">不减免</option>' + available.map(item => {
         return '<option value="' + item.id + '" ' + (Number(card.flags.discountDice) === item.id ? 'selected' : '') + '>' + escapeHtml(item.name) + '</option>';
     }).join('') + '</select></div><div class="field"><label>最多减免骰子数量</label><input class="input" type="number" min="0" max="5" data-card-flag-number="discountMax" value="' + escapeAttribute(card.flags.discountMax || 0) + '" /></div></div>');
+    form.insertAdjacentHTML('beforeend', '<div class="fields"><div class="field"><label>星星费用（免骰仍须支付）</label><input class="input" type="number" min="0" max="999" data-card-flag-number="starCost" value="' + escapeAttribute(card.flags.starCost || 0) + '" /></div><div class="field"><label>衍生牌类型（flags.archetype）</label><select class="select" data-card-flag-text="archetype">' + selectHtml(['', 'SHIV', 'SOVEREIGN_BLADE'], card.flags.archetype || '') + '</select></div></div>');
+
 }
 /**
  * @returns {string}
@@ -651,7 +653,7 @@ function renderInspector() {
     header.textContent = d?.label || n.type;
     badge.textContent = n.type;
     sub.textContent = d?.hint || '未知扩展类型：使用 JSON 编辑';
-    let form = `<div class="ins-group"><h3>通用配置</h3><div class="ins-stack"><div class="field"><label>效果类型（type）${createHelpButton('type')}</label><input class="input mono" readonly value="${escapeAttribute(n.type)}"/></div><div class="field"><label>作用目标（target）${createHelpButton('target')}</label><select class="select" data-node-field="target">${selectHtml([BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.GAIN_ENERGY, BattleEffectTypeEnum.MOVE_CARD, BattleEffectTypeEnum.COPY_CARD, BattleEffectTypeEnum.PLAY_CARD, BattleEffectTypeEnum.TRANSFORM_CARD, BattleEffectTypeEnum.GENERATE_CARD, BattleEffectTypeEnum.GROW_CARD, BattleEffectTypeEnum.CARD_RULE].includes(n.type) ? ['SELF'] : commonTargets, n.target || 'SELF')}</select></div>${!findNodeLocation(n.id)?.parent ? `<div class="field"><label>该卡效果触发时机（根节点）${createHelpButton('trigger')}</label><select class="select" data-node-field="trigger">${selectHtml(TRIGGER_EVENTS, n.trigger || 'ON_PLAY')}</select></div>` : ''}<div class="field"><label>备注（note）${createHelpButton('note')}</label><input class="input" data-node-field="note" value="${escapeAttribute(n.note || '')}" placeholder="可选" /></div></div></div>`;
+    let form = `<div class="ins-group"><h3>通用配置</h3><div class="ins-stack"><div class="field"><label>效果类型（type）${createHelpButton('type')}</label><input class="input mono" readonly value="${escapeAttribute(n.type)}"/></div><div class="field"><label>作用目标（target）${createHelpButton('target')}</label><select class="select" data-node-field="target">${selectHtml([BattleEffectTypeEnum.DRAW, BattleEffectTypeEnum.GAIN_ENERGY, BattleEffectTypeEnum.MOVE_CARD, BattleEffectTypeEnum.COPY_CARD, BattleEffectTypeEnum.PLAY_CARD, BattleEffectTypeEnum.TRANSFORM_CARD, BattleEffectTypeEnum.GENERATE_CARD, BattleEffectTypeEnum.GROW_CARD, BattleEffectTypeEnum.CARD_RULE, BattleEffectTypeEnum.GAIN_STARS, BattleEffectTypeEnum.FORGE, BattleEffectTypeEnum.SUMMON_BLADE, BattleEffectTypeEnum.END_TURN].includes(n.type) ? ['SELF'] : commonTargets, n.target || 'SELF')}</select></div>${!findNodeLocation(n.id)?.parent ? `<div class="field"><label>该卡效果触发时机（根节点）${createHelpButton('trigger')}</label><select class="select" data-node-field="trigger">${selectHtml(TRIGGER_EVENTS, n.trigger || 'ON_PLAY')}</select></div>` : ''}<div class="field"><label>备注（note）${createHelpButton('note')}</label><input class="input" data-node-field="note" value="${escapeAttribute(n.note || '')}" placeholder="可选" /></div></div></div>`;
     form += `<div class="ins-group"><h3>效果参数</h3><div class="ins-stack">${d?.fields?.length ? d.fields.map(x => {
         return renderParamField(x, n.params);
     }).join('') : '<div class="helper">此类型无需参数。如需扩展，可在下方编辑节点 JSON。</div>'}</div></div>`;
@@ -690,10 +692,13 @@ function getValidationMessages() {
         }
         if (!['SELF', 'ENEMY'].includes(card.target) || card.DiceNeed.length > 5 || card.DiceNeed.some(id => {
             return !dice.some(item => {
-                return item.id === id && item.role === card.role;
+                return item.id === id && Array.isArray(item.role) && item.role.includes(card.role);
             });
         })) {
             messages.push(['error', card.name + '（' + card.id + '）：目标或骰子条件无效，请选用当前角色骰子，最多 5 个']);
+        }
+        if (card.flags.starCost !== undefined && (!Number.isSafeInteger(card.flags.starCost) || card.flags.starCost < 0 || card.flags.starCost > 999)) {
+            messages.push(['error', card.name + '：星星费用必须为0–999的整数']);
         }
         walkNodes(card.effect, node => {
             if (!catalog[node.type] || !['SELF', 'ENEMY'].includes(node.target)) {
@@ -1350,6 +1355,16 @@ document.getElementById('cardForm').addEventListener('input', e => {
     }
 });
 document.getElementById('cardForm').addEventListener('change', e => {
+    if (e.target.dataset.cardFlagText) {
+        const card = getCurrentCard();
+        if (e.target.value) {
+            card.flags[e.target.dataset.cardFlagText] = e.target.value;
+        }
+        else {
+            delete card.flags[e.target.dataset.cardFlagText];
+        }
+        scheduleSave();
+    }
     if (e.target.dataset.cardFlagNumber) {
         getCurrentCard().flags[e.target.dataset.cardFlagNumber] = Number(e.target.value);
         scheduleSave();
@@ -1505,7 +1520,7 @@ document.getElementById('cardForm').addEventListener('click', event => {
     else if (card.DiceNeed.length < 5) {
         const id = Number(document.getElementById('diceSelect').value);
         if (!dice.some(item => {
-            return item.id === id && item.role === card.role;
+            return item.id === id && Array.isArray(item.role) && item.role.includes(card.role);
         })) {
             return;
         }

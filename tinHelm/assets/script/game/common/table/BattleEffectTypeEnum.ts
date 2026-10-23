@@ -35,4 +35,8 @@ export enum BattleEffectTypeEnum {
     GENERATE_CARD = 210045,
     GROW_CARD = 210046,
     CARD_RULE = 210047,
+    GAIN_STARS = 210048,
+    FORGE = 210049,
+    SUMMON_BLADE = 210050,
+    END_TURN = 210051,
 }

@@ -48,6 +48,19 @@ export class BattlePlayerModel extends ecs.Comp {
     nextAttackFree: number = 0;
     nextAttackRepeats: number = 0;
     resolutionDepth: number = 0;
+    stars: number = 0;
+    usesStars: boolean = false;
+    starsSpentThisTurn: number = 0;
+    shivsPlayed: number = 0;
+    skillsPlayed: number = 0;
+    cardsPlayedLastTurn: number = 0;
+    cardsCreated: number = 0;
+    discardedThisTurn: number = 0;
+    cardsDrawn: number = 0;
+    sovereignBladeId: number = 0;
+    endTurnRequested: boolean = false;
+    endingHand: boolean = false;
+    nextAbilityId: number = -1;
     reset(): void {
         this.turn = 1;
         this.dice = [];
@@ -90,5 +103,18 @@ export class BattlePlayerModel extends ecs.Comp {
         this.nextAttackFree = 0;
         this.nextAttackRepeats = 0;
         this.resolutionDepth = 0;
+        this.stars = 0;
+        this.usesStars = false;
+        this.starsSpentThisTurn = 0;
+        this.shivsPlayed = 0;
+        this.skillsPlayed = 0;
+        this.cardsPlayedLastTurn = 0;
+        this.cardsCreated = 0;
+        this.discardedThisTurn = 0;
+        this.cardsDrawn = 0;
+        this.sovereignBladeId = 0;
+        this.endTurnRequested = false;
+        this.endingHand = false;
+        this.nextAbilityId = -1;
     }
 }

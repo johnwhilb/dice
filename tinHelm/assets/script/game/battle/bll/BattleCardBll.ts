@@ -4,7 +4,7 @@ import { Battle } from '../Battle';
 import { TableCard } from '../../common/table/TableCard';
 import { TableDice } from '../../common/table/TableDice';
 import { BattlePhase } from '../model/BattleModel';
-import { BattleCardPile, BattleCardPlayedEvent, BattleContext, BattleEffect, BattleSide, BattleEventData } from '../model/BattleTypes';
+import { BattleCardArchetype, BattleCardPile, BattleCardPlayedEvent, BattleContext, BattleEffect, BattleSide, BattleEventData } from '../model/BattleTypes';
 export enum CardEvent {
     Play = 'ON_PLAY',
     Drawn = 'ON_DRAWN',
@@ -45,17 +45,30 @@ export enum BattleTriggerEvent {
     EnergyChanged = 'ON_ENERGY_CHANGED',
     EnergySpent = 'ON_ENERGY_SPENT',
     BlockGained = 'ON_BLOCK_GAINED',
-    StatusApplied = 'ON_STATUS_APPLIED'
+    StatusApplied = 'ON_STATUS_APPLIED',
+    CardCreated = 'ON_CARD_CREATED',
+    StarsChanged = 'ON_STARS_CHANGED',
+    StarsSpent = 'ON_STARS_SPENT'
 }
 
 export class BattleCardBll extends CCBusiness<Battle> {
-    // 向指定牌堆添加配置中的卡牌。
-    addCard(cardId: number, count: number, pile: string): void {
+    // 等待卡牌加入指定牌堆及生成事件结算；敌人塞牌不触发玩家生成能力。
+    async addCard(cardId: number, count: number, pile: string, createdByPlayer = true): Promise<void> {
         const player = this.ent.BattlePlayerModel;
         const destination = pile === 'DRAW' ? player.drawPile : pile === 'HAND' ? player.handCards : player.discardPile;
         const capacity = pile === 'HAND' ? Math.max(0, player.handLimit - player.handCards.length) : 100;
         for (let index = 0; index < Math.min(capacity, Math.max(0, Math.floor(count))); index++) {
-            destination.push(this.createInstance(cardId));
+            if (pile === 'HAND' && player.handCards.length >= player.handLimit) {
+                break;
+            }
+            const id = this.createInstance(cardId);
+            destination.push(id);
+            if (createdByPlayer) {
+                await this.notifyCardCreated(id);
+            }
+            if (this.ent.BattleBll.isBattleFinished()) {
+                break;
+            }
         }
         this.ent.BattleBll.refreshBattleView();
     }
@@ -80,6 +93,9 @@ export class BattleCardBll extends CCBusiness<Battle> {
     // 校验牌组效果并安排固有牌的初始位置。
     initializeDeck(cards: number[]): void {
         const player = this.ent.BattlePlayerModel;
+        player.usesStars = TableCard.getAllConfig().some(card => {
+            return card.role === player.playerId && Number(card.flags.starCost) > 0;
+        });
         const deck = this.shuffleCards(cards.map(id => {
             return this.createInstance(id);
         }));
@@ -105,7 +121,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
             return null;
         }
         const card = this.getCard(player.handCards[index])!;
-        if (card.flags.unplayable) {
+        if (card.flags.unplayable || player.stars < this.getStarCost(card)) {
             return null;
         }
         if (this.isFreeCard(card)) {
@@ -130,7 +146,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
         }
         const player = this.ent.BattlePlayerModel;
         const dice = TableDice.getConfigById(diceNeed[needIndex])!;
-        if (dice.role !== player.playerId) {
+        if (!dice.canUseBy(player.playerId)) {
             return null;
         }
         for (const diceIndex of availableIndexes) {
@@ -190,6 +206,9 @@ export class BattleCardBll extends CCBusiness<Battle> {
             model.busy = false;
             await this.ent.BattleBll.finishResult();
             this.ent.BattleBll.refreshBattleView();
+            if (player.endTurnRequested && !this.ent.BattleBll.isBattleFinished(runId)) {
+                await this.ent.BattleBll.endPlayerTurn();
+            }
         });
     }
     // 等待自动与手动出牌共用的效果链；自动出牌不再次支付骰子。
@@ -197,6 +216,11 @@ export class BattleCardBll extends CCBusiness<Battle> {
         const player = this.ent.BattlePlayerModel;
         const card = this.getCard(cardId);
         const model = this.ent.BattleModel;
+        const starCost = this.getStarCost(card);
+        if (card.flags.unplayable || player.stars < starCost) {
+            player.discardPile.push(cardId);
+            return;
+        }
         if (++player.resolutionDepth > 100) {
             player.resolutionDepth--;
             throw new Error('自动出牌嵌套超过安全深度，请检查循环效果');
@@ -204,23 +228,38 @@ export class BattleCardBll extends CCBusiness<Battle> {
         player.resolvingCards.push(cardId);
         const context = this.ent.BattleValueResolver.createContext(BattleSide.Player, cardId, card.target === 'SELF' ? BattleSide.Player : BattleSide.Enemy);
         context.cardPlay = true;
-        const repeats = card.type === 'ATTACK' ? player.nextAttackRepeats : 0;
+        const blade = card.flags.archetype === BattleCardArchetype.SovereignBlade;
+        const shiv = card.flags.archetype === BattleCardArchetype.Shiv;
+        const repeats = (card.type === 'ATTACK' ? player.nextAttackRepeats : 0)
+            + (blade ? this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.BladeRepeat) : 0);
         if (card.type === 'ATTACK') {
             player.nextAttackRepeats = 0;
         }
         player.cardsPlayed++;
         player.attacksPlayed += card.type === 'ATTACK' ? 1 : 0;
+        player.skillsPlayed += card.type === 'SKILL' ? 1 : 0;
+        const firstShivBonus = shiv && player.shivsPlayed === 0
+            ? this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.FirstShivDamage) : 0;
+        player.shivsPlayed += shiv ? 1 : 0;
         const event: BattleCardPlayedEvent = { cardId, type: card.type, diceCount,
             requiredDiceCount: card.DiceNeed.length, cardCount: player.cardsPlayed, attackCount: player.attacksPlayed };
         await (async () => {
+            if (starCost > 0) {
+                await this.changeStars(-starCost);
+            }
             await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.BeforeCardPlayed, BattleSide.Player, event);
-            context.variables.cardDamageBonus = card.type === 'ATTACK' ? player.cardDamageBonus : 0;
+            context.variables.cardDamageBonus = card.type === 'ATTACK' ? player.cardDamageBonus
+                + (shiv ? this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.ShivDamage) + firstShivBonus : 0) : 0;
             context.variables.nextCardDamageBonus = card.type === 'ATTACK' ? player.nextCardDamageBonus : 0;
             if (card.type === 'ATTACK') {
                 player.nextCardDamageBonus = 0;
             }
             for (let repeat = 0; repeat <= repeats && !this.ent.BattleBll.isBattleFinished(context.runId); repeat++) {
                 await this.runCardEvent(cardId, CardEvent.Play, context);
+                const bladeBlock = blade ? this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.BladeBlock) : 0;
+                if (bladeBlock > 0 && !this.ent.BattleBll.isBattleFinished(context.runId)) {
+                    await this.ent.BattleDamageBll.addBlock(BattleSide.Player, bladeBlock, false);
+                }
             }
             if (context.runId !== model.runId) {
                 return;
@@ -236,6 +275,9 @@ export class BattleCardBll extends CCBusiness<Battle> {
             }
             player.resolutionDepth--;
             player.resolvingCards.splice(player.resolvingCards.indexOf(cardId), 1);
+            if (card.type === 'SKILL' && this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.SlySkills)) {
+                this.setInstanceSly(cardId);
+            }
             if (exhaustAfter || card.flags.exhaust
                 || (card.type === 'SKILL' && this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.SkillFreeExhaust))) {
                 player.exhaustPile.push(cardId);
@@ -270,6 +312,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
             return false;
         }
         const cardId = player.drawPile.shift()!;
+        player.cardsDrawn++;
         player.handCards.push(cardId);
         if (onDraw) {
             onDraw(this.getCard(cardId));
@@ -354,7 +397,8 @@ export class BattleCardBll extends CCBusiness<Battle> {
             if (card.flags.ethereal) {
                 await this.moveFromHand(index, true);
             }
-            else if (card.flags.retain) {
+            else if (card.flags.retain || card.flags.archetype === BattleCardArchetype.Shiv
+                && this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.ShivRetain)) {
                 await this.runCardEvent(cardId, CardEvent.Retained);
             }
             else {
@@ -369,9 +413,19 @@ export class BattleCardBll extends CCBusiness<Battle> {
             return;
         }
         const cardId = player.handCards.splice(index, 1)[0];
+        if (!exhaust && !player.endingHand && this.getCard(cardId).flags.sly) {
+            player.discardedThisTurn++;
+            await this.runCardEvent(cardId, CardEvent.Discarded);
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.Discard, BattleSide.Player, { cardId, type: this.getCard(cardId).type });
+            await this.resolveCard(cardId);
+            return;
+        }
         (exhaust ? player.exhaustPile : player.discardPile).push(cardId);
         if (exhaust) {
             player.exhaustedThisTurn++;
+        }
+        else if (!player.endingHand) {
+            player.discardedThisTurn++;
         }
         await this.runCardEvent(cardId, exhaust ? CardEvent.Exhausted : CardEvent.Discarded);
         await this.ent.BattleTriggerBll.fireEvent(exhaust ? BattleTriggerEvent.Exhaust : BattleTriggerEvent.Discard, BattleSide.Player, { cardId, type: this.getCard(cardId).type });
@@ -403,6 +457,7 @@ export class BattleCardBll extends CCBusiness<Battle> {
                 return;
             }
             const selectedCard = candidates[selected].card;
+            initialCards.delete(selectedCard.id);
             if (context) {
                 context.variables.exhaustedCount = (context.variables.exhaustedCount || 0) + (exhaust ? 1 : 0);
                 context.variables.exhaustedDamage = this.readBaseDamage(selectedCard.id);
@@ -441,11 +496,77 @@ export class BattleCardBll extends CCBusiness<Battle> {
         const player = this.ent.BattlePlayerModel;
         return !!(card.type === 'SKILL' && this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.SkillFreeExhaust))
             || (card.type === 'ATTACK' && player.nextAttackFree > 0)
+            || player.cardsPlayed < this.ent.BattleBuffBll.getRuleValue(BattleSide.Player, BattleBuffRuleKind.FreeCardsPerTurn)
             || player.freeInstanceTurns.get(card.id) === this.ent.BattleModel.turn;
     }
     // 汇总通用与专属免骰资格。
     private isFreeCard(card: TableCard): boolean {
-        return this.hasSpecificFreeCard(card) || this.ent.BattlePlayerModel.freeDiceCards > 0;
+        const player = this.ent.BattlePlayerModel;
+        return this.hasSpecificFreeCard(card) || player.freeDiceCards > 0;
+    }
+    // 星星费用独立于骰子，免骰不会免除星星。
+    getStarCost(card: TableCard): number {
+        return Math.max(0, Math.floor(Number(card.flags.starCost) || 0));
+    }
+    // 等待星星资源变化与实际花费事件逐项结算。
+    async changeStars(amount: number): Promise<void> {
+        const player = this.ent.BattlePlayerModel;
+        const previous = player.stars;
+        player.stars = Math.max(0, Math.min(999, previous + Math.trunc(amount)));
+        const change = player.stars - previous;
+        if (!change) {
+            return;
+        }
+        player.starsSpentThisTurn += Math.max(0, -change);
+        await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.StarsChanged, BattleSide.Player,
+            { amount: change, units: Math.abs(change), current: player.stars });
+        if (change < 0) {
+            await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.StarsSpent, BattleSide.Player,
+                { amount: -change, units: -change, current: player.stars });
+        }
+    }
+    // 只为实际放入牌堆的新实例发送生成事件，起始牌组与移动不会触发。
+    async notifyCardCreated(id: number): Promise<void> {
+        this.ent.BattlePlayerModel.cardsCreated++;
+        const card = this.getCard(id);
+        await this.ent.BattleTriggerBll.fireEvent(BattleTriggerEvent.CardCreated, BattleSide.Player,
+            { cardId: id, type: card.type, baseId: card.baseId });
+    }
+    // 将奇巧属性写入当前实例，避免污染配置与其他副本。
+    private setInstanceSly(id: number): void {
+        const player = this.ent.BattlePlayerModel;
+        const raw = player.cardInstances.get(id) || this.getCard(id);
+        const copy = raw.createInstance(id);
+        copy.flags.sly = true;
+        player.cardInstances.set(id, copy);
+    }
+    // 铸造强化本场唯一君王之剑；尚未存在时自动加入手牌，满手则加入弃牌堆。
+    async forge(amount: number, cardId: number): Promise<void> {
+        const player = this.ent.BattlePlayerModel;
+        if (!player.sovereignBladeId) {
+            const blade = this.createInstance(cardId);
+            player.sovereignBladeId = blade;
+            (player.handCards.length < player.handLimit ? player.handCards : player.discardPile).push(blade);
+            await this.notifyCardCreated(blade);
+        }
+        const id = player.sovereignBladeId;
+        player.cardGrowth.set(id, (player.cardGrowth.get(id) || 0) + Math.max(0, Math.floor(amount)));
+    }
+    // 将已存在的君王之剑召回手牌，不复制实例、不重复触发生成。
+    summonBlade(): void {
+        const player = this.ent.BattlePlayerModel;
+        const id = player.sovereignBladeId;
+        if (!id || player.handCards.includes(id) || player.handCards.length >= player.handLimit || player.resolvingCards.includes(id)) {
+            return;
+        }
+        for (const pile of [player.drawPile, player.discardPile, player.exhaustPile]) {
+            const index = pile.indexOf(id);
+            if (index >= 0) {
+                pile.splice(index, 1);
+                player.handCards.push(id);
+                return;
+            }
+        }
     }
     // 按当前攻击次数减免配置指定花色，其他花色仍需支付。
     private getRequiredDice(card: TableCard): number[] {

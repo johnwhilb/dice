@@ -53,6 +53,7 @@ export class BattleBll extends CCBusiness<Battle> {
         const runId = model.runId;
         return (async () => {
             this.setPhase(BattlePhase.PlayerEnd);
+            this.ent.BattlePlayerModel.endTurnRequested = false;
             await this.settleTurnEndEffects(BattleSide.Player, runId);
             if (this.checkResult(runId)) {
                 return;
@@ -91,6 +92,7 @@ export class BattleBll extends CCBusiness<Battle> {
                 return;
             }
             model.turn++;
+            this.ent.BattlePlayerModel.cardsPlayedLastTurn = this.ent.BattlePlayerModel.cardsPlayed;
             await this.startPlayerTurn(runId);
         })().catch((error: Error) => {
             if (runId === model.runId) {
@@ -113,7 +115,10 @@ export class BattleBll extends CCBusiness<Battle> {
             }
             if (side === BattleSide.Player) {
                 await this.ent.BattleCardBll.settleExhaustAtTurnEnd();
-                await this.ent.BattleCardBll.settleHandAtTurnEnd();
+                this.ent.BattlePlayerModel.endingHand = true;
+                await this.ent.BattleCardBll.settleHandAtTurnEnd().finally(() => {
+                    this.ent.BattlePlayerModel.endingHand = false;
+                });
             }
             await this.ent.BattleBuffBll.settleTurnEndBuffs(side);
             this.ent.BattleTriggerBll.expireTriggers(side);

@@ -4,7 +4,16 @@ import type { BattleEffect } from '../../battle/model/BattleTypes';
 export enum BattleBuffRuleKind {
     SkillFreeExhaust = 'SKILL_FREE_EXHAUST',
     FirstBlockDouble = 'FIRST_BLOCK_DOUBLE',
-    VulnerableBonus = 'VULNERABLE_BONUS'
+    VulnerableBonus = 'VULNERABLE_BONUS',
+    ShivDamage = 'SHIV_DAMAGE',
+    ShivRetain = 'SHIV_RETAIN',
+    FirstShivDamage = 'FIRST_SHIV_DAMAGE',
+    PoisonRepeats = 'POISON_REPEATS',
+    SlySkills = 'SLY_SKILLS',
+    WeakAttackDouble = 'WEAK_ATTACK_DOUBLE',
+    BladeRepeat = 'BLADE_REPEAT',
+    BladeBlock = 'BLADE_BLOCK',
+    FreeCardsPerTurn = 'FREE_CARDS_PER_TURN'
 }
 export enum BattleBuffCategory {
     Buff = 'BUFF',

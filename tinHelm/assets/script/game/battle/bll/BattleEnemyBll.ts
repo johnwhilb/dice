@@ -228,7 +228,7 @@ export class BattleEnemyBll extends CCBusiness<Battle> {
                     await this.ent.BattleCardBll.discardCards(this.ent.BattleValueResolver.resolveNumber(action.count, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), 'RANDOM', action.action === EnemyActionType.Exhaust);
                     break;
                 case EnemyActionType.AddCard:
-                    this.ent.BattleCardBll.addCard(this.ent.BattleValueResolver.resolveNumber(action.cardId, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), this.ent.BattleValueResolver.resolveNumber(action.count, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.pile!);
+                    await this.ent.BattleCardBll.addCard(this.ent.BattleValueResolver.resolveNumber(action.cardId, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), this.ent.BattleValueResolver.resolveNumber(action.count, this.ent.BattleValueResolver.createContext(BattleSide.Enemy)), action.pile!, false);
                     break;
                 case EnemyActionType.Effects:
                     this.ent.BattleEffectBll.validateEffects(action.effects!);
