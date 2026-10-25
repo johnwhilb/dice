@@ -1,6 +1,14 @@
 import { BaseBattleBuff } from "./BaseBattleBuff";
 import { BattleBuffTypeEnum } from "./BattleBuffTypeEnum";
 import type { BattleEffect } from '../../battle/model/BattleTypes';
+export enum BattleBuffDuration {
+    Default = 'DEFAULT',
+    Turn = 'TURN',
+    NextTurn = 'NEXT_TURN',
+    Combat = 'COMBAT',
+    UntilEnemyEnd = 'UNTIL_ENEMY_END',
+    Action = 'ACTION'
+}
 export enum BattleBuffRuleKind {
     SkillFreeExhaust = 'SKILL_FREE_EXHAUST',
     FirstBlockDouble = 'FIRST_BLOCK_DOUBLE',
@@ -32,6 +40,15 @@ export enum BattleBuffStackMode {
  * 可以在这里安全编写项目自己的方法。
  */
 export class TableBattleBuff extends BaseBattleBuff {
+    /** 读取施加DEFAULT状态时采用的持续范围。 */
+    getDefaultDuration(): string {
+        return this.defaultDuration || BattleBuffDuration.Default;
+    }
+
+    /** 读取是否允许清除减益时驱散，旧表默认允许。 */
+    isDispellable(): boolean {
+        return this.dispellable ?? true;
+    }
     /** 读取能力获得时执行的效果；事件监听随所属Buff一起移除。 */
     getEffects(): BattleEffect[] {
         return this.effects || [];
@@ -72,6 +89,10 @@ export class TableBattleBuff extends BaseBattleBuff {
                 }) || typeof value !== 'number' || !Number.isFinite(value) || value < 0;
             })) {
             throw new Error(`Buff能力效果或规则无效：${id}`);
+        }
+        if (!Object.values(BattleBuffDuration).some(duration => duration === config.getDefaultDuration())
+            || typeof config.isDispellable() !== 'boolean') {
+            throw new Error(`Buff默认持续时间或驱散设置无效：${id}`);
         }
         return config;
     }

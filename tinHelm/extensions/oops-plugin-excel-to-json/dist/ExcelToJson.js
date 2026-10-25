@@ -228,7 +228,7 @@ async function convert(src, dst, identity, isClient) {
     let primary_index = [];
     const primaryIds = new Set();
     const workbook = new exceljs_1.Workbook();
-    await workbook.xlsx.readFile(src);
+    await require('../workbook-loader.cjs').loadWorkbook(workbook, fs.readFileSync(src));
     console.log("读取Excel文件成功", src);
     const worksheet = workbook.getWorksheet(1);
     if (!worksheet || worksheet.name !== identity.resourceName) {
@@ -402,7 +402,9 @@ async function run() {
         main_1.config.PathJsonServer.length > 0) {
         outJsonPathServer = path_1.default.join(__dirname, main_1.config.PathJsonServer.replace("project://", "../../../") + "/");
     }
-    const files = fs.readdirSync(inputExcelPath);
+    const files = fs.readdirSync(inputExcelPath).filter((name) => {
+        return !name.startsWith('~$');
+    });
     const tableIds = new Map();
     const classNames = new Set();
     for (const f of files) {

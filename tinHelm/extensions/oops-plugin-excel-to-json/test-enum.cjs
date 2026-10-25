@@ -50,8 +50,17 @@ function createConverter(workbook) {
                     };
                 case 'fs':
                     return {
+                        readFileSync() {
+                            return Buffer.alloc(0);
+                        },
                         writeFileSync(filePath, value) {
                             writes.set(path.basename(filePath), value);
+                        }
+                    };
+                case '../workbook-loader.cjs':
+                    return {
+                        async loadWorkbook() {
+                            return workbook;
                         }
                     };
                 case './main':

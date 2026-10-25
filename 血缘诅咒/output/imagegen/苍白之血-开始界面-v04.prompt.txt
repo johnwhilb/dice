@@ -1,0 +1,10 @@
+生成方式：内置 image_gen 局部编辑。
+输入：用户本轮两张图片，第一张v02底图，第二张红线范围说明；num_last_images_to_include=2。
+
+LOCAL IMAGE EDIT ONLY. Image 1 is the clean ORIGINAL v02 base image. Image 2 is the same image with a RED HAND-DRAWN BOUNDARY showing the editable foreground. The red line is an annotation, NEVER part of output.
+
+Modify ONLY the actual dark FOREGROUND ARCHITECTURAL OBJECTS on the lower/right side of that red boundary: the near balustrade and pillars, near stone wall and steps, near red hanging cloth, and cropped structure along far right edge. The gaps between rails and everything seen through those gaps are background and must remain unchanged. All pixels outside these foreground object silhouettes are protected. Preserve the original framing and dimensions.
+
+Within those foreground objects only: simplify existing fine carvings, scratches and most brick seams; merge small tonal facets into a few flat matte grey/black planes at the SAME overall darkness as the original. Hand-drawn ink contour treatment: natural thick/thin line weight, tapered ends, a few short structural hatch strokes only at essential turns, broad quiet surfaces. Keep existing main silhouettes, perspective, pillar count, positions and cloth shapes. Do not add decoration or texture. Do not add hatching everywhere. NO new light source, highlights, rim light, shadows, volume gradients, gloss or reflections. This is a restrained flattening and simplification of the marked foreground, not a redraw of the whole scene.
+
+STRICTLY PRESERVE the unmarked distant/middle cathedral, every skyline silhouette, sky, moon, tentacles, birds, mist, original background texture and atmospheric values EXACTLY as in Image 1. Preserve the title “苍白之血”, “开始游戏”, “继续游戏”, their typography, ornaments and positions exactly. No re-composition, re-lighting, background enhancement or distant ink strokes. Output the edited clean Image 1 with NO red annotation line.

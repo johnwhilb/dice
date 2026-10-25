@@ -128,6 +128,9 @@ export class BattleValueResolver extends CCBusiness<Battle> {
     // 解析角色、事件与作用域变量引用。
     private resolveReference(path: string, context: BattleContext): number {
         const [scope, field, status] = path.slice(1).split('.');
+        if (scope === 'buff' && field === 'stacks') {
+            return context.buff?.stacks || 0;
+        }
         if (scope === 'self' || scope === 'target') {
             const side = scope === 'self' ? context.source : context.target;
             const actor = this.getActor(side);

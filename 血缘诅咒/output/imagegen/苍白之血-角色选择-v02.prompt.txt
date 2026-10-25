@@ -1,0 +1,24 @@
+生成方式：内置 image_gen。
+参考图：
+C:\Users\Administrator\Desktop\血缘诅咒\生成界面\苍白之血-角色选择-v01.png
+C:\Users\Administrator\Desktop\血缘诅咒\画风锚点\herheim-1536.jpg
+C:\Users\Administrator\Desktop\血缘诅咒\画风锚点\herheim-1540.jpg
+C:\Users\Administrator\Desktop\血缘诅咒\生成界面\苍白之血-战斗界面-v02.png
+
+提示词：
+Use case: ui-mockup. Finished 16:9 full-bleed landscape game interface, target 1920x1080. Cohesive 2D hand-drawn ink and limited flat greyed colors, bone-white, ink-black, warm/cold grey, restrained muted oxblood accents. Thin variable contours, stronger silhouette edges, sparse short structural hatching. Broad calm color planes, three main value groups. MATTE EVERYWHERE: dry rough floor, simple contact shadows, no wet surfaces, puddles, mirror reflections, reflected white streaks, glossy material highlights, neon or glowing edges. Dramatically REDUCE detail density from the old screen: 70–80% fewer tiny marks, decorations, brick seams, chips, window mullions, carved tracery and debris. No dense all-over hatching or noise. Gothic atmosphere through silhouette/proportion/composition. Flat simplified but polished, readable Chinese Song/Ming serif text. Not photorealistic, not 3D, not oil painting. Reference images give ink/color language; ignore their excess detail and reflections. Preserve requested UI structure and accurate text. No watermarks or signatures.
+Regenerate the CHARACTER SELECTION screen in image 1 for 苍白之血. Image 1 is the edit/layout target; images 2–3 are ink style-only references, image 4 same-game palette/UI reference. This is NOT a battle interface.
+Keep the established character identity and broad pose from image 1: pale long-haired wandering hunter in broad black pointed hat, dark cloak, oxblood inner coat, long simple weapon across his body, one hand near hat brim. Main character on right half, clear face and large continuous clothing planes. REDESIGN costume with only 2–3 major layers and a few broad folds: one plain belt and one small clasp; REMOVE collections of dangling crosses, chains, tiny straps, buckles, fringe, embroidered patterns and weapon engraving. Hair as a few grouped locks. Maintain an elegant bold silhouette; no cropping of head or hat. Lower cloak can extend to lower edge behind UI.
+Background sparse: a few pale grey gothic arch silhouettes and plain stone foreground with NO rubble carpet, repeated swords, elaborate banners or dense cathedral windows. Bone-white left half gives quiet reading space. Right architecture lower contrast than character. A pale circular shape may frame character head.
+Left content x=11–45%, y=22–63%: large title “夜途者”. Beneath a fine divider, two compact attributes with simple flat circular icons “生命 1280” and “耐力 320”. Short description exactly “在无名的道路上追寻逝去的真相。” then “剑与信念仍会指向远方。” Lower skill block small square sword-slash illustration, title “影痕斩”, two short lines “向前挥出带有残影的斩击，” / “对路径上的敌人造成伤害。” No extra skill or attributes.
+Top-left small heading “角色选择”. Bottom center x=30–74%, y=80–96%: exactly SIX compact portrait cards in one row, FIVE different unlocked portraits (hunter, plague doctor, veiled woman, short-haired traveler, armored pilgrim) and ONE dark locked silhouette with lock icon. First selected with flat muted red border and small diamond marker, NO glow. Portraits simplified consistent ink treatment. Above portraits a slim dark status module “巡礼等级 3” and short subtitle “提升后可解锁新的技能与外观。”
+Small bottom-left “返回” arrow button and bottom-right modest oxblood “开始冒险” button with a simple arrow, not giant protruding panels.
+All text clean, content readable, preserve space between information groups. UI symbols flat, no 3D dice, no pips. Character and buildings MUCH simpler than old reference, with ample unmarked surfaces.
+
+最终定向修正提示词：
+Edit this character selection UI with targeted composition corrections. Keep existing Chinese text, six portraits and lock, attributes, skill, left information arrangement, colors, character identity, buttons and overall 16:9 canvas.
+1. Scale the RIGHT-SIDE character illustration down enough (about 15%) and move it slightly down, so the ENTIRE HAT including its top point and brim is inside the canvas with at least a little margin. Face stays clear and prominent. Keep the cloak extending behind the bottom UI. Do not crop the head. Simplify hair into larger grouped locks and further simplify wrist wrappings and clothing folds.
+2. Remove glowing edges from the selected first portrait. Use one thin FLAT muted oxblood outline with a small flat diamond marker, no white halo or neon.
+3. Fill the thin unwanted ivory horizontal strip along the bottom edge with the adjacent dark cloak/ground art. Full-bleed scene, no outer border.
+4. Reduce remaining fine cracks and masonry marks in the foreground and background; keep large clean matte shapes. No reflections or glossy highlights.
+Do not add any new UI or change existing words.
