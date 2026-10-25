@@ -1,0 +1,197 @@
+{
+  "method": "Original pixel crop; no generation, resampling, recoloring or alpha thresholding",
+  "source": "../UI.png",
+  "sourceSha256": "4A51C08FE96A8CE5400BBCC034409D3E7D0158D5461D8DB401CB85B03DC70E3D",
+  "canvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "coordinateSystem": "top-left origin; native pixels; no scale",
+  "components": [
+    {
+      "id": "title_text",
+      "label": "标题文字",
+      "file": "01_标题/文字.png",
+      "x": 278,
+      "y": 264,
+      "width": 490,
+      "height": 131,
+      "visiblePixels": 27088,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_top",
+      "label": "标题上装饰",
+      "file": "01_标题/上装饰.png",
+      "x": 316,
+      "y": 229,
+      "width": 419,
+      "height": 29,
+      "visiblePixels": 2765,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_bottom",
+      "label": "标题下装饰",
+      "file": "01_标题/下装饰.png",
+      "x": 272,
+      "y": 396,
+      "width": 490,
+      "height": 26,
+      "visiblePixels": 3205,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_left",
+      "label": "标题左装饰",
+      "file": "01_标题/左装饰.png",
+      "x": 155,
+      "y": 340,
+      "width": 122,
+      "height": 22,
+      "visiblePixels": 689,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_right",
+      "label": "标题右装饰",
+      "file": "01_标题/右装饰.png",
+      "x": 768,
+      "y": 340,
+      "width": 109,
+      "height": 22,
+      "visiblePixels": 636,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "start_text",
+      "label": "开始游戏文字",
+      "file": "02_开始游戏/文字.png",
+      "x": 431,
+      "y": 483,
+      "width": 195,
+      "height": 45,
+      "visiblePixels": 4798,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "start_ornament",
+      "label": "开始游戏装饰线",
+      "file": "02_开始游戏/装饰线.png",
+      "x": 337,
+      "y": 528,
+      "width": 390,
+      "height": 37,
+      "visiblePixels": 3670,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "continue_text",
+      "label": "继续游戏文字",
+      "file": "03_继续游戏/文字.png",
+      "x": 435,
+      "y": 579,
+      "width": 182,
+      "height": 43,
+      "visiblePixels": 4195,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "continue_ornament",
+      "label": "继续游戏装饰线",
+      "file": "03_继续游戏/装饰线.png",
+      "x": 375,
+      "y": 622,
+      "width": 320,
+      "height": 28,
+      "visiblePixels": 2408,
+      "pivot": [
+        0,
+        0
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "id": "title_group",
+      "label": "完整标题组合",
+      "file": "01_标题/组合.png",
+      "x": 155,
+      "y": 229,
+      "width": 722,
+      "height": 195,
+      "visiblePixels": 34425,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "start_group",
+      "label": "开始游戏组合",
+      "file": "02_开始游戏/组合.png",
+      "x": 330,
+      "y": 483,
+      "width": 400,
+      "height": 83,
+      "visiblePixels": 8483,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "continue_group",
+      "label": "继续游戏组合",
+      "file": "03_继续游戏/组合.png",
+      "x": 370,
+      "y": 579,
+      "width": 330,
+      "height": 76,
+      "visiblePixels": 6641,
+      "pivot": [
+        0,
+        0
+      ]
+    }
+  ],
+  "residual": {
+    "visiblePixels": 214,
+    "x": 0,
+    "width": 1672,
+    "file": "校验/边缘残留.png",
+    "y": 0,
+    "height": 941
+  },
+  "validation": {
+    "visibleRgbaMismatchPixels": 0,
+    "alphaMismatchPixels": 0,
+    "sourceUnchanged": true,
+    "componentOverlapPixels": 0,
+    "transparentRgbIgnored": true
+  }
+}

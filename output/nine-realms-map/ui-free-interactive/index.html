@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>九界 · 交互地图</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#eee1bc}
+body{display:grid;place-items:center}#map{position:relative;flex:none;isolation:isolate;overflow:hidden}
+#terrain{display:block;width:100%;height:100%;pointer-events:none;user-select:none}
+.landmark{position:absolute;display:block;margin:0;padding:0;border:0;background:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.landmark img{display:block;width:100%;height:100%;pointer-events:none;user-select:none;transition:filter .18s,transform .18s;transform-origin:50% 90%}
+.landmark:hover img,.landmark:focus-visible img{transform:translateY(-3%) scale(1.035);filter:drop-shadow(0 0 6px #fff4aa)}
+.landmark:focus-visible{outline:2px dashed #776136;outline-offset:3px;border-radius:35%}
+.landmark[aria-pressed="true"] img{filter:drop-shadow(0 0 5px #fff9d4) drop-shadow(0 0 10px #ffd461);transform:translateY(-2%)}
+.landmark.pulse img{animation:respond .55s ease-out}
+@keyframes respond{0%,100%{transform:translateY(-2%) scale(1)}40%{transform:translateY(-5%) scale(1.08);filter:drop-shadow(0 0 13px #fff3a8)}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(prefers-reduced-motion:reduce){.landmark img{transition:none}.landmark.pulse img{animation:none}}
+</style>
+</head>
+<body>
+<main id="map" aria-label="九界地图，点击地标探索"><img id="terrain" src="terrain.png" alt="无文字的九界地形底图" draggable="false"></main>
+<div id="announcement" class="sr-only" aria-live="polite"></div>
+<script src="map-data.js"></script>
+<script>
+'use strict';
+const data=window.NINE_REALMS_MAP, root=document.getElementById('map');
+const visits=new Map(), buttons=new Map();let selected=null;
+function activate(id){
+ const landmark=data.landmarks.find(item=>item.id===id);if(!landmark)return false;
+ selected=id;const count=(visits.get(id)||0)+1;visits.set(id,count);
+ for(const [key,button]of buttons)button.setAttribute('aria-pressed',String(key===id));
+ const button=buttons.get(id);button.classList.remove('pulse');void button.offsetWidth;button.classList.add('pulse');
+ const detail={id,name:landmark.name,action:landmark.action,visits:count};
+ document.getElementById('announcement').textContent=`已探索${landmark.name}，第${count}次`;
+ root.dispatchEvent(new CustomEvent('realm-interact',{detail,bubbles:true}));return detail;
+}
+for(const item of [...data.landmarks].sort((a,b)=>a.sortY-b.sortY)){
+ const button=document.createElement('button');button.type='button';button.className='landmark';button.dataset.id=item.id;
+ button.setAttribute('aria-label','探索'+item.name);button.setAttribute('aria-pressed','false');
+ Object.assign(button.style,{left:(item.x-item.w/2)/data.width*100+'%',top:(item.y-item.h)/data.height*100+'%',width:item.w/data.width*100+'%',height:item.h/data.height*100+'%'});
+ const image=document.createElement('img');image.src=item.image;image.alt='';image.draggable=false;button.append(image);
+ button.addEventListener('click',()=>activate(item.id));button.addEventListener('animationend',()=>button.classList.remove('pulse'));
+ root.append(button);buttons.set(item.id,button);
+}
+function clear(){selected=null;for(const button of buttons.values()){button.setAttribute('aria-pressed','false');button.classList.remove('pulse')}}
+root.addEventListener('click',event=>{if(!event.target.closest('.landmark'))clear()});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')clear()});
+function fit(){const scale=Math.min(innerWidth/data.width,innerHeight/data.height);root.style.width=data.width*scale+'px';root.style.height=data.height*scale+'px'}
+addEventListener('resize',fit);fit();
+window.nineRealmsMap={data,activate,clear,get selected(){return selected},get visits(){return Object.fromEntries(visits)}};
+</script>
+</body>
+</html>

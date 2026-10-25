@@ -1,0 +1,50 @@
+[
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\开始界面\\背景.png",
+    "Width": 1672,
+    "Height": 941,
+    "HasTransparentPixels": false
+  },
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\开始界面\\UI.png",
+    "Width": 1672,
+    "Height": 941,
+    "HasTransparentPixels": true
+  },
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\战斗界面\\背景.png",
+    "Width": 1671,
+    "Height": 941,
+    "HasTransparentPixels": false
+  },
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\战斗界面\\人物.png",
+    "Width": 1672,
+    "Height": 941,
+    "HasTransparentPixels": true
+  },
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\战斗界面\\UI.png",
+    "Width": 1671,
+    "Height": 941,
+    "HasTransparentPixels": true
+  },
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\角色选择\\背景.png",
+    "Width": 1672,
+    "Height": 941,
+    "HasTransparentPixels": false
+  },
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\角色选择\\人物.png",
+    "Width": 1672,
+    "Height": 941,
+    "HasTransparentPixels": true
+  },
+  {
+    "File": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\拆分ui\\角色选择\\UI.png",
+    "Width": 1672,
+    "Height": 941,
+    "HasTransparentPixels": true
+  }
+]

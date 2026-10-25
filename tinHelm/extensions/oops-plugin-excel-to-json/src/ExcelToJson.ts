@@ -365,7 +365,7 @@ async function convert(
 
     const workbook = new Workbook();
 
-    await workbook.xlsx.readFile(src);
+    await require('../workbook-loader.cjs').loadWorkbook(workbook, fs.readFileSync(src));
     console.log("读取Excel文件成功", src);
 
     const worksheet = workbook.getWorksheet(1);
@@ -643,7 +643,9 @@ export async function run() {
         );
     }
 
-    const files = fs.readdirSync(inputExcelPath);
+    const files = fs.readdirSync(inputExcelPath).filter((name: string) => {
+        return !name.startsWith('~$');
+    });
     const tableIds = new Map<number, string>();
     const classNames = new Set<string>();
 

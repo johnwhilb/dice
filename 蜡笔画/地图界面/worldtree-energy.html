@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>能量世界树 · 地图预览</title>
+  <style>
+    :root{color-scheme:light;font-family:"Microsoft YaHei UI","PingFang SC",sans-serif;color:#263e51;background:#cfdfeb}
+    *{box-sizing:border-box}body{margin:0;overflow:hidden}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid #477caa;outline-offset:3px}
+    #viewport{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab;background:radial-gradient(ellipse at center,#e7eef4,#c6d9e7)}
+    #viewport.dragging{cursor:grabbing}#map{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;pointer-events:none;max-width:none;will-change:transform;box-shadow:0 12px 80px #304d6520}
+    #panel{position:fixed;left:24px;top:24px;width:276px;padding:22px;border:1px solid #ffffffb3;border-radius:18px;background:#f6f9f1ed;background:color-mix(in srgb,#f7fafc 93%,transparent);box-shadow:0 12px 48px #334e6820;backdrop-filter:blur(18px)}
+    .eyebrow{font-size:10px;letter-spacing:.2em;color:#7190a3;margin-bottom:8px}h1{font-size:20px;letter-spacing:.04em;margin:0 0 8px;font-weight:600}.sub{font-size:12px;color:#6b8190;line-height:1.8;margin:0 0 20px}
+    .section{border-top:1px solid #dbe4e9;padding-top:17px;margin-top:17px}.row{display:flex;align-items:center;gap:8px}.between{justify-content:space-between}.label{font-size:12px;color:#5c7587}output{font-size:13px;font-variant-numeric:tabular-nums}
+    input[type=range]{width:100%;accent-color:#648aa5;margin:13px 0 8px}input[type=number]{min-width:0;width:100%;border:1px solid #d8e1e6;border-radius:8px;padding:10px;background:#fff;color:#304c60;font-variant-numeric:tabular-nums}label.dim{display:block;flex:1;font-size:11px;color:#6d8595}label.dim input{display:block;margin-top:7px}
+    button{border:1px solid #d8e2e8;color:#416079;background:#fff;border-radius:8px;padding:9px 12px;font-size:12px}button:hover{background:#eaf1f6}.buttons{display:flex;gap:8px}.buttons button{flex:1}.primary{background:#456d87;color:white;border-color:#456d87}.primary:hover{background:#365a73}.check{display:flex;align-items:center;gap:5px;font-size:11px;color:#6d8595;margin:12px 0}input[type=checkbox]{accent-color:#547e99}
+    .tip{font-size:11px;color:#7a8f9c;line-height:1.9;margin-top:16px}.tip kbd{font:inherit;padding:1px 4px;border:1px solid #dce4e9;border-radius:4px}#status{font-size:11px;line-height:1.7;color:#718997;margin-top:12px;min-height:19px}
+    #toggle{position:fixed;left:24px;bottom:24px;border-radius:30px;background:#f7fafce8;box-shadow:0 4px 24px #334e681a;padding:10px 16px;color:#536f82}#toggle span{opacity:.6;margin-left:10px;font-size:10px}body.clean #panel,body.clean #toggle{display:none}#error{display:none;position:fixed;inset:40%;text-align:center;color:#395a71}button:disabled{opacity:.5;cursor:wait}
+    @media(max-width:600px){#panel{left:12px;top:12px;width:250px;padding:18px}#toggle{left:12px;bottom:16px}.tip{display:none}.sub{margin-bottom:12px}.section{margin-top:12px;padding-top:12px}}
+    @media(prefers-reduced-motion:no-preference){button{transition:background .15s}}
+  </style>
+</head>
+<body>
+  <main id="viewport" aria-label="地图：拖动平移，滚轮或双指缩放，双击适应窗口" tabindex="0">
+    <img id="map" src="worldtree-energy.png" alt="九个大陆悬浮在蓝白与淡金色的世界树能量流中" draggable="false">
+  </main>
+  <aside id="panel" aria-label="地图调整面板">
+    <div class="eyebrow">WORLD MAP / 01</div>
+    <h1>能量世界树</h1>
+    <p class="sub">九界大陆 · 无文字地图<br>拖动浏览，滚轮或双指缩放。</p>
+    <div class="row between"><span class="label">查看缩放</span><output id="zoomValue" for="zoom">100%</output></div>
+    <input id="zoom" aria-label="查看缩放" type="range" min="0" max="1000" value="500">
+    <div class="buttons"><button id="fit">完整地图</button><button id="actual">100% 查看</button></div>
+    <div class="section">
+      <div class="row between"><span class="label">地图尺寸 · 像素</span><button id="original" title="恢复图片原始尺寸">原图尺寸</button></div>
+      <div class="row" style="margin-top:8px">
+        <label class="dim" for="width">宽度<input id="width" type="number" min="64" max="16384" step="1" value="2048"></label>
+        <span style="margin-top:20px;color:#a0b1bc">×</span>
+        <label class="dim" for="height">高度<input id="height" type="number" min="64" max="16384" step="1" value="3072"></label>
+      </div>
+      <label class="check"><input id="lock" type="checkbox" checked> 锁定当前宽高比例</label>
+      <div class="buttons"><button class="primary" id="export">导出此尺寸 PNG</button></div>
+      <div id="status" role="status" aria-live="polite">正在加载地图…</div>
+    </div>
+    <div class="tip"><kbd>F</kbd> 完整地图　<kbd>+</kbd> / <kbd>−</kbd> 缩放<br><kbd>H</kbd> 隐藏全部面板　<kbd>Esc</kbd> 显示<br>双击空白恢复全图；尺寸与位置自动记忆。</div>
+  </aside>
+  <button id="toggle" title="隐藏全部面板；按 H 或 Esc 恢复">纯地图<span>H</span></button>
+  <p id="error" role="alert">地图加载失败。请将 HTML 和 worldtree-energy.png 放在同一文件夹。</p>
+  <script>
+  (() => {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const viewport = $('viewport');
+    const map = $('map');
+    const storeKey = 'worldtree-energy-viewer-v1';
+    const minZoom = 0.03;
+    const maxZoom = 8;
+    const pointers = new Map();
+    const state = {width:2048,height:3072,zoom:1,x:0,y:0,lock:true};
+    let ready = false;
+    let saveTimer;
+    let resizeFrame;
+    const clamp = (value,min,max) => Math.min(max,Math.max(min,value));
+    const center = () => ({x:viewport.clientWidth / 2,y:viewport.clientHeight / 2});
+    function persist() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        try {localStorage.setItem(storeKey,JSON.stringify(state));} catch (_) { /* 本地文件禁用存储时仍可使用。 */ }
+      },180);
+    }
+    function render() {
+      map.style.width = state.width + 'px';
+      map.style.height = state.height + 'px';
+      map.style.transform = `translate(${state.x}px,${state.y}px) scale(${state.zoom})`;
+      $('zoomValue').value = (state.zoom * 100).toFixed(state.zoom < 1 ? 1 : 0) + '%';
+      $('zoom').value = Math.log(state.zoom / minZoom) / Math.log(maxZoom / minZoom) * 1000;
+      $('width').value = state.width;
+      $('height').value = state.height;
+      $('lock').checked = state.lock;
+      persist();
+    }
+    function zoomAt(nextZoom,x,y) {
+      if (!ready) return;
+      const previous = state.zoom;
+      state.zoom = clamp(nextZoom,minZoom,maxZoom);
+      state.x = x - (x - state.x) * state.zoom / previous;
+      state.y = y - (y - state.y) * state.zoom / previous;
+      render();
+    }
+    function fit() {
+      if (!ready) return;
+      const padding = viewport.clientWidth < 600 ? 24 : 64;
+      state.zoom = clamp(Math.min((viewport.clientWidth - padding) / state.width,(viewport.clientHeight - padding) / state.height),minZoom,maxZoom);
+      state.x = (viewport.clientWidth - state.width * state.zoom) / 2;
+      state.y = (viewport.clientHeight - state.height * state.zoom) / 2;
+      render();
+    }
+    function setDimensions(width,height) {
+      const point = center();
+      const u = (point.x - state.x) / (state.width * state.zoom);
+      const v = (point.y - state.y) / (state.height * state.zoom);
+      state.width = Math.round(clamp(width,64,16384));
+      state.height = Math.round(clamp(height,64,16384));
+      state.x = point.x - u * state.width * state.zoom;
+      state.y = point.y - v * state.height * state.zoom;
+      $('status').textContent = `导出尺寸 ${state.width} × ${state.height} px`;
+      render();
+    }
+    function changeDimension(axis) {
+      const next = Number($(axis).value);
+      if (!Number.isFinite(next) || next < 64 || next > 16384) {
+        $('status').textContent = '尺寸范围为 64–16384 像素。';
+        render();
+        return;
+      }
+      const ratio = state.width / state.height;
+      const width = axis === 'width' ? next : state.lock ? next * ratio : state.width;
+      const height = axis === 'height' ? next : state.lock ? next / ratio : state.height;
+      if (width > 16384 || height > 16384 || width < 64 || height < 64) {
+        $('status').textContent = '锁定比例后的尺寸超出范围，请调整输入。';
+        render();
+        return;
+      }
+      setDimensions(width,height);
+    }
+    function gesture() {
+      const points = Array.from(pointers.values());
+      if (points.length === 1) return {...points[0],distance:0};
+      return {x:(points[0].x + points[1].x) / 2,y:(points[0].y + points[1].y) / 2,distance:Math.hypot(points[0].x-points[1].x,points[0].y-points[1].y)};
+    }
+    viewport.addEventListener('wheel',event => {
+      event.preventDefault();
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewport.clientHeight : 1);
+      zoomAt(state.zoom * Math.exp(-delta * .0015),event.clientX,event.clientY);
+    },{passive:false});
+    viewport.addEventListener('pointerdown',event => {
+      if (!ready || event.button !== 0) return;
+      viewport.focus({preventScroll:true});
+      viewport.setPointerCapture(event.pointerId);
+      pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      viewport.classList.add('dragging');
+    });
+    viewport.addEventListener('pointermove',event => {
+      if (!pointers.has(event.pointerId)) return;
+      const before = gesture();
+      pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+      const after = gesture();
+      state.x += after.x - before.x;
+      state.y += after.y - before.y;
+      if (before.distance > 0 && after.distance > 0) zoomAt(state.zoom * after.distance / before.distance,after.x,after.y);
+      else render();
+    });
+    function release(event) {
+      pointers.delete(event.pointerId);
+      if (!pointers.size) viewport.classList.remove('dragging');
+    }
+    viewport.addEventListener('pointerup',release);
+    viewport.addEventListener('pointercancel',release);
+    viewport.addEventListener('lostpointercapture',release);
+    viewport.addEventListener('dblclick',fit);
+    $('fit').addEventListener('click',fit);
+    $('actual').addEventListener('click',() => {const p = center();zoomAt(1,p.x,p.y);});
+    $('zoom').addEventListener('input',event => {
+      const p = center();
+      zoomAt(minZoom * Math.pow(maxZoom / minZoom,Number(event.target.value) / 1000),p.x,p.y);
+    });
+    $('width').addEventListener('change',() => changeDimension('width'));
+    $('height').addEventListener('change',() => changeDimension('height'));
+    $('lock').addEventListener('change',event => {state.lock = event.target.checked;persist();});
+    $('original').addEventListener('click',() => {if (ready) setDimensions(map.naturalWidth,map.naturalHeight);});
+    $('toggle').addEventListener('click',() => document.body.classList.add('clean'));
+    document.addEventListener('keydown',event => {
+      if (/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
+      const key = event.key.toLowerCase();
+      const p = center();
+      if (key === 'h') document.body.classList.toggle('clean');
+      else if (key === 'escape') document.body.classList.remove('clean');
+      else if (key === 'f' || key === '0') fit();
+      else if (key === '+' || key === '=') zoomAt(state.zoom * 1.2,p.x,p.y);
+      else if (key === '-') zoomAt(state.zoom / 1.2,p.x,p.y);
+      else if (key.startsWith('arrow')) {
+        event.preventDefault();
+        if (key === 'arrowleft') state.x += 60;
+        if (key === 'arrowright') state.x -= 60;
+        if (key === 'arrowup') state.y += 60;
+        if (key === 'arrowdown') state.y -= 60;
+        render();
+      }
+    });
+    window.addEventListener('resize',() => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(fit);
+    });
+    $('export').addEventListener('click',() => {
+      if (!ready) return;
+      const button = $('export');
+      button.disabled = true;
+      $('status').textContent = '正在导出…';
+      requestAnimationFrame(() => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = state.width;
+          canvas.height = state.height;
+          const context = canvas.getContext('2d');
+          if (!context) throw new Error('浏览器无法创建画布');
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = 'high';
+          context.drawImage(map,0,0,state.width,state.height);
+          canvas.toBlob(blob => {
+            button.disabled = false;
+            if (!blob) {$('status').textContent = '导出失败，请减小尺寸重试。';return;}
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `世界树九界-${state.width}x${state.height}.png`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            setTimeout(() => URL.revokeObjectURL(url),60000);
+            $('status').textContent = `已导出 ${state.width} × ${state.height} px`;
+          },'image/png');
+        } catch (_) {
+          button.disabled = false;
+          $('status').textContent = '浏览器限制了导出。可直接使用同目录原图，或通过本地 HTTP 打开后重试。';
+        }
+      });
+    });
+    function loaded() {
+      if (ready || !map.naturalWidth) return;
+      ready = true;
+      state.width = map.naturalWidth;
+      state.height = map.naturalHeight;
+      let restored = false;
+      try {
+        const saved = JSON.parse(localStorage.getItem(storeKey));
+        if (saved && ['width','height','zoom','x','y'].every(key => Number.isFinite(saved[key])) && saved.width >= 64 && saved.width <= 16384 && saved.height >= 64 && saved.height <= 16384 && saved.zoom >= minZoom && saved.zoom <= maxZoom) {
+          Object.assign(state,saved);
+          state.lock = saved.lock !== false;
+          restored = true;
+        }
+      } catch (_) { /* 首次打开或本地存储不可用。 */ }
+      $('status').textContent = `原图 ${map.naturalWidth} × ${map.naturalHeight} px`;
+      if (restored) render(); else fit();
+    }
+    map.addEventListener('load',loaded);
+    map.addEventListener('error',() => {$('error').style.display = 'block';$('status').textContent = '地图图片未加载';});
+    if (map.complete) loaded();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "罗盘",
+    "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-09d68512-d635-4233-8531-4d4f1ab1afdb.png",
+    "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a narrow elegant eight pointed compass star, ivory and muted antique beige, thin dark ink divisions, no enclosing background. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+    "saved": "组件/资源栏/高清图标/罗盘.png"
+  },
+  {
+    "name": "生命",
+    "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-0e42cb1d-7e52-47b4-94e3-3896c2444695.png",
+    "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: an oxblood red flat circular life medallion with an ivory four pointed elongated compass cross centered, no outside ornaments. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+    "saved": "组件/资源栏/高清图标/生命.png"
+  },
+  {
+    "name": "卡牌",
+    "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-2ba3a6f6-bd86-4580-9298-2e708fa80b51.png",
+    "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: three slightly fanned upright ivory playing cards, blank faces with simple narrow dark ink borders. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+    "saved": "组件/资源栏/高清图标/卡牌.png"
+  },
+  {
+    "name": "金币袋",
+    "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-b9d81b44-8cdc-419e-96dd-e3f52292af0c.png",
+    "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a compact tied ivory tan cloth coin purse with two simple fold lines and dark ink outline, no coins outside. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+    "saved": "组件/资源栏/高清图标/金币袋.png"
+  },
+  {
+    "name": "设置",
+    "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-4e6ec3a4-d79a-4652-a8de-985b6adeabde.png",
+    "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a small simple ivory eight tooth cogwheel with open center, standalone gear without diamond frame. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+    "saved": "组件/资源栏/高清图标/设置.png"
+  },
+  {
+    "name": "帮助",
+    "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-431f1f4a-35c4-4c2d-8599-21ff013350a7.png",
+    "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a single elegant ivory question mark with dot, restrained serif shape, no diamond frame. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+    "saved": "组件/资源栏/高清图标/帮助.png"
+  }
+]

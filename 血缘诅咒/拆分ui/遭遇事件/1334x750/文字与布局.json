@@ -1,0 +1,733 @@
+{
+  "width": 1334,
+  "height": 750,
+  "font": "SimSun",
+  "components": [
+    {
+      "name": "顶部资源栏_无文字",
+      "left": 0,
+      "top": 0,
+      "width": 1334,
+      "height": 46
+    },
+    {
+      "name": "事件类型底板",
+      "left": 910,
+      "top": 100,
+      "width": 136,
+      "height": 33
+    },
+    {
+      "name": "选项1_选中底板",
+      "left": 880,
+      "top": 404,
+      "width": 418,
+      "height": 78
+    },
+    {
+      "name": "选项2_普通底板",
+      "left": 880,
+      "top": 493,
+      "width": 418,
+      "height": 78
+    },
+    {
+      "name": "选项3_普通底板",
+      "left": 880,
+      "top": 583,
+      "width": 418,
+      "height": 79
+    },
+    {
+      "name": "地图按钮底板",
+      "left": 24,
+      "top": 654,
+      "width": 215,
+      "height": 60
+    },
+    {
+      "name": "事件火焰纹章",
+      "left": 873,
+      "top": 76,
+      "width": 44,
+      "height": 62
+    },
+    {
+      "name": "标题分隔装饰",
+      "left": 881,
+      "top": 204,
+      "width": 400,
+      "height": 23
+    },
+    {
+      "name": "行动提示菱形",
+      "left": 881,
+      "top": 371,
+      "width": 21,
+      "height": 16
+    },
+    {
+      "name": "底部细装饰",
+      "left": 977,
+      "top": 674,
+      "width": 206,
+      "height": 27
+    },
+    {
+      "name": "右上角装饰",
+      "left": 1237,
+      "top": 58,
+      "width": 86,
+      "height": 73
+    },
+    {
+      "name": "右下角装饰",
+      "left": 1237,
+      "top": 664,
+      "width": 86,
+      "height": 71
+    },
+    {
+      "name": "仪式图标",
+      "left": 900,
+      "top": 425,
+      "width": 27,
+      "height": 38
+    },
+    {
+      "name": "卡牌图标",
+      "left": 899,
+      "top": 514,
+      "width": 30,
+      "height": 38
+    },
+    {
+      "name": "离开图标",
+      "left": 899,
+      "top": 602,
+      "width": 27,
+      "height": 36
+    },
+    {
+      "name": "地图图标",
+      "left": 59,
+      "top": 665,
+      "width": 36,
+      "height": 37
+    }
+  ],
+  "texts": [
+    {
+      "name": "文字_区域",
+      "left": 97,
+      "top": 14,
+      "text": "血月教区 · 旧礼拜堂",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        97,
+        31.53453772582359
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 19.925611052072263,
+        "fauxBold": true,
+        "fillColor": {
+          "r": 238,
+          "g": 233,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_生命标签",
+      "left": 514,
+      "top": 15,
+      "text": "生命",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        514,
+        31.83315621679065
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 19.128586609989373,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 238,
+          "g": 233,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_生命当前",
+      "left": 558,
+      "top": 15,
+      "text": "42",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        558,
+        32.53453772582359
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 19.925611052072263,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 164,
+          "g": 42,
+          "b": 33
+        }
+      }
+    },
+    {
+      "name": "文字_生命最大",
+      "left": 591,
+      "top": 15,
+      "text": "/60",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        591,
+        32.53453772582359
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 19.925611052072263,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 238,
+          "g": 233,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_卡牌",
+      "left": 712,
+      "top": 15,
+      "text": "卡牌 18",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        712,
+        32.53453772582359
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 19.925611052072263,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 238,
+          "g": 233,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_金币",
+      "left": 877,
+      "top": 15,
+      "text": "金币 126",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        877,
+        32.53453772582359
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 19.925611052072263,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 238,
+          "g": 233,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_事件类型",
+      "left": 937,
+      "top": 107,
+      "text": "危险事件",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        937,
+        124.53453772582358
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 19.925611052072263,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 240,
+          "g": 231,
+          "b": 218
+        }
+      }
+    },
+    {
+      "name": "文字_事件标题",
+      "left": 881,
+      "top": 146,
+      "text": "焚兽之夜",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        881,
+        192.99256110520724
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 53.40063761955367,
+        "fauxBold": true,
+        "fillColor": {
+          "r": 8,
+          "g": 8,
+          "b": 8
+        }
+      }
+    },
+    {
+      "name": "文字_事件描述",
+      "left": 883,
+      "top": 246,
+      "text": "半兽化的村民围住火堆，挥舞着草叉。\r被缚在木桩上的同伴，已彻底化为野兽。\r混乱的祷声中，你分不清恐惧与狂热。",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        883,
+        262.1317747077577
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 18.331562167906483,
+        "fauxBold": true,
+        "fillColor": {
+          "r": 21,
+          "g": 19,
+          "b": 15
+        }
+      }
+    },
+    {
+      "name": "文字_行动提示",
+      "left": 911,
+      "top": 371,
+      "text": "请选择一项行动",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        911,
+        386.43039319872474
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 17.534537725823593,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 23,
+          "g": 21,
+          "b": 18
+        }
+      }
+    },
+    {
+      "name": "文字_仪式标题",
+      "left": 945,
+      "top": 421,
+      "text": "加入仪式",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        945,
+        442.04144527098833
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 23.91073326248672,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 242,
+          "g": 234,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_仪式说明",
+      "left": 945,
+      "top": 454,
+      "text": "消耗 20 金币，获得祝福",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        945,
+        467.32624867162593
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 15.14346439957492,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 232,
+          "g": 223,
+          "b": 209
+        }
+      }
+    },
+    {
+      "name": "文字_余烬标题",
+      "left": 945,
+      "top": 510,
+      "text": "搜寻余烬",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        945,
+        531.0414452709883
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 23.91073326248672,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 242,
+          "g": 234,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_余烬说明",
+      "left": 945,
+      "top": 543,
+      "text": "失去 6 生命，获得一张卡牌",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        945,
+        556.3262486716259
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 15.14346439957492,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 232,
+          "g": 223,
+          "b": 209
+        }
+      }
+    },
+    {
+      "name": "文字_离开标题",
+      "left": 945,
+      "top": 600,
+      "text": "绕路离开",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        945,
+        621.0414452709883
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 23.91073326248672,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 242,
+          "g": 234,
+          "b": 223
+        }
+      }
+    },
+    {
+      "name": "文字_离开说明",
+      "left": 945,
+      "top": 633,
+      "text": "不作停留，继续探索",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        945,
+        646.3262486716259
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 15.14346439957492,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 232,
+          "g": 223,
+          "b": 209
+        }
+      }
+    },
+    {
+      "name": "文字_地图",
+      "left": 111,
+      "top": 673,
+      "text": "查看地图",
+      "transform": [
+        1,
+        0,
+        0,
+        1,
+        111,
+        691.2359192348565
+      ],
+      "antiAlias": "sharp",
+      "shapeType": "point",
+      "style": {
+        "font": {
+          "name": "SimSun"
+        },
+        "fontSize": 20.722635494155156,
+        "fauxBold": false,
+        "fillColor": {
+          "r": 243,
+          "g": 236,
+          "b": 223
+        }
+      }
+    }
+  ],
+  "resourceBar": [
+    {
+      "name": "01_资源栏底板_无图标无文字",
+      "left": 0,
+      "top": 0,
+      "width": 1334,
+      "height": 44,
+      "file": "组件/资源栏/01_资源栏底板_无图标无文字.png"
+    },
+    {
+      "name": "02_底部金色边线",
+      "left": 0,
+      "top": 43,
+      "width": 1334,
+      "height": 3,
+      "file": "组件/资源栏/02_底部金色边线.png"
+    },
+    {
+      "name": "03_区域罗盘纹章",
+      "left": 36,
+      "top": 0,
+      "width": 43,
+      "height": 44,
+      "file": "组件/资源栏/03_区域罗盘纹章.png"
+    },
+    {
+      "name": "04_左分隔纹章",
+      "left": 321,
+      "top": 2,
+      "width": 17,
+      "height": 42,
+      "file": "组件/资源栏/04_左分隔纹章.png"
+    },
+    {
+      "name": "05_右分隔纹章",
+      "left": 1185,
+      "top": 2,
+      "width": 20,
+      "height": 42,
+      "file": "组件/资源栏/05_右分隔纹章.png"
+    },
+    {
+      "name": "06_生命徽章",
+      "left": 464,
+      "top": 0,
+      "width": 43,
+      "height": 43,
+      "file": "组件/资源栏/06_生命徽章.png"
+    },
+    {
+      "name": "07_卡牌图标",
+      "left": 668,
+      "top": 6,
+      "width": 32,
+      "height": 33,
+      "file": "组件/资源栏/07_卡牌图标.png"
+    },
+    {
+      "name": "08_金币袋图标",
+      "left": 833,
+      "top": 3,
+      "width": 29,
+      "height": 37,
+      "file": "组件/资源栏/08_金币袋图标.png"
+    },
+    {
+      "name": "09_设置菱形边框",
+      "left": 1220,
+      "top": 2,
+      "width": 38,
+      "height": 40,
+      "file": "组件/资源栏/09_设置菱形边框.png"
+    },
+    {
+      "name": "10_设置符号",
+      "left": 1231,
+      "top": 12,
+      "width": 16,
+      "height": 20,
+      "file": "组件/资源栏/10_设置符号.png"
+    },
+    {
+      "name": "09_帮助菱形边框",
+      "left": 1267,
+      "top": 1,
+      "width": 41,
+      "height": 41,
+      "file": "组件/资源栏/09_帮助菱形边框.png"
+    },
+    {
+      "name": "10_帮助符号",
+      "left": 1278,
+      "top": 11,
+      "width": 19,
+      "height": 21,
+      "file": "组件/资源栏/10_帮助符号.png"
+    }
+  ],
+  "regeneratedIcons": [
+    {
+      "name": "罗盘",
+      "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-09d68512-d635-4233-8531-4d4f1ab1afdb.png",
+      "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a narrow elegant eight pointed compass star, ivory and muted antique beige, thin dark ink divisions, no enclosing background. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+      "saved": "组件/资源栏/高清图标/罗盘.png"
+    },
+    {
+      "name": "生命",
+      "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-0e42cb1d-7e52-47b4-94e3-3896c2444695.png",
+      "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: an oxblood red flat circular life medallion with an ivory four pointed elongated compass cross centered, no outside ornaments. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+      "saved": "组件/资源栏/高清图标/生命.png"
+    },
+    {
+      "name": "卡牌",
+      "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-2ba3a6f6-bd86-4580-9298-2e708fa80b51.png",
+      "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: three slightly fanned upright ivory playing cards, blank faces with simple narrow dark ink borders. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+      "saved": "组件/资源栏/高清图标/卡牌.png"
+    },
+    {
+      "name": "金币袋",
+      "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-b9d81b44-8cdc-419e-96dd-e3f52292af0c.png",
+      "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a compact tied ivory tan cloth coin purse with two simple fold lines and dark ink outline, no coins outside. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+      "saved": "组件/资源栏/高清图标/金币袋.png"
+    },
+    {
+      "name": "设置",
+      "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-4e6ec3a4-d79a-4652-a8de-985b6adeabde.png",
+      "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a small simple ivory eight tooth cogwheel with open center, standalone gear without diamond frame. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+      "saved": "组件/资源栏/高清图标/设置.png"
+    },
+    {
+      "name": "帮助",
+      "path": "C:\\Users\\Administrator\\.codex\\generated_images\\01a16e95-675e-7f50-91dd-e0c678f33327\\exec-431f1f4a-35c4-4c2d-8599-21ff013350a7.png",
+      "prompt": "Use case: stylized-concept. Generate ONE isolated game HUD icon: a single elegant ivory question mark with dot, restrained serif shape, no diamond frame. Image1 is the existing resource HUD, use only its icon visual language and palette. Image2 is the drawing-style anchor, use tapered ink outlines, flat matte grouped colors and sparse structural strokes only; do not copy characters. Centered single icon occupying 75 percent of square canvas, ample transparent margins. Victorian gothic card roguelike UI, understated and harmonious. Must remain legible at 32px. Clean real transparent alpha, filled ivory/tan/red subject interiors remain opaque. No background, no square tile, no ground shadow, no shine, reflections, 3D, glow, busy engraving, additional icons, captions or letters except specified question mark.",
+      "saved": "组件/资源栏/高清图标/帮助.png"
+    }
+  ]
+}

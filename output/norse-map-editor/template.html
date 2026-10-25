@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>九界 · 世界树地图编辑器</title><style>/*STYLES*/</style></head>
+<body>
+<main id="viewport" aria-label="九界地图，拖动浏览，滚轮滑动，Ctrl 加滚轮缩放"><div id="world"><img id="terrain" alt="无文字九界地形底图" draggable="false"><div id="landmarks"></div></div></main>
+<button id="editToggle">编辑地图 ↗</button>
+<nav id="controls" aria-label="地图浏览工具"><button class="icon" id="zoomOut" title="缩小">−</button><span id="zoomValue">100%</span><button class="icon" id="zoomIn" title="放大">+</button><i class="vline"></i><button id="fit" class="small" title="适应窗口（F）">全图</button><button id="actual" class="small">1:1</button><i class="vline"></i><button id="clean" class="small" title="隐藏工具（Tab 恢复）">纯地图</button></nav>
+<div id="hint">拖动浏览 · 滚轮滑动 · Ctrl + 滚轮缩放 · 双击放大</div>
+<aside id="editor" hidden aria-label="地图编辑面板">
+<h1>九界图志</h1><p class="sub">WORLD TREE / 地图编辑</p>
+<div class="actions"><button id="undo" title="Ctrl + Z">↶ 撤销</button><button id="redo" title="Ctrl + Shift + Z">↷ 重做</button><button id="toggleAll">只看底图</button></div>
+<div class="section-head"><h2>地区与地标</h2><span id="count"></span></div><div id="realmList"></div>
+<div id="empty">点击地图或上方缩略图选择地标。<br>每个地标均为独立透明图层。</div>
+<section id="properties" hidden><div class="prop-title"><img id="propThumb" alt="当前地标"><div><small id="propRegion"></small><h3 id="propTitle"></h3></div></div>
+<label class="field">地标名称<input id="name" maxlength="80"></label><label class="field">所属地区<input id="region" maxlength="50"></label>
+<div class="two"><label class="field">X 坐标<input id="x" type="number" step="1"></label><label class="field">Y 坐标（底部）<input id="y" type="number" step="1"></label></div>
+<div class="two"><label class="field">宽度<input id="width" type="number" min="20" max="1600"></label><label class="field">旋转角度<input id="rotation" type="number" min="-180" max="180"></label></div>
+<div class="two"><label class="field">透明度 %<input id="opacity" type="number" min="0" max="100"></label><label class="field">图层顺序<input id="z" type="number" min="0" max="999"></label></div>
+<div class="checks"><label><input id="visible" type="checkbox">显示地标</label><label><input id="locked" type="checkbox">锁定位置</label></div>
+<label class="field">地标说明<textarea id="description" maxlength="800"></textarea></label>
+<div class="actions"><button id="focusItem">定位地标</button><button id="duplicate">复制</button><button id="remove">删除</button></div><p class="note">拖动地标调整位置，拖动右下角圆点缩放。<br>坐标以素材中心底部为锚点，大小等比调整。</p></section>
+<div class="export"><button id="exportJSON">导出布局 JSON</button><button id="importJSON">导入布局 JSON</button><button id="exportPNG">导出纯地图 PNG</button><button id="exportHTML" class="primary">保存可编辑 HTML</button></div>
+<div class="actions" style="margin-top:9px"><button id="addAsset">＋ 添加 PNG 地标</button><button id="reset">恢复初始布局</button></div>
+<p id="saveState" class="save-state">修改会自动保存到当前浏览器。</p><p class="shortcut">E 编辑 / 浏览 · F 全图 · Tab 纯地图<br>空格 + 拖动 平移 · 方向键 微调 · Shift 加速<br>Ctrl + Z 撤销 · Ctrl + Shift + Z 重做</p>
+</aside>
+<div id="tooltip" hidden></div><section id="popover" hidden><button id="closePop" aria-label="关闭">×</button><div class="eyebrow" id="popRegion"></div><h3 id="popName"></h3><p id="popDesc"></p><button id="editSelected" class="small">调整这个地标 ↗</button></section>
+<button id="restore">Tab · 显示工具</button><div id="toast" hidden></div><input type="file" id="jsonFile" accept=".json,application/json" hidden><input type="file" id="assetFile" accept="image/png,image/webp,image/jpeg" hidden>
+<script id="document-data" type="application/json">/*DATA*/</script><script>/*SCRIPT*/</script>
+</body></html>

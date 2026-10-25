@@ -2,18 +2,22 @@ import { TableBattleBuff, BattleBuffCategory, BattleBuffStackMode, BattleBuffRul
 import { BattleBuffTypeEnum } from '../../common/table/BattleBuffTypeEnum';
 import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
 import { Battle } from '../Battle';
-import { BattleContext, BattleSide } from '../model/BattleTypes';
+import { BattleBuff, BattleContext, BattleSide } from '../model/BattleTypes';
 export class BattleBuffBll extends CCBusiness<Battle> {
     // 汇总当前存活Buff的规则，移除或到期后立即停止生效。
     getRuleValue(side: BattleSide, kind: BattleBuffRuleKind): number {
         return this.ent.BattleValueResolver.getActor(side).buffs.reduce((sum, buff) => {
-            return sum + Math.max(0, buff.stacks) * (TableBattleBuff.requireBuffConfig(buff.id).getRules()[kind] || 0);
+            return sum + (this.isBuffActive(side, buff) ? Math.max(0, buff.stacks) * (TableBattleBuff.requireBuffConfig(buff.id).getRules()[kind] || 0) : 0);
         }, 0);
+    }
+    // 检查所属阵营的Buff实例和持续回合，避免过期效果继续参与结算。
+    isBuffActive(side: BattleSide, buff: BattleBuff): boolean {
+        return buff.stacks !== 0 && this.ent.BattleValueResolver.getActor(side).buffs.includes(buff)
+            && (!['TURN', 'NEXT_TURN'].includes(buff.duration) || buff.expiresTurn >= this.ent.BattleModel.turn);
     }
     // 检查能力上下文对应的Buff实例是否仍然有效。
     isContextActive(context: BattleContext): boolean {
-        return !context.buff || !!context.buffSide && context.buff.stacks > 0
-            && this.ent.BattleValueResolver.getActor(context.buffSide).buffs.includes(context.buff);
+        return !context.buff || !!context.buffSide && context.buff.stacks > 0 && this.isBuffActive(context.buffSide, context.buff);
     }
     // 清理被移除、被驱散或到期Buff拥有的监听，包括尚未执行的延迟效果。
     pruneBuffTriggers(): void {
@@ -55,6 +59,7 @@ export class BattleBuffBll extends CCBusiness<Battle> {
         }
         const resolver = this.ent.BattleValueResolver;
         const config = TableBattleBuff.requireBuffConfig(id);
+        duration = duration === 'DEFAULT' ? config.getDefaultDuration() : duration;
         const effects = config.getEffects();
         const ability = effects.length > 0 || Object.keys(config.getRules()).length > 0;
         if (config.category === BattleBuffCategory.Debuff && stacks > 0 && resolver.getBuffStacks(side, BattleBuffTypeEnum.ARTIFACT) > 0) {
@@ -156,7 +161,8 @@ export class BattleBuffBll extends CCBusiness<Battle> {
     cleanseDebuffs(side: BattleSide): void {
         const actor = this.ent.BattleValueResolver.getActor(side);
         actor.buffs = actor.buffs.filter(buff => {
-            return TableBattleBuff.requireBuffConfig(buff.id).category !== BattleBuffCategory.Debuff && buff.stacks > 0;
+            const config = TableBattleBuff.requireBuffConfig(buff.id);
+            return !config.isDispellable() || config.category !== BattleBuffCategory.Debuff && buff.stacks > 0;
         });
         this.pruneBuffTriggers();
     }

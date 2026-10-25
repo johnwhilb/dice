@@ -1,0 +1,202 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>开始界面 · UI 详细拆分</title>
+<style>*{box-sizing:border-box}body{margin:0;padding:32px;background:#eeeae2;color:#242220;font:15px/1.6 system-ui}main{max-width:1200px;margin:auto}h1{font-size:26px}h2{margin-top:32px}a{color:#832f2c}button{padding:8px 14px;border:1px solid #aaa;background:#fff;cursor:pointer;margin-right:8px}.stage,.asset{background-color:#e9e5dc;background-image:linear-gradient(45deg,#d9d5cd 25%,transparent 25%),linear-gradient(-45deg,#d9d5cd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#d9d5cd 75%),linear-gradient(-45deg,transparent 75%,#d9d5cd 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}.stage{position:relative;aspect-ratio:1672/941;border:1px solid #b8b2a8;margin-top:16px}.stage img{position:absolute;max-width:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}.card{border:1px solid #c6bfb5;background:#f8f5ef;padding:16px}.asset{height:180px;display:flex;align-items:center;justify-content:center;padding:12px}.asset img{max-width:100%;max-height:100%;object-fit:contain}small{color:#665f58}.status{color:#386447}</style>
+<main><h1>开始界面 · UI 详细拆分</h1><p>9 个独立透明组件 · 3 个组合版本 · 原画布 1672 × 941</p><p class="status">按原图像素裁切。导出文件重组校验：可见 RGBA 差异 0，透明度差异 0。</p><p><a href="layout.json">坐标与尺寸 JSON</a> · <a href="使用说明.txt">使用说明</a> · <a href="组件预览.png">组件总览 PNG</a></p>
+<h2>原位复合预览</h2><button id="assembled">显示拆分重组</button><button id="source">显示源 UI</button><span id="mode">拆分重组（含边缘残留）</span><div class="stage" id="stage"></div><h2>独立组件</h2><div class="grid" id="components"></div><h2>组合版本</h2><p>组合图可整体使用；与对应独立组件二选一。</p><div class="grid" id="presets"></div></main>
+<script>const data={
+  "method": "Original pixel crop; no generation, resampling, recoloring or alpha thresholding",
+  "source": "../UI.png",
+  "sourceSha256": "4A51C08FE96A8CE5400BBCC034409D3E7D0158D5461D8DB401CB85B03DC70E3D",
+  "canvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "coordinateSystem": "top-left origin; native pixels; no scale",
+  "components": [
+    {
+      "id": "title_text",
+      "label": "标题文字",
+      "file": "01_标题/文字.png",
+      "x": 278,
+      "y": 264,
+      "width": 490,
+      "height": 131,
+      "visiblePixels": 27088,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_top",
+      "label": "标题上装饰",
+      "file": "01_标题/上装饰.png",
+      "x": 316,
+      "y": 229,
+      "width": 419,
+      "height": 29,
+      "visiblePixels": 2765,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_bottom",
+      "label": "标题下装饰",
+      "file": "01_标题/下装饰.png",
+      "x": 272,
+      "y": 396,
+      "width": 490,
+      "height": 26,
+      "visiblePixels": 3205,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_left",
+      "label": "标题左装饰",
+      "file": "01_标题/左装饰.png",
+      "x": 155,
+      "y": 340,
+      "width": 122,
+      "height": 22,
+      "visiblePixels": 689,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "title_right",
+      "label": "标题右装饰",
+      "file": "01_标题/右装饰.png",
+      "x": 768,
+      "y": 340,
+      "width": 109,
+      "height": 22,
+      "visiblePixels": 636,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "start_text",
+      "label": "开始游戏文字",
+      "file": "02_开始游戏/文字.png",
+      "x": 431,
+      "y": 483,
+      "width": 195,
+      "height": 45,
+      "visiblePixels": 4798,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "start_ornament",
+      "label": "开始游戏装饰线",
+      "file": "02_开始游戏/装饰线.png",
+      "x": 337,
+      "y": 528,
+      "width": 390,
+      "height": 37,
+      "visiblePixels": 3670,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "continue_text",
+      "label": "继续游戏文字",
+      "file": "03_继续游戏/文字.png",
+      "x": 435,
+      "y": 579,
+      "width": 182,
+      "height": 43,
+      "visiblePixels": 4195,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "continue_ornament",
+      "label": "继续游戏装饰线",
+      "file": "03_继续游戏/装饰线.png",
+      "x": 375,
+      "y": 622,
+      "width": 320,
+      "height": 28,
+      "visiblePixels": 2408,
+      "pivot": [
+        0,
+        0
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "id": "title_group",
+      "label": "完整标题组合",
+      "file": "01_标题/组合.png",
+      "x": 155,
+      "y": 229,
+      "width": 722,
+      "height": 195,
+      "visiblePixels": 34425,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "start_group",
+      "label": "开始游戏组合",
+      "file": "02_开始游戏/组合.png",
+      "x": 330,
+      "y": 483,
+      "width": 400,
+      "height": 83,
+      "visiblePixels": 8483,
+      "pivot": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "continue_group",
+      "label": "继续游戏组合",
+      "file": "03_继续游戏/组合.png",
+      "x": 370,
+      "y": 579,
+      "width": 330,
+      "height": 76,
+      "visiblePixels": 6641,
+      "pivot": [
+        0,
+        0
+      ]
+    }
+  ],
+  "residual": {
+    "visiblePixels": 214,
+    "x": 0,
+    "width": 1672,
+    "file": "校验/边缘残留.png",
+    "y": 0,
+    "height": 941
+  },
+  "validation": {
+    "visibleRgbaMismatchPixels": 0,
+    "alphaMismatchPixels": 0,
+    "sourceUnchanged": true,
+    "componentOverlapPixels": 0,
+    "transparentRgbIgnored": true
+  }
+}
+;const stage=document.getElementById('stage');function place(a){const i=document.createElement('img');i.src=a.file;i.style.cssText=`left:${a.x/data.canvas.width*100}%;top:${a.y/data.canvas.height*100}%;width:${a.width/data.canvas.width*100}%;height:${a.height/data.canvas.height*100}%`;stage.append(i)}function assembled(){stage.replaceChildren();data.components.forEach(place);place(data.residual);document.getElementById('mode').textContent='拆分重组（含边缘残留）'}document.getElementById('assembled').onclick=assembled;document.getElementById('source').onclick=()=>{stage.replaceChildren();place({file:data.source,x:0,y:0,width:data.canvas.width,height:data.canvas.height});document.getElementById('mode').textContent='源 UI.png'};function cards(items,id){const box=document.getElementById(id);items.forEach(a=>{const c=document.createElement('article');c.className='card';const t=document.createElement('strong');t.textContent=a.label;const p=document.createElement('div');p.className='asset';const i=document.createElement('img');i.src=a.file;i.alt=a.label;p.append(i);const s=document.createElement('small');s.textContent=`${a.width} × ${a.height} px · 原位 (${a.x}, ${a.y})`;const link=document.createElement('a');link.href=a.file;link.download=a.file.split('/').pop();link.textContent='下载 PNG';c.append(t,p,s,document.createElement('br'),link);box.append(c)})}cards(data.components,'components');cards(data.presets,'presets');assembled();</script></html>

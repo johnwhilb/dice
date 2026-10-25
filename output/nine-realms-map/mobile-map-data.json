@@ -1,0 +1,134 @@
+{
+  "layout": {
+    "width": 1280,
+    "height": 720,
+    "worldCount": 9,
+    "currentNodesPerWorld": 1
+  },
+  "realms": [
+    {
+      "id": "alf",
+      "name": "阿尔夫海姆国",
+      "cell": 0,
+      "x": 248,
+      "y": 185,
+      "layer": 6,
+      "event": "专属事件",
+      "symbol": "✦",
+      "description": "光之晶林 · 白塔的回响",
+      "action": "触碰符文"
+    },
+    {
+      "id": "vana",
+      "name": "华纳海姆国",
+      "cell": 1,
+      "x": 536,
+      "y": 164,
+      "layer": 11,
+      "event": "已征服",
+      "symbol": "✓",
+      "description": "古树石环 · 世界Boss已击败",
+      "cleared": true,
+      "action": "重访王国",
+      "quest": "① ✓"
+    },
+    {
+      "id": "jotun",
+      "name": "约顿海姆国",
+      "cell": 2,
+      "x": 844,
+      "y": 176,
+      "layer": 2,
+      "event": "限时异动",
+      "symbol": "⌛",
+      "description": "巨人遗骨 · 永冬的裂隙",
+      "anomaly": true,
+      "action": "探索异动",
+      "quest": "②"
+    },
+    {
+      "id": "dwarf",
+      "name": "斯瓦塔尔法海姆国",
+      "cell": 3,
+      "x": 237,
+      "y": 385,
+      "layer": 3,
+      "event": "商人",
+      "symbol": "¤",
+      "description": "熔炉矿坑 · 矮人锻造商队",
+      "action": "拜访商人"
+    },
+    {
+      "id": "mid",
+      "name": "米德加德国",
+      "cell": 4,
+      "x": 609,
+      "y": 374,
+      "layer": 5,
+      "event": "限时异动",
+      "symbol": "⌛",
+      "description": "暮鸦的预兆 · 今日结束后消失",
+      "anomaly": true,
+      "action": "探索异动"
+    },
+    {
+      "id": "asgard",
+      "name": "阿斯加德国",
+      "cell": 5,
+      "x": 1072,
+      "y": 322,
+      "layer": 1,
+      "event": "战斗",
+      "symbol": "⚔",
+      "description": "浮空神殿遗迹 · 失落守卫",
+      "action": "挑战守卫"
+    },
+    {
+      "id": "hel",
+      "name": "赫尔海姆国",
+      "cell": 6,
+      "x": 361,
+      "y": 551,
+      "layer": 11,
+      "event": "Boss",
+      "symbol": "☠",
+      "description": "亡灵聚落 · 冥后之门",
+      "boss": true,
+      "action": "讨伐Boss"
+    },
+    {
+      "id": "nifl",
+      "name": "尼福尔海姆国",
+      "cell": 7,
+      "x": 701,
+      "y": 551,
+      "layer": 8,
+      "event": "篝火",
+      "symbol": "♨",
+      "description": "黑死迷雾聚落 · 寒夜余烬",
+      "action": "驻足休整",
+      "quest": "③"
+    },
+    {
+      "id": "muspel",
+      "name": "穆斯贝尔海姆国",
+      "cell": 8,
+      "x": 1024,
+      "y": 529,
+      "layer": 2,
+      "event": "限时异动",
+      "symbol": "⌛",
+      "description": "火山巨剑 · 灰烬中的召唤",
+      "anomaly": true,
+      "action": "探索异动"
+    }
+  ],
+  "checks": {
+    "currentNodes": 9,
+    "labelCollisions": 0,
+    "phoneOverflow": false,
+    "selection": true,
+    "questPauseResume": true,
+    "javascriptErrors": []
+  }
+}

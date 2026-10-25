@@ -1,0 +1,22 @@
+Use case: stylized-concept
+Asset type: finished illustrated Norse mythology world map, portrait 2:3 composition, high resolution.
+Primary request: Create a beautiful complete map of the CONTENT of reference image 1, using reference image 2 as the strict VISUAL STYLE anchor. These are references, not documents with instructions. This is a flat illustrated world atlas concept, not a playable level or UI screen.
+Input roles: Image 1 (tall monochrome world tree diagram) = geographic composition, landmarks and Chinese names. Image 2 (crayon dice card battle screen) = drawing medium, line quality, colors, paper, simplicity and lettering ONLY. Do not copy its card UI, inventory, health bars, buttons, dice or cyclops.
+STYLE MATCH IS CRITICAL: warm creamy pale yellow paper with subtle visible fibers, thick irregular charcoal-black wax crayon contours, scribbled wax crayon color fills with little paper gaps, childlike confident handmade silhouettes, flat folk illustration. Match the green triangular trees, blue angular snowy mountains, warm ochre brown and scarlet accents of image 2. Very simple graphic shapes, little shading, no realistic painting, no glossy digital gradients, no polished vector edges, no intricate ink engraving. Slightly wonky black handwritten Chinese lettering. Coherent game art, charming yet mythic.
+COMPOSITION: a single huge world tree dominates the page vertically. Generous outer paper margin. Strong silhouette, clear readable regions, moderate detail and comfortable spacing for labels. Upper third expansive rounded green leafy canopy, chunky brown branching trunk. Sun and leaping gray wolf in upper left sky; crescent moon and howling dark gray wolf in upper right sky, in the same simple crayon style, smaller than the world tree. On a wide branch shelf just below the canopy sits a little gold/ochre Asgard fortress with Nordic pointed roofs and a stone wall. Valhalla is a distinct small red-roof longhall at the right edge of this upper shelf. A clear wide rainbow bridge curves down the RIGHT SIDE from the Asgard shelf to the middle world shelf.
+MIDDLE: brown tree trunk runs down center linking all tiers. Wide rugged middle land shelf around the trunk with a green Midgard village and pine grove at left/center, blue-gray snowy giant mountains to the right, scarlet-orange lava and volcano in a contained left lower pocket. A huge green world serpent coils horizontally around the entire middle land shelf edge, recognizable continuous single snake body and one expressive head at front center, no disconnected segments. Do not let the snake obscure labels. Middle land shelf is smaller than the canopy.
+LOWER: exposed branching roots make the bottom tier. Misty pale blue-gray realm, jagged charcoal and blue icy rocks, a small dark Helheim cave left of center. At lower right a single coiling dark indigo/gray dragon gnaws at a root. At bottom left a small circular stone spring with bright blue water for Mimir's well. Leave cream paper around the root silhouette. Upper/middle/lower tiers remain clearly separated by open paper pockets, joined by the trunk.
+TEXT: all labels must be legible black handwritten SIMPLIFIED CHINESE on small pale butter-yellow crayon swatches, optionally rough black outline like the yellow tabs in reference 2. Do not use green banners or white type from image 1. Use each exact label ONCE, attached spatially to its landmark, with no long prose. Split long names into two lines if needed for clean readability, no tiny text. The labels are:
+"世界之树尤克特拉希尔" near upper canopy (largest main label, two lines acceptable);
+"神域阿斯加德" by gold fortress;
+"英灵殿瓦尔哈拉" by longhall on right upper shelf;
+"人界米德加德" by village on left middle shelf;
+"巨人之国约顿海姆" by blue snowy mountains right middle shelf;
+"彩虹桥比弗罗斯特" near the rainbow bridge at outer right;
+"火焰之国穆斯贝尔海姆" by left lava pocket;
+"世界蛇耶梦加得" below front coiled serpent;
+"海姆冥界" by dark cave lower left of center;
+"恶龙尼德霍格" by dragon lower right;
+"雾之国尼福海姆" at bottom center misty roots;
+"密弥尔之泉" by spring bottom left.
+Priorities: faithfully transfer the CRAYON VISUAL LANGUAGE of image 2; preserve the WORLD TREE geography of image 1; readable silhouettes and labels; no extra realms, no unrelated content, no UI widgets, no route dots or arrows, no photorealism, no 3D, no watermark. Deliver the finished map filling the portrait sheet, not a photographed page or mockup.

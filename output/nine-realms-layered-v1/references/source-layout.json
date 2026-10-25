@@ -1,0 +1,105 @@
+{
+  "width": 1672,
+  "height": 941,
+  "worlds": [
+    {
+      "id": "jotunheim",
+      "name": "约顿海姆",
+      "reference": "references/jotunheim.png",
+      "referenceCrop": [
+        0,
+        0,
+        520,
+        345
+      ]
+    },
+    {
+      "id": "asgard",
+      "name": "阿斯加德",
+      "reference": "references/asgard.png",
+      "referenceCrop": [
+        520,
+        0,
+        1165,
+        340
+      ]
+    },
+    {
+      "id": "alfheim",
+      "name": "阿尔夫海姆",
+      "reference": "references/alfheim.png",
+      "referenceCrop": [
+        1160,
+        0,
+        1672,
+        360
+      ]
+    },
+    {
+      "id": "vanaheim",
+      "name": "华纳海姆",
+      "reference": "references/vanaheim.png",
+      "referenceCrop": [
+        0,
+        335,
+        520,
+        680
+      ]
+    },
+    {
+      "id": "midgard",
+      "name": "米德加德",
+      "reference": "references/midgard.png",
+      "referenceCrop": [
+        520,
+        345,
+        1160,
+        690
+      ]
+    },
+    {
+      "id": "svartalfheim",
+      "name": "斯瓦塔尔法海姆",
+      "reference": "references/svartalfheim.png",
+      "referenceCrop": [
+        1165,
+        345,
+        1672,
+        690
+      ]
+    },
+    {
+      "id": "muspelheim",
+      "name": "穆斯贝尔海姆",
+      "reference": "references/muspelheim.png",
+      "referenceCrop": [
+        0,
+        630,
+        530,
+        941
+      ]
+    },
+    {
+      "id": "niflheim",
+      "name": "尼福尔海姆",
+      "reference": "references/niflheim.png",
+      "referenceCrop": [
+        535,
+        660,
+        1145,
+        941
+      ]
+    },
+    {
+      "id": "helheim",
+      "name": "赫尔海姆",
+      "reference": "references/helheim.png",
+      "referenceCrop": [
+        1145,
+        635,
+        1672,
+        941
+      ]
+    }
+  ]
+}

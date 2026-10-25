@@ -1,0 +1,46 @@
+Use case: ui-mockup
+Create a finished highly detailed LARGE PANORAMIC SCROLLABLE GAME WORLD EXPLORATION MAP UI DESIGN IMAGE in Chinese. Target 3840x2048 landscape, a large full-map design board representing a map much bigger than a normal game viewport. This is an illustration/UI design deliverable, not a screenshot of code. Use the provided reference image ONLY as VISUAL STYLE anchor: creamy textured paper, rough thick charcoal wax-crayon outlines, visible scribbled colored pencil/wax crayon fill with paper gaps, simple readable handmade landmark silhouettes, handwritten black Chinese, yellow crayon tabs. Maintain this medium but turn palette apocalyptic: desaturated blue, charcoal, withered olive, burnt brown, bone cream, sparse scarlet and violet. Not a cheerful fantasy park; Norse Ragnarok approaching. No realism, no polished vector UI, no glossy modern mobile map.
+PRIMARY HIERARCHY: nine large terrain regions + their exact 11-node landmark routes dominate; active nodes and daily anomalies next; thin persistent game status and tiny inline quest strip next; mythology scenery last. No side detail panels, no popup, no submenu, no cards grid, no skill tree, no big central tree with floating islands.
+WORLD GEOGRAPHY: one continuous sprawling illustrated fractured world continent with 8 irregularly-shaped adjacent but distinct biomes linked through shared mountains/seas/fissures. Regions should be large and spread across the panorama, staggered irregularly in depth, absolutely not a 3x3 grid, not circular world buttons. Ninth Asgard ONLY is visibly detached, isolated high and far to upper right beyond a huge black sea/void, joined only by a BROKEN rainbow bridge. Use depth and distant landscape to make it farther and higher. No nine islands hanging from tree branches. World tree exists only as faint dying root/branch veins BEHIND the terrain, never main subject. A subdued dark green Jormungandr serpent curls through the OUTER BORDER as mural-like decoration, never hides labels or routes. Tiny ravens, runestones, broken ruins, collapsed shore, ice fissures, black smoke and embers imply Norse apocalypse.
+LAYOUT PLAN: Alfheim upper left pale dying luminous forest, Vanaheim upper mid-left overgrown ruined temple wetlands, Jotunheim upper center-right immense icy crags, detached Asgard upper far right gold ruined citadel. Svartalfheim mid-left dark dwarven mine, Midgard broad center burned Nordic villages and broken fortress, Muspelheim mid-right red-black lava slopes. Helheim lower-left dead gray realm and skeletal gate, Niflheim lower-center/right frozen fog basin. Irregular terrain boundaries, no enclosing rectangular region cards. Clear breathing room between regions, each route has enough area. LARGE safe margin all around geographic map: outer 5-7% only fog, ocean, ruins, serpent border decoration, NO critical text/nodes at map edge.
+EXACT NODE SYSTEM, ESSENTIAL: Each of all NINE worlds has exactly ELEVEN real illustrated landmark nodes in ONE readable locally winding path; total 99 nodes. Thin pale ochre roads / stone trails / ice paths connect nodes, routes NEVER merge between worlds and NEVER cross themselves. Each node has a tiny legible ordinal 01 through 11. Nodes not mere uniform circles. Node types in the SAME exact order in every world:
+01 crossed-axe battle camp
+02 crossed-axe battle camp
+03 merchant tent and coin bag
+04 crossed-axe battle camp
+05 crossed-axe battle camp
+06 unique world event runestone/altar (different emblem per biome)
+07 crossed-axe battle camp
+08 campfire with stacked logs
+09 crossed-axe battle camp
+10 crossed-axe battle camp
+11 large BOSS landmark, skull-marked fortress / throne / lair.
+Thus baseline seven battle nodes, one merchant, one event, one campfire, one boss. Boss visually larger than other landmarks; routes ascend spatially from entrance to boss but are natural winding paths, not 11-step staircase flowcharts.
+Every world label uses BLACK handwritten Chinese with a pale yellow paper/crayon underlay, plus small independent progress and current event tag. EXACT names and example states:
+"亚尔夫海姆" "光精灵之境" "0/11 · 当前：战斗"
+"华纳海姆" "古神湿地" "11/11 · Boss已击败"
+"约顿海姆" "巨人冰原" "1/11 · 当前：限时异动"
+"阿斯加德" "脱离的神域" "0/11 · 当前：战斗"
+"斯瓦塔尔夫海姆" "矮人矿国" "0/11 · 当前：战斗"
+"米德加德" "人类废土" "4/11 · 当前：限时异动"
+"穆斯贝尔海姆" "烈焰裂土" "1/11 · 当前：限时异动"
+"赫尔海姆" "亡者国度" "0/11 · 当前：战斗"
+"尼福尔海姆" "寒雾深渊" "0/11 · 当前：战斗"
+PROGRESS VISUAL STATES: completed nodes carry small green check stamp and muted colored landmark; CURRENT accessible node strong rough gold square/diamond frame around illustrated landmark; FUTURE node faded gray crayon + small lock indicator, still type discernible. Vanaheim all 11 done, Boss has prominent green defeat stamp. Midgard 01-04 done, node05 current. Jotunheim and Muspelheim node01 done, node02 current. Other five untouched worlds INCLUDING Asgard node01 current (Asgard accessible, NOT a required final locked boss). Node02-11 future. All world progress is independent. Small "可进入" tag on current landmark, done/future conveyed by checks and locks.
+DAILY ANOMALIES: EXACTLY THREE, ONLY replace CURRENT battle nodes in Midgard05, Jotunheim02, Muspelheim02. At those exact route positions draw conspicuous violet fractured rune/hourg lass landmark IN PLACE OF the ordinary axes. Add purple rough outlined highlight and small hourglass pennant "今日限定". Keep its ordinal and route intact, no extra nodes. These 3 realms show purple small "异动" pennant by name. None elsewhere. Main interface says "今日异动 3/3 · 日终消失". No glowing realistic bloom, use scribbled violet rings and radiating ink marks matching crayon.
+LONG QUEST directly on map: thin GOLD DASHED THREAD connects 3 small rune-diamond quest badges associated with Vanaheim06 (completed green tick), Jotunheim02 (current gold badge "任务②", also anomaly), Niflheim06 (future gray badge). It is thinner than local route paths and never obscures nodes. The cross-region thread is distinguishable from solid world routes. Small unobtrusive horizontal paper strip near lower map interior: "长任务：止息永冬  1/3 · 已暂停，可继续" and "下一阶段：约顿海姆②". Quest remains visibly saved. NOT a side panel. Max two compact lines.
+TOP STABLE UI BAR: thin handmade parchment information rail INSIDE overall design safe margin, not overwhelming map, with readable EXACT Chinese:
+title "九界 · 诸神黄昏"
+"第19天 / 60" 
+"剩余41天"
+"今日未行动 · 可行动1次"
+"通关目标：60天内击败任意3界Boss"
+"Boss已击败 1/3" with three skull medallions, first checked green, other two empty.
+Small secondary rule text "探索1节点 / 推进1任务阶段 = 1天 · 切换世界不耗时".
+Small purple status line "今日异动 3/3 · 日终消失".
+Do not create navigation tabs or page-switch menus. All vital information visible in this ONE map.
+BOTTOM SMALL INLINE LEGEND, inside safe area: eight distinct mini landmark icons with short labels:
+crossed axes "战斗"; tent "商人"; rune altar "专属事件"; fire "篝火"; skull fortress "Boss"; black fog question-mark stone "未知"; wood chest "宝箱"; violet hourglass rift "限时异动".
+Unknown and chest are legend-only expansion types, MUST NOT add nodes to the fixed 11 routes. Beside legend tiny state indicators "✓ 已探索" "金框 可进入" "锁 未到达".
+SCROLLABILITY: large panoramic map landscape extends across huge geography, no squeezing into ordinary one-screen layout. Subtle slim handdrawn horizontal and vertical scroll tracks at safe outer bottom and right with thumb indicating current portion; small 4-way handdrawn compass/drag affordance reading "拖动探索九界" unobtrusively in map interior near bottom. These are in-world parchment UI, not modern GPS controls. No large minimap, no smartphone frame. Design represents entire large map at overview zoom; actual game camera would view only part. Preserve breathing room.
+TEXT QUALITY: readable handmade Simplified Chinese, consistent labels, no lorem ipsum, no invented English paragraphs. Largest world labels, then progress, then small ordinals. Do not fill terrain with prose. Every region has its full local eleven-landmark path visually separable from scenery. Keep backgrounds subdued enough to count landmarks. Do NOT omit a world, a path, or a world Boss. Do NOT add extra nodes or use a world tree as the main interactive object. Deliver a complete coherent polished crayon game map main interface design, functional information hierarchy and Norse apocalyptic worldbuilding.

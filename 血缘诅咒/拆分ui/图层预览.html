@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>苍白之血 · 图层预览</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:24px;background:#202124;color:#eee;font:15px system-ui,"Microsoft YaHei",sans-serif}h1{font-size:22px;margin:0 0 14px}header{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:16px}select,button,input{font:inherit}select,button{padding:7px 12px;background:#35363a;color:#eee;border:1px solid #666;border-radius:5px}label{display:inline-flex;align-items:center;gap:6px}#stage{position:relative;width:min(100%,1672px);aspect-ratio:1672/941;overflow:hidden;background-color:#e8e6e1;background-image:linear-gradient(45deg,#c9c7c2 25%,transparent 25%),linear-gradient(-45deg,#c9c7c2 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#c9c7c2 75%),linear-gradient(-45deg,transparent 75%,#c9c7c2 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0;border:1px solid #555}#stage img{position:absolute;object-fit:fill;pointer-events:none}p{color:#bbb;max-width:1100px;line-height:1.7}.links{margin:14px 0;display:flex;gap:20px;flex-wrap:wrap}a{color:#d6b99b}#controls{display:flex;gap:14px;flex-wrap:wrap}.adjust{margin:14px 0;display:flex;gap:14px;align-items:center;flex-wrap:wrap}.adjust input{width:80px;padding:4px}small{color:#bbb}
+</style>
+<h1>苍白之血 · 图层预览</h1>
+<header><select id="screen" aria-label="界面"></select><div id="controls"></div><label><input id="original" type="checkbox">对照原图</label></header>
+<div id="stage"></div><div id="adjust" class="adjust" hidden></div><div id="links" class="links"></div>
+<p>背景 → 人物 → UI。关闭背景可查看透明边缘。开始界面没有人物层。卡牌和头像内的插图保留在 UI 层。</p>
+<p>这些图层从合成 PNG 经生成式提取与补绘得到，文字、边缘及比例可能与原图存在差异，无法逐像素还原。战斗人物已提供建议显示位置，可在上方微调。接入游戏请按 layout.json 的显示矩形叠放。</p>
+<script>
+const data={"version":1,"referenceCanvas":{"width":1672,"height":941},"coordinates":"top-left, pixels","method":"内置 image_gen 图层重建与透明提取；非PSD原始分层","screens":[{"name":"开始界面","source":"C:\\Users\\Administrator\\Desktop\\血缘诅咒\\生成界面\\苍白之血-开始界面-v05.png","layers":[{"name":"背景","file":"开始界面/背景.png","transparent":false,"displayRect":{"x":0,"y":0,"width":1672,"height":941}},{"name":"UI","file":"开始界面/UI.png","transparent":true,"displayRect":{"x":0,"y":0,"width":1672,"height":941}}]},{"name":"角色选择","source":"C:\\Users\\Administrator\\Desktop\\血缘诅咒\\生成界面\\苍白之血-角色选择-v04.png","layers":[{"name":"背景","file":"角色选择/背景.png","transparent":false,"displayRect":{"x":0,"y":0,"width":1672,"height":941}},{"name":"人物","file":"角色选择/人物.png","transparent":true,"displayRect":{"x":0,"y":0,"width":1672,"height":941}},{"name":"UI","file":"角色选择/UI.png","transparent":true,"displayRect":{"x":0,"y":0,"width":1672,"height":941}}]},{"name":"战斗界面","source":"C:\\Users\\Administrator\\Desktop\\血缘诅咒\\生成界面\\苍白之血-战斗界面-v02.png","layers":[{"name":"背景","file":"战斗界面/背景.png","transparent":false,"displayRect":{"x":0,"y":0,"width":1672,"height":941}},{"name":"人物","file":"战斗界面/人物.png","transparent":true,"displayRect":{"x":150,"y":10,"width":1337.6,"height":752.8}},{"name":"UI","file":"战斗界面/UI.png","transparent":true,"displayRect":{"x":0,"y":0,"width":1672,"height":941}}]}]};
+const select=document.getElementById('screen'),stage=document.getElementById('stage'),controls=document.getElementById('controls'),original=document.getElementById('original'),links=document.getElementById('links'),adjust=document.getElementById('adjust');
+data.screens.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;select.append(o)});
+function pos(img,r){img.style.left=(r.x/1672*100)+'%';img.style.top=(r.y/941*100)+'%';img.style.width=(r.width/1672*100)+'%';img.style.height=(r.height/941*100)+'%'}
+function render(){
+const s=data.screens[Number(select.value)];stage.replaceChildren();controls.replaceChildren();links.replaceChildren();adjust.replaceChildren();adjust.hidden=true;
+s.layers.forEach(l=>{
+const img=new Image();img.src=l.file;img.alt=s.name+l.name;pos(img,l.displayRect);stage.append(img);
+const label=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.checked=true;label.append(cb,document.createTextNode(l.name));controls.append(label);cb.onchange=()=>img.hidden=!cb.checked||original.checked;
+const a=document.createElement('a');a.href=l.file;a.download=l.file.split('/').pop();a.textContent='下载'+l.name;links.append(a);
+if(s.name==='战斗界面'&&l.name==='人物'){
+adjust.hidden=false;const title=document.createElement('span');title.textContent='敌人层位置：';adjust.append(title);
+const values={x:l.displayRect.x,y:l.displayRect.y,scale:l.displayRect.width/1672};
+for(const [key,text,step] of [['x','X',1],['y','Y',1],['scale','比例',0.01]]){const label=document.createElement('label'),input=document.createElement('input');input.type='number';input.step=step;input.value=values[key];label.append(document.createTextNode(text),input);adjust.append(label);input.oninput=()=>{values[key]=Number(input.value);pos(img,{x:values.x,y:values.y,width:1672*values.scale,height:941*values.scale})}}
+}
+});
+const ref=new Image();ref.src=s.name+'/原图.png';ref.alt='原图';pos(ref,{x:0,y:0,width:1672,height:941});ref.hidden=!original.checked;stage.append(ref);
+original.onchange=()=>{ref.hidden=!original.checked;[...stage.children].slice(0,-1).forEach((img,i)=>img.hidden=original.checked||!controls.children[i].querySelector('input').checked)};
+original.onchange();
+}select.onchange=render;render();
+</script></html>

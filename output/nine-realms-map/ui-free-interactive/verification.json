@@ -1,0 +1,14 @@
+{
+  "landmarks": 9,
+  "independentSprites": true,
+  "sourceEdgeTouches": 0,
+  "clickEvents": true,
+  "keyboard": true,
+  "repeatVisits": true,
+  "responsiveSizes": [
+    "1605x980",
+    "844x390",
+    "390x844"
+  ],
+  "javascriptErrors": []
+}

@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "referenceCanvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "coordinates": "top-left, pixels",
+  "method": "内置 image_gen 图层重建与透明提取；非PSD原始分层",
+  "screens": [
+    {
+      "name": "开始界面",
+      "source": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\生成界面\\苍白之血-开始界面-v05.png",
+      "layers": [
+        {
+          "name": "背景",
+          "file": "开始界面/背景.png",
+          "transparent": false,
+          "displayRect": {
+            "x": 0,
+            "y": 0,
+            "width": 1672,
+            "height": 941
+          }
+        },
+        {
+          "name": "UI",
+          "file": "开始界面/UI.png",
+          "transparent": true,
+          "displayRect": {
+            "x": 0,
+            "y": 0,
+            "width": 1672,
+            "height": 941
+          }
+        }
+      ]
+    },
+    {
+      "name": "角色选择",
+      "source": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\生成界面\\苍白之血-角色选择-v04.png",
+      "layers": [
+        {
+          "name": "背景",
+          "file": "角色选择/背景.png",
+          "transparent": false,
+          "displayRect": {
+            "x": 0,
+            "y": 0,
+            "width": 1672,
+            "height": 941
+          }
+        },
+        {
+          "name": "人物",
+          "file": "角色选择/人物.png",
+          "transparent": true,
+          "displayRect": {
+            "x": 0,
+            "y": 0,
+            "width": 1672,
+            "height": 941
+          }
+        },
+        {
+          "name": "UI",
+          "file": "角色选择/UI.png",
+          "transparent": true,
+          "displayRect": {
+            "x": 0,
+            "y": 0,
+            "width": 1672,
+            "height": 941
+          }
+        }
+      ]
+    },
+    {
+      "name": "战斗界面",
+      "source": "C:\\Users\\Administrator\\Desktop\\血缘诅咒\\生成界面\\苍白之血-战斗界面-v02.png",
+      "layers": [
+        {
+          "name": "背景",
+          "file": "战斗界面/背景.png",
+          "transparent": false,
+          "displayRect": {
+            "x": 0,
+            "y": 0,
+            "width": 1672,
+            "height": 941
+          }
+        },
+        {
+          "name": "人物",
+          "file": "战斗界面/人物.png",
+          "transparent": true,
+          "displayRect": {
+            "x": 150,
+            "y": 10,
+            "width": 1337.6,
+            "height": 752.8
+          }
+        },
+        {
+          "name": "UI",
+          "file": "战斗界面/UI.png",
+          "transparent": true,
+          "displayRect": {
+            "x": 0,
+            "y": 0,
+            "width": 1672,
+            "height": 941
+          }
+        }
+      ]
+    }
+  ]
+}

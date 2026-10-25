@@ -1,0 +1,21 @@
+Use case: precise removal / clean map artwork extraction. Edit the EXACT supplied nine-realms map. REMOVE EVERY UI ELEMENT AND ALL INTER-REALM ROUTE CONNECTORS. Deliver only the nine illustrated floating island worlds on the original cream parchment with its faint background tree texture.
+REMOVE COMPLETELY:
+- All NINE cream information cards, their black frames, ochre name header tabs, every Chinese/English text label, every name, numeral, floor count, colored progress dot, Boss line, next-node line.
+- All NINE circular emblem badges: mountains, sun, crescent, sprout, tree, hammer, flame, snowflake, lock. These UI badges must disappear entirely.
+- Every red 今日异动 banner, white exclamation mark, event tag.
+- ALL brown dotted/dashed paths between islands, and ALL freestanding small gray rune-stone navigation markers placed along those paths in the open parchment gaps. No replacement connecting arrows, bridges, routes, graphic lines, nodes or labels.
+RESTORE what UI had hidden: naturally inpaint each floating island's lower rock skirt, lower terrain, waterfalls, icicles, hanging roots, clouds or fog where appropriate. If a removed card was outside island terrain, restore matching uninterrupted warm ivory paper and faint tree background. Do not leave cream rectangular blank patches, leftover border fragments, icon circles or label silhouettes. Exposed rock undersides should match adjacent original forms and rough crayon/marker strokes. Complete all nine island silhouettes.
+KEEP EXACTLY:
+- Same full landscape canvas, same nine-world positions, relative sizes, spacing, perspective and original framing. No rearrangement or new decorative border.
+- Top LEFT: Jotunheim snowy fortress mountains WITH the newly added large ivory giant skull, arched rib bones, long bones, blue-white snow and gray towers. Keep all giant remains visible.
+- Top CENTER: Asgard gold/white temple, stairs, pillars, surrounding cream clouds and natural golden sun/rune halo above the architecture. The natural temple sun/roof motif stays; only the separate UI sun badge is removed.
+- Top RIGHT: Alfheim white-and-gold arches, blue/teal glowing crystals, teal sacred tree and cascading waterfall.
+- Middle LEFT: Vanaheim old green grove, natural large rune-standing stones INSIDE THE GROVE, white deer, waterfall and stream. Those in-world sacred stones remain; only route-navigation rune icons in paper gaps are removed.
+- Middle CENTER: Midgard red-roof village, windmill, bridge, river, fields, pines, snowy mountain ridge.
+- Middle RIGHT: dwarf forge fortress, orange furnace, lava, mine/bridges/smoke.
+- Bottom LEFT: Muspelheim dark volcanic peaks, orange-red lava, large natural rune monolith and rock bridge. Rune inscription on the volcanic landmark is part of scenery and stays.
+- Bottom CENTER: Niflheim cold stone/ice spires, ruined gray bridge and gateways, bare trees, GRAY CRAYON MIST circling the island. Gray fog must remain gray rather than blue.
+- Bottom RIGHT: Helheim skull-shaped gate, dead trees, ruins, pale green spectral flames and ghostly village structures.
+- Preserve existing strong rough black hand-drawn outlines, colored pencil / wax crayon textures, grainy muted color fills, ivory fibrous paper. Do not simplify the detailed scene content or restyle the image.
+- The large WORLD TREE stays ONLY as an extremely faint tan paper-background rubbing behind the map. It is scenery/background texture, not a UI connector. Do not turn it bold.
+After editing: no text anywhere, no UI, no icon badges, no dots, no cards, no connecting paths, no floating navigation runestones. Nine clean richly drawn floating island scenes and their natural environmental effects only. No new props, ships, sea monsters, ravens, compass, border, title, watermark or signature.

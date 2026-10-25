@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "mapSize": {"width":1586,"height":992},
+  "anchor": "center-bottom",
+  "landmarks": [
+    {"id":"asgard","region":"阿斯加德","name":"金辉神殿","asset":"asgard","x":400,"y":280,"width":220,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"浮于云海之上的神殿，九界诸神的居所。"},
+    {"id":"jotunheim","region":"约顿海姆","name":"巨人遗骨","asset":"jotunheim","x":880,"y":322,"width":230,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"巨人头骨与肋骨沉睡于寒冷的山谷。"},
+    {"id":"muspelheim","region":"穆斯贝尔海姆","name":"烈焰巨剑","asset":"muspelheim","x":1325,"y":416,"width":270,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"烈焰与熔岩汇聚，巨剑矗立在火山之侧。"},
+    {"id":"vanaheim","region":"华纳海姆","name":"古林祭坛","asset":"vanaheim","x":345,"y":554,"width":270,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"古树守护的环形石阵，与自然之力相连。"},
+    {"id":"world-tree","region":"九界之心","name":"世界树 · 尤克特拉希尔","asset":"world-tree","x":790,"y":510,"width":366,"rotation":0,"opacity":1,"z":9,"visible":true,"locked":false,"description":"枝叶承接天穹，根系深入大地，联结九界的古老生命。"},
+    {"id":"midgard","region":"米德加德","name":"人类古城","asset":"midgard","x":790,"y":651,"width":230,"rotation":0,"opacity":1,"z":11,"visible":true,"locked":false,"description":"河流与古道交汇的城镇，凡人旅程的起点。"},
+    {"id":"alfheim","region":"阿尔夫海姆","name":"光之晶塔","asset":"alfheim","x":1190,"y":645,"width":236,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"晶树围绕洁白高塔，光精灵的辉光在此汇聚。"},
+    {"id":"svartalfheim","region":"斯瓦塔尔法海姆","name":"矮人熔炉","asset":"svartalfheim","x":347,"y":810,"width":260,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"黑岩山谷里的工坊，炉火与矿道终年不息。"},
+    {"id":"niflheim","region":"尼福尔海姆","name":"寒雾聚落","asset":"niflheim","x":800,"y":897,"width":256,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"冰霜与浓雾笼罩的聚落，屋檐之下隐约透出冷光。"},
+    {"id":"helheim","region":"赫尔海姆","name":"冥界之门","asset":"helheim","x":1260,"y":872,"width":262,"rotation":0,"opacity":1,"z":10,"visible":true,"locked":false,"description":"骨门与幽火守护寂静之地，生者止步于此。"}
+  ]
+}

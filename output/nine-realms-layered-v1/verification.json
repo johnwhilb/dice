@@ -1,0 +1,119 @@
+{
+  "worldCount": 9,
+  "backgroundSize": [
+    1672,
+    941
+  ],
+  "allTrueAlpha": true,
+  "allEdgesClear": true,
+  "checks": [
+    {
+      "id": "jotunheim",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.4898,
+      "edgeTouch": false,
+      "nativeSize": [
+        1506,
+        1010
+      ]
+    },
+    {
+      "id": "asgard",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.5189,
+      "edgeTouch": false,
+      "nativeSize": [
+        1537,
+        923
+      ]
+    },
+    {
+      "id": "alfheim",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.4765,
+      "edgeTouch": false,
+      "nativeSize": [
+        1495,
+        1019
+      ]
+    },
+    {
+      "id": "vanaheim",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.3711,
+      "edgeTouch": false,
+      "nativeSize": [
+        1529,
+        1027
+      ]
+    },
+    {
+      "id": "midgard",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.5046,
+      "edgeTouch": false,
+      "nativeSize": [
+        1523,
+        860
+      ]
+    },
+    {
+      "id": "svartalfheim",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.3968,
+      "edgeTouch": false,
+      "nativeSize": [
+        1517,
+        998
+      ]
+    },
+    {
+      "id": "muspelheim",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.5924,
+      "edgeTouch": false,
+      "nativeSize": [
+        1283,
+        873
+      ]
+    },
+    {
+      "id": "niflheim",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.4689,
+      "edgeTouch": false,
+      "nativeSize": [
+        1534,
+        872
+      ]
+    },
+    {
+      "id": "helheim",
+      "mode": "RGBA",
+      "alphaMin": 0,
+      "alphaMax": 254,
+      "transparentPixelFraction": 0.4399,
+      "edgeTouch": false,
+      "nativeSize": [
+        1545,
+        964
+      ]
+    }
+  ]
+}

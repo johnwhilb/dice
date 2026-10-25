@@ -1,0 +1,22 @@
+{
+  "visual_model": "baked_raster",
+  "map_mode": "baked_scene_mode",
+  "engine_target": "HTML",
+  "background": {
+    "image": "map.png",
+    "width": 1536,
+    "height": 1024,
+    "pointerEvents": "none",
+    "sameRasterLayer": ["世界树", "耶梦加得", "尼格霍德", "维德佛尼尔", "拉塔托斯克"],
+    "decorations": [
+      {"id": "jormungandr", "name": "耶梦加得", "zone": "左侧和底部安全区", "interactive": false},
+      {"id": "nidhogg", "name": "尼格霍德", "zone": "右下树根安全区", "interactive": false},
+      {"id": "vidofnir", "name": "维德佛尼尔", "zone": "上方树冠安全区", "interactive": false},
+      {"id": "ratatoskr", "name": "拉塔托斯克", "zone": "右上枝条安全区", "interactive": false}
+    ]
+  },
+  "interaction": {"source": "index.template.html realms 数组", "worldHotspots": 9, "decorativeHotspots": 0},
+  "camera": {"initialView": "fit", "pan": true, "zoom": true, "minimap": true},
+  "assetSource": "built-in image_gen",
+  "prompt": "map-guardians.prompt.txt"
+}

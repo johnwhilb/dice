@@ -1,0 +1,418 @@
+{
+  "width": 1334,
+  "height": 750,
+  "font": "SimSun",
+  "editableTextLayers": 16,
+  "texts": [
+    [
+      "职业名",
+      "观星者",
+      194,
+      111,
+      74,
+      "#080808"
+    ],
+    [
+      "生命标签",
+      "生命",
+      280,
+      216,
+      24,
+      "#141414"
+    ],
+    [
+      "生命数值",
+      "1280",
+      280,
+      240,
+      36,
+      "#641b1b"
+    ],
+    [
+      "耐力标签",
+      "耐力",
+      523,
+      216,
+      24,
+      "#141414"
+    ],
+    [
+      "耐力数值",
+      "320",
+      523,
+      240,
+      36,
+      "#28343f"
+    ],
+    [
+      "简介",
+      "仰望群星，窥探隐秘。\n以星象解读深渊的低语。",
+      197,
+      306,
+      23,
+      "#101010"
+    ],
+    [
+      "技能名称",
+      "星轨启示",
+      340,
+      406,
+      33,
+      "#111111"
+    ],
+    [
+      "技能说明",
+      "抽取卡牌，强化下一次法术。",
+      340,
+      451,
+      23,
+      "#111111"
+    ],
+    [
+      "等级数值",
+      "3",
+      671,
+      542,
+      40,
+      "#e1cfb5"
+    ],
+    [
+      "等级标题",
+      "巡礼等级",
+      751,
+      539,
+      26,
+      "#eee6d5"
+    ],
+    [
+      "等级说明",
+      "提升后可解锁新的技能与外观。",
+      751,
+      571,
+      18,
+      "#eee6d5"
+    ],
+    [
+      "职业标签1",
+      "神职人员",
+      623,
+      770,
+      23,
+      "#f1ede3"
+    ],
+    [
+      "职业标签2",
+      "猎人",
+      815,
+      770,
+      23,
+      "#f1ede3"
+    ],
+    [
+      "职业标签3",
+      "观星者",
+      972,
+      770,
+      23,
+      "#f1ede3"
+    ],
+    [
+      "返回",
+      "返回",
+      133,
+      695,
+      29,
+      "#f1e6d7"
+    ],
+    [
+      "开始冒险",
+      "开始冒险",
+      1415,
+      690,
+      34,
+      "#fff3df"
+    ]
+  ],
+  "components": [
+    {
+      "name": "头像_观星者",
+      "left": 746,
+      "top": 490,
+      "width": 111,
+      "height": 111,
+      "hidden": false
+    },
+    {
+      "name": "头像_猎人",
+      "left": 610,
+      "top": 490,
+      "width": 111,
+      "height": 111,
+      "hidden": false
+    },
+    {
+      "name": "头像_神职人员",
+      "left": 477,
+      "top": 490,
+      "width": 111,
+      "height": 111,
+      "hidden": false
+    },
+    {
+      "name": "技能_观星者",
+      "left": 160,
+      "top": 320,
+      "width": 91,
+      "height": 86,
+      "hidden": false
+    },
+    {
+      "name": "生命图标",
+      "left": 154,
+      "top": 160,
+      "width": 60,
+      "height": 64,
+      "hidden": false
+    },
+    {
+      "name": "耐力图标",
+      "left": 350,
+      "top": 161,
+      "width": 59,
+      "height": 62,
+      "hidden": false
+    },
+    {
+      "name": "巡礼底板",
+      "left": 440,
+      "top": 413,
+      "width": 452,
+      "height": 67,
+      "hidden": false
+    },
+    {
+      "name": "普通框1",
+      "left": 472,
+      "top": 485,
+      "width": 122,
+      "height": 122,
+      "hidden": false
+    },
+    {
+      "name": "普通框2",
+      "left": 605,
+      "top": 485,
+      "width": 123,
+      "height": 122,
+      "hidden": false
+    },
+    {
+      "name": "选中框",
+      "left": 740,
+      "top": 485,
+      "width": 122,
+      "height": 122,
+      "hidden": false
+    },
+    {
+      "name": "返回底板",
+      "left": 9,
+      "top": 533,
+      "width": 199,
+      "height": 61,
+      "hidden": false
+    },
+    {
+      "name": "冒险底板",
+      "left": 1045,
+      "top": 532,
+      "width": 286,
+      "height": 65,
+      "hidden": false
+    },
+    {
+      "name": "技能分隔线",
+      "left": 155,
+      "top": 305,
+      "width": 403,
+      "height": 2,
+      "hidden": false
+    },
+    {
+      "name": "标题分隔线",
+      "left": 155,
+      "top": 153,
+      "width": 403,
+      "height": 2,
+      "hidden": false
+    },
+    {
+      "name": "属性分隔线",
+      "left": 155,
+      "top": 228,
+      "width": 403,
+      "height": 2,
+      "hidden": false
+    },
+    {
+      "name": "文字_职业名",
+      "left": 155,
+      "top": 88,
+      "width": 189,
+      "height": 94,
+      "hidden": false
+    },
+    {
+      "name": "文字_生命标签",
+      "left": 223,
+      "top": 172,
+      "width": 51,
+      "height": 36,
+      "hidden": false
+    },
+    {
+      "name": "文字_生命数值",
+      "left": 223,
+      "top": 191,
+      "width": 127,
+      "height": 50,
+      "hidden": false
+    },
+    {
+      "name": "文字_耐力标签",
+      "left": 417,
+      "top": 172,
+      "width": 51,
+      "height": 36,
+      "hidden": false
+    },
+    {
+      "name": "文字_耐力数值",
+      "left": 417,
+      "top": 191,
+      "width": 99,
+      "height": 50,
+      "hidden": false
+    },
+    {
+      "name": "文字_简介",
+      "left": 157,
+      "top": 244,
+      "width": 214,
+      "height": 62,
+      "hidden": false
+    },
+    {
+      "name": "文字_技能名称",
+      "left": 271,
+      "top": 324,
+      "width": 118,
+      "height": 47,
+      "hidden": false
+    },
+    {
+      "name": "文字_技能说明",
+      "left": 271,
+      "top": 359,
+      "width": 251,
+      "height": 35,
+      "hidden": false
+    },
+    {
+      "name": "文字_等级数值",
+      "left": 535,
+      "top": 432,
+      "width": 44,
+      "height": 55,
+      "hidden": false
+    },
+    {
+      "name": "文字_等级标题",
+      "left": 599,
+      "top": 430,
+      "width": 95,
+      "height": 39,
+      "hidden": false
+    },
+    {
+      "name": "文字_等级说明",
+      "left": 599,
+      "top": 455,
+      "width": 213,
+      "height": 29,
+      "hidden": false
+    },
+    {
+      "name": "文字_职业标签1",
+      "left": 497,
+      "top": 614,
+      "width": 86,
+      "height": 35,
+      "hidden": false
+    },
+    {
+      "name": "文字_职业标签2",
+      "left": 650,
+      "top": 614,
+      "width": 49,
+      "height": 35,
+      "hidden": false
+    },
+    {
+      "name": "文字_职业标签3",
+      "left": 776,
+      "top": 614,
+      "width": 67,
+      "height": 35,
+      "hidden": false
+    },
+    {
+      "name": "文字_返回",
+      "left": 106,
+      "top": 554,
+      "width": 59,
+      "height": 42,
+      "hidden": false
+    },
+    {
+      "name": "文字_开始冒险",
+      "left": 1129,
+      "top": 550,
+      "width": 121,
+      "height": 48,
+      "hidden": false
+    },
+    {
+      "name": "标题侧装饰",
+      "left": 111,
+      "top": 73,
+      "width": 33,
+      "height": 181,
+      "hidden": false
+    },
+    {
+      "name": "巡礼纹章",
+      "left": 471,
+      "top": 419,
+      "width": 56,
+      "height": 56,
+      "hidden": false
+    },
+    {
+      "name": "返回箭头",
+      "left": 48,
+      "top": 549,
+      "width": 34,
+      "height": 30,
+      "hidden": false
+    },
+    {
+      "name": "前进箭头",
+      "left": 1257,
+      "top": 554,
+      "width": 16,
+      "height": 22,
+      "hidden": false
+    }
+  ]
+}

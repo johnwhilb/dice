@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TinHelm · Buff 效果编辑器</title>
+<link rel="stylesheet" href="/effectEditor.css">
+</head>
+<body>
+<a href="http://127.0.0.1:3211/" style="position:fixed;right:12px;bottom:36px;z-index:5;background:#274c49;color:#b7f7e6;padding:9px 13px;border:1px solid #56bda9;border-radius:8px;text-decoration:none">敌人行为树编辑器 →</a>
+<div class="app">
+<header class="top"><div class="brand"><div class="logo">◇</div><div><strong>TinHelm</strong><p>Buff 配置 · Excel 实时读取</p></div></div><div class="toolbar"><a class="btn" href="http://127.0.0.1:3210/" target="_blank" rel="noopener">卡牌编辑器 ↗</a><button class="btn" id="guideBtn">使用说明</button><button class="btn" id="importBtn">导入 JSON</button><button class="btn" id="exportBtn">导出全部 JSON</button><button class="btn primary" id="saveExcelBtn">保存到 Excel</button><button class="btn primary" id="addCardBtn">＋ 新建 Buff</button></div></header>
+<div class="layout"><aside class="sidebar"><div class="side-section"><div class="side-title"><h3>Buff 库</h3><span id="countTag" class="badgel green">0 张</span></div><div style="margin-top:13px"><input id="cardSearch" class="search" placeholder="⌕ 搜索名称或 ID…" /></div><div class="status-line"><span>Excel 配置源</span><span id="saveStatus"><span class="dot"></span>已就绪</span></div></div><div class="card-list" id="cardList"></div><div class="side-section" style="border-top:1px solid #29394c"><div class="side-title"><h3>配置表连接</h3></div><p class="helper" id="connectionNotice">独立读取 Buff 配置及效果定义。</p><button class="btn block" id="loadSamplesBtn">重新读取 Excel</button></div></aside>
+<main class="main"><div class="workspace"><div class="path"><span>Buff 库</span><span>›</span><span id="breadcrumb">Buff</span></div><div class="hero"><div><h1 id="heading">Buff 编辑</h1><p id="subheading">Buff 属性 · 持续规则 · 嵌套效果流程</p></div><div class="hero-actions"><button class="btn" id="copyCardBtn">复制 Buff</button><button class="btn danger" id="deleteCardBtn">删除</button></div></div>
+<div class="pane"><div class="pane-head"><h2>Buff 基础配置与持续规则</h2><span class="badgel">BUFF</span></div><div class="pane-body"><div id="cardForm"></div></div></div>
+<div class="pane"><div class="pane-head"><div><h2>效果流程（effect）<button type="button" class="help-button" data-help="effect" aria-label="查看 effect 的说明" title="查看说明">!</button></h2><div class="helper" style="margin-top:5px">按顺序结算；条件、循环和持续触发器可嵌套子效果。</div></div><div style="display:flex;align-items:center;gap:8px"><span id="effectCount" class="section-counter">0 个效果</span><button class="btn primary" id="addRootEffect">＋ 添加效果</button></div></div><div id="effectTree" class="effect-stack"></div></div>
+<div class="pane"><div class="pane-head"><h2>结构校验与输出</h2><div class="tabs"><button class="tab active" data-output="validate">校验</button><button class="tab" data-output="json">JSON 预览</button></div></div><div class="pane-body" id="outputPane"></div></div>
+</div></main>
+<aside class="inspector"><div class="inspector-head"><div class="side-title"><h2 id="insTitle">效果属性</h2><span id="insBadge" class="badgel">INSPECTOR</span></div><p id="insSub" class="helper" style="margin:8px 0 0">选择中间的效果，编辑其参数和触发条件。</p></div><div id="inspectorBody" class="inspector-body"></div></aside></div>
+<footer class="footer"><span><span class="dot"></span>配置源：excel/1_Role.xlsx · 2_Card.xlsx · 3_Dice.xlsx · 20_BattleBuff.xlsx · 21_BattleEffect.xlsx</span><span>支持 JSON 导入导出 · Ctrl / ⌘ + S 保存 Excel</span></footer></div>
+<div class="overlay" id="catalogOverlay"><div class="modal"><div class="modal-header"><div><h2>添加效果</h2><p class="helper" id="catalogContext" style="margin:4px 0 0">选择效果类型</p></div><button class="btn" data-close="catalogOverlay">关闭 ×</button></div><div class="modal-content"><div class="catalog-toolbar"><input class="search" id="catalogSearch" placeholder="搜索：伤害、格挡、状态、能力触发……" /></div><div class="catalog-chips" id="catalogCategories"></div><div class="catalog-grid" id="catalogGrid"></div></div></div></div>
+<div class="overlay" id="guideOverlay"><div class="modal" style="width:min(740px,100%)"><div class="modal-header"><h2>编辑器说明及 JSON 运行时约定</h2><button class="btn" data-close="guideOverlay">关闭 ×</button></div><div class="modal-content guide"><p>Buff 编辑器直接读取和保存 20_BattleBuff.xlsx。支持基础属性、获得效果、事件监听、条件与持续规则。保存时检查版本冲突和引用，保留原表备份。保存后通过项目配表插件同步客户端配置。</p><p>效果逐层执行；持续行为使用事件监听，随所属 Buff 移除或到期而失效。已有编号和枚举锁定。JSON 可用于备份和导入，页面修改只有点击保存后才会写入 Excel。</p></div></div></div>
+<div class="overlay" id="helpOverlay"><div class="modal" style="width:min(560px,100%)"><div class="modal-header"><h2 id="helpTitle">字段说明</h2><button class="btn" data-close="helpOverlay">关闭 ×</button></div><div class="modal-content guide" id="helpBody"></div></div></div>
+<input id="fileInput" type="file" accept=".json,application/json" hidden /><div class="toast" id="toast" role="status"></div>
+<script src="/effectEditorCore.js"></script>
+<script src="/buffEditor.js"></script>
+</body>
+</html>

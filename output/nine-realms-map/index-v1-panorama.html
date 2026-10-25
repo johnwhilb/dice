@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>九界 · 诸神黄昏 — 世界探索地图</title>
+<style>
+:root{color-scheme:light;--ink:#29271f;--paper:#f3e6c7;--purple:#733a97;--gold:#edc14c}
+*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#302f2d;color:var(--ink);font-family:"KaiTi","STKaiti","Microsoft YaHei",sans-serif}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible{outline:4px solid #8454b5;outline-offset:4px}
+#hud{position:fixed;z-index:20;top:0;width:100%;padding:12px 22px 9px;background:var(--paper);border-bottom:4px solid var(--ink);box-shadow:0 5px 16px #19181455}
+.topline{display:flex;align-items:center;gap:22px;flex-wrap:wrap}.title{font-size:27px;font-weight:bold;letter-spacing:3px;margin-right:auto}.day{font-size:24px;font-weight:bold}.action{background:#f6cf68;padding:6px 13px;transform:rotate(-1deg);font-weight:bold}.goal{font-size:17px}.goal b{font-size:25px}.subline{display:flex;justify-content:space-between;gap:20px;font-size:14px;margin-top:7px}.anomaly-text{color:var(--purple);font-weight:bold}
+#viewport{position:absolute;inset:108px 0 126px;overflow:auto;touch-action:none;cursor:grab;scrollbar-color:#b8a779 #45413b;scrollbar-width:auto}#viewport.dragging{cursor:grabbing}#space{position:relative}#map{position:absolute;left:0;top:0;transform-origin:0 0;width:4000px;height:2400px;background:radial-gradient(ellipse at center,#c7c9bd 5%,#e6ddc8 70%,#d3c4a6 100%);isolation:isolate}
+#terrain{position:absolute;left:200px;top:200px;width:3600px;height:1920px;background:url("nine-realms-terrain.png") center/100% 100% no-repeat;opacity:.89;mask-image:radial-gradient(ellipse at center,#000 56%,transparent 76%)}
+#roads,#threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}#roads{z-index:2}#threads{z-index:3}.road-shadow{fill:none;stroke:#37352a;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;opacity:.75}.road{fill:none;stroke:#e5cd8c;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}.thread{fill:none;stroke:#553c2a;stroke-width:9;opacity:.6}.thread.gold{stroke:#ffd763;stroke-width:5;stroke-dasharray:15 15;opacity:1}
+.realm{position:absolute;z-index:4;width:420px;pointer-events:none}.realm h2{display:inline-block;margin:0 0 8px;padding:6px 16px;background:#eed28a;border:3px solid var(--ink);box-shadow:3px 3px 0 #514b36;font-size:31px;transform:rotate(-1.2deg)}.realm small{font-size:19px;background:#eee6d1e8;padding:3px 8px}.realm p{margin:10px 0 0;display:table;padding:5px 11px;background:#f4e7cde8;font-size:20px;border-left:5px solid #50422d}.realm .purple{color:#693086;border-color:#693086}.realm .cleared{color:#386546;border-color:#386546}
+.node{position:absolute;z-index:5;width:84px;height:96px;border:0;background:transparent;padding:0;transform:translate(-50%,-50%);overflow:visible;filter:drop-shadow(0 3px 2px #f0e2be);isolation:isolate}.icon{display:block;width:100%;height:100%;background-image:url("landmark-atlas.png");background-size:400% 200%;background-repeat:no-repeat;pointer-events:none}.node.boss{width:116px;height:126px}.node.future .icon{filter:grayscale(.8);opacity:.6}.node.done .icon{filter:saturate(.7);opacity:.78}.node.current:before{content:"";position:absolute;z-index:-1;inset:-6px;background:#f6de8edb;border:5px solid #edae2d;border-radius:15% 9% 17% 8%;transform:rotate(-8deg);box-shadow:0 0 0 5px #fff2c7a8}.node.anomaly:before{border-color:#8151ac;background:#d9c7e2dc;box-shadow:0 0 0 6px #be87d477}.number{position:absolute;top:-24px;left:-3px;font:bold 22px "KaiTi",serif;background:#efe5ce;padding:1px 5px;border-radius:3px}.state{position:absolute;right:-10px;bottom:-5px;font-size:20px;background:#f3e7cb;border:2px solid #4f493e;padding:0 5px}.done .state{background:#3c7953;color:white}.current .state{background:#f6d872;font-size:16px;white-space:nowrap;right:-5px}.anomaly .state{color:white;background:#724196}.questmark{position:absolute;top:-33px;right:-23px;padding:3px 8px;background:#efd37e;border:3px solid #40362b;font-size:19px;white-space:nowrap;transform:rotate(3deg)}.node.selected:after{content:"";position:absolute;inset:-13px;border:3px dashed #28271e;border-radius:15%}
+#map-note{position:absolute;left:260px;top:2220px;font-size:25px;color:#71664f;letter-spacing:4px}
+#footer{position:fixed;z-index:20;bottom:0;width:100%;background:var(--paper);border-top:4px solid var(--ink);padding:8px 20px 10px}.questline{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:16px;padding-bottom:7px;border-bottom:1px dashed #938367}.questline strong{color:#795722}.questline button,.controls button{border:2px solid #534a36;background:#f6e8be;padding:4px 10px}.legendline{display:flex;align-items:center;gap:12px;margin-top:5px;flex-wrap:wrap}.legenditem{display:flex;align-items:center;gap:2px;font-size:13px}.legenditem .icon{width:30px;height:32px}.controls{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:13px}.controls input{width:80px;accent-color:#7a6336}.statelegend{font-size:12px;color:#5b5549}
+#selection{position:fixed;z-index:19;right:24px;bottom:142px;max-width:440px;padding:10px 16px;background:#f6e8c5f5;border:3px solid #39352d;box-shadow:5px 5px 0 #332f2455;line-height:1.6}#selection:empty{display:none}#selection b{font-size:18px}#selection small{display:block}#selection button{background:#f2cf6a;border:2px solid #3c3527;padding:5px 13px;margin-top:6px}#toast{color:#6b3d80}
+@media(max-width:1000px){#hud{padding:8px 12px}.topline{gap:12px}.title{font-size:21px}.day{font-size:20px}.goal{font-size:14px}.goal b{font-size:20px}.subline{font-size:12px}.legendline{gap:5px}.statelegend{display:none}#footer{padding:6px 10px}.questline{font-size:13px;gap:8px}.legenditem{font-size:11px}.legenditem .icon{width:23px;height:26px}.controls{margin-left:0}}
+</style></head>
+<body>
+<header id="hud"><div class="topline"><div class="title">九界 · 诸神黄昏</div><div class="day">第19天 / 60 <span style="font-size:15px">剩余41天</span></div><div class="action">今日未行动 · 可行动1次</div><div class="goal">60天内击败任意3界Boss　<b>1 / 3</b>　<span style="color:#3e7952">☑</span> □ □</div></div><div class="subline"><span>探索1节点 / 推进1任务阶段 = 1天 · 切换世界不耗时</span><span class="anomaly-text">今日异动 3/3 · 日终消失</span></div></header>
+<main id="viewport" aria-label="可拖动的九界探索地图" tabindex="0"><div id="space"><div id="map"><div id="terrain"></div><svg id="roads" viewBox="0 0 4000 2400"></svg><svg id="threads" viewBox="0 0 4000 2400"></svg><div id="map-note">世界边界海 · 拖动探索九界</div></div></div></main>
+<div id="selection" role="status" aria-live="polite"></div>
+<footer id="footer"><div class="questline"><strong>◇ 长任务 · 止息永冬</strong><span id="queststatus">1/3 · 已暂停，进度保留</span><span>华纳海姆 ✓ ┄ 约顿海姆② ┄ 尼福尔海姆⑥</span><button id="questresume">继续任务</button><span id="toast">选择地标查看当前事件</span></div><div class="legendline" id="legend"><div class="controls"><span>拖动平移 · 滚轮缩放</span><button id="fit">全图</button><button id="home">当前世界</button><input id="zoom" aria-label="地图缩放" type="range" min="20" max="110" value="62"><span id="zoomlabel">62%</span></div></div></footer>
+<script>
+const types={battle:{name:'战斗',cell:0},merchant:{name:'商人',cell:1},event:{name:'专属事件',cell:2},camp:{name:'篝火',cell:3},boss:{name:'Boss',cell:4},unknown:{name:'未知',cell:5},chest:{name:'宝箱',cell:6},anomaly:{name:'限时异动',cell:7}};
+const sequence=['battle','battle','merchant','battle','battle','event','battle','camp','battle','battle','boss'];
+const worlds=[
+{id:'alf',name:'亚尔夫海姆',sub:'光精灵之境 · 枯萎圣林',x:330,y:410,w:690,h:410,done:0},
+{id:'vana',name:'华纳海姆',sub:'古神湿地 · 旧神陨落',x:1190,y:360,w:680,h:440,done:11},
+{id:'jotun',name:'约顿海姆',sub:'巨人冰原 · 冰裂山脉',x:2010,y:390,w:740,h:430,done:1,anomaly:true},
+{id:'asgard',name:'阿斯加德',sub:'脱离的神域 · 断虹彼岸',x:3060,y:340,w:650,h:440,done:0},
+{id:'dwarf',name:'斯瓦塔尔夫海姆',sub:'矮人矿国 · 熄火熔炉',x:340,y:1020,w:810,h:450,done:0},
+{id:'mid',name:'米德加德',sub:'人类废土 · 焦土王城',x:1330,y:1030,w:920,h:430,done:4,anomaly:true},
+{id:'muspel',name:'穆斯贝尔海姆',sub:'烈焰裂土 · 破碎火山',x:2530,y:1000,w:1080,h:450,done:1,anomaly:true},
+{id:'hel',name:'赫尔海姆',sub:'亡者国度 · 无归之门',x:480,y:1650,w:1080,h:410,done:0},
+{id:'nifl',name:'尼福尔海姆',sub:'寒雾深渊 · 永冬之息',x:1940,y:1690,w:1340,h:390,done:0}
+];
+const points=[[.06,.85],[.23,.91],[.40,.83],[.57,.90],[.74,.83],[.92,.74],[.86,.43],[.68,.47],[.50,.40],[.32,.47],[.14,.39]];
+const map=document.querySelector('#map'),vp=document.querySelector('#viewport'),space=document.querySelector('#space'),roads=document.querySelector('#roads'),threads=document.querySelector('#threads');
+const svgNS='http://www.w3.org/2000/svg';let zoom=.62,selected=null,paused=true;
+function makePath(parent,d,cls){const p=document.createElementNS(svgNS,'path');p.setAttribute('d',d);p.setAttribute('class',cls);parent.append(p)}
+function iconStyle(cell){return 'background-position:'+((cell%4)*100/3)+'% '+(cell>3?100:0)+'%'}
+function point(w,i){return [w.x+points[i][0]*w.w,w.y+125+points[i][1]*(w.h-125)]}
+function stateOf(w,i){return i<w.done?'done':i===w.done?'current':'future'}
+function nodeType(w,i){return w.anomaly&&i===w.done?'anomaly':sequence[i]}
+function questBadge(w,i){if(w.id==='vana'&&i===5)return '任务① ✓';if(w.id==='jotun'&&i===1)return '任务②';if(w.id==='nifl'&&i===5)return '任务③';return ''}
+for(const w of worlds){
+ const label=document.createElement('section');label.className='realm';label.style.left=w.x+'px';label.style.top=(w.y-35)+'px';
+ const active=w.done===11?'Boss已击败':types[nodeType(w,w.done)].name;
+ label.innerHTML='<h2>'+w.name+'</h2><br><small>'+w.sub+'</small><p class="'+(w.anomaly?'purple':w.done===11?'cleared':'')+'">'+w.done+'/11 · '+(w.done===11?'✓ Boss已击败':'当前：'+active)+(w.anomaly?' · 今日限定':'')+'</p>';map.append(label);
+ const coords=sequence.map((_,i)=>point(w,i)),d=coords.map((p,i)=>(i?'L':'M')+p.join(' ')).join(' ');
+ makePath(roads,d,'road-shadow');makePath(roads,d,'road');
+ sequence.forEach((base,i)=>{
+  const type=nodeType(w,i),st=stateOf(w,i),p=coords[i],button=document.createElement('button');
+  button.className='node '+st+' '+(base==='boss'?'boss ':'')+(type==='anomaly'?'anomaly':'');button.style.left=p[0]+'px';button.style.top=p[1]+'px';button.dataset.world=w.id;button.dataset.layer=i+1;button.dataset.type=type;button.dataset.baseType=base;button.dataset.state=st;
+  button.setAttribute('aria-label',w.name+' 第'+(i+1)+'层 '+types[type].name+' '+({done:'已完成',current:'可进入',future:'尚未到达'}[st]));
+  button.innerHTML='<span class="icon" style="'+iconStyle(types[type].cell)+'"></span><span class="number">'+String(i+1).padStart(2,'0')+'</span><span class="state">'+(st==='done'?'✓':st==='current'?(type==='anomaly'?'今日限定':'可进入'):'锁')+'</span>'+(questBadge(w,i)?'<span class="questmark">'+questBadge(w,i)+'</span>':'');
+  button.onclick=()=>selectNode(w,i,button);map.append(button);
+ });
+}
+const questCoords=[point(worlds[1],5),point(worlds[2],1),point(worlds[8],5)];
+const qd='M '+questCoords[0].join(' ')+' C 1830 800, 2110 900, '+questCoords[1].join(' ')+' S 2940 1470, '+questCoords[2].join(' ');
+makePath(threads,qd,'thread');makePath(threads,qd,'thread gold');
+function selectNode(w,i,button){
+ if(selected)selected.classList.remove('selected');selected=button;button.classList.add('selected');
+ const type=nodeType(w,i),st=stateOf(w,i),quest=questBadge(w,i);
+ document.querySelector('#selection').innerHTML='<b>'+w.name+' · '+String(i+1).padStart(2,'0')+' / 11</b>　'+types[type].name+'<small>'+({done:'✓ 已完成 · 进度独立保存',current:'◇ 当前可进入',future:'锁 尚未到达 · 按道路依次推进'}[st])+(type==='anomaly'?' · 替换战斗 · 今日结束后消失':'')+(quest?' · '+quest:'')+'</small><small>切换世界与查看地标均不消耗天数</small>';
+ document.querySelector('#toast').textContent='已查看 '+w.name+' · 第'+(i+1)+'层（设计预览）';
+}
+const legend=document.querySelector('#legend');
+for(const [key,t] of Object.entries(types)){const item=document.createElement('span');item.className='legenditem';item.innerHTML='<span class="icon" style="'+iconStyle(t.cell)+'"></span>'+t.name;legend.insertBefore(item,legend.querySelector('.controls'))}
+const states=document.createElement('span');states.className='statelegend';states.textContent='✓ 已探索 · 金框可进入 · 灰色未到达';legend.insertBefore(states,legend.querySelector('.controls'));
+function sizeViewport(){vp.style.top=document.querySelector('#hud').offsetHeight+'px';vp.style.bottom=document.querySelector('#footer').offsetHeight+'px'}
+function setZoom(value,anchor){
+ const old=zoom;const ax=anchor?.[0]??vp.clientWidth/2,ay=anchor?.[1]??vp.clientHeight/2;const wx=(vp.scrollLeft+ax)/old,wy=(vp.scrollTop+ay)/old;
+ zoom=Math.max(.2,Math.min(1.1,value));map.style.transform='scale('+zoom+')';space.style.width=(4000*zoom)+'px';space.style.height=(2400*zoom)+'px';vp.scrollLeft=wx*zoom-ax;vp.scrollTop=wy*zoom-ay;
+ document.querySelector('#zoom').value=zoom*100;document.querySelector('#zoomlabel').textContent=Math.round(zoom*100)+'%';
+}
+function centerWorld(){const w=worlds[5];vp.scrollLeft=(w.x+w.w/2)*zoom-vp.clientWidth/2;vp.scrollTop=(w.y+w.h/2)*zoom-vp.clientHeight/2}
+document.querySelector('#zoom').oninput=e=>setZoom(+e.target.value/100);
+document.querySelector('#fit').onclick=()=>{setZoom(Math.min(vp.clientWidth/4000,vp.clientHeight/2400));vp.scrollLeft=0;vp.scrollTop=0};
+document.querySelector('#home').onclick=()=>{setZoom(.62);centerWorld()};
+document.querySelector('#questresume').onclick=()=>{paused=!paused;document.querySelector('#queststatus').textContent='1/3 · '+(paused?'已暂停，进度保留':'进行中，下一阶段可推进');document.querySelector('#questresume').textContent=paused?'继续任务':'暂停任务';document.querySelector('#toast').textContent='切换任务状态不耗时 · 推进阶段消耗1天';};
+vp.addEventListener('wheel',e=>{e.preventDefault();const r=vp.getBoundingClientRect();setZoom(zoom*Math.exp(-e.deltaY*.001),[e.clientX-r.left,e.clientY-r.top])},{passive:false});
+let drag=null,moved=false;
+vp.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,sx:vp.scrollLeft,sy:vp.scrollTop};moved=false;});
+window.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>5){moved=true;vp.classList.add('dragging');vp.scrollLeft=drag.sx-dx;vp.scrollTop=drag.sy-dy}});
+window.addEventListener('pointerup',()=>{drag=null;vp.classList.remove('dragging')});
+vp.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false}},{capture:true});
+vp.addEventListener('keydown',e=>{const dirs={ArrowLeft:[-130,0],ArrowRight:[130,0],ArrowUp:[0,-130],ArrowDown:[0,130]};if(dirs[e.key]){e.preventDefault();vp.scrollBy(...dirs[e.key])}});
+window.addEventListener('resize',sizeViewport);
+window.mapDesign={worlds,sequence,types,point,nodeType,stateOf};
+sizeViewport();setZoom(.62);centerWorld();
+</script></body></html>

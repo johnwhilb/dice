@@ -1,0 +1,403 @@
+{
+  "schema": "nine-realms.layered-overworld.v1",
+  "map_mode": "scene_mode",
+  "visual_model": "layered_raster",
+  "runtime_object_model": "interactive_scene_objects",
+  "engine_target": "HTML_or_Cocos",
+  "collision_model": "trigger_zones",
+  "size": {
+    "width": 1672,
+    "height": 941
+  },
+  "background": {
+    "image": "backgrounds/background-paper-tree.png",
+    "prompt": "prompts/background.prompt.txt",
+    "opaque": true
+  },
+  "combinedWorldsLayer": "worlds-layer.png",
+  "worlds": [
+    {
+      "id": "jotunheim",
+      "name": "约顿海姆",
+      "image": "worlds/jotunheim.png",
+      "source": "raw/jotunheim.png",
+      "prompt": "prompts/jotunheim.prompt.txt",
+      "nativeSize": {
+        "width": 1506,
+        "height": 1010
+      },
+      "sourceCrop": [
+        27,
+        22,
+        1509,
+        1008
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 14,
+      "y": 8,
+      "w": 491,
+      "h": 329,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 259.5,
+        "y": 337
+      },
+      "sortY": 337,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 14,
+        "y": 8,
+        "w": 491,
+        "h": 329
+      },
+      "sha256": "ecf768ac1e84b40e1ed6d867374f71cb03c577b8bf386640fe7e5ca453ce639e"
+    },
+    {
+      "id": "asgard",
+      "name": "阿斯加德",
+      "image": "worlds/asgard.png",
+      "source": "raw/asgard.png",
+      "prompt": "prompts/asgard.prompt.txt",
+      "nativeSize": {
+        "width": 1537,
+        "height": 923
+      },
+      "sourceCrop": [
+        12,
+        67,
+        1525,
+        966
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 572,
+      "y": 8,
+      "w": 540,
+      "h": 324,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 842.0,
+        "y": 332
+      },
+      "sortY": 332,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 572,
+        "y": 8,
+        "w": 540,
+        "h": 324
+      },
+      "sha256": "e53d8b6d6dedb0f0de0e4f80b48f4a2875afddc37daa200a28f2a2a595b0da41"
+    },
+    {
+      "id": "alfheim",
+      "name": "阿尔夫海姆",
+      "image": "worlds/alfheim.png",
+      "source": "raw/alfheim.png",
+      "prompt": "prompts/alfheim.prompt.txt",
+      "nativeSize": {
+        "width": 1495,
+        "height": 1019
+      },
+      "sourceCrop": [
+        32,
+        16,
+        1503,
+        1011
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 1168,
+      "y": 11,
+      "w": 496,
+      "h": 338,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 1416.0,
+        "y": 349
+      },
+      "sortY": 349,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 1168,
+        "y": 11,
+        "w": 496,
+        "h": 338
+      },
+      "sha256": "008505eca9054aebb62860bde2a820dd8fdfadbf4900eea724a61cedd59dd38c"
+    },
+    {
+      "id": "vanaheim",
+      "name": "华纳海姆",
+      "image": "worlds/vanaheim.png",
+      "source": "raw/vanaheim.png",
+      "prompt": "prompts/vanaheim.prompt.txt",
+      "nativeSize": {
+        "width": 1529,
+        "height": 1027
+      },
+      "sourceCrop": [
+        11,
+        10,
+        1516,
+        1013
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 15,
+      "y": 343,
+      "w": 490,
+      "h": 329,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 260.0,
+        "y": 672
+      },
+      "sortY": 672,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 15,
+        "y": 343,
+        "w": 490,
+        "h": 329
+      },
+      "sha256": "49d78f713cd087d4f15393f2de5afcd98be4591c0da41a3448b7a431addfcde1"
+    },
+    {
+      "id": "midgard",
+      "name": "米德加德",
+      "image": "worlds/midgard.png",
+      "source": "raw/midgard.png",
+      "prompt": "prompts/midgard.prompt.txt",
+      "nativeSize": {
+        "width": 1523,
+        "height": 860
+      },
+      "sourceCrop": [
+        21,
+        139,
+        1520,
+        975
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 548,
+      "y": 353,
+      "w": 583,
+      "h": 329,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 839.5,
+        "y": 682
+      },
+      "sortY": 682,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 548,
+        "y": 353,
+        "w": 583,
+        "h": 329
+      },
+      "sha256": "9024a51f6b6d6748b4dc57adc3e2196cfa9dd5a8e660bffecdef94f505ff91ae"
+    },
+    {
+      "id": "svartalfheim",
+      "name": "斯瓦塔尔法海姆",
+      "image": "worlds/svartalfheim.png",
+      "source": "raw/svartalfheim.png",
+      "prompt": "prompts/svartalfheim.prompt.txt",
+      "nativeSize": {
+        "width": 1517,
+        "height": 998
+      },
+      "sourceCrop": [
+        22,
+        25,
+        1515,
+        999
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 1173,
+      "y": 356,
+      "w": 491,
+      "h": 323,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 1418.5,
+        "y": 679
+      },
+      "sortY": 679,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 1173,
+        "y": 356,
+        "w": 491,
+        "h": 323
+      },
+      "sha256": "9999e446fcc41eca74c495835774a38d7bf4b83ebffc77976cdeed8bb03b8c96"
+    },
+    {
+      "id": "muspelheim",
+      "name": "穆斯贝尔海姆",
+      "image": "worlds/muspelheim.png",
+      "source": "raw/muspelheim.png",
+      "prompt": "prompts/muspelheim.prompt.txt",
+      "nativeSize": {
+        "width": 1283,
+        "height": 873
+      },
+      "sourceCrop": [
+        146,
+        82,
+        1405,
+        931
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 48,
+      "y": 638,
+      "w": 434,
+      "h": 295,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 265.0,
+        "y": 933
+      },
+      "sortY": 933,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 48,
+        "y": 638,
+        "w": 434,
+        "h": 295
+      },
+      "sha256": "ebdf7093155d38d35601f80bc124ac57fb8c9b7c668970f9f981126e9a9b7dd1",
+      "postPrompt": "prompts/muspelheim-edge-repair.prompt.txt"
+    },
+    {
+      "id": "niflheim",
+      "name": "尼福尔海姆",
+      "image": "worlds/niflheim.png",
+      "source": "raw/niflheim.png",
+      "prompt": "prompts/niflheim.prompt.txt",
+      "nativeSize": {
+        "width": 1534,
+        "height": 872
+      },
+      "sourceCrop": [
+        9,
+        115,
+        1519,
+        963
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 607,
+      "y": 668,
+      "w": 466,
+      "h": 265,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 840.0,
+        "y": 933
+      },
+      "sortY": 933,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 607,
+        "y": 668,
+        "w": 466,
+        "h": 265
+      },
+      "sha256": "63de7e1a797cd77f64fc531fa0a160157b5dd4e3deac393ff03e01010a265096"
+    },
+    {
+      "id": "helheim",
+      "name": "赫尔海姆",
+      "image": "worlds/helheim.png",
+      "source": "raw/helheim.png",
+      "prompt": "prompts/helheim.prompt.txt",
+      "nativeSize": {
+        "width": 1545,
+        "height": 964
+      },
+      "sourceCrop": [
+        7,
+        52,
+        1528,
+        992
+      ],
+      "transparentGuard": 12,
+      "layer": "worlds",
+      "x": 1176,
+      "y": 643,
+      "w": 465,
+      "h": 290,
+      "anchor": "top-left",
+      "centerBottom": {
+        "x": 1408.5,
+        "y": 933
+      },
+      "sortY": 933,
+      "occlusionClass": "tall",
+      "occupantPolicy": {
+        "mode": "none"
+      },
+      "interactiveBounds": {
+        "x": 1176,
+        "y": 643,
+        "w": 465,
+        "h": 290
+      },
+      "sha256": "c0c67de9aa7dacadc2818b760bcc0f3a2367e7d8694d9f38879b22842a649689"
+    }
+  ],
+  "renderOrder": [
+    "background",
+    "worlds sorted by sortY"
+  ],
+  "collision": {
+    "blockers": [],
+    "reason": "World selection map, no actor navigation."
+  },
+  "scene_hooks": {
+    "cameraBounds": {
+      "x": 0,
+      "y": 0,
+      "w": 1672,
+      "h": 941
+    }
+  },
+  "provenance": {
+    "sourceImage": "../nine-realms-explorer/map-nine-realms-ui-free.png",
+    "artSource": "built-in image_gen",
+    "edit": "Separate each world, remove paper background; gently align marker/crayon style; selectively reduce repeated detail by about 10–18%.",
+    "processing": "Remove alpha noise below 3/255, alpha trim, transparent padding, resize for preview, metadata and packaging only."
+  }
+}

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "alfheim",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      0,
+      0,
+      418,
+      418
+    ],
+    "crop": [
+      49,
+      22,
+      378,
+      418
+    ],
+    "size": [
+      345,
+      412
+    ]
+  },
+  {
+    "id": "vanaheim",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      418,
+      0,
+      836,
+      418
+    ],
+    "crop": [
+      6,
+      65,
+      418,
+      418
+    ],
+    "size": [
+      428,
+      369
+    ]
+  },
+  {
+    "id": "jotunheim",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      836,
+      0,
+      1254,
+      418
+    ],
+    "crop": [
+      0,
+      25,
+      406,
+      418
+    ],
+    "size": [
+      422,
+      409
+    ]
+  },
+  {
+    "id": "svartalfheim",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      0,
+      418,
+      418,
+      836
+    ],
+    "crop": [
+      15,
+      0,
+      418,
+      406
+    ],
+    "size": [
+      419,
+      422
+    ]
+  },
+  {
+    "id": "midgard",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      418,
+      418,
+      836,
+      836
+    ],
+    "crop": [
+      0,
+      0,
+      418,
+      398
+    ],
+    "size": [
+      434,
+      414
+    ]
+  },
+  {
+    "id": "asgard",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      836,
+      418,
+      1254,
+      836
+    ],
+    "crop": [
+      0,
+      0,
+      391,
+      406
+    ],
+    "size": [
+      407,
+      422
+    ]
+  },
+  {
+    "id": "helheim",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      0,
+      836,
+      418,
+      1254
+    ],
+    "crop": [
+      12,
+      26,
+      418,
+      389
+    ],
+    "size": [
+      422,
+      379
+    ]
+  },
+  {
+    "id": "niflheim",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      418,
+      836,
+      836,
+      1254
+    ],
+    "crop": [
+      0,
+      34,
+      418,
+      389
+    ],
+    "size": [
+      434,
+      371
+    ]
+  },
+  {
+    "id": "muspelheim",
+    "source": "existing kingdom-landmarks.png",
+    "cell": [
+      836,
+      836,
+      1254,
+      1254
+    ],
+    "crop": [
+      0,
+      15,
+      407,
+      402
+    ],
+    "size": [
+      423,
+      403
+    ]
+  }
+]

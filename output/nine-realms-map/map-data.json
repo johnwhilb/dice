@@ -1,0 +1,881 @@
+{
+  "worlds": [
+    {
+      "id": "alf",
+      "name": "亚尔夫海姆",
+      "completed": 0,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "current",
+          "x": 371.4,
+          "y": 777.25
+        },
+        {
+          "layer": 2,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 488.7,
+          "y": 794.35
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "future",
+          "x": 606,
+          "y": 771.55
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 723.3,
+          "y": 791.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 840.6,
+          "y": 771.55
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 964.8,
+          "y": 745.9
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 923.4,
+          "y": 657.55
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 799.2,
+          "y": 668.95
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 675,
+          "y": 649
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 550.8,
+          "y": 668.95
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 426.6,
+          "y": 646.15
+        }
+      ]
+    },
+    {
+      "id": "vana",
+      "name": "华纳海姆",
+      "completed": 11,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1230.8,
+          "y": 752.75
+        },
+        {
+          "layer": 2,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1346.4,
+          "y": 771.65
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "done",
+          "x": 1462,
+          "y": 746.45
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1577.6,
+          "y": 768.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1693.2,
+          "y": 746.45
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "done",
+          "x": 1815.6,
+          "y": 718.1
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1774.8,
+          "y": 620.45
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "done",
+          "x": 1652.4,
+          "y": 633.05
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1530,
+          "y": 611
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1407.6,
+          "y": 633.05
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "done",
+          "x": 1285.2,
+          "y": 607.85
+        }
+      ]
+    },
+    {
+      "id": "jotun",
+      "name": "约顿海姆",
+      "completed": 1,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 2054.4,
+          "y": 774.25
+        },
+        {
+          "layer": 2,
+          "type": "anomaly",
+          "baseType": "battle",
+          "state": "current",
+          "x": 2180.2,
+          "y": 792.55
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "future",
+          "x": 2306,
+          "y": 768.15
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2431.8,
+          "y": 789.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2557.6,
+          "y": 768.15
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 2690.8,
+          "y": 740.7
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2646.4,
+          "y": 646.15
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 2513.2,
+          "y": 658.35
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2380,
+          "y": 637
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2246.8,
+          "y": 658.35
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 2113.6,
+          "y": 633.95
+        }
+      ]
+    },
+    {
+      "id": "asgard",
+      "name": "阿斯加德",
+      "completed": 0,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "current",
+          "x": 3099,
+          "y": 732.75
+        },
+        {
+          "layer": 2,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3209.5,
+          "y": 751.65
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "future",
+          "x": 3320,
+          "y": 726.45
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3430.5,
+          "y": 748.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3541,
+          "y": 726.45
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 3658,
+          "y": 698.1
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3619,
+          "y": 600.45
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 3502,
+          "y": 613.05
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3385,
+          "y": 591
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3268,
+          "y": 613.05
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 3151,
+          "y": 587.85
+        }
+      ]
+    },
+    {
+      "id": "dwarf",
+      "name": "斯瓦塔尔夫海姆",
+      "completed": 0,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "current",
+          "x": 388.6,
+          "y": 1421.25
+        },
+        {
+          "layer": 2,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 526.3,
+          "y": 1440.75
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "future",
+          "x": 664,
+          "y": 1414.75
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 801.7,
+          "y": 1437.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 939.4,
+          "y": 1414.75
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 1085.2,
+          "y": 1385.5
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 1036.6,
+          "y": 1284.75
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 890.8,
+          "y": 1297.75
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 745,
+          "y": 1275
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 599.2,
+          "y": 1297.75
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 453.4,
+          "y": 1271.75
+        }
+      ]
+    },
+    {
+      "id": "mid",
+      "name": "米德加德",
+      "completed": 4,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1385.2,
+          "y": 1414.25
+        },
+        {
+          "layer": 2,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1541.6,
+          "y": 1432.55
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "done",
+          "x": 1698,
+          "y": 1408.15
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 1854.4,
+          "y": 1429.5
+        },
+        {
+          "layer": 5,
+          "type": "anomaly",
+          "baseType": "battle",
+          "state": "current",
+          "x": 2010.8,
+          "y": 1408.15
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 2176.4,
+          "y": 1380.7
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2121.2,
+          "y": 1286.15
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 1955.6,
+          "y": 1298.35
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 1790,
+          "y": 1277
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 1624.4,
+          "y": 1298.35
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 1458.8,
+          "y": 1273.95
+        }
+      ]
+    },
+    {
+      "id": "muspel",
+      "name": "穆斯贝尔海姆",
+      "completed": 1,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "done",
+          "x": 2594.8,
+          "y": 1401.25
+        },
+        {
+          "layer": 2,
+          "type": "anomaly",
+          "baseType": "battle",
+          "state": "current",
+          "x": 2778.4,
+          "y": 1420.75
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "future",
+          "x": 2962,
+          "y": 1394.75
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3145.6,
+          "y": 1417.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3329.2,
+          "y": 1394.75
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 3523.6,
+          "y": 1365.5
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3458.8,
+          "y": 1264.75
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 3264.4,
+          "y": 1277.75
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3070,
+          "y": 1255
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2875.6,
+          "y": 1277.75
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 2681.2,
+          "y": 1251.75
+        }
+      ]
+    },
+    {
+      "id": "hel",
+      "name": "赫尔海姆",
+      "completed": 0,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "current",
+          "x": 544.8,
+          "y": 2017.25
+        },
+        {
+          "layer": 2,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 728.4,
+          "y": 2034.35
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "future",
+          "x": 912,
+          "y": 2011.55
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 1095.6,
+          "y": 2031.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 1279.2,
+          "y": 2011.55
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 1473.6,
+          "y": 1985.9
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 1408.8,
+          "y": 1897.55
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 1214.4,
+          "y": 1908.95
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 1020,
+          "y": 1889
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 825.6,
+          "y": 1908.95
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 631.2,
+          "y": 1886.15
+        }
+      ]
+    },
+    {
+      "id": "nifl",
+      "name": "尼福尔海姆",
+      "completed": 0,
+      "nodes": [
+        {
+          "layer": 1,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "current",
+          "x": 2020.4,
+          "y": 2040.25
+        },
+        {
+          "layer": 2,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2248.2,
+          "y": 2056.15
+        },
+        {
+          "layer": 3,
+          "type": "merchant",
+          "baseType": "merchant",
+          "state": "future",
+          "x": 2476,
+          "y": 2034.95
+        },
+        {
+          "layer": 4,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2703.8,
+          "y": 2053.5
+        },
+        {
+          "layer": 5,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2931.6,
+          "y": 2034.95
+        },
+        {
+          "layer": 6,
+          "type": "event",
+          "baseType": "event",
+          "state": "future",
+          "x": 3172.8,
+          "y": 2011.1
+        },
+        {
+          "layer": 7,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 3092.4,
+          "y": 1928.95
+        },
+        {
+          "layer": 8,
+          "type": "camp",
+          "baseType": "camp",
+          "state": "future",
+          "x": 2851.2,
+          "y": 1939.55
+        },
+        {
+          "layer": 9,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2610,
+          "y": 1921
+        },
+        {
+          "layer": 10,
+          "type": "battle",
+          "baseType": "battle",
+          "state": "future",
+          "x": 2368.8,
+          "y": 1939.55
+        },
+        {
+          "layer": 11,
+          "type": "boss",
+          "baseType": "boss",
+          "state": "future",
+          "x": 2127.6,
+          "y": 1918.35
+        }
+      ]
+    }
+  ],
+  "nodeCount": 99,
+  "anomalies": [
+    {
+      "world": "jotun",
+      "layer": 2,
+      "state": "current",
+      "baseType": "battle"
+    },
+    {
+      "world": "mid",
+      "layer": 5,
+      "state": "current",
+      "baseType": "battle"
+    },
+    {
+      "world": "muspel",
+      "layer": 2,
+      "state": "current",
+      "baseType": "battle"
+    }
+  ],
+  "completedBosses": 1
+}

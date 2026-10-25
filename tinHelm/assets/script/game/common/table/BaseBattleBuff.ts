@@ -15,6 +15,8 @@ interface BattleBuffConfigData {
     description: string;
     effects: any[];
     rules: Record<string, any>;
+    defaultDuration: string;
+    dispellable: boolean;
 }
 
 /**
@@ -205,5 +207,15 @@ export class BaseBattleBuff {
     /** 持续结算规则 */
     get rules(): Record<string, any> {
         return this.data.rules;
+    }
+
+    /** 默认持续时间 */
+    get defaultDuration(): string {
+        return this.data.defaultDuration;
+    }
+
+    /** 可被驱散 */
+    get dispellable(): boolean {
+        return this.data.dispellable;
     }
 }
