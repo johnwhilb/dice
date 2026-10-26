@@ -1,0 +1,63 @@
+[
+  {
+    "label": "战斗场景",
+    "path": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\生成界面\\苍白之血-约瑟夫卡诊所-战斗场景-v01.png",
+    "source": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-f8991621-4f05-4f5b-9d4e-e08efb627d1e.png",
+    "size": [
+      1672,
+      941
+    ],
+    "mode": "RGB"
+  },
+  {
+    "label": "兽化狼人",
+    "path": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\生成界面\\苍白之血-约瑟夫卡诊所-兽化狼人-v01.png",
+    "source": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-27290bb5-1b4b-4bfe-babd-4afcbc8cec2e.png",
+    "size": [
+      1402,
+      1122
+    ],
+    "mode": "RGBA",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.5623186636864576,
+    "near_opaque_fraction": 0.38280429536618177,
+    "low_alpha_fraction": 0.024945265358120944
+  },
+  {
+    "label": "小型天界使者",
+    "path": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\生成界面\\苍白之血-约瑟夫卡诊所-小型天界使者-v01.png",
+    "source": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-5949f25e-a29d-4399-9132-9d35c99b57a4.png",
+    "size": [
+      1086,
+      1448
+    ],
+    "mode": "RGBA",
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "transparent_fraction": 0.7513519632082862,
+    "near_opaque_fraction": 0.21505372241384574,
+    "low_alpha_fraction": 0.016703041217708048
+  },
+  {
+    "label": "假约瑟夫卡",
+    "path": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\生成界面\\苍白之血-约瑟夫卡诊所-假约瑟夫卡-v01.png",
+    "source": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-5b691aab-0061-4ed5-9e40-d877f7424ee1.png",
+    "size": [
+      1024,
+      1536
+    ],
+    "mode": "RGBA",
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "transparent_fraction": 0.52593994140625,
+    "near_opaque_fraction": 0.44292322794596356,
+    "low_alpha_fraction": 0.01422119140625
+  }
+]

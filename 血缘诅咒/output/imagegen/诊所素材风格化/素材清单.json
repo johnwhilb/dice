@@ -1,0 +1,107 @@
+{
+  "scene": "约瑟夫卡诊所",
+  "game": "苍白之血",
+  "source_interface": "生成界面/苍白之血-战斗界面-约瑟夫卡诊所-v01.png",
+  "canvas": [
+    1672,
+    941
+  ],
+  "method": "内置image_gen提取、遮挡补绘及风格化；非逐像素无损拆分",
+  "assets": [
+    {
+      "key": "background",
+      "file": "拆分ui/战斗界面/背景/约瑟夫卡诊所-v01.png",
+      "size": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "tool_original": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-0d0631c4-bd51-4de8-8539-69a1ff8d2183.png",
+      "display_envelope_reference": null
+    },
+    {
+      "key": "wolf",
+      "file": "拆分ui/战斗界面/敌人/约瑟夫卡诊所-兽化狼人-v01.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "tool_original": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-9f8aefd8-4cfd-41c3-b106-580e23816875.png",
+      "display_envelope_reference": [
+        340,
+        200,
+        335,
+        280
+      ],
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "transparent_fraction": 0.554111,
+      "near_opaque_fraction": 0.403006,
+      "visible_bbox_alpha16": [
+        151,
+        11,
+        1387,
+        1024
+      ]
+    },
+    {
+      "key": "celestial",
+      "file": "拆分ui/战斗界面/敌人/约瑟夫卡诊所-小型天界使者-v01.png",
+      "size": [
+        1086,
+        1448
+      ],
+      "mode": "RGBA",
+      "tool_original": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-5f0cab32-1020-4717-a473-74b979a6624d.png",
+      "display_envelope_reference": [
+        790,
+        230,
+        160,
+        255
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_fraction": 0.758279,
+      "near_opaque_fraction": 0.216624,
+      "visible_bbox_alpha16": [
+        230,
+        75,
+        890,
+        1409
+      ]
+    },
+    {
+      "key": "impostor",
+      "file": "拆分ui/战斗界面/敌人/约瑟夫卡诊所-假约瑟夫卡-v01.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "tool_original": "C:\\Users\\DHXM\\.codex\\generated_images\\01a175f4-97e3-73a3-aace-7685d802be91\\exec-c08b4ae4-8cd8-49ea-8a1b-a08ea7047521.png",
+      "display_envelope_reference": [
+        1035,
+        112,
+        290,
+        370
+      ],
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "transparent_fraction": 0.494666,
+      "near_opaque_fraction": 0.478004,
+      "visible_bbox_alpha16": [
+        39,
+        54,
+        1017,
+        1510
+      ]
+    }
+  ]
+}
