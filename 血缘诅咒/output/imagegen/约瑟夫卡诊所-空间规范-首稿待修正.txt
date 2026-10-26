@@ -1,0 +1,4 @@
+首稿：C:/Users/Administrator/.codex/generated_images/01a17831-7dad-7cf0-955e-cfeb1b22c39a/exec-99d7f156-d141-4f88-8c02-5170cb06350f.png
+未采用：墙脚/地面起始约66%，未满足48%-54%；病床伸至X约28%，并进入站立带；中央墙面剥落与地板碎纹理过密。需重构空间并清理纹理。
+第二稿：C:/Users/Administrator/.codex/generated_images/01a17831-7dad-7cf0-955e-cfeb1b22c39a/exec-558aaf00-6fbd-40d5-ae25-bb4ccc9a35f3.png
+未采用：地面交界仍约63%，Y58%处仍是墙面，不满足站立带。下一轮使用明确的百分比空间块面示意作直接构图参考，移除前两稿的构图约束。
