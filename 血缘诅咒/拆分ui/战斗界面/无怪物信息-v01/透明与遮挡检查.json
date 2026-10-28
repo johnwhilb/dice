@@ -1,0 +1,30 @@
+{
+  "source_ui": "C:\\Users\\DHXM\\.codex\\generated_images\\01a17798-1429-79a2-86c9-7e2434e05e5c\\exec-28a714e2-1249-43f1-8f1a-e6aa19e05816.png",
+  "output_size": [
+    1671,
+    941
+  ],
+  "psd_size": [
+    1672,
+    941
+  ],
+  "mode": "RGBA",
+  "alpha_range": [
+    0,
+    255
+  ],
+  "central_stage_nontransparent_pixels": 61655,
+  "enemy_alpha_range": [
+    0,
+    255
+  ],
+  "enemy_overlap_pixels": 19211,
+  "partial_enemy_occlusion_allowed_by_user": true,
+  "psd_bbox": [
+    484,
+    161,
+    1209,
+    595
+  ],
+  "ui_sha256": "707543993f07612af816af681b7ced948f7b97114c6b95ee974e3d2c60d9622d"
+}
