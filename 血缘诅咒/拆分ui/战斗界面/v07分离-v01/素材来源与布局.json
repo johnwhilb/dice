@@ -1,0 +1,207 @@
+{
+  "source": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\生成界面\\未命名游戏-战斗界面-草稿-v07.png",
+  "canvas": [
+    1672,
+    941
+  ],
+  "output": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\拆分ui\\战斗界面\\v07分离-v01",
+  "status": "UI与背景分离已检查；敌人为透明重建草稿，待精修；未制作PSD",
+  "ui": {
+    "raw": "C:\\Users\\DHXM\\.codex\\generated_images\\01a186b6-a38c-7462-8a35-6eb285503442\\exec-5e809574-60cd-4630-b105-1282744988aa.png",
+    "file": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\拆分ui\\战斗界面\\v07分离-v01\\UI总层.png",
+    "size": [
+      1672,
+      941
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "inspection": "白底、深灰底、棋盘底及局部放大已目视检查；未见明显场景或敌人碎片，细边和文字保留。",
+    "opaque_pixel_mean_absolute_rgb_difference": 11.1144,
+    "text": [
+      "观星者",
+      "生命",
+      "80/80",
+      "耐力",
+      "3/3",
+      "格挡",
+      "0",
+      "道具袋 2",
+      "抽牌",
+      "重投",
+      "结束回合",
+      "卡牌 1",
+      "卡牌 2",
+      "卡牌 3",
+      "卡牌 4",
+      "卡牌 5",
+      "牌库 18",
+      "弃牌 0"
+    ],
+    "counts": {
+      "敌人血条": 3,
+      "骰子": 5,
+      "手牌": 5,
+      "暂停按钮": 1,
+      "操作按钮": 3,
+      "牌堆计数": 2
+    }
+  },
+  "background": {
+    "raw": "C:\\Users\\DHXM\\.codex\\generated_images\\01a186b6-a38c-7462-8a35-6eb285503442\\exec-892890c7-c2c0-4a0e-bbdc-dab3d4a49745.png",
+    "file": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\拆分ui\\战斗界面\\v07分离-v01\\背景.png",
+    "size": [
+      1671,
+      941
+    ],
+    "alpha_extrema": [
+      255,
+      255
+    ],
+    "export_adjustment": {
+      "original_size": [
+        1671,
+        941
+      ],
+      "delivery_size": [
+        1672,
+        941
+      ],
+      "method": "补绘背景输出宽度少1像素，导出时仅将宽度从1671归一到1672；不改画布高度。"
+    },
+    "inspection": "实际打开检查：无UI、人物或武器残留；月亮、废墟透视和右侧旗帜保留；干燥哑光，无明显反光。背景含原图不可见区域的生成式补绘。"
+  },
+  "enemies": {
+    "raw": "C:\\Users\\DHXM\\.codex\\generated_images\\01a186b6-a38c-7462-8a35-6eb285503442\\exec-7620f9d4-4357-44ae-9cdf-e404598cb845.png",
+    "file": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\拆分ui\\战斗界面\\v07分离-v01\\敌人总层-重建草稿.png",
+    "size": [
+      1672,
+      941
+    ],
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "alignment": [
+      {
+        "name": "01_三角帽剑士",
+        "alpha_bbox_in_tool_output": [
+          8,
+          185,
+          721,
+          894
+        ],
+        "native_size": [
+          713,
+          709
+        ],
+        "position": [
+          313,
+          149
+        ],
+        "delivery_size": [
+          392,
+          390
+        ],
+        "method": "从干净透明总层按alpha连通轮廓分离，不损伤内部深色；保持宽高比缩回原效果图的高度并对齐锚点。"
+      },
+      {
+        "name": "02_鹿骨祭司",
+        "alpha_bbox_in_tool_output": [
+          623,
+          106,
+          1185,
+          897
+        ],
+        "native_size": [
+          562,
+          791
+        ],
+        "position": [
+          716,
+          134
+        ],
+        "delivery_size": [
+          285,
+          401
+        ],
+        "method": "从干净透明总层按alpha连通轮廓分离，不损伤内部深色；保持宽高比缩回原效果图的高度并对齐锚点。"
+      },
+      {
+        "name": "03_兜帽弩手",
+        "alpha_bbox_in_tool_output": [
+          1124,
+          260,
+          1626,
+          896
+        ],
+        "native_size": [
+          502,
+          636
+        ],
+        "position": [
+          1033,
+          189
+        ],
+        "delivery_size": [
+          272,
+          345
+        ],
+        "method": "从干净透明总层按alpha连通轮廓分离，不损伤内部深色；保持宽高比缩回原效果图的高度并对齐锚点。"
+      }
+    ],
+    "native_source": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\拆分ui\\战斗界面\\v07分离-v01\\草稿\\敌人-放大布局-未通过.png",
+    "notes": "工具两次输出均放大人物；以首版完整透明立绘作素材，分别按比例还原画面高度与坐标。",
+    "individual_assets": [
+      {
+        "file": "敌人-重建草稿\\01_三角帽剑士.png",
+        "original_position": [
+          305,
+          141
+        ],
+        "size": [
+          405,
+          406
+        ],
+        "full_canvas_file": "敌人-重建草稿\\01_三角帽剑士-原位.png"
+      },
+      {
+        "file": "敌人-重建草稿\\02_鹿骨祭司.png",
+        "original_position": [
+          710,
+          130
+        ],
+        "size": [
+          299,
+          413
+        ],
+        "full_canvas_file": "敌人-重建草稿\\02_鹿骨祭司-原位.png"
+      },
+      {
+        "file": "敌人-重建草稿\\03_兜帽弩手.png",
+        "original_position": [
+          1030,
+          181
+        ],
+        "size": [
+          283,
+          361
+        ],
+        "full_canvas_file": "敌人-重建草稿\\03_兜帽弩手-原位.png"
+      }
+    ],
+    "individual_reassembly_visible_pixels_identical": true,
+    "acceptance": "重建草稿，待精修：生成工具未保留精确原始造型；虽已按比例恢复位置与高度，局部服装、衣褶、武器及轮廓与原图仍有差异，不作为无损抠图最终版。"
+  },
+  "enemy_rejected_draft": {
+    "file": "C:\\Users\\DHXM\\Documents\\dice\\血缘诅咒\\拆分ui\\战斗界面\\v07分离-v01\\草稿\\敌人-放大布局-未通过.png",
+    "reason": "内置工具将敌人放大并重排，没有保留原始画布坐标；不通过原位分离验收。"
+  },
+  "scope": "本次仅交付UI总层、背景、敌人PNG；未制作PSD，UI总层中的普通文字仍为图像像素，不宣称可编辑文字。未进入独立UI组件与PSD制作阶段。",
+  "limitations": [
+    "内置图像工具提取与补绘可能产生局部线条和颜色差异，非逐像素无损抠图。",
+    "背景中原先被遮挡的区域和敌人被UI挡住的少量脚部属于补绘。",
+    "敌人不含独立地面投影；重组时接地阴影与原效果图可能不同。"
+  ]
+}
