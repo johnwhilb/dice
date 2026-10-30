@@ -1,0 +1,11 @@
+{
+  "psdReadback": true,
+  "width": 1672,
+  "height": 941,
+  "componentFiles": 65,
+  "textLayers": 39,
+  "fullImageMeanAbsoluteRgbDifference": 18.452803737921755,
+  "differenceScope": "包含背景补绘、人物提取重建、字体替换及UI修复的全图差异，不代表原像素提取精度",
+  "photoshopOpened": false,
+  "fullScreenshotOverlay": false
+}

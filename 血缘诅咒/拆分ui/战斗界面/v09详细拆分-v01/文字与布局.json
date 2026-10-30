@@ -1,0 +1,1112 @@
+{
+  "canvas": [
+    1672,
+    941
+  ],
+  "source": "F:\\COCOSproject\\dice\\血缘诅咒\\生成界面\\未命名游戏-战斗界面-草稿-v09.png",
+  "sourceVersion": "v09",
+  "status": "草稿，真实编辑文字；提取补绘与原图存在差异",
+  "font": {
+    "family": "宋体",
+    "postScriptName": "SimSun",
+    "installedFile": "C:/Windows/Fonts/simsun.ttc",
+    "version": "未读取"
+  },
+  "components": [
+    {
+      "name": "旅者徽记",
+      "file": "组件/001_旅者徽记.png",
+      "x": 48,
+      "y": 2,
+      "width": 71,
+      "height": 66,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "生命徽记",
+      "file": "组件/002_生命徽记.png",
+      "x": 246,
+      "y": 5,
+      "width": 58,
+      "height": 59,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "耐力羽毛",
+      "file": "组件/003_耐力羽毛.png",
+      "x": 574,
+      "y": 5,
+      "width": 53,
+      "height": 58,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "格挡盾",
+      "file": "组件/004_格挡盾.png",
+      "x": 866,
+      "y": 11,
+      "width": 46,
+      "height": 52,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "生命槽与边框",
+      "file": "组件/005_生命槽与边框.png",
+      "x": 321,
+      "y": 46,
+      "width": 224,
+      "height": 15,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "生命当前填充",
+      "file": "组件/006_生命当前填充.png",
+      "x": 325,
+      "y": 50,
+      "width": 173,
+      "height": 7,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "耐力槽与边框",
+      "file": "组件/007_耐力槽与边框.png",
+      "x": 642,
+      "y": 46,
+      "width": 190,
+      "height": 15,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "耐力当前填充",
+      "file": "组件/008_耐力当前填充.png",
+      "x": 646,
+      "y": 50,
+      "width": 116,
+      "height": 7,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "格挡槽与边框",
+      "file": "组件/009_格挡槽与边框.png",
+      "x": 924,
+      "y": 46,
+      "width": 101,
+      "height": 15,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "格挡当前填充",
+      "file": "组件/010_格挡当前填充.png",
+      "x": 928,
+      "y": 50,
+      "width": 47,
+      "height": 7,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "顶部_无图标底板",
+      "file": "组件/000_顶部无图标底板.png",
+      "x": 0,
+      "y": 0,
+      "width": 1074,
+      "height": 72,
+      "kind": "图像",
+      "source": "已验收透明UI总层去独立符号"
+    },
+    {
+      "name": "抽牌按钮",
+      "file": "组件/011_抽牌按钮.png",
+      "x": 297,
+      "y": 582,
+      "width": 243,
+      "height": 66,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "重掷按钮",
+      "file": "组件/012_重掷按钮.png",
+      "x": 1130,
+      "y": 582,
+      "width": 236,
+      "height": 66,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "结束回合按钮",
+      "file": "组件/013_结束回合按钮.png",
+      "x": 1381,
+      "y": 583,
+      "width": 279,
+      "height": 65,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "连接装饰左",
+      "file": "组件/014_连接装饰左.png",
+      "x": 540,
+      "y": 601,
+      "width": 65,
+      "height": 29,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "连接装饰右",
+      "file": "组件/015_连接装饰右.png",
+      "x": 1065,
+      "y": 601,
+      "width": 65,
+      "height": 29,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源1_空底框",
+      "file": "组件/016_资源1_空底框.png",
+      "x": 607,
+      "y": 577,
+      "width": 74,
+      "height": 74,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源1_符号",
+      "file": "组件/017_资源1_符号.png",
+      "x": 620,
+      "y": 591,
+      "width": 47,
+      "height": 47,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源2_空底框",
+      "file": "组件/018_资源2_空底框.png",
+      "x": 702,
+      "y": 577,
+      "width": 74,
+      "height": 74,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源2_符号",
+      "file": "组件/019_资源2_符号.png",
+      "x": 721,
+      "y": 592,
+      "width": 37,
+      "height": 43,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源3_空底框",
+      "file": "组件/020_资源3_空底框.png",
+      "x": 798,
+      "y": 577,
+      "width": 74,
+      "height": 74,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源3_符号",
+      "file": "组件/021_资源3_符号.png",
+      "x": 810,
+      "y": 589,
+      "width": 52,
+      "height": 50,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源4_空底框",
+      "file": "组件/022_资源4_空底框.png",
+      "x": 894,
+      "y": 577,
+      "width": 74,
+      "height": 74,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源4_符号",
+      "file": "组件/023_资源4_符号.png",
+      "x": 914,
+      "y": 592,
+      "width": 37,
+      "height": 42,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源5_空底框",
+      "file": "组件/024_资源5_空底框.png",
+      "x": 990,
+      "y": 577,
+      "width": 74,
+      "height": 74,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "资源5_符号",
+      "file": "组件/025_资源5_符号.png",
+      "x": 1004,
+      "y": 591,
+      "width": 48,
+      "height": 47,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "道具袋面板_无符号底板",
+      "file": "组件/026_道具袋面板_无符号底板.png",
+      "x": 37,
+      "y": 116,
+      "width": 172,
+      "height": 86,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "道具袋面板_独立图标",
+      "file": "组件/027_道具袋面板_独立图标.png",
+      "x": 51,
+      "y": 126,
+      "width": 64,
+      "height": 67,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "牌库面板_无符号底板",
+      "file": "组件/028_牌库面板_无符号底板.png",
+      "x": 51,
+      "y": 774,
+      "width": 179,
+      "height": 110,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "牌库面板_独立图标",
+      "file": "组件/029_牌库面板_独立图标.png",
+      "x": 69,
+      "y": 795,
+      "width": 66,
+      "height": 74,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "弃牌面板_无符号底板",
+      "file": "组件/030_弃牌面板_无符号底板.png",
+      "x": 1439,
+      "y": 774,
+      "width": 182,
+      "height": 110,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "弃牌面板_独立图标",
+      "file": "组件/031_弃牌面板_独立图标.png",
+      "x": 1466,
+      "y": 797,
+      "width": 53,
+      "height": 72,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "暂停_边框与底板",
+      "file": "组件/032_暂停_边框与底板.png",
+      "x": 1583,
+      "y": 4,
+      "width": 77,
+      "height": 78,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "暂停_双竖线符号",
+      "file": "组件/033_暂停_双竖线符号.png",
+      "x": 1613,
+      "y": 31,
+      "width": 17,
+      "height": 25,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "敌人1_生命槽边框",
+      "file": "组件/034_敌人1_生命槽边框.png",
+      "x": 489,
+      "y": 134,
+      "width": 166,
+      "height": 15,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "敌人1_当前生命填充",
+      "file": "组件/035_敌人1_当前生命填充.png",
+      "x": 492,
+      "y": 137,
+      "width": 128,
+      "height": 9,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "敌人2_生命槽边框",
+      "file": "组件/036_敌人2_生命槽边框.png",
+      "x": 768,
+      "y": 126,
+      "width": 168,
+      "height": 13,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "敌人2_当前生命填充",
+      "file": "组件/037_敌人2_当前生命填充.png",
+      "x": 771,
+      "y": 129,
+      "width": 162,
+      "height": 7,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "敌人3_生命槽边框",
+      "file": "组件/038_敌人3_生命槽边框.png",
+      "x": 1064,
+      "y": 148,
+      "width": 167,
+      "height": 13,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "敌人3_当前生命填充",
+      "file": "组件/039_敌人3_当前生命填充.png",
+      "x": 1067,
+      "y": 151,
+      "width": 126,
+      "height": 7,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌1_完整无文字底板",
+      "file": "组件/040_手牌1_完整无文字底板.png",
+      "x": 372,
+      "y": 675,
+      "width": 219,
+      "height": 255,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌1_费用角标",
+      "file": "组件/041_手牌1_费用角标.png",
+      "x": 383,
+      "y": 703,
+      "width": 52,
+      "height": 52,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌1_功能符号",
+      "file": "组件/042_手牌1_功能符号.png",
+      "x": 460,
+      "y": 758,
+      "width": 24,
+      "height": 22,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌1_标题分隔",
+      "file": "组件/043_手牌1_标题分隔.png",
+      "x": 409,
+      "y": 762,
+      "width": 136,
+      "height": 22,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌1_底部分隔",
+      "file": "组件/044_手牌1_底部分隔.png",
+      "x": 422,
+      "y": 856,
+      "width": 136,
+      "height": 22,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌2_完整无文字底板",
+      "file": "组件/045_手牌2_完整无文字底板.png",
+      "x": 557,
+      "y": 674,
+      "width": 202,
+      "height": 241,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌2_费用角标",
+      "file": "组件/046_手牌2_费用角标.png",
+      "x": 567,
+      "y": 689,
+      "width": 52,
+      "height": 52,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌2_功能符号",
+      "file": "组件/047_手牌2_功能符号.png",
+      "x": 640,
+      "y": 752,
+      "width": 17,
+      "height": 21,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌2_标题分隔",
+      "file": "组件/048_手牌2_标题分隔.png",
+      "x": 588,
+      "y": 760,
+      "width": 137,
+      "height": 10,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌2_底部分隔",
+      "file": "组件/049_手牌2_底部分隔.png",
+      "x": 593,
+      "y": 855,
+      "width": 137,
+      "height": 10,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌3_完整无文字底板",
+      "file": "组件/050_手牌3_完整无文字底板.png",
+      "x": 740,
+      "y": 664,
+      "width": 190,
+      "height": 233,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌3_费用角标",
+      "file": "组件/051_手牌3_费用角标.png",
+      "x": 748,
+      "y": 672,
+      "width": 52,
+      "height": 52,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌3_功能符号",
+      "file": "组件/052_手牌3_功能符号.png",
+      "x": 819,
+      "y": 738,
+      "width": 22,
+      "height": 23,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌3_标题分隔",
+      "file": "组件/053_手牌3_标题分隔.png",
+      "x": 767,
+      "y": 750,
+      "width": 136,
+      "height": 2,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌3_底部分隔",
+      "file": "组件/054_手牌3_底部分隔.png",
+      "x": 767,
+      "y": 845,
+      "width": 136,
+      "height": 2,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌4_完整无文字底板",
+      "file": "组件/055_手牌4_完整无文字底板.png",
+      "x": 923,
+      "y": 676,
+      "width": 201,
+      "height": 243,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌4_费用角标",
+      "file": "组件/056_手牌4_费用角标.png",
+      "x": 941,
+      "y": 686,
+      "width": 52,
+      "height": 52,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌4_功能符号",
+      "file": "组件/057_手牌4_功能符号.png",
+      "x": 1011,
+      "y": 755,
+      "width": 19,
+      "height": 22,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌4_标题分隔",
+      "file": "组件/058_手牌4_标题分隔.png",
+      "x": 957,
+      "y": 763,
+      "width": 137,
+      "height": 10,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌4_底部分隔",
+      "file": "组件/059_手牌4_底部分隔.png",
+      "x": 952,
+      "y": 858,
+      "width": 137,
+      "height": 10,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌5_完整无文字底板",
+      "file": "组件/060_手牌5_完整无文字底板.png",
+      "x": 1084,
+      "y": 680,
+      "width": 218,
+      "height": 257,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌5_费用角标",
+      "file": "组件/061_手牌5_费用角标.png",
+      "x": 1119,
+      "y": 693,
+      "width": 52,
+      "height": 51,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌5_功能符号",
+      "file": "组件/062_手牌5_功能符号.png",
+      "x": 1184,
+      "y": 768,
+      "width": 16,
+      "height": 19,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌5_标题分隔",
+      "file": "组件/063_手牌5_标题分隔.png",
+      "x": 1130,
+      "y": 768,
+      "width": 136,
+      "height": 22,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    },
+    {
+      "name": "手牌5_底部分隔",
+      "file": "组件/064_手牌5_底部分隔.png",
+      "x": 1117,
+      "y": 862,
+      "width": 136,
+      "height": 22,
+      "kind": "图像",
+      "source": "清理后的透明UI总层或其同类底板遮挡补全"
+    }
+  ],
+  "texts": [
+    {
+      "text": "旅者",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 30,
+      "color": "#e8ddc2",
+      "x": 134,
+      "y": 45,
+      "angle": 0,
+      "align": "left"
+    },
+    {
+      "text": "生命",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 24,
+      "color": "#e8ddc2",
+      "x": 322,
+      "y": 38,
+      "angle": 0,
+      "align": "left"
+    },
+    {
+      "text": "48/60",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 28,
+      "color": "#e8ddc2",
+      "x": 387,
+      "y": 38,
+      "angle": 0,
+      "align": "left"
+    },
+    {
+      "text": "耐力",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 24,
+      "color": "#e8ddc2",
+      "x": 644,
+      "y": 38,
+      "angle": 0,
+      "align": "left"
+    },
+    {
+      "text": "3/3",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 28,
+      "color": "#e8ddc2",
+      "x": 710,
+      "y": 38,
+      "angle": 0,
+      "align": "left"
+    },
+    {
+      "text": "格挡",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 24,
+      "color": "#e8ddc2",
+      "x": 925,
+      "y": 38,
+      "angle": 0,
+      "align": "left"
+    },
+    {
+      "text": "08",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 28,
+      "color": "#e8ddc2",
+      "x": 989,
+      "y": 38,
+      "angle": 0,
+      "align": "left"
+    },
+    {
+      "text": "抽牌",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 30,
+      "color": "#eee1c6",
+      "x": 419,
+      "y": 626,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "重掷",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 30,
+      "color": "#eee1c6",
+      "x": 1248,
+      "y": 626,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "结束回合",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 30,
+      "color": "#eee1c6",
+      "x": 1520,
+      "y": 626,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "道具袋",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 23,
+      "color": "#e8ddc2",
+      "x": 156,
+      "y": 148,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "2",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 40,
+      "color": "#e8ddc2",
+      "x": 151,
+      "y": 186,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "牌库",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 23,
+      "color": "#e8ddc2",
+      "x": 174,
+      "y": 813,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "18",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 48,
+      "color": "#e8ddc2",
+      "x": 174,
+      "y": 858,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "弃牌",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 23,
+      "color": "#e8ddc2",
+      "x": 1562,
+      "y": 813,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "0",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 48,
+      "color": "#e8ddc2",
+      "x": 1562,
+      "y": 858,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "32/40",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 23,
+      "color": "#171818",
+      "x": 627,
+      "y": 131,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "48/48",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 23,
+      "color": "#171818",
+      "x": 905,
+      "y": 121,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "28/36",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 23,
+      "color": "#171818",
+      "x": 1200,
+      "y": 144,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "打击",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 25,
+      "color": "#151515",
+      "x": 489.00785184801924,
+      "y": 734.9162841982927,
+      "angle": -8,
+      "align": "center"
+    },
+    {
+      "text": "造成6点伤害。",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 20,
+      "color": "#191817",
+      "x": 486.4010637013814,
+      "y": 824.147470761952,
+      "angle": -8,
+      "align": "center"
+    },
+    {
+      "text": "攻击",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 22,
+      "color": "#703331",
+      "x": 496.5607000714662,
+      "y": 896.4370397800866,
+      "angle": -8,
+      "align": "center"
+    },
+    {
+      "text": "1",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 32,
+      "color": "#f1e4cb",
+      "x": 410.9319038804163,
+      "y": 739.8301776607284,
+      "angle": -8,
+      "align": "center"
+    },
+    {
+      "text": "防守",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 25,
+      "color": "#151515",
+      "x": 671.5156416609024,
+      "y": 728.0684791732735,
+      "angle": -3,
+      "align": "center"
+    },
+    {
+      "text": "获得5点格挡。",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 20,
+      "color": "#191817",
+      "x": 661.1417627889629,
+      "y": 816.7329175753202,
+      "angle": -3,
+      "align": "center"
+    },
+    {
+      "text": "防御",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 22,
+      "color": "#414f55",
+      "x": 664.9622875946977,
+      "y": 889.6328736124041,
+      "angle": -3,
+      "align": "center"
+    },
+    {
+      "text": "1",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 32,
+      "color": "#f1e4cb",
+      "x": 593.308522212588,
+      "y": 726.1589065516957,
+      "angle": -3,
+      "align": "center"
+    },
+    {
+      "text": "专注",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 25,
+      "color": "#151515",
+      "x": 852,
+      "y": 715,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "抽取1张卡牌。",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 20,
+      "color": "#191817",
+      "x": 837,
+      "y": 803,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "技巧",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 22,
+      "color": "#414f55",
+      "x": 837,
+      "y": 876,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "0",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 32,
+      "color": "#f1e4cb",
+      "x": 774,
+      "y": 709,
+      "angle": 0,
+      "align": "center"
+    },
+    {
+      "text": "突刺",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 25,
+      "color": "#151515",
+      "x": 1044.1773741241223,
+      "y": 732.791733371693,
+      "angle": 3,
+      "align": "center"
+    },
+    {
+      "text": "造成8点伤害。",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 20,
+      "color": "#191817",
+      "x": 1024.5923669534245,
+      "y": 819.8860930864514,
+      "angle": 3,
+      "align": "center"
+    },
+    {
+      "text": "攻击",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 22,
+      "color": "#703331",
+      "x": 1020.7718421476895,
+      "y": 892.7860491235352,
+      "angle": 3,
+      "align": "center"
+    },
+    {
+      "text": "1",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 32,
+      "color": "#f1e4cb",
+      "x": 966.5982861507231,
+      "y": 722.717751576216,
+      "angle": 3,
+      "align": "center"
+    },
+    {
+      "text": "休整",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 25,
+      "color": "#151515",
+      "x": 1219.8121955500926,
+      "y": 746.0910588133474,
+      "angle": 8,
+      "align": "center"
+    },
+    {
+      "text": "恢复1点耐力。",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 20,
+      "color": "#191817",
+      "x": 1192.710941634483,
+      "y": 831.1470523482046,
+      "angle": 8,
+      "align": "center"
+    },
+    {
+      "text": "技巧",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 22,
+      "color": "#414f55",
+      "x": 1182.5513052643985,
+      "y": 903.4366213663392,
+      "angle": 8,
+      "align": "center"
+    },
+    {
+      "text": "0",
+      "font": "SimSun",
+      "fontFile": "C:/Windows/Fonts/simsun.ttc",
+      "size": 32,
+      "color": "#f1e4cb",
+      "x": 1143.4063247940105,
+      "y": 729.2939485260129,
+      "angle": 8,
+      "align": "center"
+    }
+  ],
+  "verification": {
+    "psdReadback": true,
+    "leafLayers": 108,
+    "editableTextLayers": 39,
+    "photoshopOpened": false
+  },
+  "limitations": [
+    "原始图即为草稿，尺寸1672×941。",
+    "UI通过图像工具去字与透明提取，部分纹理、细边框和位置有轻微变化。",
+    "手牌遮挡边缘按同款中间卡框补齐，卡框纹理及分隔线存在差异。",
+    "透明敌人提取时工具放大并重绘，独立缩放恢复原位，但造型细节与原图不同且分割边界需继续修正。",
+    "背景遮挡处补绘，不是原始独立场景。",
+    "未在Photoshop中打开验证，文字使用真实TySh数据且已经PSD读回核对。"
+  ]
+}
