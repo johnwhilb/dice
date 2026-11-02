@@ -1,0 +1,280 @@
+{
+  "canvas": [
+    1851,
+    850
+  ],
+  "layers": [
+    {
+      "file": "scene_background.png",
+      "x": 0,
+      "y": 0,
+      "width": 1851,
+      "height": 849,
+      "group": "场景"
+    },
+    {
+      "file": "enemy.png",
+      "x": 731,
+      "y": 30,
+      "width": 414,
+      "height": 586,
+      "group": "场景"
+    },
+    {
+      "file": "panel_location.png",
+      "x": 32,
+      "y": 28,
+      "width": 328,
+      "height": 84,
+      "group": "界面"
+    },
+    {
+      "file": "panel_turn.png",
+      "x": 1603,
+      "y": 28,
+      "width": 217,
+      "height": 75,
+      "group": "界面"
+    },
+    {
+      "file": "panel_enemy.png",
+      "x": 1210,
+      "y": 170,
+      "width": 321,
+      "height": 98,
+      "group": "界面"
+    },
+    {
+      "file": "panel_player.png",
+      "x": 30,
+      "y": 650,
+      "width": 210,
+      "height": 162,
+      "group": "界面"
+    },
+    {
+      "file": "button_end_turn.png",
+      "x": 1616,
+      "y": 680,
+      "width": 204,
+      "height": 73,
+      "group": "界面"
+    },
+    {
+      "file": "button_draw.png",
+      "x": 278,
+      "y": 443,
+      "width": 161,
+      "height": 61,
+      "group": "界面"
+    },
+    {
+      "file": "hand_backdrop.png",
+      "x": 0,
+      "y": 799,
+      "width": 1851,
+      "height": 51,
+      "group": "界面"
+    },
+    {
+      "file": "dice_slot_92x92.png",
+      "x": 680,
+      "y": 449,
+      "width": 92,
+      "height": 92,
+      "group": "骰子"
+    },
+    {
+      "file": "rune_star_52.png",
+      "x": 700,
+      "y": 469,
+      "width": 52,
+      "height": 52,
+      "group": "骰子"
+    },
+    {
+      "file": "dice_slot_92x92.png",
+      "x": 786,
+      "y": 449,
+      "width": 92,
+      "height": 92,
+      "group": "骰子"
+    },
+    {
+      "file": "rune_sun_52.png",
+      "x": 806,
+      "y": 469,
+      "width": 52,
+      "height": 52,
+      "group": "骰子"
+    },
+    {
+      "file": "dice_slot_92x92.png",
+      "x": 892,
+      "y": 449,
+      "width": 92,
+      "height": 92,
+      "group": "骰子"
+    },
+    {
+      "file": "rune_sun_52.png",
+      "x": 912,
+      "y": 469,
+      "width": 52,
+      "height": 52,
+      "group": "骰子"
+    },
+    {
+      "file": "dice_slot_92x92.png",
+      "x": 998,
+      "y": 449,
+      "width": 92,
+      "height": 92,
+      "group": "骰子"
+    },
+    {
+      "file": "rune_sun_52.png",
+      "x": 1018,
+      "y": 469,
+      "width": 52,
+      "height": 52,
+      "group": "骰子"
+    },
+    {
+      "file": "dice_slot_92x92.png",
+      "x": 1104,
+      "y": 449,
+      "width": 92,
+      "height": 92,
+      "group": "骰子"
+    },
+    {
+      "file": "rune_moon_52.png",
+      "x": 1124,
+      "y": 469,
+      "width": 52,
+      "height": 52,
+      "group": "骰子"
+    },
+    {
+      "file": "card_01_frame.png",
+      "x": 404,
+      "y": 554,
+      "width": 232,
+      "height": 293,
+      "group": "手牌01"
+    },
+    {
+      "file": "card_01_skill.png",
+      "x": 507,
+      "y": 606,
+      "width": 56,
+      "height": 64,
+      "group": "手牌01"
+    },
+    {
+      "file": "card_01_runes.png",
+      "x": 413,
+      "y": 584,
+      "width": 36,
+      "height": 33,
+      "group": "手牌01"
+    },
+    {
+      "file": "card_02_frame.png",
+      "x": 617,
+      "y": 547,
+      "width": 216,
+      "height": 282,
+      "group": "手牌02"
+    },
+    {
+      "file": "card_02_skill.png",
+      "x": 714,
+      "y": 599,
+      "width": 57,
+      "height": 63,
+      "group": "手牌02"
+    },
+    {
+      "file": "card_02_runes.png",
+      "x": 625,
+      "y": 564,
+      "width": 39,
+      "height": 79,
+      "group": "手牌02"
+    },
+    {
+      "file": "card_03_frame.png",
+      "x": 832,
+      "y": 546,
+      "width": 197,
+      "height": 268,
+      "group": "手牌03"
+    },
+    {
+      "file": "card_03_skill.png",
+      "x": 915,
+      "y": 591,
+      "width": 71,
+      "height": 63,
+      "group": "手牌03"
+    },
+    {
+      "file": "card_03_runes.png",
+      "x": 839,
+      "y": 551,
+      "width": 34,
+      "height": 36,
+      "group": "手牌03"
+    },
+    {
+      "file": "card_04_frame.png",
+      "x": 1027,
+      "y": 547,
+      "width": 216,
+      "height": 282,
+      "group": "手牌04"
+    },
+    {
+      "file": "card_04_skill.png",
+      "x": 1127,
+      "y": 601,
+      "width": 61,
+      "height": 63,
+      "group": "手牌04"
+    },
+    {
+      "file": "card_04_runes.png",
+      "x": 1048,
+      "y": 555,
+      "width": 39,
+      "height": 79,
+      "group": "手牌04"
+    },
+    {
+      "file": "card_05_frame.png",
+      "x": 1224,
+      "y": 554,
+      "width": 232,
+      "height": 293,
+      "group": "手牌05"
+    },
+    {
+      "file": "card_05_skill.png",
+      "x": 1334,
+      "y": 614,
+      "width": 68,
+      "height": 66,
+      "group": "手牌05"
+    },
+    {
+      "file": "card_05_runes.png",
+      "x": 1252,
+      "y": 562,
+      "width": 48,
+      "height": 122,
+      "group": "手牌05"
+    }
+  ]
+}
