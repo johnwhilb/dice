@@ -46,6 +46,7 @@ export class BattleView extends CCView<Battle> {
     // 等待战斗数据初始化完成后，再加载双方立绘和刷新界面。
     async start(): Promise<void> {
         this.nodeTreeInfoLite();
+        this.getNode('nodeSelf')!.active = false;
         this.setButton();
         const itemLayout = this.getNode('itemLayout')!;
         this.itemsVisible = false;
@@ -66,26 +67,21 @@ export class BattleView extends CCView<Battle> {
         this.on(PlayerEvent.statsChanged, this.refreshBattleView, this);
         this.initDiceView();
         await this.ent.BattleBll.startBattle();
-        this.initPlayerView();
         this.initEnemyView();
         this.refreshBattleView();
     }
     refreshBattleView(): void {
         const model = this.ent.BattleModel;
         const player = this.ent.BattlePlayerModel;
-        const phaseNames = ['战斗准备', '玩家回合开始', '玩家行动', '玩家回合结束',
-            '敌人回合开始', '敌人行动', '敌人回合结束', '结果结算', '战斗胜利', '战斗失败'];
         this.updatePlayerStatus();
         this.updateEnemyStatus();
         this.getNode('lbtPlayerEnergy')!.getComponent(Label)!.string = `${player.energy}/${player.maxEnergy}`;
         this.getNode('lbtPlayerBuff')!.getComponent(RichText)!.string = this.ent.BattleBuffBll.describeBuffs(BattleSide.Player);
         this.getNode('lbtEnemyBuff')!.getComponent(RichText)!.string = `${this.ent.BattleBuffBll.describeBuffs(BattleSide.Enemy)}<br/>意图：${this.ent.BattleEnemyBll.describeIntent()}`;
-        this.getNode('lbtCurrentPhase')!.getComponent(Label)!.string = model.message || phaseNames[model.phase];
-        this.getNode('lbtCurrentRound')!.getComponent(Label)!.string = `第 ${model.turn} 回合`;
         const selectedDiceIndex = player.diceLocked[0];
-        this.getNode('txtThrow')!.getComponent(Label)!.string = player.diceUsed.includes(selectedDiceIndex)
-            ? '激活 -2' : '重投 -2';
-        this.getNode('txtDraw')!.getComponent(Label)!.string = '抽牌 -1';
+        const hasSelectedDice = player.diceLocked.length > 0;
+        this.getNode('txtDraw')!.getComponent(Label)!.string = hasSelectedDice
+            ? (player.diceUsed.includes(selectedDiceIndex) ? '激活 -2' : '重投 -2') : '抽牌 -1';
         this.getNode('txtContinue')!.getComponent(Label)!.string = model.phase === BattlePhase.Victory ? '继续前进'
             : model.phase === BattlePhase.Defeat ? '重新开始' : model.closed ? '关闭' : '结束回合';
         const actionable = !model.busy && model.phase === BattlePhase.PlayerAction && !this.ent.BattleBll.isBattleFinished();
@@ -94,11 +90,10 @@ export class BattleView extends CCView<Battle> {
         const canInspect = !model.busy && !model.closed;
         this.getNode('btnDrawPile')!.getComponent(Button)!.interactable = canInspect;
         this.getNode('btnDiscardPile')!.getComponent(Button)!.interactable = canInspect;
-        this.getNode('btnThrow')!.getComponent(Button)!.interactable = actionable && player.energy >= 2
-            && player.diceLocked.length === 1;
-        this.getNode('btnDraw')!.getComponent(Button)!.interactable = actionable && player.energy > 0
-            && player.handCards.length < player.handLimit
-            && (!!player.drawPile.length || !!player.discardPile.length);
+        this.getNode('btnDraw')!.getComponent(Button)!.interactable = actionable && (hasSelectedDice
+            ? player.energy >= 2 && player.diceLocked.length === 1
+            : player.energy > 0 && !player.drawLocked && player.handCards.length < player.handLimit
+                && (!!player.drawPile.length || !!player.discardPile.length));
         this.getNode('btnEnd')!.getComponent(Button)!.interactable = actionable
             || (!model.busy && this.ent.BattleBll.isBattleFinished());
         this.updateCardList();
@@ -178,7 +173,6 @@ export class BattleView extends CCView<Battle> {
                 this.selectedItemId = itemId;
                 this.selectedTouchId = event.getID();
                 this.onCardTouchStart(event);
-                this.getNode('lbtCurrentPhase')!.getComponent(Label)!.string = `${item.name}：${item.des}`;
             }, this);
             node.on(Node.EventType.TOUCH_MOVE, this.onCardTouchMove, this);
             node.on(Node.EventType.TOUCH_END, this.onCardTouchEnd, this);
@@ -230,6 +224,7 @@ export class BattleView extends CCView<Battle> {
         cardNode.on(Node.EventType.TOUCH_CANCEL, this.onCardTouchCancel, this);
     }
     private onCardTouchStart(event: EventTouch): void {
+        this.getNode('nodeSelf')!.active = false;
         const touchPos = event.getUILocation();
         this.cardTouchStartPos.set(touchPos.x, touchPos.y, 0);
     }
@@ -240,13 +235,16 @@ export class BattleView extends CCView<Battle> {
         const touchPos = event.getUILocation();
         const touchWorldPos = new Vec3(touchPos.x, touchPos.y, 0);
         const moveDistance = Vec3.distance(this.cardTouchStartPos, touchWorldPos);
-        if (moveDistance < this.cardGestureJudgeThreshold) {
-            return;
-        }
         const layout = this.getNode(this.selectedItemId ? 'itemLayout' : 'cardLayout')!;
-        if (this.isWorldPosInsideNode(touchWorldPos, layout)) {
+        if (moveDistance < this.cardGestureJudgeThreshold || this.isWorldPosInsideNode(touchWorldPos, layout)) {
+            this.getNode('nodeSelf')!.active = false;
+            this.getNode('nodeGraphView')!.getComponent(GraphView)!.reset();
             return;
         }
+        const config = this.selectedItemId
+            ? TableItem.getConfigById(this.selectedItemId)
+            : this.ent.BattleCardBll.getCard(this.ent.BattlePlayerModel.handCards[this.selectedCardIndex]);
+        this.getNode('nodeSelf')!.active = config?.target === 'SELF';
         this.getNode('nodeGraphView')!
             .getComponent(GraphView)!
             .drawBezierCurveByWorldPos(this.cardTouchStartPos, touchWorldPos);
@@ -258,25 +256,26 @@ export class BattleView extends CCView<Battle> {
         }
         const index = this.selectedCardIndex;
         const itemId = this.selectedItemId;
+        const config = itemId ? TableItem.getConfigById(itemId)
+            : index >= 0 && index < this.ent.BattlePlayerModel.handCards.length
+                ? this.ent.BattleCardBll.getCard(this.ent.BattlePlayerModel.handCards[index]) : undefined;
+        if (!config) {
+            this.cancelCardGesture();
+            return;
+        }
+        const targetNode = this.getNode(config.target === 'SELF' ? 'nodeSelf' : 'spEnemy')!;
+        const canRelease = targetNode.activeInHierarchy
+            && targetNode.getComponent(UITransform)!.hitTest(event.getLocation(), event.windowId);
         this.cancelCardGesture();
+        if (!canRelease) {
+            return;
+        }
         if (itemId) {
-            const item = TableItem.getConfigById(itemId)!;
-            const targetNode = this.getNode(item.target === 'SELF' ? 'spRole' : 'spEnemy')!;
-            if (targetNode.getComponent(UITransform)!.hitTest(event.getLocation(), event.windowId)) {
-                await this.ent.BattleItemBll.useItem(itemId);
-            }
+            await this.ent.BattleItemBll.useItem(itemId);
             this.refreshBattleView();
             return;
         }
-        if (index < 0 || index >= this.ent.BattlePlayerModel.handCards.length) {
-            return;
-        }
-        const card = this.ent.BattleCardBll.getCard(this.ent.BattlePlayerModel.handCards[index])!;
-        const targetNode = this.getNode(card.target === 'SELF' ? 'spRole' : 'spEnemy')!;
-        // 引擎按屏幕坐标、UI 相机和窗口转换，避免将 UI 坐标误当世界坐标。
-        if (targetNode.getComponent(UITransform)!.hitTest(event.getLocation(), event.windowId)) {
-            await this.ent.BattleCardBll.playCard(index);
-        }
+        await this.ent.BattleCardBll.playCard(index);
     }
     private onCardTouchCancel(event: EventTouch): Promise<void> | undefined {
         if (event.getID() !== this.selectedTouchId) {
@@ -296,6 +295,7 @@ export class BattleView extends CCView<Battle> {
         this.selectedCardIndex = -1;
         this.selectedItemId = 0;
         this.selectedTouchId = null;
+        this.getNode('nodeSelf')!.active = false;
         this.getNode('nodeGraphView')!.getComponent(GraphView)!.reset();
     }
     private isWorldPosInsideNode(worldPos: Vec3, node: Node): boolean {
@@ -310,11 +310,7 @@ export class BattleView extends CCView<Battle> {
             && localPos.y >= minY
             && localPos.y <= maxY;
     }
-    initPlayerView(): void {
-        const spRole = this.getNode('spRole')!.getComponent(Sprite);
-        const currentSelectedAvatarId = smc.player.getSelectedRoleId();
-        this.setSprite(spRole, ResPath.getSpriteRoleCard(currentSelectedAvatarId));
-    }
+
     initEnemyView(): void {
         const spEnemy = this.getNode('spEnemy')!.getComponent(Sprite);
         const currentSelectedAvatarId = this.ent.BattleEnemyModel.enemyId;
@@ -345,10 +341,10 @@ export class BattleView extends CCView<Battle> {
             diceNode.getComponent(nodeDice)!.setIndex(index);
         });
     }
-    btnThrow(): void {
-        this.ent.BattleBll.rerollSelectedDice();
-    }
-    btnDraw(): Promise<boolean> {
+    btnDraw() {
+        if (this.ent.BattlePlayerModel.diceLocked.length > 0) {
+            return this.ent.BattleBll.rerollSelectedDice();
+        }
         return this.ent.BattleCardBll.drawPaidCard();
     }
     btnDrawPile(): Promise<Node | null> | undefined {
@@ -426,9 +422,6 @@ export class BattleView extends CCView<Battle> {
         label.horizontalAlign = Label.HorizontalAlign.CENTER;
         label.verticalAlign = Label.VerticalAlign.CENTER;
         return node;
-    }
-    btnClose(): void {
-        this.ent.closeBattleView();
     }
     reset(): void {
         this.itemSignature = '';

@@ -34,7 +34,7 @@ export class nodeCard extends GameComponent {
                 node.parent = nodeIconNeed;
             }
             node.active = true;
-            const spIcon = node.getChildByName("face")!.getChildByName("spIcon")!.getComponent(Sprite);
+            const spIcon = node.getChildByName("spIcon")!.getComponent(Sprite);
             this.setSprite(spIcon, ResPath.getSpriteDice(iconNeed[i]));
         }
     }
