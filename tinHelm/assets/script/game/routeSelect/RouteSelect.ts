@@ -34,10 +34,7 @@ export class RouteSelect extends CCEntity {
     }
 
     openRouteSelectView() {
-        if (this.has(RouteSelectView)) {
-            return Promise.resolve(this.RouteSelectView.node);
-        }
-        return this.addUi(RouteSelectView);
+        return this.openMapView();
     }
 
     closeRouteSelectView() {
@@ -74,15 +71,8 @@ export class RouteSelect extends CCEntity {
         return this.RouteSelectBll.getRealmLevels();
     }
 
-    canTravelToRealm(realmId: number) {
-        return this.RouteSelectBll.canTravelToRealm(realmId);
-    }
-
-    selectRealmRoute(realmId: number) {
-        return this.RouteSelectBll.selectRealmRoute(realmId);
-    }
-
-    async openMapView() {
+    openMapView() {
+        this.generateRoutes();
         if (this.has(MapView)) {
             return Promise.resolve(this.MapView.node);
         }
@@ -93,6 +83,14 @@ export class RouteSelect extends CCEntity {
         if (this.has(MapView)) {
             this.removeUi(MapView);
         }
+    }
+
+    canSelectMapNode(nodeId: number) {
+        return this.RouteSelectBll.canSelectMapNode(nodeId);
+    }
+
+    selectMapNode(nodeId: number) {
+        return this.RouteSelectBll.selectMapNode(nodeId);
     }
 
 }

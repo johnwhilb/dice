@@ -21,6 +21,7 @@ export class MainMenu extends CCEntity {
 
     open() {
         if (this.has(MainMenuView)) {
+            this.MainMenuView.refresh();
             return Promise.resolve(this.MainMenuView.node);
         }
         this.addUi(MainMenuView);

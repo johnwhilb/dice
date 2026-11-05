@@ -1,0 +1,37 @@
+{
+  "frame_count": 4,
+  "frame_size": [
+    1254,
+    1254
+  ],
+  "duration_ms": [
+    650,
+    110,
+    650,
+    790
+  ],
+  "loop_duration_ms": 2200,
+  "boots_identical_all_frames": true,
+  "head_identical_except_blink": true,
+  "transparent_corners": true,
+  "adjacent_changed_pixels": [
+    293651,
+    286554,
+    283558,
+    285452
+  ],
+  "native_breathing": "sprite-gen breathe --mode pixel --depth 0.008 --depth-x 0.003 --breaths 1 --lag 0",
+  "hand_authored_stages": [
+    "Closed-eye pixels in frame 2",
+    "Integer-row cloth follow-through",
+    "Exact source restoration on head and boots"
+  ],
+  "background_cleanup": "Only alpha <= 1 dust removed",
+  "notes": [
+    "4 frames follow the explicit request; fewer than the skill recommended 6 frames per breath.",
+    "PNG and WebP preserve full RGBA. GIF uses a shared 255-colour palette and binary alpha."
+  ],
+  "webp_frames": 4,
+  "webp_lossless_rgba_verified": true,
+  "gif_frames": 4
+}

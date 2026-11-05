@@ -15,6 +15,26 @@ export interface RealmLevelState {
     currentEventIndex: number;
     completed: boolean;
     visited: boolean;
+    mapNodes?: MapNodeData[];
+    currentNodeId?: number;
+    visitedNodeIds?: number[];
+}
+
+export enum MapNodeType {
+    Fight,
+    Shop,
+    Elite,
+}
+
+export interface MapNodeData {
+    id: number;
+    column: number;
+    lane: number;
+    offsetY: number;
+    type: MapNodeType;
+    eventId: number;
+    detailId: number;
+    nextNodeIds: number[];
 }
 
 export interface TravelRouteData {
@@ -38,6 +58,7 @@ export class RouteSelectModel extends ecs.Comp {
         des: '随机探索其他世界',
     };
 
+    /** 清空本局世界、地图节点及路线进度；节点 ID 仅在所属地图内有效。 */
     reset(): void {
         this.currentRealmId = 0;
         this.originRealmId = 0;

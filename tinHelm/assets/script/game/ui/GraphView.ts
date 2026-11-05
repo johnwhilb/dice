@@ -1,6 +1,13 @@
 import { _decorator, Color, Component, Graphics, UITransform, Vec2, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
+export interface GraphPathData {
+    start: Vec2;
+    end: Vec2;
+    color: Color;
+    animated: boolean;
+}
+
 @ccclass('GraphView')
 export class GraphView extends Component {
     @property
@@ -9,16 +16,63 @@ export class GraphView extends Component {
 
     private graphics: Graphics = null!;
     private uiTransform: UITransform = null!;
+    private paths: GraphPathData[] = [];
+    private dashOffset = 0;
+    private redrawTime = 0;
 
     onLoad() {
         this.ensureGraphics();
         this.node.active = true;
     }
 
+    setMarchingPaths(paths: GraphPathData[]) {
+        this.ensureGraphics();
+        this.paths = paths;
+        this.drawMarchingPaths();
+    }
+
+    update(deltaTime: number) {
+        if (!this.paths.length) {
+            return;
+        }
+        this.dashOffset = (this.dashOffset + deltaTime * 24) % 18;
+        this.redrawTime += deltaTime;
+        if (this.redrawTime < 1 / 30) {
+            return;
+        }
+        this.redrawTime = 0;
+        this.drawMarchingPaths();
+    }
+
+    private drawMarchingPaths() {
+        this.graphics.clear();
+        this.graphics.lineWidth = this.lineWidth;
+        for (const path of this.paths) {
+            const dx = path.end.x - path.start.x;
+            const dy = path.end.y - path.start.y;
+            const length = Math.hypot(dx, dy);
+            if (length < 1) {
+                continue;
+            }
+            this.graphics.strokeColor = path.color;
+            let distance = path.animated ? this.dashOffset - 18 : 0;
+            while (distance < length) {
+                const start = Math.max(0, distance);
+                const end = Math.min(length, distance + 9);
+                if (end > start) {
+                    this.graphics.moveTo(path.start.x + dx * start / length, path.start.y + dy * start / length);
+                    this.graphics.lineTo(path.start.x + dx * end / length, path.start.y + dy * end / length);
+                }
+                distance += 18;
+            }
+            this.graphics.stroke();
+        }
+    }
+
     private ensureGraphics() {
-        let uiTransform = this.getComponent(UITransform)!;
+        const uiTransform = this.getComponent(UITransform)!;
         this.uiTransform = uiTransform;
-        let graphics = this.getComponent(Graphics)!;
+        const graphics = this.getComponent(Graphics)!;
         this.graphics = graphics;
         this.graphics.lineWidth = this.lineWidth;
         this.graphics.lineCap = Graphics.LineCap.ROUND;
@@ -134,6 +188,8 @@ export class GraphView extends Component {
     }
 
     reset() {
+        this.paths = [];
+        this.dashOffset = 0;
         this.ensureGraphics();
         if (this.graphics) {
             this.graphics.clear();

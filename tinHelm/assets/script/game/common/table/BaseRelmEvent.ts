@@ -13,6 +13,7 @@ interface RelmEventConfigData {
     unknownEvent: any[];
     shopPool: any[];
     maybeEvent: any[];
+    elitePool: any[];
 }
 
 /**
@@ -193,5 +194,10 @@ export class BaseRelmEvent {
     /** 可能发生的事件 */
     get maybeEvent(): any[] {
         return this.data.maybeEvent;
+    }
+
+    /** 终点精英战斗事件池 */
+    get elitePool(): any[] {
+        return this.data.elitePool;
     }
 }

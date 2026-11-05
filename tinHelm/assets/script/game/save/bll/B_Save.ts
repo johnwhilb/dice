@@ -5,7 +5,8 @@ import { Save } from '../Save';
 import { smc } from '../../common/SingletonModuleComp';
 import { CommonStorageConfig } from '../../common/config/GameStorageConfig';
 import { GameFlowState } from '../../gameFlow/model/GameFlowModel';
-import { RealmLevelState } from '../../routeSelect/model/RouteSelectModel';
+import { MapNodeData, MapNodeType, RealmLevelState } from '../../routeSelect/model/RouteSelectModel';
+import { EventTypeEnum } from '../../common/table/EventTypeEnum';
 import { PlayerEvent } from '../../player/PlayerEvent';
 import { RouteSelectEvent } from '../../routeSelect/RouteSelectEvent';
 const { ccclass } = _decorator;
@@ -40,6 +41,7 @@ export class SaveBll extends CCBusiness<Save> {
         return !!this.readSave();
     }
 
+    /** 保存玩家状态和完整节点图，地图坐标、事件详情及已走路线均不再重抽。 */
     saveGame() {
         const flow = smc.gameFlow.GameFlowModel;
         if (flow.currentGameFlowState === GameFlowState.RoleSelect) {
@@ -48,7 +50,7 @@ export class SaveBll extends CCBusiness<Save> {
         const route = smc.routeSelect.RouteSelectModel;
         const player = smc.player.PlayerModel;
         const data: RunSaveData = {
-            version: 2,
+            version: 3,
             state: flow.currentGameFlowState,
             currentDay: flow.currentDay,
             currentRealmId: route.currentRealmId,
@@ -77,6 +79,7 @@ export class SaveBll extends CCBusiness<Save> {
         }
     }
 
+    /** 恢复节点存档；旧线性存档迁移合法路径并保留玩家数据。 */
     restoreGame() {
         const data = this.readSave();
         if (!data) {
@@ -85,31 +88,20 @@ export class SaveBll extends CCBusiness<Save> {
         const flow = smc.gameFlow.GameFlowModel;
         const route = smc.routeSelect.RouteSelectModel;
         const player = smc.player.PlayerModel;
-        const needsMigration = data.version === 1 || data.realmLevels.some((level) => {
-            return level.eventDetailIds?.length !== level.eventIds.length;
-        });
+        const needsMigration = data.version < 3;
         flow.currentGameFlowState = needsMigration ? GameFlowState.RouteSelect : data.state;
         flow.currentDay = data.currentDay;
         if (needsMigration) {
             smc.routeSelect.RouteSelectBll.generateRealmLevels();
-            route.realmLevels.forEach((level) => {
-                const savedLevel = data.realmLevels.find((item) => {
-                    return item.realmId === level.realmId;
-                });
-                if (!savedLevel) {
-                    return;
-                }
-                level.currentEventIndex = savedLevel.completed
-                    ? level.eventIds.length
-                    : Math.min(savedLevel.currentEventIndex, level.eventIds.length - 1);
-                level.completed = savedLevel.completed;
-                level.visited = savedLevel.visited;
+            const savedLevel = data.realmLevels.find((item) => {
+                return item.realmId === data.currentRealmId;
             });
+            smc.routeSelect.RouteSelectBll.migrateLegacyProgress(savedLevel?.currentEventIndex ?? 0);
         } else {
             route.realmLevels = data.realmLevels;
+            route.currentRealmId = data.currentRealmId;
+            route.originRealmId = data.originRealmId;
         }
-        route.currentRealmId = data.currentRealmId;
-        route.originRealmId = data.originRealmId;
         route.anchorCount = data.anchorCount;
         route.recordedRealmId = data.recordedRealmId;
         route.currentEventDetailId = needsMigration ? 0 : (data.currentEventDetailId ?? 0);
@@ -149,12 +141,13 @@ export class SaveBll extends CCBusiness<Save> {
         return null;
     }
 
+    /** 校验存档版本、玩家数据及对应版本的地图结构，value 为原始存档对象。 */
     private isSaveData(value: unknown): value is RunSaveData {
         if (!value || typeof value !== 'object') {
             return false;
         }
         const data: Partial<RunSaveData> = value;
-        return (data.version === 1 || data.version === 2)
+        return (data.version === 1 || data.version === 2 || data.version === 3)
             && (data.state === GameFlowState.RouteSelect || data.state === GameFlowState.Event)
             && typeof data.currentDay === 'number' && data.currentDay >= 1
             && typeof data.currentRealmId === 'number'
@@ -188,6 +181,9 @@ export class SaveBll extends CCBusiness<Save> {
             && (data.version === 1 || data.realmLevels.every((level) => {
                 return level.eventDetailIds?.length === level.eventIds.length;
             }))
+            && (data.version !== 3 || data.realmLevels.every((level) => {
+                return this.isMapLevel(level, data.state ?? GameFlowState.RouteSelect);
+            }))
             && data.realmLevels.some((level) => {
                 return level.realmId === data.currentRealmId
                     && (data.state !== GameFlowState.Event || !!level.eventIds[level.currentEventIndex]);
@@ -210,6 +206,7 @@ export class SaveBll extends CCBusiness<Save> {
         });
     }
 
+    /** 校验新旧存档共用的事件数组和世界进度字段，value 为原始世界记录。 */
     private isRealmLevel(value: unknown): value is RealmLevelState {
         if (!value || typeof value !== 'object') {
             return false;
@@ -231,6 +228,76 @@ export class SaveBll extends CCBusiness<Save> {
                 && level.eventDetailIds.every((id: unknown) => {
                     return typeof id === 'number';
                 })));
+    }
+
+    /** 校验节点字段和事件类型，value 为反序列化得到的未知节点。 */
+    private isMapNode(value: unknown): value is MapNodeData {
+        if (!value || typeof value !== 'object') {
+            return false;
+        }
+        const node: Partial<MapNodeData> = value;
+        return typeof node.id === 'number' && Number.isSafeInteger(node.id) && node.id > 0
+            && typeof node.column === 'number' && Number.isSafeInteger(node.column) && node.column >= 0
+            && typeof node.lane === 'number' && Number.isFinite(node.lane) && node.lane >= 0 && node.lane <= 8
+            && typeof node.offsetY === 'number' && Number.isFinite(node.offsetY) && Math.abs(node.offsetY) <= 0.15
+            && (node.type === MapNodeType.Fight || node.type === MapNodeType.Shop || node.type === MapNodeType.Elite)
+            && node.eventId === (node.type === MapNodeType.Shop ? EventTypeEnum.SHOP : EventTypeEnum.FIGHT)
+            && typeof node.detailId === 'number' && Number.isSafeInteger(node.detailId) && node.detailId > 0
+            && Array.isArray(node.nextNodeIds) && this.isIdList(node.nextNodeIds);
+    }
+
+    /** 校验地图拓扑、已走路线与流程状态，拒绝断链、重复节点及重复结算存档。 */
+    private isMapLevel(level: RealmLevelState, state: GameFlowState) {
+        const nodes = level.mapNodes;
+        const visited = level.visitedNodeIds;
+        if (!Array.isArray(nodes) || !nodes.length || nodes.length > 1000
+            || !nodes.every((node: unknown) => {
+                return this.isMapNode(node);
+            }) || !Array.isArray(visited) || !this.isIdList(visited)
+            || new Set(visited).size !== visited.length || nodes.length !== level.eventIds.length) {
+            return false;
+        }
+        const byId = new Map(nodes.map((node) => {
+            return [node.id, node];
+        }));
+        const finalColumn = Math.max(...nodes.map((node) => {
+            return node.column;
+        }));
+        const finalNodes = nodes.filter((node) => {
+            return node.column === finalColumn;
+        });
+        if (finalColumn < 1 || finalNodes.length !== 1 || byId.size !== nodes.length) {
+            return false;
+        }
+        const validNodes = nodes.every((node, index) => {
+            const terminal = node.column === finalColumn;
+            return node.id === index + 1 && node.eventId === level.eventIds[index]
+                && node.detailId === level.eventDetailIds?.[index]
+                && (terminal ? node.type === MapNodeType.Elite && !node.nextNodeIds.length
+                    : node.type !== MapNodeType.Elite && node.nextNodeIds.length > 0)
+                && new Set(node.nextNodeIds).size === node.nextNodeIds.length
+                && node.nextNodeIds.every((id) => {
+                    return byId.get(id)?.column === node.column + 1;
+                }) && (node.column === 0 || nodes.some((parent) => {
+                    return parent.nextNodeIds.includes(node.id);
+                }));
+        });
+        if (!validNodes || !visited.every((id, index) => {
+            return index === 0 ? byId.get(id)?.column === 0
+                : !!byId.get(visited[index - 1])?.nextNodeIds.includes(id);
+        })) {
+            return false;
+        }
+        const lastId = visited[visited.length - 1] ?? 0;
+        if (level.completed !== (lastId === finalNodes[0].id)) {
+            return false;
+        }
+        if (state === GameFlowState.RouteSelect) {
+            return level.currentNodeId === lastId;
+        }
+        const current = byId.get(level.currentNodeId ?? 0);
+        return !!current && !visited.includes(current.id) && level.currentEventIndex === current.id - 1
+            && (lastId ? !!byId.get(lastId)?.nextNodeIds.includes(current.id) : current.column === 0);
     }
 
 }
