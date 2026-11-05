@@ -9,6 +9,7 @@ interface ShopEventConfigData {
     cardCounts: any[];
     name: string;
     des: string;
+    mapPathName: number;
 }
 
 /**
@@ -169,5 +170,10 @@ export class BaseShopEvent {
     /** 事件描述 */
     get des(): string {
         return this.data.des;
+    }
+
+    /** 地图节点图标路径 */
+    get mapPathName(): number {
+        return this.data.mapPathName;
     }
 }
