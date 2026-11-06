@@ -15,6 +15,7 @@ interface EnemyConfigData {
     cardRewad: any[];
     resourceReward: any[];
     mechanics: Record<string, any>;
+    mapPathName: number;
 }
 
 /**
@@ -205,5 +206,10 @@ export class BaseEnemy {
     /** 特殊状态与阶段机制（无召唤）：初始状态、一次性阶段、事件触发 */
     get mechanics(): Record<string, any> {
         return this.data.mechanics;
+    }
+
+    /** 地图节点图标路径 */
+    get mapPathName(): number {
+        return this.data.mapPathName;
     }
 }

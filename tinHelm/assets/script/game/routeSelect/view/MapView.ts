@@ -6,8 +6,8 @@ import { CCView } from 'db://oops-framework/module/common/CCView';
 import { RouteSelect } from '../RouteSelect';
 import { MapNodeData, MapNodeType } from '../model/RouteSelectModel';
 import { GraphPathData, GraphView } from '../../ui/GraphView';
-import { TableUniversal } from '../../common/table/TableUniversal';
-import { UniversalNameEnum } from '../../common/table/UniversalNameEnum';
+import { TableEnemy } from '../../common/table/TableEnemy';
+import { TableShopEvent } from '../../common/table/TableShopEvent';
 import { smc } from '../../common/SingletonModuleComp';
 
 const { ccclass, property } = _decorator;
@@ -52,7 +52,14 @@ export class MapView extends CCView<RouteSelect> {
         const columns = Math.max(1, ...nodes.map((node) => {
             return node.column + 1;
         }));
-        const lanes = Math.max(2, Math.min(9, TableUniversal.getConfigById(UniversalNameEnum.MAP_LANE_COUNT)?.value ?? 7));
+        const columnLanes = Array.from({ length: columns }, (_, column) => {
+            return Math.max(1, ...nodes.filter((node) => {
+                return node.column === column;
+            }).map((node) => {
+                return node.lane + 1;
+            }));
+        });
+        const lanes = Math.max(2, ...columnLanes);
         const height = this.getNode('mapViewport')!.getComponent(UITransform)!.height;
         const laneHeight = Math.min(78, (height - 100) / (lanes - 1));
         this.iconScale = Math.min(1, laneHeight / 82);
@@ -62,7 +69,7 @@ export class MapView extends CCView<RouteSelect> {
         this.getNode('mapLines')!.getComponent(UITransform)!.setContentSize(width, height);
         for (const data of nodes) {
             const position = new Vec2(this.padding + data.column * this.columnWidth,
-                ((lanes - 1) / 2 - data.lane + data.offsetY) * laneHeight);
+                ((columnLanes[data.column] - 1) / 2 - data.lane + data.offsetY) * laneHeight);
             this.positions.set(data.id, position);
             const node = instantiate(this.nodePrefab);
             node.parent = nodeLayer;
@@ -72,14 +79,13 @@ export class MapView extends CCView<RouteSelect> {
             node.on(Node.EventType.TOUCH_END, (event: EventTouch) => {
                 event.propagationStopped = true;
                 if (!this.dragging && this.ent.selectMapNode(data.id)) {
-                    this.ent.closeRouteSelectView();
                     this.ent.closeMapView();
                 }
             }, this);
         }
         this.drawConnections(nodes);
-        const visitedCount = level?.visitedNodeIds?.length ?? 0;
-        this.getNode('lbtMapTitle')!.getComponent(Label)!.string = `${this.ent.getCurrentRealm()?.name ?? '探索地图'} · 路线选择`;
+        const visitedCount = level?.visitedNodeIds.length ?? 0;
+        this.getNode('lbtMapTitle')!.getComponent(Label)!.string = `${this.ent.RouteSelectBll.getCurrentMap()?.name ?? '探索地图'} · 路线选择`;
         this.getNode('lbtMapProgress')!.getComponent(Label)!.string = level?.completed
             ? '精英已击败 · 本次探索完成' : `已完成 ${visitedCount} / ${columns} 关 · 选择金色节点继续前进`;
         this.getNode('lbtMapHint')!.getComponent(Label)!.string = '向左滑动查看后续路线    普通战斗 / 商店 / 终点精英';
@@ -106,7 +112,7 @@ export class MapView extends CCView<RouteSelect> {
 
     private updateMapNode(node: Node, data: MapNodeData) {
         const level = this.ent.RouteSelectBll.getCurrentRealmLevel();
-        const visited = level?.visitedNodeIds?.includes(data.id) ?? false;
+        const visited = level?.visitedNodeIds.includes(data.id) ?? false;
         const available = this.ent.canSelectMapNode(data.id);
         const current = level?.currentNodeId === data.id;
         const color = current ? new Color(150, 91, 22) : available ? new Color(174, 111, 25)
@@ -116,6 +122,16 @@ export class MapView extends CCView<RouteSelect> {
         node.getChildByName('eliteEnemy')!.active = data.type === MapNodeType.Elite;
         for (const name of ['enemy', 'shop', 'eliteEnemy']) {
             node.getChildByName(name)!.getComponent(Sprite)!.color = new Color(255, 255, 255, available || current || visited ? 255 : 130);
+        }
+        const iconName = data.type === MapNodeType.Shop ? 'shop' : data.type === MapNodeType.Elite ? 'eliteEnemy' : 'enemy';
+        const pathName: unknown = data.type === MapNodeType.Shop
+            ? TableShopEvent.getConfigById(data.detailId)?.mapPathName
+            : TableEnemy.getConfigById(data.detailId)?.mapPathName;
+        if (typeof pathName === 'string' && pathName.trim()) {
+            const path = pathName.trim();
+            const spritePath = path.includes('/') ? path : `gui/map/texture/${path}`;
+            this.setSprite(node.getChildByName(iconName)!.getComponent(Sprite)!,
+                spritePath.endsWith('/spriteFrame') ? spritePath : `${spritePath}/spriteFrame`);
         }
         const ring = node.getChildByName('nodeRing')!.getComponent(Graphics)!;
         ring.clear();

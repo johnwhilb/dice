@@ -3,7 +3,6 @@ import { CCEntity } from 'db://oops-framework/module/common/CCEntity';
 import { GameFlowModel } from './model/GameFlowModel';
 import { GameFlowBll } from './bll/GameFlowBll';
 import { RoleSelectView } from '../player/view/RoleSelectView';
-import { RouteSelectView } from '../routeSelect/view/RouteSelectView';
 
 
 @ecs.register('GameFlow')
@@ -11,7 +10,6 @@ export class GameFlow extends CCEntity {
     GameFlowModel!: GameFlowModel
     GameFlowBll!: GameFlowBll
     RoleSelectView!: RoleSelectView
-    RouteSelectView!: RouteSelectView
 
     static create(): GameFlow {
         return ecs.getEntity<GameFlow>(GameFlow);

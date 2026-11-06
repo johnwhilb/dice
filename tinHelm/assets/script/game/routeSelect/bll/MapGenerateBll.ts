@@ -1,135 +1,139 @@
-import { TableRelmEvent } from '../../common/table/TableRelmEvent';
-import { TableUniversal } from '../../common/table/TableUniversal';
-import { UniversalNameEnum } from '../../common/table/UniversalNameEnum';
-import { TableFightEvent } from '../../common/table/TableFightEvent';
+﻿import { TableMap } from '../../common/table/TableMap';
+import { TableMapFloor } from '../../common/table/TableMapFloor';
+import { MapMapEnum } from '../../common/table/MapMapEnum';
 import { TableEnemy } from '../../common/table/TableEnemy';
 import { TableShopEvent } from '../../common/table/TableShopEvent';
 import { EventTypeEnum } from '../../common/table/EventTypeEnum';
 import { MapNodeData, MapNodeType, RealmLevelState } from '../model/RouteSelectModel';
 
+interface MapEventChoice {
+    eventId: EventTypeEnum;
+    weight: number;
+    pool: number[];
+}
+
 export class MapGenerateBll {
-    /** 按世界配置生成分层无交叉路径；random 为可替换的随机源，便于验证地图。 */
-    static generate(realmId: number, random = Math.random): RealmLevelState {
-        const floors = TableRelmEvent.getAllConfig().filter((item) => {
-            return item.realms === realmId;
-        }).sort((left, right) => {
-            return left.level - right.level;
-        });
-        const columns = Math.max(2, Math.min(floors.length,
-            this.getValue(UniversalNameEnum.REALM_EVENT_NUM, 10)));
-        const lanes = Math.max(2, Math.min(9, this.getValue(UniversalNameEnum.MAP_LANE_COUNT, 7)));
-        const pathCount = Math.max(2, Math.min(20, this.getValue(UniversalNameEnum.MAP_PATH_COUNT, 7)));
-        const shopChance = Math.max(0, Math.min(100, this.getValue(UniversalNameEnum.MAP_SHOP_CHANCE, 15))) / 100;
+    /** 按 mapId 的列配置生成地图；realmId 保留世界进度归属，random 为随机源。 */
+    static generate(realmId: number, random = Math.random, mapId = MapMapEnum.Yharnam): RealmLevelState {
+        const map = TableMap.getConfigById(mapId);
+        const floorIds: unknown[] = map?.mapFloorPool ?? [];
+        if (!floorIds.length) {
+            throw new Error(`地图 ${mapId} 缺少地图层配置`);
+        }
         const nodes: MapNodeData[] = [];
-        const starts: number[] = [];
-        for (const pathIndex of Array.from({ length: pathCount }).keys()) {
-            let lane = Math.floor(random() * lanes);
-            if (pathIndex === 1 && lane === starts[0]) {
-                lane = (lane + 1) % lanes;
-            }
-            starts.push(lane);
-            let previous = this.getOrCreateNode(nodes, 0, lane, random);
-            for (const columnIndex of Array.from({ length: columns - 2 }).keys()) {
-                const column = columnIndex + 1;
-                const candidates = [lane - 1, lane, lane + 1].filter((nextLane) => {
-                    return nextLane >= 0 && nextLane < lanes && !nodes.some((source) => {
-                        return source.column === column - 1 && source.nextNodeIds.some((id) => {
-                            const target = nodes.find((node) => {
-                                return node.id === id;
-                            })!;
-                            return (source.lane - lane) * (target.lane - nextLane) < 0;
-                        });
-                    });
-                });
-                lane = candidates[Math.floor(random() * candidates.length)] ?? lane;
-                const next = this.getOrCreateNode(nodes, column, lane, random);
-                if (!previous.nextNodeIds.includes(next.id)) {
-                    previous.nextNodeIds.push(next.id);
-                }
-                previous = next;
-            }
-            const end = this.getOrCreateNode(nodes, columns - 1, (lanes - 1) / 2, random);
-            if (!previous.nextNodeIds.includes(end.id)) {
-                previous.nextNodeIds.push(end.id);
-            }
-        }
-        const ordered = [...nodes].sort((left, right) => {
-            return left.column - right.column || left.lane - right.lane;
-        });
-        for (const node of ordered) {
-            const floor = floors[node.column];
+        const columns = floorIds.map((id, column) => {
+            const floor = typeof id === 'number' ? TableMapFloor.getConfigById(id) : null;
             if (!floor) {
-                throw new Error(`世界 ${realmId} 缺少第 ${node.column + 1} 列地图配置`);
+                throw new Error(`地图 ${mapId} 第 ${column + 1} 列配置不存在`);
             }
-            const elite = node.column === columns - 1;
-            const parents = nodes.filter((parent) => {
-                return parent.nextNodeIds.includes(node.id);
-            });
-            const shopPool = (floor.shopPool ?? []).filter((id): id is number => {
-                return typeof id === 'number' && !!TableShopEvent.getConfigById(id);
-            });
-            const shop = !elite && node.column > 0 && shopPool.length > 0
-                && floor.maybeEvent.includes(EventTypeEnum.SHOP)
-                && !parents.some((parent) => {
-                    return parent.type === MapNodeType.Shop || parent.nextNodeIds.some((id) => {
-                        return nodes.find((sibling) => {
-                            return sibling.id === id;
-                        })?.type === MapNodeType.Shop;
-                    });
-                }) && random() < shopChance;
-            const fightPool = (elite ? floor.elitePool : floor.fightPool).filter((id): id is number => {
-                return typeof id === 'number'
-                    && !!TableEnemy.getConfigById(TableFightEvent.getConfigById(id)?.enemyId ?? 0);
-            });
-            const pool = shop ? shopPool : fightPool;
-            if (!pool.length) {
-                throw new Error(`世界 ${realmId} 第 ${node.column + 1} 列缺少有效的${elite ? '精英' : '普通战斗'}事件池`);
+            const minimum = floor.minCount ?? 1;
+            const maximum = floor.maxCount ?? minimum;
+            if (!Number.isSafeInteger(minimum) || !Number.isSafeInteger(maximum)
+                || minimum < 1 || maximum < minimum) {
+                throw new Error(`地图层 ${floor.id} 节点数量范围无效`);
             }
-            node.type = elite ? MapNodeType.Elite : shop ? MapNodeType.Shop : MapNodeType.Fight;
-            node.eventId = shop ? EventTypeEnum.SHOP : EventTypeEnum.FIGHT;
-            node.detailId = pool[Math.floor(random() * pool.length)];
-        }
+            const count = minimum + Math.floor(random() * (maximum - minimum + 1));
+            const choices = this.getEventChoices(floor);
+            const totalWeight = choices.reduce((total, choice) => {
+                return total + choice.weight;
+            }, 0);
+            if (!totalWeight) {
+                throw new Error(`地图层 ${floor.id} 缺少有效的事件权重或事件池`);
+            }
+            return Array.from({ length: count }, (_, lane) => {
+                let weight = random() * totalWeight;
+                const choice = choices.find((item) => {
+                    weight -= item.weight;
+                    return weight < 0;
+                }) ?? choices[choices.length - 1];
+                const shop = choice.eventId === EventTypeEnum.SHOP;
+                const node: MapNodeData = {
+                    id: nodes.length + 1,
+                    column,
+                    lane,
+                    offsetY: (random() - 0.5) * 0.08,
+                    type: shop ? MapNodeType.Shop : column === floorIds.length - 1 ? MapNodeType.Elite : MapNodeType.Fight,
+                    eventId: choice.eventId,
+                    detailId: choice.pool[Math.floor(random() * choice.pool.length)],
+                    nextNodeIds: [],
+                };
+                nodes.push(node);
+                return node;
+            });
+        });
+        columns.forEach((column, index) => {
+            const next = columns[index + 1];
+            if (next) {
+                this.connectColumns(column, next, random);
+            }
+        });
         return {
             realmId,
-            eventIds: nodes.map((node) => {
-                return node.eventId;
-            }),
-            eventDetailIds: nodes.map((node) => {
-                return node.detailId;
-            }),
-            currentEventIndex: 0,
+            mapId,
             completed: false,
-            visited: true,
             mapNodes: nodes,
             currentNodeId: 0,
             visitedNodeIds: [],
         };
     }
 
-    /** 复用同一网格点，随机偏移只影响展示，不改变路径拓扑。 */
-    private static getOrCreateNode(nodes: MapNodeData[], column: number, lane: number, random: () => number) {
-        const existing = nodes.find((node) => {
-            return node.column === column && node.lane === lane;
-        });
-        if (existing) {
-            return existing;
+    /** 从 floor 的事件权重及有效详情池读取可生成的战斗和商店。 */
+    private static getEventChoices(floor: TableMapFloor) {
+        const entries: unknown[] = floor.maybeEvent ?? [];
+        const choices: MapEventChoice[] = [];
+        for (const entry of entries) {
+            if (!Array.isArray(entry)) {
+                continue;
+            }
+            const [eventId, weight] = entry;
+            if ((eventId !== EventTypeEnum.FIGHT && eventId !== EventTypeEnum.SHOP)
+                || typeof weight !== 'number' || !Number.isFinite(weight) || weight <= 0) {
+                continue;
+            }
+            const rawPool: unknown[] = (eventId === EventTypeEnum.SHOP ? floor.shopPool : floor.enemyPool) ?? [];
+            const pool = rawPool.filter((id): id is number => {
+                if (typeof id !== 'number') {
+                    return false;
+                }
+                return eventId === EventTypeEnum.SHOP ? !!TableShopEvent.getConfigById(id)
+                    : !!TableEnemy.getConfigById(id);
+            });
+            if (!pool.length) {
+                throw new Error(`地图层 ${floor.id} 的事件 ${eventId} 缺少有效详情`);
+            }
+            choices.push({ eventId, weight, pool });
         }
-        const node: MapNodeData = {
-            id: nodes.length + 1,
-            column,
-            lane,
-            offsetY: (random() - 0.5) * 0.08,
-            type: MapNodeType.Fight,
-            eventId: EventTypeEnum.FIGHT,
-            detailId: 0,
-            nextNodeIds: [],
-        };
-        nodes.push(node);
-        return node;
+        return choices;
     }
 
-    /** 读取生成参数，id 为通用配置枚举，fallback 为缺省整数。 */
-    private static getValue(id: UniversalNameEnum, fallback: number) {
-        return Math.floor(TableUniversal.getConfigById(id)?.value ?? fallback);
+    /** 为相邻列 source、target 建立全节点可达的无交叉连线，random 控制额外分支。 */
+    private static connectColumns(source: MapNodeData[], target: MapNodeData[], random: () => number) {
+        const steps = Math.max(source.length, target.length);
+        for (const step of Array.from({ length: steps }).keys()) {
+            const ratio = steps === 1 ? 0 : step / (steps - 1);
+            const start = source[Math.round(ratio * (source.length - 1))];
+            const end = target[Math.round(ratio * (target.length - 1))];
+            if (!start.nextNodeIds.includes(end.id)) {
+                start.nextNodeIds.push(end.id);
+            }
+        }
+        for (const start of source) {
+            for (const end of target) {
+                if (start.nextNodeIds.includes(end.id) || random() >= 0.35) {
+                    continue;
+                }
+                const crossing = source.some((other) => {
+                    return other.nextNodeIds.some((id) => {
+                        const destination = target.find((node) => {
+                            return node.id === id;
+                        })!;
+                        return (other.lane - start.lane) * (destination.lane - end.lane) < 0;
+                    });
+                });
+                if (!crossing) {
+                    start.nextNodeIds.push(end.id);
+                }
+            }
+        }
     }
 }
