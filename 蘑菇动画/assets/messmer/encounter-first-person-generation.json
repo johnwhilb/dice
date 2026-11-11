@@ -1,0 +1,11 @@
+{
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "identity_ref": "master-still-sheet.png",
+  "style_ref": "../../style-ref.jpg",
+  "output": "encounter-first-person.png",
+  "intent": "玩家第一人称低机位遭遇梅瑟莫，敌意对峙",
+  "review": "Hostile direct gaze, foreground spear and two living shoulder serpents visible; helmet tip touches upper edge."
+}

@@ -1,0 +1,21 @@
+{
+  "scene_mode": "baked_scene_mode",
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "image": "background.png",
+  "composition_guide": "composition-guide.png",
+  "requested_layout": {
+    "left_frame": [0, 0.15],
+    "open_combat": [0.15, 0.85],
+    "right_frame": [0.85, 1],
+    "horizon_y": 0.48,
+    "background_height": 0.48,
+    "ground_height": 0.52
+  },
+  "camera": "centered first-person, eye-level, slight downward angle, no roll",
+  "characters": [],
+  "review": "Empty center and continuous floor visually reviewed. Generated wall-floor junction is approximate, not a numerically certified horizon. No UI or enemy included.",
+  "status": "needs-visual-review"
+}

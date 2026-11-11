@@ -1,0 +1,12 @@
+{
+  "character": "Revenant / 复仇者",
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "output": "dynamic-idle.png",
+  "identity_ref": "master-still-sheet.png",
+  "style_ref": "../../style-ref.jpg",
+  "kind": "single_static_dynamic_idle_pose",
+  "transparent_background": true
+}

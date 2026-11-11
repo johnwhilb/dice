@@ -1,0 +1,16 @@
+{
+  "name": "梅瑟莫战斗场地：惩罚房间，卡通改编",
+  "scene_mode": "baked_scene_mode",
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "image": "background-style-ref.png",
+  "style_ref": "F:/COCOSproject/dice/蘑菇动画/style-ref.jpg",
+  "environment_reference": "official-reference.jpg",
+  "source_url": "https://media.fromsoftware.jp/eldenring/resources/images/movieandimages/screenshot/4k/50.jpg",
+  "characters": [],
+  "requested_layout": {"left_frame": 0.15, "open_center": 0.7, "right_frame": 0.15, "horizon_y": 0.48, "ground_height": 0.52},
+  "review": "Official chamber motifs adapted to cartoon style with drapery, candles and stonework; clear center and bottom center. Layout remains visually approximate; not a literal reconstruction or pixel-certified horizon.",
+  "status": "needs-visual-review"
+}

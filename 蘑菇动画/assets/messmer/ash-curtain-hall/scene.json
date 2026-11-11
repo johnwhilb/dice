@@ -1,0 +1,13 @@
+{
+  "name": "烬幕谒见厅",
+  "scene_mode": "baked_scene_mode",
+  "aspect_ratio": "16:9",
+  "regions_normalized": {"left_frame": [0,0,0.15,1], "combat": [0.15,0,0.85,1], "right_frame": [0.85,0,1,1], "background": [0,0,1,0.48], "ground": [0,0.48,1,1]},
+  "camera": {"view": "centered first-person", "height": "eye-level", "pitch": "slightly downward", "roll": 0, "horizon_y": 0.48},
+  "actors": [],
+  "art_source": "host_image",
+  "route": "image_gen",
+  "style_reference": "F:/COCOSproject/dice/蘑菇动画/style-ref.jpg",
+  "status": "needs-visual-review",
+  "pipeline_note": "Python launcher and python executable unavailable. Used native host image tool with actual style reference attachment. No API keys or provider config present."
+}

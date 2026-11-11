@@ -1,0 +1,10 @@
+{
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "output": "background-style-ref.png",
+  "style_ref": "F:/COCOSproject/dice/蘑菇动画/style-ref.jpg",
+  "review": "Bold black contours, simplified shapes and cel-style color blocks; no enemies or UI, open center. Requested 48% wall-ground boundary remains approximate after refinement.",
+  "status": "needs-visual-review"
+}

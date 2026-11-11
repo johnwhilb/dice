@@ -1,0 +1,15 @@
+{
+  "name": "梅瑟莫专属：烬幕谒见厅",
+  "scene_mode": "baked_scene_mode",
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "image": "background.png",
+  "theme_reference": "../../messmer/master-still-sheet.png",
+  "layout": {"left_frame": 0.15, "open_center": 0.7, "right_frame": 0.15, "horizon_y": 0.48, "ground_height": 0.52},
+  "camera": "centered first-person, eye-level, slight downward angle, no roll",
+  "characters": [],
+  "review": "New basalt, bronze serpent and crimson drapery scene; center and bottom center clear; wall-floor seam visually near 48%, not pixel-certified.",
+  "status": "needs-visual-review"
+}

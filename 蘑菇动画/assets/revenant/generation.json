@@ -1,0 +1,15 @@
+{
+  "character": "Revenant / 复仇者",
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "output": "master-still-sheet.png",
+  "identity_reference": "official-reference.jpg",
+  "identity_source": "https://en.bandainamcoent.eu/elden-ring/elden-ring-nightreign/characters/revenant",
+  "style_ref": "../../style-ref.jpg",
+  "layout_ref": "../../master-still-template.jpg",
+  "kind": "character_reference_sheet",
+  "animation_master": false,
+  "review": "Three full-body views, six detail panels, lyre, expressions, scale illustration and vignette present."
+}

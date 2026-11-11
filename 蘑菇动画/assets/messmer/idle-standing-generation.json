@@ -1,0 +1,11 @@
+{
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "identity_ref": "master-still-sheet.png",
+  "style_ref": "../../style-ref.jpg",
+  "output": "idle-standing.png",
+  "intent": "自然待机站姿、透明背景、游戏内展示立绘",
+  "review": "Complete standing figure and upright spear visible, relaxed free hand, two shoulder snakes; spear tip has a narrow upper margin."
+}

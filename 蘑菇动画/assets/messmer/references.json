@@ -1,0 +1,12 @@
+{
+  "character": "Messmer the Impaler / 梅瑟莫",
+  "identity_ref": {
+    "path": "F:/COCOSproject/dice/蘑菇动画/assets/messmer/master-still-sheet.png",
+    "what": "用户指定的梅瑟莫身份参考设定图",
+    "copy": "匹配角色外观、配色、服装、武器和蛇的设计；姿势与构图按当次要求调整"
+  },
+  "style_ref": {
+    "path": "F:/COCOSproject/dice/蘑菇动画/style-ref.jpg",
+    "what": "项目默认画风参考"
+  }
+}

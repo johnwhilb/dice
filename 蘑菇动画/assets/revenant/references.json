@@ -1,0 +1,11 @@
+{
+  "character": "Revenant / 复仇者",
+  "identity_ref": {
+    "path": "F:/COCOSproject/dice/蘑菇动画/assets/revenant/master-still-sheet.png",
+    "what": "用户指定的复仇者身份参考设定图"
+  },
+  "style_ref": {
+    "path": "F:/COCOSproject/dice/蘑菇动画/style-ref.jpg",
+    "what": "项目默认画风参考"
+  }
+}

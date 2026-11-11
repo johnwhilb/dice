@@ -1,0 +1,12 @@
+{
+  "art_source": "host_image",
+  "route": "image_gen",
+  "identity_ref": "master-still-sheet.png",
+  "style_ref": "../../style-ref.jpg",
+  "output": "battle-ready-front.png",
+  "size": [1326, 1768],
+  "aspect_ratio": "3:4",
+  "background": "native_alpha",
+  "pose": "front-facing hostile battle ready",
+  "processing": "Original generated 1086x1448 RGBA placed unscaled at (120,160) on transparent 1326x1768 canvas to provide safe margins."
+}

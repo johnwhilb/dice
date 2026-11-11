@@ -1,0 +1,15 @@
+{
+  "character": "Wylder / 追踪者",
+  "art_source": "host_image",
+  "route": "image_gen",
+  "model": "not reported by tool",
+  "estimateUsd": null,
+  "output": "master-still-sheet.png",
+  "identity_reference": "official-reference.jpg",
+  "identity_source": "https://www.bandainamcoent.com/news/elden-ring-nightreign-gameplay-guide",
+  "style_ref": "../../style-ref.jpg",
+  "layout_ref": "../../master-still-template.jpg",
+  "kind": "character_reference_sheet",
+  "animation_master": false,
+  "review": "Three full-body views, six details, greatsword and claw equipment, five helmet mood portraits, scale illustration and vignette present."
+}
