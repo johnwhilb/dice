@@ -1,0 +1,31 @@
+Design an original exclusive boss arena for Messmer the Impaler: "Chamber of the Veiled Serpent". A single finished 2D game environment background, no text, no border, no UI, no characters. Reference 1 is the BATTLE BACKGROUND STYLE reference: match clean bold dark contours, broad flat colors, restrained two-tone cel shadows, angular simplified architecture and sparse hand-drawn stone marks. Avoid painterly texture, photorealism, complex rendering and excessive detail. Reference 2 is Messmer's master character sheet: translate his dark bronze armor, winged snake crown, crimson drapes, slender spear and coiling serpent shapes into environmental architecture ONLY. Do not draw Messmer or living snakes.
+
+Art direction: a majestic secluded sanctum inside a shadow fortress. At the extreme left and right, tall dark bronze winged-serpent carved buttresses and pointed spear-tip finials frame the view, with a few small amber ritual flames and wine-red banners. Across the upper background, a layered gallery of weathered recessed arches and monumental dark hanging curtains creates architectural depth. Some side arches reveal a smoky dim inner cloister. Central distant architecture is visible and meaningful but subdued: a broad shallow recessed sanctuary with muted low-relief serpent interlace and sweeping shadow shapes; no central glowing door or bright throne. Rich environmental scenery can exist behind the enemy; control value, contrast and edge weight to keep it subordinate. Palette: charcoal, smoky warm stone, dark muted bronze, subdued deep crimson on the edges. Avoid a large red background mass behind the red-haired red-cloaked boss. Standing area: a broad weathered ceremonial stone arena, with a subtle broken circular bronze inlay and sparse soot marks, all flush with the surface. The inlay is quiet, not a bright focal symbol. No stairs, pits or obstacles in the standing space. Make this a coherent lived-in fortress sanctuary rather than a generic flat empty wall.
+
+COMPOSITION AND CAMERA — HIGHEST PRIORITY
+Create a complete panoramic battle background at 1750 × 750 pixels.
+Preserve the fixed framing and visual center. Exclude characters and UI;
+the enemy will be composited separately.
+
+HORIZONTAL LAYOUT: left 15% / center 70% / right 15%.
+Use the outer regions for balanced environmental framing. Keep the central
+70% spacious and readable, without large foreground obstructions.
+
+VERTICAL LAYOUT: upper 48% environmental background / lower 52% enemy
+standing area. These describe visual functions, not a mandatory wall and floor.
+Use terrain, architecture, vegetation, distant scenery or other suitable elements.
+Keep the depth transition near Y 48%, connected naturally across the image.
+
+The background may contain rich scenery and recognizable objects. Control
+their contrast, brightness, edges and detail so they support the environment
+without competing with the enemy. Place stronger accents toward the sides;
+avoid bright focal points or dominant lines behind the expected silhouette.
+
+Reserve enemy placement at X 50%, spanning approximately X 30–70%, with
+ground contact at Y 88–92%. Provide a believable standing surface and clear
+silhouette space. Keep the bottom center unobstructed while continuing natural
+textures and environmental detail throughout; avoid an artificial blank zone.
+
+CAMERA: centered first-person view, eye level, looking down 4–6 degrees,
+zero roll and no horizontal offset. Use mild perspective depth, with horizon
+and central vanishing point at X 50%, Y 48%.

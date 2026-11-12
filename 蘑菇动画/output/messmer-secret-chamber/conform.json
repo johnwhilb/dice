@@ -1,0 +1,95 @@
+{
+  "schema": "generate2dmap.conform.v1",
+  "tool": {
+    "name": "conform_background",
+    "version": "0.5.0"
+  },
+  "mode": "ground-fit",
+  "source": {
+    "path": "exec-99538534-25d3-45ea-893a-579a4cd9da1c.png",
+    "sha256": "664e2632d967fc5080376cd5c5dfbd41bd6816006933f8d900da41fa42dec05c",
+    "bytes": 1767658,
+    "size": [
+      1914,
+      822
+    ],
+    "source_mode": "RGB"
+  },
+  "output": {
+    "path": "background.png",
+    "sha256": "c958ea6ed3a761bd7aa218f721f4ef80473b40febcb19d79921c798dc502f256",
+    "bytes": 1597430,
+    "size": [
+      1750,
+      750
+    ]
+  },
+  "transform": {
+    "scale": 0.982367758186398,
+    "src_rect": [
+      66.29487179487182,
+      58.53846153846155,
+      1847.7051282051282,
+      822.0
+    ],
+    "out_size": [
+      1750,
+      750
+    ],
+    "resampler": "lanczos",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "map": "out = (src - src_rect[0:2]) * scale",
+    "inverse": "src = out / scale + src_rect[0:2]",
+    "zoom_vs_cover": 1.0744296509535805,
+    "dropped_source_px": {
+      "left": 66.29487179487182,
+      "top": 58.53846153846155,
+      "right": 66.29487179487182,
+      "bottom": 0.0
+    },
+    "ground": {
+      "source_y": 425.0,
+      "output_y": 360.0
+    }
+  },
+  "subjects": [],
+  "warnings": [],
+  "qa": {
+    "status": "pass",
+    "method": "conform_background: transform arithmetic (ImageOps.fit crop for cover), subject boxes mapped through it and measured against the output and its cover crops.",
+    "notProven": [
+      "The ground row is the one given; the tool does not find the painted ground in the art.",
+      "Cropping keeps the art's own perspective; a zoomed ground-fit can lose content at the edges (see dropped_source_px).",
+      "Subject and crop checks measure boxes only; look at the output at gameplay scale."
+    ],
+    "checks": [
+      {
+        "id": "ground row on floor",
+        "status": "pass",
+        "value": 360.0,
+        "threshold": 360.0
+      }
+    ],
+    "inputs": [
+      {
+        "path": "exec-99538534-25d3-45ea-893a-579a4cd9da1c.png",
+        "sha256": "664e2632d967fc5080376cd5c5dfbd41bd6816006933f8d900da41fa42dec05c",
+        "bytes": 1767658
+      }
+    ],
+    "outputs": [
+      {
+        "path": "background.png",
+        "sha256": "c958ea6ed3a761bd7aa218f721f4ef80473b40febcb19d79921c798dc502f256",
+        "bytes": 1597430
+      }
+    ],
+    "tool": {
+      "name": "conform_background",
+      "version": "0.5.0"
+    }
+  }
+}

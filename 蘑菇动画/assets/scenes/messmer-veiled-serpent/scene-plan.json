@@ -1,0 +1,21 @@
+{
+  "scene_mode": "baked_scene_mode",
+  "title": "隐蛇帷幕密殿",
+  "viewport": [1750, 750],
+  "logical_resolution": [1750, 750],
+  "world_extent": [1750, 750],
+  "origin": "top-left",
+  "camera": {"center": [0.5, 0.48], "down_angle_degrees": 5, "roll": 0, "zoom": 1},
+  "enemy_reservation": {"horizontal_span": [0.3, 0.7], "ground_anchor": [0.5, 0.9], "width_px": 700, "footprint": "reserved only; actor not included"},
+  "horizontal_regions": [0.15, 0.7, 0.15],
+  "vertical_regions": [0.48, 0.52],
+  "landmarks": ["winged-serpent buttresses", "veiled recessed sanctuary", "subtle bronze arena inlay"],
+  "routes": [], "interactions": [], "exits": [],
+  "render_order": ["background plate", "future enemy sprite", "future combat effects"],
+  "art_source": "host_image",
+  "route": "Codex image_gen",
+  "model": "tool-managed; not exposed",
+  "estimateUsd": null,
+  "references": ["../messmer-dark-chamber/background-style-ref.png", "../../messmer/master-still-sheet.png"],
+  "stage_status": "needs-visual-review"
+}

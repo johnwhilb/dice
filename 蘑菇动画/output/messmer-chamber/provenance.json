@@ -1,0 +1,27 @@
+{
+  "art_source": "host_image",
+  "route": "Codex built-in image_gen",
+  "model": "not exposed by host tool",
+  "estimateUsd": null,
+  "sourceSize": [
+    1915,
+    821
+  ],
+  "finalSize": [
+    1750,
+    750
+  ],
+  "references": [
+    "../../assets/messmer/master-still-sheet.png",
+    "../../style-ref.jpg",
+    "composition-guide.png"
+  ],
+  "transform": "final/conform.json",
+  "sha256": "01e7cdd11cb0c9048359b7ac4e642df4235811f4908e0dce74a427ad63bfb8d8",
+  "visualReview": {
+    "actorsPainted": false,
+    "centralGroundOpen": true,
+    "note": "Soft wall-to-floor transition; painted horizon is approximate, not pixel-exact at 48%. Side framing is visually approximate to 15/70/15."
+  },
+  "capabilityReport": "doctor.json; environment capability warnings do not describe the delivered image"
+}

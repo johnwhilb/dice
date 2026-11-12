@@ -1,0 +1,359 @@
+{
+  "schema": "generate2dmap.stage_qa.v1",
+  "status": "needs-visual-review",
+  "method": "validate_stage: stage.v1 structure and cross-field rules; even-odd point-in-polygon tests of each slot and approach point plus 8 footprint-ellipse samples against ground polygons, walk-protected regions and ripple polygons; pixel-centre rasters for effect overlaps; a greedy grid-search layout solver per aspect (cover/contain projection, UI panels, scale ladder, foot-y draw order).",
+  "notProven": [
+    "Geometry is checked against the stage's own polygons; the tool does not see whether the painted plate really has dry, open ground there. Look at stage-overlay.png and the layout renders.",
+    "Actor boxes are rectangles of the given height, aspect and foot anchor, not real silhouettes; the UI panels are the chosen profile, not the game's own HUD unless --ui gives it.",
+    "Layouts are solved at reference viewports (720 px high, 390 px wide in portrait) with the stage's fit and objectPosition; other projections, safe-area insets and depth-dependent actor scale are not modelled.",
+    "A solved layout is one valid answer from a greedy search; the game's own layout code must still place actors on ground (run it, or compare with the solved feet)."
+  ],
+  "checks": [
+    {
+      "id": "ground polygons are simple",
+      "status": "pass",
+      "value": null,
+      "threshold": null
+    },
+    {
+      "id": "slots stand on ground",
+      "status": "pass",
+      "value": null,
+      "threshold": {
+        "footRadius": 0.01,
+        "ySquash": 0.58
+      }
+    },
+    {
+      "id": "slots avoid walk-protected regions",
+      "status": "pass",
+      "value": null,
+      "threshold": {
+        "footRadius": 0.01,
+        "ySquash": 0.58
+      }
+    },
+    {
+      "id": "slots stay off water",
+      "status": "pass",
+      "value": null,
+      "threshold": {
+        "footRadius": 0.01,
+        "ySquash": 0.58
+      }
+    },
+    {
+      "id": "slots inside playableBand",
+      "status": "pass",
+      "value": null,
+      "threshold": [
+        0.5,
+        0.98
+      ]
+    },
+    {
+      "id": "approach points are standable",
+      "status": "skipped",
+      "value": "no approachPoints",
+      "threshold": null
+    },
+    {
+      "id": "slot footprints do not overlap",
+      "status": "pass",
+      "value": null,
+      "threshold": {
+        "footprintPx": [
+          35.0,
+          20.3
+        ]
+      }
+    },
+    {
+      "id": "effects avoid motion-protected regions",
+      "status": "pass",
+      "value": null,
+      "threshold": null
+    },
+    {
+      "id": "water stays off ground polygons",
+      "status": "pass",
+      "value": null,
+      "threshold": "split the ground polygon around the water: a runtime that tests only groundPolygons would let actors stand in it (validate_stage also tests ripple polygons)"
+    },
+    {
+      "id": "bakedContent declared",
+      "status": "pass",
+      "value": {
+        "painted": []
+      },
+      "threshold": null
+    },
+    {
+      "id": "plate matches sourceSize",
+      "status": "pass",
+      "value": [
+        1750,
+        750
+      ],
+      "threshold": [
+        1750,
+        750
+      ]
+    },
+    {
+      "id": "layout 7:3 party-vs-enemies",
+      "status": "skipped",
+      "value": {
+        "aspect": "7:3",
+        "ratio": 2.3333,
+        "formation": "party-vs-enemies",
+        "viewport": [
+          1680,
+          720
+        ],
+        "inReviewedRange": true,
+        "placed": 0,
+        "unplaced": [],
+        "minScale": null,
+        "drawOrder": [],
+        "errors": []
+      },
+      "threshold": {
+        "reviewedAspectRange": [
+          2.3333,
+          2.3333
+        ],
+        "warnBelowScale": 0.7
+      }
+    },
+    {
+      "id": "layout 7:3 party-vs-boss",
+      "status": "pass",
+      "value": {
+        "aspect": "7:3",
+        "ratio": 2.3333,
+        "formation": "party-vs-boss",
+        "viewport": [
+          1680,
+          720
+        ],
+        "inReviewedRange": true,
+        "placed": 1,
+        "unplaced": [],
+        "minScale": 1.0,
+        "drawOrder": [
+          "B"
+        ],
+        "errors": []
+      },
+      "threshold": {
+        "reviewedAspectRange": [
+          2.3333,
+          2.3333
+        ],
+        "warnBelowScale": 0.7
+      }
+    },
+    {
+      "id": "layout solves at both ends of reviewedAspectRange",
+      "status": "pass",
+      "value": [
+        {
+          "ratio": 2.3333,
+          "formation": "party-vs-enemies",
+          "viewport": [
+            1680,
+            720
+          ],
+          "unplaced": []
+        },
+        {
+          "ratio": 2.3333,
+          "formation": "party-vs-boss",
+          "viewport": [
+            1680,
+            720
+          ],
+          "unplaced": []
+        }
+      ],
+      "threshold": [
+        2.3333,
+        2.3333
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "path": "../stage.json",
+      "sha256": "dabbba8a1cb665956b4c69285203368f54146d120a8f13b683f97eeff976339b",
+      "bytes": 1141
+    },
+    {
+      "path": "../messmer-chamber-1750x750.png",
+      "sha256": "01e7cdd11cb0c9048359b7ac4e642df4235811f4908e0dce74a427ad63bfb8d8",
+      "bytes": 1534722
+    }
+  ],
+  "outputs": [
+    {
+      "path": "stage-overlay.png",
+      "sha256": "e70bb72096a37b885bebc64a559a1d916cf2f1127371095bfa8373bd1c78aa65",
+      "bytes": 1491947
+    },
+    {
+      "path": "layout-7x3.png",
+      "sha256": "c48bbfa43beda502617d9c1b7d417ceec8f5ed598c6af5dd0b420be3fcebf45b",
+      "bytes": 1425379
+    },
+    {
+      "path": "layout-7x3-boss.png",
+      "sha256": "2b51a3fdb677098259c01552bddc93ef7aa18cc21a53add7a6e9bb3440e02c6e",
+      "bytes": 1412029
+    }
+  ],
+  "tool": {
+    "name": "validate_stage",
+    "version": "0.5.0"
+  },
+  "stage": {
+    "sourceSize": [
+      1750,
+      750
+    ],
+    "fit": "contain",
+    "reviewedAspectRange": [
+      2.3333333333333335,
+      2.3333333333333335
+    ],
+    "objectPosition": [
+      0.5,
+      0.5
+    ],
+    "slots": 1
+  },
+  "settings": {
+    "footRadius": 0.01,
+    "ySquash": 0.58,
+    "minScale": 0.5,
+    "actors": {
+      "hero": {
+        "height": 0.2,
+        "aspect": 1.0,
+        "anchor": [
+          0.5,
+          0.96
+        ]
+      },
+      "enemy": {
+        "height": 0.18,
+        "aspect": 1.0,
+        "anchor": [
+          0.5,
+          0.96
+        ]
+      },
+      "boss": {
+        "height": 0.75,
+        "aspect": 1.0,
+        "anchor": [
+          0.5,
+          0.96
+        ]
+      }
+    },
+    "ui": "none",
+    "minActorPx": 38
+  },
+  "layouts": [
+    {
+      "aspect": "7:3",
+      "ratio": 2.333,
+      "formation": "party-vs-enemies",
+      "render": "layout-7x3.png",
+      "viewport": [
+        1680,
+        720
+      ],
+      "fit": "contain",
+      "scale": 0.96,
+      "offset": [
+        0.0,
+        0.0
+      ],
+      "visibleUv": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "ui": [],
+      "actors": [],
+      "drawOrder": [],
+      "overlaps": [],
+      "errors": []
+    },
+    {
+      "aspect": "7:3",
+      "ratio": 2.333,
+      "formation": "party-vs-boss",
+      "render": "layout-7x3-boss.png",
+      "viewport": [
+        1680,
+        720
+      ],
+      "fit": "contain",
+      "scale": 0.96,
+      "offset": [
+        0.0,
+        0.0
+      ],
+      "visibleUv": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "ui": [],
+      "actors": [
+        {
+          "id": "B",
+          "role": "boss",
+          "slot": [
+            0.5,
+            0.9
+          ],
+          "desired": [
+            840.0,
+            648.0
+          ],
+          "foot": [
+            840.0,
+            648.0
+          ],
+          "footUv": [
+            0.5,
+            0.9
+          ],
+          "box": [
+            570.0,
+            129.6,
+            1110.0,
+            669.6
+          ],
+          "sizePx": 540.0,
+          "scale": 1.0,
+          "placed": true,
+          "grounded": true,
+          "movedPx": 0.0
+        }
+      ],
+      "drawOrder": [
+        "B"
+      ],
+      "overlaps": [],
+      "errors": []
+    }
+  ],
+  "warnings": []
+}

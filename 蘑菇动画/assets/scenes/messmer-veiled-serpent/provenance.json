@@ -1,0 +1,29 @@
+{
+  "art_source": "host_image",
+  "route": "Codex image_gen",
+  "model": "tool-managed; not exposed",
+  "estimateUsd": null,
+  "original": {
+    "path": "original.png",
+    "size": [
+      1915,
+      821
+    ],
+    "sha256": "38250a87eb676bef06bd78146e21c5c4b251737ebfc7512d98b4e51d6a377f37"
+  },
+  "final": {
+    "path": "final/background.png",
+    "size": [
+      1750,
+      750
+    ],
+    "sha256": "d286c46fe9465258da1744d53324c7bf2084d3678fa15ae4235fc080fccbe3a8"
+  },
+  "checks": {
+    "exact_resolution": true
+  },
+  "stage_status": "needs-visual-review",
+  "limits": [
+    "Composition percentages and perspective are visual targets, not a geometric proof."
+  ]
+}
