@@ -1,0 +1,67 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: snake-vs:vert
+      frag: snake-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        shapeParams: { value: [30, 27, 9, 0.75] }
+}%
+
+CCProgram snake-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+  out vec2 uv0;
+  out vec4 color;
+
+  vec4 vert () {
+    vec4 position = vec4(a_position, 1.0);
+    #if USE_LOCAL
+      position = cc_matWorld * position;
+    #endif
+    uv0 = a_texCoord;
+    color = a_color;
+    return cc_matViewProj * position;
+  }
+}%
+
+CCProgram snake-fs %{
+  precision highp float;
+  in vec2 uv0;
+  in vec4 color;
+
+  uniform SnakeShape {
+    vec4 shapeParams;
+  };
+
+  vec4 frag () {
+    vec2 point = (uv0 - vec2(0.5)) * shapeParams.x;
+    float radius = min(shapeParams.z, shapeParams.y * 0.5);
+    vec2 corner = abs(point) - vec2(shapeParams.y * 0.5 - radius);
+    float distanceToEdge = length(max(corner, vec2(0.0)))
+      + min(max(corner.x, corner.y), 0.0) - radius;
+    float coverage = 1.0 - smoothstep(-shapeParams.w, shapeParams.w, distanceToEdge);
+    #if SHADOW_PASS
+      return vec4(vec3(0.1), color.a * coverage * 0.5);
+    #else
+      return vec4(color.rgb, color.a * coverage);
+    #endif
+  }
+}%

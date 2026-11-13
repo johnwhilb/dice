@@ -1,0 +1,23 @@
+{
+  "__type__": "cc.Material",
+  "_name": "SnakeShadow",
+  "_objFlags": 0,
+  "__editorExtras__": {},
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "98810af9-2a71-49cd-a6a7-b90bfc5a5e7a",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": 0,
+  "_defines": [
+    {
+      "SHADOW_PASS": true
+    }
+  ],
+  "_states": [
+    {}
+  ],
+  "_props": [
+    {}
+  ]
+}

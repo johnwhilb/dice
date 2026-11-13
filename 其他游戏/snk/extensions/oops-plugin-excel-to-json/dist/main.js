@@ -1,0 +1,47 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.methods = exports.config = exports.unload = exports.load = void 0;
+const ExcelToJson_1 = require("./ExcelToJson");
+const ClimbEditorServer_1 = require("./ClimbEditorServer");
+/**
+ * @en Hooks triggered after extension loading is complete
+ * @zh 扩展加载完成后触发的钩子
+ */
+function load() {
+    (0, ClimbEditorServer_1.startClimbEditorServer)(() => {
+        return Editor.Profile.getProject('oops-plugin-excel-to-json');
+    }, () => {
+        return exports.methods.excelToJson();
+    });
+}
+exports.load = load;
+/**
+ * @en Hooks triggered after extension uninstallation is complete
+ * @zh 扩展卸载完成后触发的钩子
+ */
+function unload() {
+    (0, ClimbEditorServer_1.stopClimbEditorServer)();
+}
+exports.unload = unload;
+/**
+ * @en
+ * @zh 为扩展的主进程的注册方法
+ */
+exports.methods = {
+    async excelToJson() {
+        exports.config = await Editor.Profile.getProject("oops-plugin-excel-to-json");
+        if (exports.config.PathExcel == null) {
+            console.warn("项目->项目设置->Excel To Json->PathExcel 配置路径");
+            return;
+        }
+        if (exports.config.PathJsonClient == null) {
+            console.warn("项目->项目设置->Excel To Json->PathJsonClient 配置路径");
+            return;
+        }
+        if (exports.config.PathTsClient == null) {
+            console.warn("项目->项目设置->Excel To Json->PathTsClient 配置路径");
+            return;
+        }
+        await (0, ExcelToJson_1.run)();
+    }
+};

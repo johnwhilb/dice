@@ -1,0 +1,12 @@
+{
+  "ver": "1.0.0",
+  "importer": "*",
+  "imported": true,
+  "uuid": "cec7dd85-57e5-493d-be15-ce4c1ba3efcf",
+  "files": [
+    ".json",
+    ".lua"
+  ],
+  "subMetas": {},
+  "userData": {}
+}
