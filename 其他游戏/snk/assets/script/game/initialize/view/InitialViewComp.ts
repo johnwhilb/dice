@@ -1,42 +1,46 @@
-import type { Color } from 'cc';
-import { _decorator, color, Label, tween } from 'cc';
-import { oops } from 'db://oops-framework/core/Oops';
-import { JsonUtil } from 'db://oops-framework/core/utils/JsonUtil';
-import { ecs } from 'db://oops-framework/libs/ecs/ECS';
-import { CCView } from 'db://oops-framework/module/common/CCView';
-import { CommonStorageConfig } from '../../common/config/GameStorageConfig';
-import type { Initialize } from '../Initialize';
-import { LoadingViewComp } from './LoadingViewComp';
+import type { Color } from "cc";
+import { _decorator, color, Label, tween } from "cc";
+import { oops } from "db://oops-framework/core/Oops";
+import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
+import { ecs } from "db://oops-framework/libs/ecs/ECS";
+import { CCView } from "db://oops-framework/module/common/CCView";
+import { CommonStorageConfig } from "../../common/config/GameStorageConfig";
+import type { Initialize } from "../Initialize";
+import { LoadingViewComp } from "./LoadingViewComp";
 
-const { ccclass, property } = _decorator;
+const { ccclass } = _decorator;
 
 /** 游戏初始画面 - 避免加载框架通用资源与自定义游戏资源过长时的过度画面 */
-@ccclass('InitialViewComp')
-@ecs.register('InitialView', false)
+@ccclass("InitialViewComp")
+@ecs.register("InitialView", false)
 export class InitialViewComp extends CCView<Initialize> {
     /** 等待动画播放完成 */
-    private waitComplete = false;
+    private waitComplete: boolean = false;
     /** 资源加载完成 */
-    private loadComplete = false;
+    private loadComplete: boolean = false;
 
-    //#region 体验动画相关自定义逻辑
-    private startColor = color(255, 0, 0, 0);
-    private endColor = color(255, 0, 0, 255);
-    private duration = 0;
+    // #region 体验动画相关自定义逻辑
+    private startColor: Color = color(255, 0, 0, 0);
+    private endColor: Color = color(255, 0, 0, 255);
+    private duration: number = 0;
 
     // TODO: 这里实现的效果为动画播放完，初始化完成则进入第一个界面；如果动画未播放完，初始化完成时，会等动画播放完进入第一个界面（注：动画逻辑可自定义，注意资源要尽可能小，让玩家更快看到提示画面）
     private waitAnim(startColor: Color, endColor: Color, callback: Function) {
-        const title = this.getNode('title')!.getComponent(Label)!;
+        const title = this.getNode("title").getComponent(Label);
         tween(title)
-            .to(this.duration, { color: endColor }, {
-                onUpdate: (target, ratio) => {
-                    const r = startColor.r + (endColor.r - startColor.r) * ratio!;
-                    const g = startColor.g + (endColor.g - startColor.g) * ratio!;
-                    const b = startColor.b + (endColor.b - startColor.b) * ratio!;
-                    const a = startColor.a + (endColor.a - startColor.a) * ratio!;
-                    title.color.set(r, g, b, a);
+            .to(
+                this.duration,
+                { color: endColor },
+                {
+                    onUpdate: (target, ratio) => {
+                        const r = startColor.r + (endColor.r - startColor.r) * ratio;
+                        const g = startColor.g + (endColor.g - startColor.g) * ratio;
+                        const b = startColor.b + (endColor.b - startColor.b) * ratio;
+                        const a = startColor.a + (endColor.a - startColor.a) * ratio;
+                        title.color.set(r, g, b, a);
+                    },
                 }
-            })
+            )
             .call(() => {
                 callback();
             })
@@ -54,10 +58,9 @@ export class InitialViewComp extends CCView<Initialize> {
             }
         });
     }
-    //#endregion
+    // #endregion
 
     start() {
-        this.nodeTreeInfoLite();
         this.wait();
         this.loadRes();
     }
@@ -92,7 +95,7 @@ export class InitialViewComp extends CCView<Initialize> {
 
     /** 窗口打开失败事件 */
     private onOpenFailure() {
-        oops.gui.toast('网络异常请稍后重试');
+        oops.gui.toast("网络异常请稍后重试");
     }
 
     /** 加载 Zip 配置表 */
@@ -105,7 +108,7 @@ export class InitialViewComp extends CCView<Initialize> {
         return new Promise((resolve, reject) => {
             // 设置默认语言
             let lan = oops.storage.get(CommonStorageConfig.Language);
-            if (lan == null || lan == '') {
+            if (!lan) {
                 lan = oops.config.game.languageDefault;
                 oops.storage.set(CommonStorageConfig.Language, lan);
             }
@@ -118,7 +121,7 @@ export class InitialViewComp extends CCView<Initialize> {
     /** 加载公共资源（必备） */
     private loadCommon(): Promise<void> {
         return new Promise((resolve, reject) => {
-            oops.res.loadDir('common', resolve);
+            oops.res.loadDir("common", resolve);
         });
     }
 

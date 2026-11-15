@@ -1,6 +1,6 @@
-import { BaseShopRule } from './BaseShopRule';
-import { ShopRuleKeyEnum } from './ShopRuleKeyEnum';
-import { TableShopLevel } from './TableShopLevel';
+import { BaseShopRule } from "./BaseShopRule";
+import { ShopRuleKeyEnum } from "./ShopRuleKeyEnum";
+import { TableShopLevel } from "./TableShopLevel";
 
 /**
  * ShopRule 配置扩展类。

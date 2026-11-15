@@ -3,7 +3,8 @@
   "extends": "./temp/tsconfig.cocos.json",
   /* Add your custom configuration here. */
   "compilerOptions": {
-    "strict": true,
+    "strict": false,
+    "noUnusedLocals": true,
     "baseUrl": ".",
     "module": "ESNext",
     "moduleResolution": "node",

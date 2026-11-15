@@ -1,4 +1,4 @@
-import { BaseRoleClass } from './BaseRoleClass';
+import { BaseRoleClass } from "./BaseRoleClass";
 
 /**
  * RoleClass 配置扩展类。
@@ -8,8 +8,10 @@ import { BaseRoleClass } from './BaseRoleClass';
  */
 export class TableRoleClass extends BaseRoleClass {
     getActivationCounts() {
-        return Array.from(new Set([this.activationCount1, this.activationCount2, this.activationCount3])).filter((count) => {
-            return count > 0;
-        });
+        return Array.from(new Set([this.activationCount1, this.activationCount2, this.activationCount3])).filter(
+            (count) => {
+                return count > 0;
+            }
+        );
     }
 }

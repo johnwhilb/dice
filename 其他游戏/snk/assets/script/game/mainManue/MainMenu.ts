@@ -1,17 +1,15 @@
-import { ecs } from 'db://oops-framework/libs/ecs/ECS';
-import { CCEntity } from 'db://oops-framework/module/common/CCEntity';
-import { MainMenuBll } from './bll/MainMenuBll';
-import { MainMenuView } from './view/MainMenuView';
-import { MainMenuOptionView } from './view/MainMenuOptionView';
-import { MainMenuModel } from './viewModel/MainMenuModel';
+import { ecs } from "db://oops-framework/libs/ecs/ECS";
+import { CCEntity } from "db://oops-framework/module/common/CCEntity";
+import { MainMenuBll } from "./bll/MainMenuBll";
+import { MainMenuView } from "./view/MainMenuView";
+import { MainMenuOptionView } from "./view/MainMenuOptionView";
+import { MainMenuModel } from "./viewModel/MainMenuModel";
 
-@ecs.register('MainMenu')
+@ecs.register("MainMenu")
 export class MainMenu extends CCEntity {
-
-    MainMenuView!: MainMenuView;
-    MainMenuOptionView!: MainMenuOptionView;
-    MainMenuModel!: MainMenuModel;
-
+    MainMenuView: MainMenuView;
+    MainMenuOptionView: MainMenuOptionView;
+    MainMenuModel: MainMenuModel;
 
     static create(): MainMenu {
         return ecs.getEntity<MainMenu>(MainMenu);
@@ -40,5 +38,4 @@ export class MainMenu extends CCEntity {
     continueGame() {
         return this.getBusiness<MainMenuBll>(MainMenuBll).continueGame();
     }
-
 }

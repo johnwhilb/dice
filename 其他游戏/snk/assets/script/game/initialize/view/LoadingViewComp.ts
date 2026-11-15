@@ -1,35 +1,34 @@
-import { _decorator } from 'cc';
-import { oops } from 'db://oops-framework/core/Oops';
-import { gui } from 'db://oops-framework/core/gui/Gui';
-import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
-import { ecs } from 'db://oops-framework/libs/ecs/ECS';
-import { CCView } from 'db://oops-framework/module/common/CCView';
-import { UIID } from '../../common/config/GameUIConfig';
-import type { Initialize } from '../Initialize';
-import { smc } from '../../common/SingletonModuleComp';
+import { _decorator } from "cc";
+import { oops } from "db://oops-framework/core/Oops";
+import { gui } from "db://oops-framework/core/gui/Gui";
+import { LayerType } from "db://oops-framework/core/gui/layer/LayerEnum";
+import { ecs } from "db://oops-framework/libs/ecs/ECS";
+import { CCView } from "db://oops-framework/module/common/CCView";
+import type { Initialize } from "../Initialize";
+import { smc } from "../../common/SingletonModuleComp";
 
-const { ccclass, property } = _decorator;
+const { ccclass } = _decorator;
 
 /** 游戏资源加载 */
-@ccclass('LoadingViewComp')
-@ecs.register('LoadingView', false)
-@gui.register('LoadingView', { layer: LayerType.UI, prefab: 'gui/loading/loading' })
+@ccclass("LoadingViewComp")
+@ecs.register("LoadingView", false)
+@gui.register("LoadingView", { layer: LayerType.UI, prefab: "gui/loading/loading" })
 export class LoadingViewComp extends CCView<Initialize> {
-    protected mvvm = true;
+    protected mvvm: boolean = true;
     protected data: any = {
         /** 加载资源当前进度 */
         finished: 0,
         /** 加载资源最大进度 */
         total: 0,
         /** 加载资源进度比例值 */
-        progress: '0',
+        progress: "0",
         /** 加载流程中提示文本 */
-        prompt: '',
+        prompt: "",
         /** 游戏版本号 */
-        version: '1.0.0',
+        version: "1.0.0",
     };
 
-    private progress = 0;
+    private progress: number = 0;
 
     start() {
         this.loadRes();
@@ -50,8 +49,8 @@ export class LoadingViewComp extends CCView<Initialize> {
     /** 加载初始游戏内容资源 */
     private loadGameRes() {
         // 加载初始游戏内容资源的多语言提示文本
-        this.data.prompt = oops.language.getLangByID('loading_load_game');
-        oops.res.loadDir('game', this.onProgressCallback.bind(this), this.onCompleteCallback.bind(this));
+        this.data.prompt = oops.language.getLangByID("loading_load_game");
+        oops.res.loadDir("game", this.onProgressCallback.bind(this), this.onCompleteCallback.bind(this));
     }
 
     /** 加载进度事件 */
@@ -73,10 +72,11 @@ export class LoadingViewComp extends CCView<Initialize> {
         this.data.progress = 100;
 
         // 获取用户信息的多语言提示文本
-        this.data.prompt = oops.language.getLangByID('loading_load_player');
+        this.data.prompt = oops.language.getLangByID("loading_load_player");
 
         this.onLoginSuccessGame();
     }
 
-    reset(): void { }
+    reset(): void {
+    }
 }

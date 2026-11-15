@@ -22,6 +22,17 @@ interface ShopRuleConfigData {
     lockCost: number;
     xpPurchaseCost: number;
     copiesPerUpgrade: number;
+    downgradeCost: number;
+    interestGoldStep: number;
+    interestCap: number;
+    merchantGoldStep: number;
+    merchantInterestCap: number;
+    autoXpRoundInterval: number;
+    itemXpCost: number;
+    itemLevel1Xp: number;
+    itemLevel2Xp: number;
+    itemSalePerLevel: number;
+    roundsPerLoop: number;
 }
 
 /**
@@ -247,5 +258,60 @@ export class BaseShopRule {
     /** ???????? */
     get copiesPerUpgrade(): number {
         return this.data.copiesPerUpgrade;
+    }
+
+    /** 降级费用 */
+    get downgradeCost(): number {
+        return this.data.downgradeCost;
+    }
+
+    /** 金币利息步长 */
+    get interestGoldStep(): number {
+        return this.data.interestGoldStep;
+    }
+
+    /** 利息上限 */
+    get interestCap(): number {
+        return this.data.interestCap;
+    }
+
+    /** 商人利息步长 */
+    get merchantGoldStep(): number {
+        return this.data.merchantGoldStep;
+    }
+
+    /** 商人利息上限 */
+    get merchantInterestCap(): number {
+        return this.data.merchantInterestCap;
+    }
+
+    /** 自动经验关卡间隔 */
+    get autoXpRoundInterval(): number {
+        return this.data.autoXpRoundInterval;
+    }
+
+    /** 道具经验费用 */
+    get itemXpCost(): number {
+        return this.data.itemXpCost;
+    }
+
+    /** 一级道具升级经验 */
+    get itemLevel1Xp(): number {
+        return this.data.itemLevel1Xp;
+    }
+
+    /** 二级道具升级经验 */
+    get itemLevel2Xp(): number {
+        return this.data.itemLevel2Xp;
+    }
+
+    /** 道具每级售价 */
+    get itemSalePerLevel(): number {
+        return this.data.itemSalePerLevel;
+    }
+
+    /** 关卡循环长度 */
+    get roundsPerLoop(): number {
+        return this.data.roundsPerLoop;
     }
 }

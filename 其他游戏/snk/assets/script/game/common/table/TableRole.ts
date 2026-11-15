@@ -1,9 +1,9 @@
-import { BaseRole } from './BaseRole';
-import { RoleLevelKeyEnum } from './RoleLevelKeyEnum';
-import { TableRoleClass } from './TableRoleClass';
-import { TableRoleLevel } from './TableRoleLevel';
+import { BaseRole } from "./BaseRole";
+import { RoleLevelKeyEnum } from "./RoleLevelKeyEnum";
+import { TableRoleClass } from "./TableRoleClass";
+import { TableRoleLevel } from "./TableRoleLevel";
 
-export interface RoleBaseStats {
+export interface IRoleBaseStats {
     hp: number;
     damage: number;
     defense: number;
@@ -28,21 +28,18 @@ export class TableRole extends BaseRole {
     }
 
     getClasses() {
-        return [this.classId1, this.classId2, this.classId3].filter((id) => {
-            return id > 0;
-        }).map((id) => {
-            return TableRoleClass.getConfigById(id);
-        }).filter((config): config is TableRoleClass => {
-            return !!config;
-        });
+        return [this.classId1, this.classId2, this.classId3]
+            .filter((id) => {
+                return id > 0;
+            })
+            .map((id) => {
+                return TableRoleClass.getConfigById(id);
+            });
     }
 
     getBaseStats(levelId: number = RoleLevelKeyEnum.Level1) {
         const level = TableRoleLevel.getConfigById(levelId);
-        if (!level) {
-            return null;
-        }
-        const stats: RoleBaseStats = {
+        const stats: IRoleBaseStats = {
             hp: level.hp,
             damage: level.damage,
             defense: level.defense,
@@ -50,7 +47,7 @@ export class TableRole extends BaseRole {
             attackSpeedMultiplier: level.attackSpeedMultiplier,
             cooldownMultiplier: 1,
             areaDamageMultiplier: level.areaDamageMultiplier,
-            areaSizeMultiplier: level.areaSizeMultiplier
+            areaSizeMultiplier: level.areaSizeMultiplier,
         };
         this.getClasses().forEach((roleClass) => {
             stats.hp *= roleClass.hpMultiplier;

@@ -1,4 +1,4 @@
-import { BaseShopLevel } from './BaseShopLevel';
+import { BaseShopLevel } from "./BaseShopLevel";
 
 /**
  * ShopLevel 配置扩展类。
@@ -10,7 +10,7 @@ export class TableShopLevel extends BaseShopLevel {
     static getConfigByLevel(level: number) {
         return this.getAllConfig<TableShopLevel>().find((config) => {
             return config.level === level;
-        }) || null;
+        });
     }
 
     getTierWeights() {

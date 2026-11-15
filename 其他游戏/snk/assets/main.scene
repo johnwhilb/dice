@@ -182,8 +182,8 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 600,
-      "y": 360.00000000000006,
+      "x": 667,
+      "y": 375,
       "z": 0
     },
     "_lrot": {
@@ -268,7 +268,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 360.00000000000006,
+    "_orthoHeight": 469.69580838323355,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -415,7 +415,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 599.9134314361463,
+      "width": 600,
       "height": 63
     },
     "_anchorPoint": {
@@ -448,7 +448,7 @@
     "_string": "游戏自定义初始自提示界面",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 57.70833333333333,
+    "_actualFontSize": 50,
     "_fontSize": 50,
     "_fontFamily": "Arial",
     "_lineHeight": 50,
@@ -529,8 +529,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 1200,
-      "height": 720.0000000000001
+      "width": 1334,
+      "height": 750
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -583,8 +583,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 1200,
-      "height": 720.0000000000001
+      "width": 1334,
+      "height": 750
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -659,7 +659,6 @@
     "__type__": "0eec0s4qrZF7onPlYBrD+y+",
     "_name": "",
     "_objFlags": 0,
-    "__editorExtras__": {},
     "node": {
       "__id__": 2
     },

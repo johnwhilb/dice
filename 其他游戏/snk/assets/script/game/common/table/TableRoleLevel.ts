@@ -1,4 +1,4 @@
-import { BaseRoleLevel } from './BaseRoleLevel';
+import { BaseRoleLevel } from "./BaseRoleLevel";
 
 /**
  * RoleLevel 配置扩展类。
@@ -10,6 +10,6 @@ export class TableRoleLevel extends BaseRoleLevel {
     static getConfigByLevel(level: number) {
         return this.getAllConfig<TableRoleLevel>().find((config) => {
             return config.level === level;
-        }) || null;
+        });
     }
 }

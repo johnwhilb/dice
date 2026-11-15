@@ -1,0 +1,13 @@
+node_modules/
+temp/
+library/
+build/
+dist/
+.creator/
+extensions/
+assets/SNKRX-master/
+assets/script/game/common/table/Base*.ts
+assets/script/game/common/table/*Enum.ts
+assets/script/game/common/table/Enum*.ts
+assets/script/game/ui/List.ts
+assets/script/game/ui/ListItem.ts

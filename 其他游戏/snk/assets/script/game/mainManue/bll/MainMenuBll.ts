@@ -1,22 +1,25 @@
-import { game, sys } from 'cc';
-import { oops } from 'db://oops-framework/core/Oops';
-import { CCBusiness } from 'db://oops-framework/module/common/CCBusiness';
-import { MainMenu } from '../MainMenu';
-import { Battle } from '../../battle/Battle';
-import { smc } from '../../common/SingletonModuleComp';
+import { game, sys } from "cc";
+import { oops } from "db://oops-framework/core/Oops";
+import { CCBusiness } from "db://oops-framework/module/common/CCBusiness";
+import { MainMenu } from "../MainMenu";
+import { Game } from "../../game/Game";
+import { smc } from "../../common/SingletonModuleComp";
 
 export class MainMenuBll extends CCBusiness<MainMenu> {
     /** 创建或复用本局实体，打开首轮商店。 */
     entryGame() {
-        if (!smc.battle) {
-            smc.battle = Battle.create();
+        if (!smc.game) {
+            smc.game = Game.create();
         }
-        smc.battle.openShop();
+        smc.game.openShop();
     }
 
-    /** 响应继续游戏入口，返回暂无存档的多语言提示键。 */
+    /** 恢复已保存的商店局，无效存档返回多语言提示键。 */
     continueGame() {
-        return 'main_menu_save_unavailable';
+        if (!smc.game) {
+            smc.game = Game.create();
+        }
+        smc.game.openShop(true);
     }
 
     /** 从框架音频管理器同步音乐、音效开关到主菜单数据。 */
@@ -32,9 +35,9 @@ export class MainMenuBll extends CCBusiness<MainMenu> {
             return;
         }
         const paths = this.ent.MainMenuModel.menuMusicPaths;
-        const path = paths[Math.floor(Math.random() * paths.length)] || paths[0];
+        const path = paths[Math.floor(Math.random() * paths.length)];
         if (path) {
-            oops.audio.playMusic(path, { bundle: 'bundle', loop: true });
+            oops.audio.playMusic(path, { bundle: "bundle", loop: true });
         }
     }
 
@@ -61,18 +64,18 @@ export class MainMenuBll extends CCBusiness<MainMenu> {
         oops.audio.save();
         if (sys.isNative) {
             game.end();
-            return '';
+            return "";
         }
-        return 'main_menu_quit_browser';
+        return "main_menu_quit_browser";
     }
 
     /** 打开原版游戏的音乐专辑页面。 */
     openSoundtrack() {
-        sys.openURL('https://kubbimusic.com/album/ember');
+        sys.openURL("https://kubbimusic.com/album/ember");
     }
 
     /** 打开原版游戏的社区页面。 */
     openCommunity() {
-        sys.openURL('https://discord.gg/4d6GWmChKY');
+        sys.openURL("https://discord.gg/4d6GWmChKY");
     }
 }

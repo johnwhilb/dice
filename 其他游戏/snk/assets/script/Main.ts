@@ -3,7 +3,7 @@ import { LogType } from 'db://oops-framework/core/common/log/Logger';
 import { oops } from 'db://oops-framework/core/Oops';
 import { Root } from 'db://oops-framework/core/Root';
 import { ecs } from 'db://oops-framework/libs/ecs/ECS';
-import { UIConfigData } from './game/common/config/GameUIConfig';
+import { uiConfigData } from './game/common/config/GameUIConfig';
 import { smc } from './game/common/SingletonModuleComp';
 import { Initialize } from './game/initialize/Initialize';
 import { MainMenu } from './game/mainManue/MainMenu';
@@ -26,7 +26,7 @@ export class Main extends Root {
     }
 
     protected initGui() {
-        oops.gui.init(UIConfigData);
+        oops.gui.init(uiConfigData);
     }
 
     protected run() {

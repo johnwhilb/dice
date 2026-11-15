@@ -1,5 +1,5 @@
-import { LayerType } from 'db://oops-framework/core/gui/layer/LayerEnum';
-import type { UIConfig } from 'db://oops-framework/core/gui/layer/UIConfig';
+import { LayerType } from "db://oops-framework/core/gui/layer/LayerEnum";
+import type { UIConfig } from "db://oops-framework/core/gui/layer/UIConfig";
 
 /**
  * 老版定义界面配置方式
@@ -19,6 +19,6 @@ export enum UIID {
 }
 
 /** 打开界面方式的配置数据 */
-export const UIConfigData: { [key: number]: UIConfig } = {
-    [UIID.DemoMain]: { layer: LayerType.UI, prefab: 'gui/demo/demo_main', destroy: false },
+export const uiConfigData: { [key: number]: UIConfig } = {
+    [UIID.DemoMain]: { layer: LayerType.UI, prefab: "gui/demo/demo_main", destroy: false },
 };
