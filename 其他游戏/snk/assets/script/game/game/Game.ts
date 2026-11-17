@@ -17,6 +17,12 @@ import { GoldFinger } from "../goldFinger/GoldFinger";
 import { GoldFingerBll } from "../goldFinger/bll/GoldFingerBll";
 import { Enemy } from "../enemy/Enemy";
 import { TableShopRule } from "../common/table/TableShopRule";
+import { Combat } from "../combat/Combat";
+import { Projectile } from "../projectile/Projectile";
+import { Buff } from "../buff/Buff";
+import { Summon } from "../summon/Summon";
+import { Effect } from "../effect/Effect";
+import { CombatBll } from "../combat/bll/CombatBll";
 
 @ecs.register("Game")
 export class Game extends CCEntity {
@@ -26,6 +32,11 @@ export class Game extends CCEntity {
     player: Player;
     goldFinger: GoldFinger;
     enemy: Enemy;
+    combat: Combat;
+    projectile: Projectile;
+    buff: Buff;
+    summon: Summon;
+    effect: Effect;
 
     static create() {
         return ecs.getEntity<Game>(Game);
@@ -35,6 +46,17 @@ export class Game extends CCEntity {
         this.add(GameModel);
         this.addBusinesss(GameBll);
         this.player = this.addChildSingleton(Player);
+        this.player.game = this;
+        this.combat = this.addChildSingleton(Combat);
+        this.combat.game = this;
+        this.projectile = this.addChildSingleton(Projectile);
+        this.projectile.game = this;
+        this.buff = this.addChildSingleton(Buff);
+        this.buff.game = this;
+        this.summon = this.addChildSingleton(Summon);
+        this.summon.game = this;
+        this.effect = this.addChildSingleton(Effect);
+        this.effect.game = this;
         this.enemy = this.addChildSingleton(Enemy);
         this.enemy.game = this;
         this.shop = this.addChildSingleton(Shop);
@@ -113,6 +135,7 @@ export class Game extends CCEntity {
                     this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Shop);
                     this.battle.removeUi(BattleView);
                     this.enemy.EnemyModel.reset();
+                    this.combat.getBusiness<CombatBll>(CombatBll).reset();
                 }
             },
             () => {

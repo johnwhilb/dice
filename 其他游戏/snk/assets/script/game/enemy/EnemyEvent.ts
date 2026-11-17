@@ -49,6 +49,11 @@ export interface IEnemyData extends IEnemySource {
     forceRemaining: number;
     forceX: number;
     forceY: number;
+    wallDamage: number;
+    wallSource: number;
+    deathResolved: boolean;
+    bonusGold: boolean;
+    doom: number;
 }
 
 /** 待生成敌人，at 为本场开始后的绝对秒数。 */

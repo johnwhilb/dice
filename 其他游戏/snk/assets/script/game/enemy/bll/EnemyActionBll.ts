@@ -8,6 +8,15 @@ import { PlayerBll } from "../../player/bll/PlayerBll";
 import type { IPlayerData } from "../../player/model/PlayerModel";
 import type { IEnemyData, IEnemySource } from "../EnemyEvent";
 import { EnemySpawnBll } from "./EnemySpawnBll";
+import { CombatBll } from "../../combat/bll/CombatBll";
+import { CombatCamp } from "../../combat/CombatEvent";
+import { BuffBll } from "../../buff/bll/BuffBll";
+import { BuffKind } from "../../buff/BuffEvent";
+import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
+import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
+import { PlayerPassiveBll } from "../../player/bll/PlayerPassiveBll";
+import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
+import { TableCombatRule } from "../../common/table/TableCombatRule";
 
 export class EnemyActionBll extends CCBusiness<Enemy> {
     /** 推进 delta 秒的移动、技能、碰撞和战场对象，width、height 为战场尺寸。 */
@@ -33,7 +42,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                     this.collidePlayers(enemy);
                 }
             });
-            this.updateObjects(delta, width, height);
+            this.updateObjects(delta);
         }
         model.enemies = model.enemies.filter((enemy) => {
             return !enemy.dead;
@@ -47,11 +56,27 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
     private updateEnemy(enemy: IEnemyData, target: IPlayerData, delta: number, width: number, height: number) {
         const rule = TableBattleRule.getCurrent();
         const config = enemy.config;
+        const buffs = this.ent.game.buff.getBusiness<BuffBll>(BuffBll);
+        const taunt = this.ent.game.buff.BuffModel.buffs.find((entry) => {
+            return entry.camp === CombatCamp.Enemy && entry.target === enemy.id && entry.kind === BuffKind.Taunt && entry.remaining > 0;
+        });
+        if (taunt) {
+            const summon = this.ent.game.summon.SummonModel.summons.find((entry) => {
+                return entry.id === taunt.power && !entry.dead;
+            });
+            if (summon) {
+                target = { ...target, pose: { x: summon.x, y: summon.y, angle: summon.angle } };
+            }
+        }
+        if (buffs.get(CombatCamp.Enemy, enemy.id, BuffKind.Stun)) {
+            return;
+        }
         enemy.boostRemaining = Math.max(0, enemy.boostRemaining - delta);
         if (config.selfDestructMax > 0) {
             enemy.life -= delta;
             if (enemy.life <= 0) {
                 this.die(enemy);
+                this.ent.game.player.getBusiness<PlayerActionBll>(PlayerActionBll).onEnemyDeath(enemy, -1, 0);
                 return;
             }
         }
@@ -74,7 +99,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                 }
             });
         }
-        if (enemy.skillTimer <= 0) {
+        if (enemy.skillTimer <= 0 && !buffs.get(CombatCamp.Enemy, enemy.id, BuffKind.Silence)) {
             this.useSkill(enemy, target);
         }
         let vx = 0;
@@ -141,8 +166,19 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
             vx += -Math.sin(angle) * wander * rule.wanderStrength * config.wanderFactor;
             vy += Math.cos(angle) * wander * rule.wanderStrength * config.wanderFactor;
         }
-        enemy.x = Math.max(-width / 2 + config.width / 2, Math.min(width / 2 - config.width / 2, enemy.x + vx * delta));
-        enemy.y = Math.max(-height / 2 + config.height / 2, Math.min(height / 2 - config.height / 2, enemy.y + vy * delta));
+        const stats = this.ent.game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll);
+        const slow = Math.min(1, buffs.get(CombatCamp.Enemy, enemy.id, BuffKind.Slow) + stats.item(ShopContentKeyEnum.ItemTemporalChains) + (buffs.get(CombatCamp.Enemy, enemy.id, BuffKind.Dot) ? stats.item(ShopContentKeyEnum.ItemDeceleration) : 0));
+        const nextX = enemy.x + vx * delta * (1 - slow);
+        const nextY = enemy.y + vy * delta * (1 - slow);
+        enemy.x = Math.max(-width / 2 + config.width / 2, Math.min(width / 2 - config.width / 2, nextX));
+        enemy.y = Math.max(-height / 2 + config.height / 2, Math.min(height / 2 - config.height / 2, nextY));
+        if (enemy.knockbackRemaining > 0 && (nextX !== enemy.x || nextY !== enemy.y) && enemy.wallSource >= 0) {
+            const source = enemy.wallSource;
+            enemy.wallSource = -1;
+            const player = this.ent.game.player.PlayerModel.players[source];
+            this.ent.game.combat.getBusiness<CombatBll>(CombatBll).hitEnemy(enemy, enemy.wallDamage, source, player.skill.id, false);
+            this.ent.game.player.getBusiness<PlayerPassiveBll>(PlayerPassiveBll).onWall(source, enemy);
+        }
         if (vx || vy) {
             enemy.angle = Math.atan2(vy, vx) * 180 / Math.PI;
         }
@@ -233,6 +269,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
         const target = candidates[Math.floor(Math.random() * candidates.length)];
         const config = TableEnemy.getConfigById<TableEnemy>(type);
         this.die(target);
+        this.ent.game.player.getBusiness<PlayerActionBll>(PlayerActionBll).onEnemyDeath(target, -1, 0);
         if (type === EnemyKeyEnum.BossSwarmer) {
             this.spawnCritters(target, config.spawnMin, config.spawnMax);
         } else if (enemy.config.id === EnemyKeyEnum.BossRandomizer) {
@@ -259,13 +296,17 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                 return;
             }
             contacts.add(index);
+            if (this.ent.game.buff.getBusiness<BuffBll>(BuffBll).get(CombatCamp.Player, index, BuffKind.Shield)) {
+                this.ent.game.combat.getBusiness<CombatBll>(CombatBll).push(enemy, Math.atan2(enemy.y - player.pose.y, enemy.x - player.pose.x), TableCombatRule.getCurrent().orbSpeed, index);
+                return;
+            }
             if (enemy.contacts.has(index)) {
                 return;
             }
             const charge = enemy.config.id === EnemyKeyEnum.Headbutter && enemy.chargeRemaining > 0 && enemy.chargeRemaining <= enemy.config.skillDuration;
             const damage = enemy.damage * (charge ? rule.chargeDamageBase + Math.floor(this.ent.EnemyModel.level / rule.chargeDamageLevelDivisor) : 1);
             const multiplier = rule.doubleContactRoles.includes(player.roleId) ? rule.doubleContactMultiplier : 1;
-            this.hit(enemy, player.stats.damage * multiplier);
+            this.ent.game.combat.getBusiness<CombatBll>(CombatBll).hitEnemy(enemy, player.stats.damage * multiplier, index, player.skill.id, false);
             this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).hit(index, damage);
             this.push(enemy, Math.atan2(enemy.y - player.pose.y, enemy.x - player.pose.x), this.randomRange(rule.knockbackMin, rule.knockbackMax), rule.knockbackDuration);
             enemy.chargeRemaining = 0;
@@ -275,11 +316,15 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
 
     /** 按伤害 damage 和防御公式扣减 enemy 血量，死亡仅结算一次。 */
     hit(enemy: IEnemyData, damage: number) {
+        this.ent.game.combat.getBusiness<CombatBll>(CombatBll).hitEnemy(enemy, damage);
+    }
+
+    /** 扣减已经过统一伤害结算的 damage，保留敌人自身死亡技能。 */
+    applyDamage(enemy: IEnemyData, damage: number) {
         if (enemy.dead) {
             return;
         }
-        const rule = TableBattleRule.getCurrent();
-        enemy.hp = Math.max(0, enemy.hp - damage * rule.defenseBase / (rule.defenseBase + enemy.config.defense));
+        enemy.hp = Math.max(0, enemy.hp - damage);
         if (enemy.hp > 0) {
             return;
         }
@@ -372,8 +417,8 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
         }
     }
 
-    /** 更新 delta 秒的弹丸、地雷和金币碰撞，宽高用于销毁越界弹丸。 */
-    private updateObjects(delta: number, width: number, height: number) {
+    /** 更新 delta 秒的地雷和金币，双方弹丸由 Projectile 模块推进。 */
+    private updateObjects(delta: number) {
         const model = this.ent.EnemyModel;
         const rule = TableBattleRule.getCurrent();
         const players = this.ent.game.player.PlayerModel.players;
@@ -400,36 +445,26 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                 }
                 return;
             }
-            if (object.kind === EnemyObjectKind.Projectile) {
-                const angle = object.angle * Math.PI / 180;
-                object.x += Math.cos(angle) * object.speed * delta;
-                object.y += Math.sin(angle) * object.speed * delta;
-                object.life -= delta;
-                object.dead = object.life <= 0 || Math.abs(object.x) > width / 2 || Math.abs(object.y) > height / 2;
-            }
-            players.forEach((player, index) => {
+            players.forEach((player) => {
                 if (player.hp <= 0 || object.dead) {
                     return;
                 }
                 const radius = object.kind === EnemyObjectKind.Gold ? rule.goldPickupRadius : (player.config.bodySize + object.height) / 2;
+                const distance = Math.hypot(player.pose.x - object.x, player.pose.y - object.y);
+                const magnetism = this.ent.game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll).item(ShopContentKeyEnum.ItemMagnetism);
+                if (object.kind === EnemyObjectKind.Gold && distance > radius && distance <= radius * (1 + magnetism)) {
+                    const step = Math.min(distance, TableCombatRule.getCurrent().orbSpeed * delta);
+                    object.x += (player.pose.x - object.x) / distance * step;
+                    object.y += (player.pose.y - object.y) / distance * step;
+                }
                 if (Math.hypot(player.pose.x - object.x, player.pose.y - object.y) <= radius) {
                     object.dead = true;
                     if (object.kind === EnemyObjectKind.Gold) {
                         model.pickedUpGold += rule.goldAmount;
-                    } else {
-                        this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).hit(index, object.damage);
+                        this.ent.game.player.getBusiness<PlayerActionBll>(PlayerActionBll).onGoldPickup(object.x, object.y);
                     }
                 }
             });
-            if (object.kind === EnemyObjectKind.Projectile && object.configId === EnemyKeyEnum.Shooter && !object.dead) {
-                const target = model.enemies.find((entry) => {
-                    return !entry.dead && entry.id !== object.sourceId && Math.hypot(entry.x - object.x, entry.y - object.y) <= (entry.config.height + object.height) / 2;
-                });
-                if (target) {
-                    object.dead = true;
-                    this.hit(target, object.damage * rule.shooterFriendlyFireMultiplier);
-                }
-            }
         });
     }
 

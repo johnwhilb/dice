@@ -1,4 +1,4 @@
-import { _decorator, EventTouch, instantiate, Label, Layout, Node, Prefab, UITransform, Vec3 } from "cc";
+import { _decorator, EventTouch, Graphics, instantiate, Label, Layout, Node, Prefab, UITransform, Vec3 } from "cc";
 import { CCView } from "db://oops-framework/module/common/CCView";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { gui } from "db://oops-framework/core/gui/Gui";
@@ -12,6 +12,8 @@ import type { IPlayerData } from "../../player/model/PlayerModel";
 import { BattleEvent, BattleState } from "../BattleEvent";
 import { EnemyEvent } from "../../enemy/EnemyEvent";
 import { EnemyView } from "../../enemy/view/EnemyView";
+import { EffectView } from "../../effect/view/EffectView";
+import { CombatEvent } from "../../combat/CombatEvent";
 
 const { ccclass, property } = _decorator;
 
@@ -29,6 +31,7 @@ export class BattleView extends CCView<Battle> {
     private enemies: EnemyView[] = [];
     private objects: EnemyView[] = [];
     private arenaTransform: UITransform;
+    private effects: EffectView;
 
     get model() {
         return this.ent.game.player.PlayerModel;
@@ -44,14 +47,26 @@ export class BattleView extends CCView<Battle> {
         this.on(PlayerEvent.UpdateHp, this.refreshPlayerHp, this);
         this.on(EnemyEvent.UpdateFrame, this.refreshEnemies, this);
         this.on(BattleEvent.UpdateState, this.refreshState, this);
+        this.on(CombatEvent.UpdateFrame, this.refreshEffects, this);
         const arena = this.getNode("arena");
         this.arenaTransform = arena.getComponent(UITransform);
+        const effects = new Node("combatEffects");
+        effects.layer = arena.layer;
+        effects.parent = arena;
+        effects.addComponent(UITransform).setContentSize(this.arenaTransform.contentSize);
+        effects.addComponent(Graphics);
+        this.effects = effects.addComponent(EffectView);
         this.business.setArenaSize(this.arenaTransform.width, this.arenaTransform.height);
         arena.on(Node.EventType.TOUCH_START, this.steer, this);
         arena.on(Node.EventType.TOUCH_MOVE, this.steer, this);
         this.refresh();
         this.refreshEnemies();
         this.refreshState();
+        this.refreshEffects();
+    }
+
+    private refreshEffects() {
+        this.effects.render(this.ent.game);
     }
 
     refresh() {
@@ -163,6 +178,12 @@ export class BattleView extends CCView<Battle> {
     }
 
     reset() {
+        this.off(PlayerEvent.UpdatePlayers, this.refresh, this);
+        this.off(PlayerEvent.UpdatePose, this.refreshPose, this);
+        this.off(PlayerEvent.UpdateHp, this.refreshPlayerHp, this);
+        this.off(EnemyEvent.UpdateFrame, this.refreshEnemies, this);
+        this.off(BattleEvent.UpdateState, this.refreshState, this);
+        this.off(CombatEvent.UpdateFrame, this.refreshEffects, this);
         this.bodies = [];
         this.enemies = [];
         this.objects = [];

@@ -6,6 +6,7 @@ import { PlayerBll } from "../../player/bll/PlayerBll";
 import { GamePhase } from "../../game/model/GameModel";
 import { EnemyBll } from "../../enemy/bll/EnemyBll";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
+import { CombatBll } from "../../combat/bll/CombatBll";
 
 export class BattleBll extends CCBusiness<Battle> {
     /** 将商店 team 交给 Player 模块建立战场快照，并请求打开战场。 */
@@ -14,6 +15,7 @@ export class BattleBll extends CCBusiness<Battle> {
             this.toast("shop_team_empty");
             return;
         }
+        this.ent.game.combat.getBusiness<CombatBll>(CombatBll).reset();
         this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).prepare(team);
         this.ent.BattleModel.reset();
         const shop = this.ent.game.shop.ShopModel;
@@ -24,6 +26,8 @@ export class BattleBll extends CCBusiness<Battle> {
         this.dispatchEvent(BattleEvent.UpdateState);
         if (openView) {
             this.dispatchEvent(BattleEvent.OpenBattle);
+        } else {
+            this.ent.game.combat.getBusiness<CombatBll>(CombatBll).refreshView();
         }
     }
 
@@ -70,11 +74,13 @@ export class BattleBll extends CCBusiness<Battle> {
                 }
             } else {
                 manager.update(delta, model.arenaWidth, model.arenaHeight);
+                this.ent.game.combat.getBusiness<CombatBll>(CombatBll).update(delta, model.arenaWidth, model.arenaHeight);
                 this.checkProgress();
             }
             remaining -= delta;
         }
         manager.refreshView();
+        this.ent.game.combat.getBusiness<CombatBll>(CombatBll).refreshView();
         this.dispatchEvent(BattleEvent.UpdateState);
     }
 

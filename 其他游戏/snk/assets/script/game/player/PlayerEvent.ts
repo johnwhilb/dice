@@ -21,3 +21,26 @@ export interface IPlayerPose {
     y: number;
     angle: number;
 }
+
+/** 延迟战斗指令类型。 */
+export enum PlayerActionKind {
+    /** 再次施放技能，禁止递归触发重复施法。 */
+    Repeat,
+    /** 延迟范围攻击。 */
+    Area,
+    /** 延迟弹丸。 */
+    Shot,
+    /** 延迟死亡到期。 */
+    Death,
+}
+
+/** 战斗内延迟指令，统一随战场重置，不使用异步定时器。 */
+export interface IPlayerAction {
+    source: number;
+    kind: PlayerActionKind;
+    remaining: number;
+    x: number;
+    y: number;
+    damage: number;
+    proc: boolean;
+}

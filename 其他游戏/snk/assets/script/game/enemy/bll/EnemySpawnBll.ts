@@ -5,6 +5,8 @@ import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
 import type { Enemy } from "../Enemy";
 import { EnemyObjectKind } from "../EnemyEvent";
 import type { IDistributedSpawn, IEnemyData, IEnemyObject, IEnemySource } from "../EnemyEvent";
+import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
+import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
 
 export class EnemySpawnBll extends CCBusiness<Enemy> {
     /** 按当前战场时间生成已到期的刷怪队列。 */
@@ -112,7 +114,8 @@ export class EnemySpawnBll extends CCBusiness<Enemy> {
         const ng = model.newGamePlus;
         const rule = TableBattleRule.getCurrent();
         const baseHp = config.boss ? stats.bossHp + ng * stats.bossHpStep : config.critter ? stats.critterHp : ng > 0 ? stats.ngHp + ng * stats.ngHpStep : stats.hp;
-        const maxHp = baseHp * config.hpMultiplier * (config.hpBaseMultiplier + config.hpLevelMultiplier * model.level + config.hpNgMultiplier * ng);
+        const intimidation = this.ent.game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll).item(ShopContentKeyEnum.ItemIntimidation);
+        const maxHp = baseHp * config.hpMultiplier * (config.hpBaseMultiplier + config.hpLevelMultiplier * model.level + config.hpNgMultiplier * ng) * (1 - intimidation);
         const damage = config.boss ? ng > 0 ? stats.bossNgDamage + ng * stats.bossNgDamageStep : stats.bossDamage : config.critter ? stats.critterDamage : ng > 0 ? stats.ngDamage + ng * stats.ngDamageStep : stats.damage;
         const speed = (config.boss ? ng > 0 ? stats.bossNgSpeed : stats.bossSpeed : config.critter ? stats.critterSpeed : stats.speed) * config.speedMultiplier * config.moveMultiplier * rule.scale;
         const enemy: IEnemyData = {
@@ -122,6 +125,7 @@ export class EnemySpawnBll extends CCBusiness<Enemy> {
             boostRemaining: 0, boostDuration: 0, chargeRemaining: 0, chargeX: 0, chargeY: 0,
             knockbackRemaining: 0, knockbackX: 0, knockbackY: 0, contacts: new Set<number>(), shooting: false,
             forceRemaining: 0, forceX: 0, forceY: 0,
+            wallDamage: 0, wallSource: -1, deathResolved: false, bonusGold: false, doom: 0,
         };
         model.enemies.push(enemy);
         return enemy;
@@ -134,7 +138,11 @@ export class EnemySpawnBll extends CCBusiness<Enemy> {
         const object: IEnemyObject = { id: model.nextId++, kind, configId: source.config.id, sourceId: source.id, x: source.x, y: source.y, angle: angle * 180 / Math.PI,
             width: kind === EnemyObjectKind.Projectile ? rule.projectileWidth : rule.projectileHeight,
             height: rule.projectileHeight, speed, damage, life, dead: false, delay };
-        model.objects.push(object);
+        if (kind === EnemyObjectKind.Projectile) {
+            this.ent.game.projectile.ProjectileModel.enemyProjectiles.push(object);
+        } else {
+            model.objects.push(object);
+        }
         return object;
     }
 

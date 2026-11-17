@@ -6,6 +6,11 @@ import { TableShopContent } from "../table/TableShopContent";
 import { TableEnemy } from "../table/TableEnemy";
 
 export class ColorConst {
+    static getCombatColor(roleId: number, opacity: number) {
+        const color = roleId > 0 ? this.getPlayerColor(roleId) : this.shopText.clone();
+        color.a = opacity;
+        return color;
+    }
     static getEnemyColor(configId: number) {
         return new Color(TableEnemy.getConfigById(configId).color);
     }
