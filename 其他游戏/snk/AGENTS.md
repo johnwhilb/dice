@@ -21,6 +21,7 @@
 - Cocos 已序列化的 `@ccclass` 名称不能随意修改；TypeScript 类名仍使用 `PascalCase`，两者允许不同，以保证旧 Prefab 和场景引用有效。
 
 ## 编码规范
+- 代码参考标准为shop模块的代码规范，为本项目的代码规范，编写代码前请先查看shop模块。
 - 判空优先使用真值特性，例如 `if (val)` 或 `!!val`。禁止写 `val !== null && val !== undefined`。
 - 控制节点 `active` 时必须形成 true/false 闭环，避免 List Item 复用导致状态残留。优先写 `node.active = index === currentIndex;`。
 - 禁止使用 `var`。
@@ -75,6 +76,7 @@
 
 ## 项目结构
 - dice\其他游戏\snk\assets\SNKRX-master  SNKRX项目代码（引擎 / 框架： LÖVE（Love2D）编程语言： Lua 游戏类型： 2D）
+- dice\其他游戏\snk\excel  项目excel表格，不要直接修改项目内的数据，所有数据要先修改excel表格，然后运行表格插件更新数据。
 
 
 

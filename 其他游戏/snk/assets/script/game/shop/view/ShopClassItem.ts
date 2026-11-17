@@ -2,7 +2,7 @@ import { smc } from "../../common/SingletonModuleComp";
 import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
-import { _decorator, Color, Layout, Sprite, instantiate } from "cc";
+import { _decorator, Color, Layout, Node, Sprite, instantiate } from "cc";
 import { TableRoleClass } from "../../common/table/TableRoleClass";
 import { TableShopContent } from "../../common/table/TableShopContent";
 import { ColorConst } from "../../common/config/ColorConst";
@@ -33,29 +33,46 @@ export class ShopClassItem extends GameComponent {
         this.data = data;
         const content = TableShopContent.getRoleClass(data.classId);
         const thresholds = TableRoleClass.getConfigById<TableRoleClass>(data.classId).getActivationCounts();
-        const maximum = Math.max(...thresholds);
         const color = new Color(content.color);
         const active = data.count >= thresholds[0];
         this.getNode("background").getComponent(Sprite).color = active ? color : ColorConst.shopPanel;
         const icon = this.getNode("icon").getComponent(Sprite);
         this.setSprite(this.getNode("icon"), ResPath.getClassSpriteItemIcon(content.id), "bundle");
         icon.color = active ? new Color(content.color) : ColorConst.shopTick;
-        this.updateProgressMarks(maximum, data.count, color);
+        this.updateProgressMarks(thresholds, data.count, color);
     }
 
-    private updateProgressMarks(maximum: number, count: number, color: Color) {
+    private updateProgressMarks(thresholds: number[], count: number, color: Color) {
         const box = this.getNode("tickBox");
-        const length = Math.max(box.children.length, maximum);
+        const length = Math.max(box.children.length, thresholds.length);
+        let previousCount = 0;
         for (let index = 0; index < length; index++) {
-            if (index < maximum && index >= box.children.length) {
+            if (index < thresholds.length && index >= box.children.length) {
                 const child = instantiate(box.children[0]);
                 child.parent = box;
             }
-            const node = box.children[index];
-            node.active = index < maximum;
-            node.getComponentInChildren(Sprite).color = index < count ? color : ColorConst.shopTick;
+            const column = box.children[index];
+            column.active = index < thresholds.length;
+            if (index < thresholds.length) {
+                this.updateColumnMarks(column, thresholds[index] - previousCount, count - previousCount, color);
+                previousCount = thresholds[index];
+            }
         }
         box.getComponent(Layout).updateLayout();
+    }
+
+    private updateColumnMarks(column: Node, maximum: number, count: number, color: Color) {
+        const length = Math.max(column.children.length, maximum);
+        for (let index = 0; index < length; index++) {
+            if (index < maximum && index >= column.children.length) {
+                const child = instantiate(column.children[0]);
+                child.parent = column;
+            }
+            const mark = column.children[index];
+            mark.active = index < maximum;
+            mark.getComponent(Sprite).color = index < count ? color : ColorConst.shopTick;
+        }
+        column.getComponent(Layout).updateLayout();
     }
 
     protected btnClass() {
