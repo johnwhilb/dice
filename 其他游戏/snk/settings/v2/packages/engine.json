@@ -143,13 +143,13 @@
             "_value": false
           },
           "tiled-map": {
-            "_value": false
+            "_value": true
           },
           "vendor-google": {
             "_value": false
           },
           "spine": {
-            "_value": false,
+            "_value": true,
             "_option": "spine-3.8"
           },
           "spine-3.8": {
@@ -165,7 +165,7 @@
             }
           },
           "dragon-bones": {
-            "_value": false
+            "_value": true
           },
           "marionette": {
             "_value": true
@@ -190,7 +190,9 @@
             "_value": false
           }
         },
-        "flags": {},
+        "flags": {
+          "LOAD_SPINE_MANUALLY": false
+        },
         "includeModules": [
           "2d",
           "affine-transform",
@@ -198,6 +200,7 @@
           "audio",
           "base",
           "custom-pipeline",
+          "dragon-bones",
           "gfx-webgl",
           "graphics",
           "intersection-2d",
@@ -209,6 +212,8 @@
           "profiler",
           "rich-text",
           "skeletal-animation",
+          "spine-3.8",
+          "tiled-map",
           "tween",
           "ui",
           "ui-skew",
