@@ -1,0 +1,137 @@
+import { oops } from "db://oops-framework/core/Oops";
+import { CCBusiness } from "db://oops-framework/module/common/CCBusiness";
+import { lang } from "../../common/Language";
+import { TableRole } from "../../common/table/TableRole";
+import { TableRoleLevel } from "../../common/table/TableRoleLevel";
+import { TableShopRule } from "../../common/table/TableShopRule";
+import { RoleLevelKeyEnum } from "../../common/table/RoleLevelKeyEnum";
+import { TableBattleStage } from "../../common/table/TableBattleStage";
+import { TableBattleRule } from "../../common/table/TableBattleRule";
+import { GamePhase } from "../../game/model/GameModel";
+import { PlayerBll } from "../../player/bll/PlayerBll";
+import type { IPlayerUnit } from "../../player/PlayerEvent";
+import { ShopBll } from "../../shop/bll/ShopBll";
+import { ShopEvent } from "../../shop/ShopEvent";
+import type { GoldFinger } from "../GoldFinger";
+import { GoldFingerEvent } from "../GoldFingerEvent";
+import { GoldFingerView } from "../view/GoldFingerView";
+
+export class GoldFingerBll extends CCBusiness<GoldFinger> {
+    /** 显示本局悬浮入口，首次显示时等待框架加载预制体，完成后通过事件刷新。 */
+    show() {
+        const model = this.ent.GoldFingerModel;
+        model.visible = true;
+        if (this.ent.has(GoldFingerView)) {
+            this.dispatchEvent(GoldFingerEvent.UpdatePanel);
+            return;
+        }
+        if (model.opening) {
+            return;
+        }
+        model.opening = true;
+        this.ent.addPrefab(GoldFingerView, oops.gui.guide, "gui/goldFinger/GoldFingerView").then(() => {
+            model.opening = false;
+            this.dispatchEvent(GoldFingerEvent.UpdatePanel);
+        }, () => {
+            model.opening = false;
+            oops.gui.toast(lang("shop_load_failed"));
+        });
+    }
+
+    /** 返回主菜单时隐藏悬浮入口并关闭面板，保留拖动位置。 */
+    hide() {
+        const model = this.ent.GoldFingerModel;
+        model.visible = false;
+        model.panelOpen = false;
+        this.dispatchEvent(GoldFingerEvent.UpdatePanel);
+    }
+
+    /** 切换金手指面板状态，open 为是否打开。 */
+    setPanelOpen(open: boolean) {
+        this.ent.GoldFingerModel.panelOpen = open;
+        this.ent.GoldFingerModel.message = "";
+        this.dispatchEvent(GoldFingerEvent.UpdatePanel);
+    }
+
+    /** 将输入 text 作为正整数金币数量加入本局，保存存档并通知商店刷新。 */
+    addGold(text: string) {
+        if (this.ent.game.GameModel.transitioning) {
+            this.setMessage("界面切换中，请稍后操作");
+            return;
+        }
+        const value = text.trim();
+        const amount = Number(value);
+        const shop = this.ent.game.shop;
+        if (!/^\d+$/.test(value) || !Number.isSafeInteger(amount) || amount <= 0 || !Number.isSafeInteger(shop.ShopModel.gold + amount)) {
+            this.setMessage("请输入有效的正整数金币数量");
+            return;
+        }
+        shop.ShopModel.gold += amount;
+        shop.getBusiness<ShopBll>(ShopBll).saveRun();
+        this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.setMessage(`已增加 ${amount} 金币`);
+    }
+
+    /** 将输入 text 对应的角色配置以一级追加至队尾，允许重复和超员，战场中同步追加。 */
+    addRole(text: string) {
+        const game = this.ent.game;
+        if (game.GameModel.transitioning) {
+            this.setMessage("界面切换中，请稍后操作");
+            return;
+        }
+        const value = text.trim();
+        const roleId = Number(value);
+        if (!/^\d+$/.test(value) || !Number.isSafeInteger(roleId)) {
+            this.setMessage("请输入有效的角色配置 ID");
+            return;
+        }
+        const role = TableRole.getConfigById<TableRole>(roleId);
+        if (!role) {
+            this.setMessage(`角色配置 ID ${roleId} 不存在`);
+            return;
+        }
+        const level = TableRoleLevel.getConfigById(RoleLevelKeyEnum.Level1);
+        const unit: IPlayerUnit = {
+            roleId: role.id,
+            level: level.level,
+            copies: Math.pow(TableShopRule.getInitial().copiesPerUpgrade, level.level - 1),
+        };
+        if (game.GameModel.phase === GamePhase.Battle) {
+            game.player.getBusiness<PlayerBll>(PlayerBll).append(unit);
+        }
+        game.shop.ShopModel.team.push(unit);
+        game.shop.ShopModel.goldFingerEnabled = true;
+        game.shop.getBusiness<ShopBll>(ShopBll).saveRun();
+        this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.setMessage(`已在队尾加入 ${role.name}（${role.id}）`);
+    }
+
+    /** 保存操作反馈 message，并通过事件通知界面更新。 */
+    private setMessage(message: string) {
+        this.ent.GoldFingerModel.message = message;
+        this.dispatchEvent(GoldFingerEvent.UpdatePanel);
+    }
+
+    /** 将关卡输入 text 校验后立即跳转，保留本局阵容、金币和道具，清空旧战斗。 */
+    jumpLevel(text: string) {
+        const game = this.ent.game;
+        if (game.GameModel.transitioning) {
+            this.setMessage("界面切换中，请稍后操作");
+            return;
+        }
+        const value = text.trim();
+        const level = Number(value);
+        const max = TableBattleRule.getCurrent().maxLevel;
+        if (!/^\d+$/.test(value) || !Number.isSafeInteger(level) || level < 1 || level > max || !TableBattleStage.getByLevel(level)) {
+            this.setMessage(`请输入 1–${max} 范围内已配置的关卡`);
+            return;
+        }
+        if (!game.shop.ShopModel.team.length) {
+            this.setMessage("请先招募或添加至少一名角色");
+            return;
+        }
+        game.jumpToLevel(level);
+        this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.setPanelOpen(false);
+    }
+}

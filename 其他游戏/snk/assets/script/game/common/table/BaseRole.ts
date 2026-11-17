@@ -18,6 +18,10 @@ interface RoleConfigData {
     canAttack: boolean;
     hasCooldown: boolean;
     note: string;
+    bodySize: number;
+    followSpacing: number;
+    turnSpeed: number;
+    movementScale: number;
 }
 
 /**
@@ -223,5 +227,25 @@ export class BaseRole {
     /** 角色池说明 */
     get note(): string {
         return this.data.note;
+    }
+
+    /** 战场角色边长（Lua 9×3） */
+    get bodySize(): number {
+        return this.data.bodySize;
+    }
+
+    /** 跟随间距（Lua 10.4×3） */
+    get followSpacing(): number {
+        return this.data.followSpacing;
+    }
+
+    /** 转向弧度每秒（Lua 1.66π） */
+    get turnSpeed(): number {
+        return this.data.turnSpeed;
+    }
+
+    /** 原版移动单位到战场坐标倍率 */
+    get movementScale(): number {
+        return this.data.movementScale;
     }
 }

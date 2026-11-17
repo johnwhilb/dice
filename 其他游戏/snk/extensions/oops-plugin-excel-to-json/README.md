@@ -13,6 +13,23 @@
 
 工具指向策划配置表目录后，每次更新配置时，一键生成数据与静态配置表代码，在项目中后期平凡维护修改时，提高开发效率。
 
+### 首次使用与依赖修复
+
+在项目的 `extensions/oops-plugin-excel-to-json` 目录执行：
+
+```powershell
+npm.cmd ci --ignore-scripts --no-audit --no-fund
+npm.cmd test
+```
+
+依赖安装与编译完成后，在 Cocos Creator 扩展管理器中重新加载此插件；也可以重启编辑器。
+
+如果菜单提示 `Method does not exist(oops-plugin-excel-to-json.excelToJson)`、`methods` 为 `undefined`，先检查编辑器日志中更早出现的插件加载错误。本项目缺少 `exceljs` 时，入口会在注册方法前加载失败；按上述命令补齐依赖后重新加载插件即可。
+
+Windows 使用 `npm.cmd` 可避免 PowerShell 禁止执行 `npm.ps1`，无需修改系统执行策略。`node_modules` 不纳入版本控制，首次检出项目后需要安装依赖。
+
+读取器同时兼容普通 Excel 和带 XML 命名空间前缀的标准 SpreadsheetML；仅在内存中转换 ExcelJS 不支持的标签前缀，不修改源表。
+
 ### Excel中数据规则
 - Excel中前五行为工具规则数据
 - 第一行为字段中文名

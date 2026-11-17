@@ -33,12 +33,19 @@ export class TableRole extends BaseRole {
                 return id > 0;
             })
             .map((id) => {
-                return TableRoleClass.getConfigById(id);
+                const config = TableRoleClass.getConfigById<TableRoleClass>(id);
+                if (!config) {
+                    throw new Error(`角色职业配置缺失：${this.id}，职业 ${id}`);
+                }
+                return config;
             });
     }
 
     getBaseStats(levelId: number = RoleLevelKeyEnum.Level1) {
         const level = TableRoleLevel.getConfigById(levelId);
+        if (!level) {
+            throw new Error(`角色等级配置缺失：${this.id}，等级配置 ${levelId}`);
+        }
         const stats: IRoleBaseStats = {
             hp: level.hp,
             damage: level.damage,

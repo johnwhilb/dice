@@ -1,10 +1,5 @@
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
-
-export interface IShopUnit {
-    roleId: number;
-    level: number;
-    copies: number;
-}
+import type { IPlayerUnit } from "../../player/PlayerEvent";
 
 export interface IShopItem {
     contentId: number;
@@ -16,7 +11,7 @@ export interface IShopSave {
     version: number;
     gold: number;
     offers: number[];
-    team: IShopUnit[];
+    team: IPlayerUnit[];
     items: IShopItem[];
     itemPool: number[];
     shopLevel: number;
@@ -25,6 +20,8 @@ export interface IShopSave {
     loop: number;
     newGamePlus: number;
     locked: boolean;
+    /** 本局已通过金手指添加角色，允许恢复重复、超员及非商店角色；旧存档可不包含此字段。 */
+    goldFingerEnabled?: boolean;
 }
 
 export interface IShopClassProgress {
@@ -44,15 +41,16 @@ export class ShopModel extends ecs.Comp {
     loop: number = 0;
     newGamePlus: number = 0;
     locked: boolean = false;
+    goldFingerEnabled: boolean = false;
     guideOpen: boolean = false;
     grabbedIndex: number = -1;
     rightButtonDown: boolean = false;
     items: IShopItem[] = [];
     itemPool: number[] = [];
     offers: number[] = [];
-    team: IShopUnit[] = [];
+    team: IPlayerUnit[] = [];
 
-    /** 清空金币、商品、商店等级、队伍和道具数据。 */
+    /** 清空金币、商品、商店等级、队伍、道具数据和本局金手指标记。 */
     reset() {
         this.gold = 0;
         this.shopLevel = 1;
@@ -61,6 +59,7 @@ export class ShopModel extends ecs.Comp {
         this.loop = 0;
         this.newGamePlus = 0;
         this.locked = false;
+        this.goldFingerEnabled = false;
         this.guideOpen = false;
         this.grabbedIndex = -1;
         this.rightButtonDown = false;

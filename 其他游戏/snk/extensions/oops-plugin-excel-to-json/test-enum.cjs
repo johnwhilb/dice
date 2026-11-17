@@ -4,8 +4,38 @@ const path = require('node:path');
 const vm = require('node:vm');
 const { test } = require('node:test');
 const { Workbook } = require('exceljs');
+const JSZip = require('jszip');
+const { readWorkbook } = require('./dist/WorkbookReader');
 
 const identity = { tableId: 99, resourceName: '99_Example', className: 'Example' };
+
+test('普通 Excel 与带命名空间前缀的 Excel 读取结果一致，源文件保持不变', async (context) => {
+    const file = path.join(__dirname, 'workbook-reader.test.xlsx');
+    context.after(() => {
+        fs.unlinkSync(file);
+    });
+    const workbook = createWorkbook();
+    const buffer = await workbook.xlsx.writeBuffer();
+    fs.writeFileSync(file, buffer);
+    const normal = await readWorkbook(file);
+    const archive = await JSZip.loadAsync(buffer);
+    for (const entry of Object.values(archive.files)) {
+        if (entry.dir || !entry.name.endsWith('.xml')) {
+            continue;
+        }
+        const text = await entry.async('string');
+        if (text.includes('xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"')) {
+            archive.file(entry.name, text
+                .replace('xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"', 'xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main"')
+                .replace(/<(\/?)([A-Za-z][\w.-]*)(?=[\s/>])/g, '<$1x:$2'));
+        }
+    }
+    const prefixedBuffer = await archive.generateAsync({ type: 'nodebuffer' });
+    fs.writeFileSync(file, prefixedBuffer);
+    const prefixed = await readWorkbook(file);
+    assert.deepEqual(prefixed.getWorksheet(identity.resourceName).getSheetValues(), normal.getWorksheet(identity.resourceName).getSheetValues());
+    assert.deepEqual(fs.readFileSync(file), prefixedBuffer);
+});
 
 function createWorkbook() {
     const workbook = new Workbook();
@@ -25,9 +55,6 @@ function createWorkbook() {
 function createConverter(workbook) {
     const writes = new Map();
     const generatedTypes = [];
-    workbook.xlsx.readFile = async () => {
-        return workbook;
-    };
     const exports = {};
     const context = {
         exports,
@@ -40,6 +67,12 @@ function createConverter(workbook) {
         },
         require(name) {
             switch (name) {
+                case './WorkbookReader':
+                    return {
+                        async readWorkbook() {
+                            return workbook;
+                        }
+                    };
                 case 'exceljs':
                     return {
                         Workbook: class {

@@ -3,7 +3,8 @@ import type { Shop } from "../Shop";
 import { ShopEvent } from "../ShopEvent";
 import { GamePhase } from "../../game/model/GameModel";
 import { ShopModel } from "../model/ShopModel";
-import type { IShopClassProgress, IShopSave, IShopUnit } from "../model/ShopModel";
+import type { IShopClassProgress, IShopSave } from "../model/ShopModel";
+import type { IPlayerUnit } from "../../player/PlayerEvent";
 import { oops } from "db://oops-framework/core/Oops";
 import { TableRole } from "../../common/table/TableRole";
 import { TableRoleLevel } from "../../common/table/TableRoleLevel";
@@ -13,6 +14,7 @@ import { TableShopContent } from "../../common/table/TableShopContent";
 import { TableRoundReward } from "../../common/table/TableRoundReward";
 import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
 import { CommonStorageConfig } from "../../common/config/GameStorageConfig";
+import { TableBattleRule } from "../../common/table/TableBattleRule";
 
 export class ShopBll extends CCBusiness<Shop> {
     /** 根据开局配置创建新一局。 */
@@ -461,7 +463,7 @@ export class ShopBll extends CCBusiness<Shop> {
         const rule = TableShopRule.getInitial();
         if (
             this.ent.game.GameModel.transitioning ||
-            this.ent.game.GameModel.phase !== GamePhase.Arena ||
+            this.ent.game.GameModel.phase !== GamePhase.Battle ||
             !Number.isInteger(pickedUpGold) ||
             pickedUpGold < 0
         ) {
@@ -490,7 +492,8 @@ export class ShopBll extends CCBusiness<Shop> {
         model.gold +=
             gold * Math.max(1, Math.floor(model.battleLevel / rule.roundsPerLoop)) + pickedUpGold + this.getInterest();
         model.offers = offers;
-        model.battleLevel += 1;
+        model.battleLevel = Math.min(model.battleLevel + 1, TableBattleRule.getCurrent().maxLevel);
+        model.loop = Math.floor((model.battleLevel - 1) / rule.roundsPerLoop);
         this.ent.game.GameModel.phase = GamePhase.Shop;
         this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
@@ -522,6 +525,7 @@ export class ShopBll extends CCBusiness<Shop> {
             loop: model.loop,
             newGamePlus: model.newGamePlus,
             locked: model.locked,
+            goldFingerEnabled: model.goldFingerEnabled,
         };
         oops.storage.set(CommonStorageConfig.ShopRun, save);
     }
@@ -548,6 +552,7 @@ export class ShopBll extends CCBusiness<Shop> {
             this.toast("main_menu_save_unavailable");
             return;
         }
+        const goldFingerEnabled = data.goldFingerEnabled === true;
         const shopLevel = TableShopLevel.getConfigByLevel(data.shopLevel);
         const capacity = Math.min(
             rule.maxTeamSize,
@@ -559,18 +564,18 @@ export class ShopBll extends CCBusiness<Shop> {
         if (
             !shopLevel ||
             (shopLevel.getNextLevel() ? data.shopXp >= shopLevel.xpToNextLevel : data.shopXp !== 0) ||
-            data.team.length > capacity ||
+            (!goldFingerEnabled && data.team.length > capacity) ||
             !data.offers.every((id) => {
                 return id === 0 || !!TableRole.getConfigById(id).shopEnabled;
             }) ||
             !data.team.every((unit) => {
-                return this.isValidUnit(unit);
+                return this.isValidUnit(unit, goldFingerEnabled);
             }) ||
-            new Set(
+            (!goldFingerEnabled && new Set(
                 data.team.map((unit) => {
                     return unit.roleId;
                 })
-            ).size !== data.team.length ||
+            ).size !== data.team.length) ||
             !data.items.every((item) => {
                 const content = TableShopContent.getConfigById(item.contentId);
                 const xpNeeded = item.level === 1 ? rule.itemLevel1Xp : item.level === 2 ? rule.itemLevel2Xp : 0;
@@ -620,12 +625,13 @@ export class ShopBll extends CCBusiness<Shop> {
         model.loop = data.loop;
         model.newGamePlus = data.newGamePlus;
         model.locked = data.locked;
+        model.goldFingerEnabled = goldFingerEnabled;
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.dispatchEvent(ShopEvent.OpenShop);
     }
 
-    /** 校验队员角色、等级与累计份数，unit 为存档中的队员。 */
-    private isValidUnit(unit: IShopUnit) {
+    /** 校验存档队员 unit 的角色、等级与份数，goldFingerEnabled 允许配置中的非招募角色。 */
+    private isValidUnit(unit: IPlayerUnit, goldFingerEnabled: boolean) {
         const rule = TableShopRule.getInitial();
         const maxLevel = Math.max(
             ...TableRoleLevel.getAllConfig<TableRoleLevel>().map((config) => {
@@ -634,7 +640,7 @@ export class ShopBll extends CCBusiness<Shop> {
         );
         return (
             !!unit &&
-            !!TableRole.getConfigById(unit.roleId).shopEnabled &&
+            (TableRole.getConfigById(unit.roleId).shopEnabled || goldFingerEnabled) &&
             !!TableRoleLevel.getConfigByLevel(unit.level) &&
             Number.isInteger(unit.copies) &&
             unit.copies >= Math.pow(rule.copiesPerUpgrade, unit.level - 1) &&

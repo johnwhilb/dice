@@ -2,8 +2,19 @@
  * @Descripttion: 颜色常量类
  */
 import { Color } from "cc";
+import { TableShopContent } from "../table/TableShopContent";
+import { TableEnemy } from "../table/TableEnemy";
 
 export class ColorConst {
+    static getEnemyColor(configId: number) {
+        return new Color(TableEnemy.getConfigById(configId).color);
+    }
+
+    static getPlayerColor(roleId: number) {
+        const content = TableShopContent.getRole(roleId);
+        return new Color(content.color);
+    }
+
     static readonly shopText: Color = new Color("#dadada");
     static readonly shopMuted: Color = new Color("#777777");
     static readonly shopPanel: Color = new Color("#434343");

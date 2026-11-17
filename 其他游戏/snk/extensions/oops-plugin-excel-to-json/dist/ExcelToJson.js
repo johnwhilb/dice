@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const path_1 = __importDefault(require("path"));
-const exceljs_1 = require("exceljs");
 const JsonToTs_1 = require("./JsonToTs");
 const main_1 = require("./main");
+const WorkbookReader_1 = require("./WorkbookReader");
 const fs = require("fs");
 const LOCAL_ID_BASE = 10000;
 const enumSuffix = "_ENUM";
@@ -227,8 +227,7 @@ async function convert(src, dst, identity, isClient) {
     let primary = [];
     let primary_index = [];
     const primaryIds = new Set();
-    const workbook = new exceljs_1.Workbook();
-    await workbook.xlsx.readFile(src);
+    const workbook = await (0, WorkbookReader_1.readWorkbook)(src);
     console.log("读取Excel文件成功", src);
     const worksheet = workbook.getWorksheet(1);
     if (!worksheet || worksheet.name !== identity.resourceName) {
@@ -407,7 +406,7 @@ async function run() {
     const classNames = new Set();
     for (const f of files) {
         const ext = f.toString().substring(f.lastIndexOf(".") + 1);
-        if (ext !== "xlsx") {
+        if (ext !== "xlsx" || f.toString().startsWith("~$")) {
             continue;
         }
         const identity = parseTableIdentity(f);

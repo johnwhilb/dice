@@ -6,8 +6,6 @@ export enum ShopEvent {
     UpdateShopContent = "shop_update_content",
     /** 新局或读档成功后打开商店。 */
     OpenShop = "shop_open",
-    /** 队伍校验成功后打开竞技场。 */
-    OpenArena = "shop_open_arena",
     /** 回合结算成功后返回商店。 */
     RoundCompleted = "shop_round_completed",
     /** 记录队员拖拽起点；参数 index 为队伍下标，point 为触摸的 UI 坐标。 */

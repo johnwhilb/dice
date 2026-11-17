@@ -6,16 +6,26 @@ import { lang } from "../common/Language";
 import { MainMenuView } from "../mainManue/view/MainMenuView";
 import { GameModel, GamePhase } from "./model/GameModel";
 import { GameBll } from "./bll/GameBll";
+import { Battle } from "../battle/Battle";
+import { BattleBll } from "../battle/bll/BattleBll";
+import { BattleView } from "../battle/view/BattleView";
 import { ShopView } from "../shop/view/ShopView";
 import { ShopBll } from "../shop/bll/ShopBll";
 import { Shop } from "../shop/Shop";
-import { ArenaView } from "./view/ArenaView";
+import { Player } from "../player/Player";
+import { GoldFinger } from "../goldFinger/GoldFinger";
+import { GoldFingerBll } from "../goldFinger/bll/GoldFingerBll";
+import { Enemy } from "../enemy/Enemy";
+import { TableShopRule } from "../common/table/TableShopRule";
 
 @ecs.register("Game")
 export class Game extends CCEntity {
     GameModel: GameModel;
     shop: Shop;
-    ArenaView: ArenaView;
+    battle: Battle;
+    player: Player;
+    goldFinger: GoldFinger;
+    enemy: Enemy;
 
     static create() {
         return ecs.getEntity<Game>(Game);
@@ -24,8 +34,15 @@ export class Game extends CCEntity {
     init() {
         this.add(GameModel);
         this.addBusinesss(GameBll);
+        this.player = this.addChildSingleton(Player);
+        this.enemy = this.addChildSingleton(Enemy);
+        this.enemy.game = this;
         this.shop = this.addChildSingleton(Shop);
         this.shop.game = this;
+        this.battle = this.addChildSingleton(Battle);
+        this.battle.game = this;
+        this.goldFinger = this.addChildSingleton(GoldFinger);
+        this.goldFinger.game = this;
     }
 
     openShop(continueRun: boolean = false) {
@@ -50,6 +67,7 @@ export class Game extends CCEntity {
                 this.GameModel.transitioning = false;
                 if (node) {
                     smc.mainMenu.removeUi(MainMenuView);
+                    this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).show();
                 }
             },
             () => {
@@ -59,20 +77,20 @@ export class Game extends CCEntity {
         );
     }
 
-    openArena() {
+    openBattle() {
         if (this.GameModel.transitioning || this.GameModel.phase !== GamePhase.Shop) {
             return;
         }
-        this.getBusiness<GameBll>(GameBll).prepareArena();
+        this.battle.getBusiness<BattleBll>(BattleBll).prepareBattle(this.shop.ShopModel.team);
     }
 
-    showArena() {
+    showBattle() {
         this.GameModel.transitioning = true;
-        this.addUi(ArenaView).then(
+        this.battle.addUi(BattleView).then(
             (node) => {
                 this.GameModel.transitioning = false;
                 if (node) {
-                    this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Arena);
+                    this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Battle);
                     this.shop.removeUi(ShopView);
                 }
             },
@@ -93,7 +111,8 @@ export class Game extends CCEntity {
                 this.GameModel.transitioning = false;
                 if (node) {
                     this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Shop);
-                    this.removeUi(ArenaView);
+                    this.battle.removeUi(BattleView);
+                    this.enemy.EnemyModel.reset();
                 }
             },
             () => {
@@ -103,8 +122,22 @@ export class Game extends CCEntity {
         );
     }
 
-    finishArena(pickedUpGold: number = 0) {
+    finishBattle(pickedUpGold: number = 0) {
         this.shop.getBusiness<ShopBll>(ShopBll).completeRound(pickedUpGold);
+    }
+
+    jumpToLevel(level: number) {
+        const activeBattle = this.battle.has(BattleView);
+        const width = this.battle.BattleModel.arenaWidth;
+        const height = this.battle.BattleModel.arenaHeight;
+        const model = this.shop.ShopModel;
+        model.battleLevel = level;
+        model.loop = Math.floor((level - 1) / TableShopRule.getInitial().roundsPerLoop);
+        this.battle.getBusiness<BattleBll>(BattleBll).prepareBattle(model.team, !activeBattle);
+        if (activeBattle) {
+            this.battle.getBusiness<BattleBll>(BattleBll).setArenaSize(width, height);
+        }
+        this.shop.getBusiness<ShopBll>(ShopBll).saveRun();
     }
 
     returnMenu() {
@@ -117,6 +150,7 @@ export class Game extends CCEntity {
                 this.GameModel.transitioning = false;
                 if (node) {
                     this.shop.removeUi(ShopView);
+                    this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).hide();
                 }
             },
             () => {

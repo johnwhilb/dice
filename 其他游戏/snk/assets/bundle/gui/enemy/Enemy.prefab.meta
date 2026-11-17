@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "230959e9-c8fc-4a39-ba16-776103f4f291",
+  "uuid": "d00b5b46-aaaf-4373-aec8-f55c60865e86",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "ArenaView"
+    "syncNodeName": "Enemy"
   }
 }

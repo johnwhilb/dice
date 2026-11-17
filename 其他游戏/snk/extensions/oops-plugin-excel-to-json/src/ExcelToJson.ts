@@ -2,6 +2,7 @@ import path from "path";
 import { Workbook, Worksheet } from "exceljs";
 import { createTsClient, createTsServer } from "./JsonToTs";
 import { config } from "./main";
+import { readWorkbook } from "./WorkbookReader";
 
 const fs = require("fs");
 
@@ -363,9 +364,7 @@ async function convert(
     let primary_index: number[] = [];
     const primaryIds = new Set<number>();
 
-    const workbook = new Workbook();
-
-    await workbook.xlsx.readFile(src);
+    const workbook = await readWorkbook(src);
     console.log("读取Excel文件成功", src);
 
     const worksheet = workbook.getWorksheet(1);
@@ -652,7 +651,7 @@ export async function run() {
             f.lastIndexOf(".") + 1
         );
 
-        if (ext !== "xlsx") {
+        if (ext !== "xlsx" || f.toString().startsWith("~$")) {
             continue;
         }
 

@@ -4,7 +4,7 @@ import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import type { IShopRoleData } from "../ShopEvent";
 import { ShopRoleKind } from "../ShopEvent";
 import { _decorator, Prefab, Node, instantiate, Layout } from "cc";
-import type { IShopUnit } from "../model/ShopModel";
+import type { IPlayerUnit } from "../../player/PlayerEvent";
 import { ShopRoleItem } from "./ShopRoleItem";
 
 const { ccclass, property } = _decorator;
@@ -18,7 +18,7 @@ export class ShopTeamItem extends GameComponent {
         return smc.game.shop.getBusiness<ShopBll>(ShopBll);
     }
 
-    setData(index: number, unit: IShopUnit, preview: boolean = false) {
+    setData(index: number, unit: IPlayerUnit, preview: boolean = false) {
         const body = this.getNode("teamBody");
         body.active = preview || index !== smc.game.shop.ShopModel.grabbedIndex;
         const main: IShopRoleData[] = [

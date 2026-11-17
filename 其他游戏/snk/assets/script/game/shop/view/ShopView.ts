@@ -114,8 +114,10 @@ export class ShopView extends CCView<Shop> {
     refresh() {
         const model = this.model;
         const rule = TableShopRule.getInitial();
-        this.getNode("lbtShopTitle").getComponent(RichText).string =
-            UICommon.toText(`[fg]商店 · 金币：[yellow]${model.gold}`, true);
+        this.getNode("lbtShopTitle").getComponent(RichText).string = UICommon.toText(
+            `[fg]商店 · 金币：[yellow]${model.gold}`,
+            true
+        );
         this.getNode("lbtTeamTitle").getComponent(Label).string =
             `队伍 ${model.team.length}/${this.business.getTeamCapacity()}`;
         this.getNode("lbtRefresh").getComponent(Label).string = `刷新：${rule.refreshCost}`;
@@ -284,9 +286,7 @@ export class ShopView extends CCView<Shop> {
     }
 
     reset() {
-        this.model.grabbedIndex = -1;
         this.pendingDragIndex = -1;
-        this.model.rightButtonDown = false;
     }
 
     btnRefresh() {
@@ -325,7 +325,7 @@ export class ShopView extends CCView<Shop> {
 
     btnBattle() {
         if (!this.clickBlocked) {
-            this.ent.game.openArena();
+            this.ent.game.openBattle();
         }
     }
 
