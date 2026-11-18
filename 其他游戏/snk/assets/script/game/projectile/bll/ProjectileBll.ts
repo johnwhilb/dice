@@ -1,6 +1,7 @@
 import { CCBusiness } from "db://oops-framework/module/common/CCBusiness";
 import type { Projectile } from "../Projectile";
 import type { IProjectileData } from "../ProjectileEvent";
+import { spellbladeLength, spellbladeThickness } from "../ProjectileEvent";
 import { TablePlayerSkill } from "../../common/table/TablePlayerSkill";
 import { TableCombatRule } from "../../common/table/TableCombatRule";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
@@ -9,9 +10,20 @@ import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
 import { RoleClassKeyEnum } from "../../common/table/RoleClassKeyEnum";
 import { CombatBll } from "../../combat/bll/CombatBll";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { AreaFeedback } from "../../effect/EffectEvent";
 import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
+import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
+import { BuffBll } from "../../buff/bll/BuffBll";
+import { BuffKind } from "../../buff/BuffEvent";
+import { CombatCamp } from "../../combat/CombatEvent";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 import { SummonTypeKeyEnum } from "../../common/table/SummonTypeKeyEnum";
+
+const bladeInitialDecay = 6.25;
+const bladeFinalDecay = 12.25;
+const explosiveRoles = new Set([RoleKeyEnum.Wizard, RoleKeyEnum.Blade, RoleKeyEnum.Cannoneer]);
+const arrowRoles = new Set([RoleKeyEnum.Archer, RoleKeyEnum.Hunter, RoleKeyEnum.Barrager, RoleKeyEnum.Sentry]);
+const knifeRoles = new Set([RoleKeyEnum.Scout, RoleKeyEnum.Outlaw, RoleKeyEnum.Blade, RoleKeyEnum.Spellblade, RoleKeyEnum.Jester, RoleKeyEnum.Beastmaster, RoleKeyEnum.Witch, RoleKeyEnum.Thief]);
 
 export class ProjectileBll extends CCBusiness<Projectile> {
     /** 创建 source 角色的弹丸，位置 x、y，angle 为弧度，delay 为连射延迟，proc 控制被动触发。 */
@@ -27,6 +39,10 @@ export class ProjectileBll extends CCBusiness<Projectile> {
             bounces: skill.bounces, warps: stats.item(ShopContentKeyEnum.ItemWarpingShots), homing: homing || skill.homing,
             hitIds: new Set<number>(), dead: false, timer: 0, proc, generic,
         };
+        if (!generic && roleId === RoleKeyEnum.Spellblade) {
+            data.bladeContacts = new Set<number>();
+            data.life += bladeInitialDecay + bladeFinalDecay;
+        }
         if (!generic && (roleId === RoleKeyEnum.Arcanist || roleId === RoleKeyEnum.Lich || roleId === RoleKeyEnum.Sage)) {
             data.visual = {
                 age: 0, trailTime: 0, flashTime: 0, velocity: 0,
@@ -62,17 +78,31 @@ export class ProjectileBll extends CCBusiness<Projectile> {
             const roleId = game.player.PlayerModel.players[shot.source].roleId;
             const oldX = shot.x;
             const oldY = shot.y;
+            if (!shot.launched) {
+                shot.launched = true;
+                if (shot.summon && !shot.summon.dead) {
+                    shot.summon.attackAt = game.combat.CombatModel.elapsed;
+                    shot.summon.attackAngle = shot.angle;
+                }
+                const muzzle = shot.muzzle;
+                effects.showMuzzle(muzzle?.x ?? oldX, muzzle?.y ?? oldY, shot.angle, roleId, muzzle ? shot.source : undefined);
+            }
             if (shot.homing) {
-                const target = combat.nearest(shot.x, shot.y, rule.chainRange, shot.hitIds);
+                const target = combat.nearest(shot.x, shot.y, rule.projectileHomingRange, shot.hitIds);
                 if (target) {
                     const desired = Math.atan2(target.y - shot.y, target.x - shot.x);
                     const turn = Math.atan2(Math.sin(desired - shot.angle), Math.cos(desired - shot.angle));
                     shot.angle += Math.max(-rule.homingTurn * delta, Math.min(rule.homingTurn * delta, turn));
                 }
             }
-            shot.angle += shot.generic ? 0 : skill.angularSpeed * delta;
-            shot.x += Math.cos(shot.angle) * shot.speed * delta;
-            shot.y += Math.sin(shot.angle) * shot.speed * delta;
+            const bladeContacts = shot.bladeContacts;
+            const turnSpeed = bladeContacts ? this.spellbladeTurnSpeed(skill, shot.timer + delta / 2) : skill.angularSpeed;
+            shot.angle += shot.generic ? 0 : turnSpeed * delta;
+            const directionX = Math.cos(shot.angle);
+            const directionY = Math.sin(shot.angle);
+            const distance = shot.speed * delta;
+            shot.x += directionX * distance;
+            shot.y += directionY * distance;
             shot.life -= delta;
             shot.timer += delta;
             const visual = shot.visual;
@@ -109,57 +139,66 @@ export class ProjectileBll extends CCBusiness<Projectile> {
             if (skill.pull > 0 && !shot.generic) {
                 combat.pull(shot.x, shot.y, skill.pull, skill.pull, delta);
             }
-            const wallX = Math.abs(shot.x) > width / 2;
-            const wallY = Math.abs(shot.y) > height / 2;
-            if (wallX || wallY) {
-                if (shot.warps > 0) {
-                    shot.warps -= 1;
-                    shot.x = wallX ? -Math.sign(shot.x) * width / 2 : shot.x;
-                    shot.y = wallY ? -Math.sign(shot.y) * height / 2 : shot.y;
-                } else if (shot.bounces > 0) {
-                    shot.bounces -= 1;
-                    shot.angle = wallX ? Math.PI - shot.angle : -shot.angle;
-                    shot.x = Math.max(-width / 2, Math.min(width / 2, shot.x));
-                    shot.y = Math.max(-height / 2, Math.min(height / 2, shot.y));
-                    shot.hitIds.clear();
-                } else {
-                    shot.dead = true;
-                }
-            }
-            if (shot.life <= 0) {
-                shot.dead = true;
-                if (skill.pull > 0 && skill.extraPower > 0 && !shot.generic) {
-                    combat.area(shot.source, shot.skillId, shot.x, shot.y, skill.pull, passives.stats(shot.source).damage * skill.extraPower, false);
-                }
-            }
+            const boundaryX = width / 2;
+            const boundaryY = height / 2;
+            const exitX = Math.abs(shot.x) > boundaryX ? this.travelToEdge(oldX, shot.x, boundaryX) : Number.POSITIVE_INFINITY;
+            const exitY = Math.abs(shot.y) > boundaryY ? this.travelToEdge(oldY, shot.y, boundaryY) : Number.POSITIVE_INFINITY;
+            const wallX = exitX <= 1 && exitX <= exitY;
+            const wallY = exitY <= 1 && exitY <= exitX;
+            const wall = wallX || wallY;
+            const travel = distance * Math.min(1, exitX, exitY);
+            const endX = Math.max(-boundaryX, Math.min(boundaryX, oldX + directionX * travel));
+            const endY = Math.max(-boundaryY, Math.min(boundaryY, oldY + directionY * travel));
+            const dx = endX - oldX;
+            const dy = endY - oldY;
+            const length = dx * dx + dy * dy;
+            const explosive = !shot.generic && explosiveRoles.has(roleId);
+            let redirected = false;
             for (const enemy of game.enemy.EnemyModel.enemies.slice()) {
-                if (shot.dead || enemy.dead || shot.hitIds.has(enemy.id)) {
+                if (shot.dead || enemy.dead || (!bladeContacts && shot.hitIds.has(enemy.id))) {
                     continue;
                 }
-                const dx = shot.x - oldX;
-                const dy = shot.y - oldY;
-                const length = dx * dx + dy * dy;
                 const t = length > 0 ? Math.max(0, Math.min(1, ((enemy.x - oldX) * dx + (enemy.y - oldY) * dy) / length)) : 0;
                 const hitX = oldX + dx * t;
                 const hitY = oldY + dy * t;
-                if (Math.hypot(enemy.x - hitX, enemy.y - hitY) > rule.projectileRadius + enemy.config.height / 2) {
+                if (bladeContacts) {
+                    const alreadyTouching = bladeContacts.has(enemy.id);
+                    if (combat.overlapsEnemyBox(enemy, endX, endY, directionX, directionY, spellbladeLength / 2, spellbladeThickness / 2)) {
+                        bladeContacts.add(enemy.id);
+                    } else {
+                        bladeContacts.delete(enemy.id);
+                    }
+                    if (alreadyTouching || !combat.overlapsEnemyBox(enemy, (oldX + endX) / 2, (oldY + endY) / 2, directionX, directionY,
+                        (spellbladeLength + travel) / 2, spellbladeThickness / 2)) {
+                        continue;
+                    }
+                } else if (Math.hypot(enemy.x - hitX, enemy.y - hitY) > rule.projectileRadius + enemy.config.height / 2) {
                     continue;
                 }
                 shot.hitIds.add(enemy.id);
                 if (skill.radius > 0 && !shot.generic) {
-                    combat.area(shot.source, shot.skillId, enemy.x, enemy.y, skill.radius, shot.damage, shot.proc);
+                    const x = explosive ? hitX : enemy.x;
+                    const y = explosive ? hitY : enemy.y;
+                    combat.area(shot.source, shot.skillId, x, y, skill.radius, shot.damage, shot.proc);
                 } else {
                     combat.hitEnemy(enemy, shot.damage, shot.source, shot.skillId, shot.proc);
                 }
                 if (shot.chains > 0) {
-                    const next = combat.nearest(enemy.x, enemy.y, rule.chainRange, shot.hitIds);
+                    const next = combat.nearest(enemy.x, enemy.y, rule.projectileChainRange, shot.hitIds);
                     if (next) {
+                        effects.showChain(enemy.x, enemy.y, next.x, next.y, roleId);
                         shot.chains -= 1;
                         shot.x = enemy.x;
                         shot.y = enemy.y;
                         shot.angle = Math.atan2(next.y - enemy.y, next.x - enemy.x);
-                        const player = game.player.PlayerModel.players[shot.source];
-                        shot.damage *= 1 + passives.item(ShopContentKeyEnum.ItemUltimatum) + (player.roleId === RoleKeyEnum.Scout ? skill.extraPower : 0);
+                        redirected = true;
+                        if (!shot.generic) {
+                            shot.speed *= roleId === RoleKeyEnum.Lich ? 1.1 : 1.25;
+                            if (roleId === RoleKeyEnum.Lich && skill.slow > 0) {
+                                game.buff.getBusiness<BuffBll>(BuffBll).add(CombatCamp.Enemy, next.id, shot.source, BuffKind.Slow, skill.slow, skill.duration, skill.id);
+                            }
+                        }
+                        shot.damage *= 1 + passives.item(ShopContentKeyEnum.ItemUltimatum) + (roleId === RoleKeyEnum.Scout ? skill.extraPower : 0);
                         effects.showProjectileHit(hitX, hitY, false, roleId, enemy.config.id);
                         break;
                     }
@@ -168,16 +207,71 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                     shot.pierce -= 1;
                 } else {
                     shot.dead = true;
+                    if (explosive && roleId === RoleKeyEnum.Cannoneer) {
+                        game.player.getBusiness<PlayerActionBll>(PlayerActionBll).queueCannonAftershocks(shot.source, skill, hitX, hitY, shot.damage);
+                    }
                 }
                 effects.showProjectileHit(hitX, hitY, shot.dead, roleId, enemy.config.id);
             }
+            if (shot.dead || (redirected && shot.life > 0)) {
+                return;
+            }
+            if (wall && shot.life > 0 && shot.warps > 0) {
+                shot.warps -= 1;
+                shot.x = wallX ? -endX : endX;
+                shot.y = wallY ? -endY : endY;
+                bladeContacts?.clear();
+                return;
+            }
+            if (wall && shot.life > 0 && shot.bounces > 0) {
+                shot.bounces -= 1;
+                shot.x = endX;
+                shot.y = endY;
+                shot.angle = wallX ? Math.PI - shot.angle : shot.angle;
+                shot.angle = wallY ? -shot.angle : shot.angle;
+                shot.hitIds.clear();
+                return;
+            }
+            if (wall || shot.life <= 0) {
+                shot.dead = true;
+                if (explosive) {
+                    combat.area(shot.source, shot.skillId, endX, endY, skill.radius, shot.damage, shot.proc);
+                    if (roleId === RoleKeyEnum.Cannoneer) {
+                        game.player.getBusiness<PlayerActionBll>(PlayerActionBll).queueCannonAftershocks(shot.source, skill, endX, endY, shot.damage);
+                    }
+                } else if (shot.life <= 0 && skill.pull > 0 && skill.extraPower > 0 && !shot.generic) {
+                    combat.area(shot.source, shot.skillId, endX, endY, skill.pull, passives.stats(shot.source).damage * skill.extraPower, false, false, false, AreaFeedback.Targets);
+                }
+                effects.showProjectileHit(endX, endY, true, roleId);
+                const arrow = shot.arrow || arrowRoles.has(roleId);
+                const knife = !arrow && knifeRoles.has(roleId);
+                if (wall && (arrow || knife)) {
+                    const wallAngle = wallX ? (directionX > 0 ? Math.PI : 0) : (directionY > 0 ? -Math.PI / 2 : Math.PI / 2);
+                    effects.showWallResidue(endX, endY, shot.angle, wallAngle, roleId, knife, shot.speed * 0.1);
+                }
+            }
         });
         model.enemyProjectiles.forEach((shot) => {
+            if (shot.dead) {
+                return;
+            }
             if (shot.delay > 0) {
                 shot.delay -= delta;
                 return;
             }
             const angle = shot.angle * Math.PI / 180;
+            if (!shot.launched) {
+                shot.launched = true;
+                if (shot.configId === EnemyKeyEnum.Shooter) {
+                    const shooter = game.enemy.EnemyModel.enemies.find((enemy) => {
+                        return !enemy.dead && enemy.id === shot.sourceId;
+                    });
+                    if (shooter) {
+                        shooter.fireTime = game.combat.CombatModel.elapsed;
+                    }
+                    effects.showMuzzle(shot.x, shot.y, angle, 0);
+                }
+            }
             shot.x += Math.cos(angle) * shot.speed * delta;
             shot.y += Math.sin(angle) * shot.speed * delta;
             shot.life -= delta;
@@ -214,4 +308,18 @@ export class ProjectileBll extends CCBusiness<Projectile> {
             return !shot.dead;
         });
     }
+
+    /** 根据刀片飞行年龄 age 计算先指数下降、再线性归零的角速度。 */
+    private spellbladeTurnSpeed(skill: TablePlayerSkill, age: number) {
+        if (age < bladeInitialDecay) {
+            return -(skill.angularSpeedEnd + (skill.angularSpeed - skill.angularSpeedEnd) * 2 ** (-10 * age / bladeInitialDecay));
+        }
+        return -skill.angularSpeedEnd * Math.max(0, 1 - (age - bladeInitialDecay) / bladeFinalDecay);
+    }
+
+    /** 计算从 start 移到 end 时，在对应坐标轴上到达边界的位移比例。 */
+    private travelToEdge(start: number, end: number, boundary: number) {
+        return start === end ? 0 : Math.max(0, (Math.sign(end) * boundary - start) / (end - start));
+    }
+
 }

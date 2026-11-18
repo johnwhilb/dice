@@ -33,6 +33,8 @@ export interface IEnemyData extends IEnemySource {
     hp: number;
     maxHp: number;
     hitTime?: number;
+    /** 最近一次实际开火的战斗时间。 */
+    fireTime?: number;
     speed: number;
     dead: boolean;
     skillTimer: number;
@@ -81,6 +83,8 @@ export interface IEnemyObject {
     life: number;
     dead: boolean;
     delay: number;
+    /** 已启动飞行，延迟弹丸只触发一次发射反馈。 */
+    launched?: boolean;
 }
 
 /** 配置中的分布刷怪模式，groups 为每组数量，times 为每组的延迟。 */

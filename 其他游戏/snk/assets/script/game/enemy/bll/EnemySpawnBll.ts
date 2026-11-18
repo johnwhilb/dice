@@ -7,6 +7,7 @@ import { EnemyObjectKind } from "../EnemyEvent";
 import type { IDistributedSpawn, IEnemyData, IEnemyObject, IEnemySource } from "../EnemyEvent";
 import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
+import { EffectBll } from "../../effect/bll/EffectBll";
 
 export class EnemySpawnBll extends CCBusiness<Enemy> {
     /** 按当前战场时间生成已到期的刷怪队列。 */
@@ -19,7 +20,8 @@ export class EnemySpawnBll extends CCBusiness<Enemy> {
             return entry.at > model.elapsed;
         });
         due.forEach((entry) => {
-            this.spawn(entry.configId, entry.x, entry.y);
+            const enemy = this.spawn(entry.configId, entry.x, entry.y);
+            this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showSpawnArrival(enemy.x, enemy.y, enemy.config.width / 2, enemy.config.id);
         });
     }
 

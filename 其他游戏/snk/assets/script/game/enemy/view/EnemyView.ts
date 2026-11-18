@@ -2,6 +2,7 @@ import { _decorator, Sprite, UITransform } from "cc";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { ColorConst } from "../../common/config/ColorConst";
 import { EnemyObjectKind } from "../EnemyEvent";
+import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
 import type { IEnemyData, IEnemyObject } from "../EnemyEvent";
 
 const { ccclass } = _decorator;
@@ -26,19 +27,28 @@ export class EnemyView extends GameComponent {
         body.angle = enemy.angle;
         body.getComponent(UITransform).setContentSize(enemy.config.width, enemy.config.height);
         const color = ColorConst.getEnemyColor(enemy.config.id);
+        let bodyColor = color;
         const hitAge = combatTime - (enemy.hitTime ?? Number.NEGATIVE_INFINITY);
+        const fireAge = combatTime - (enemy.fireTime ?? Number.NEGATIVE_INFINITY);
+        const age = Math.min(hitAge, fireAge);
         const springDecay = this.hitSpringDamping / 2;
         const springFrequency = Math.sqrt(this.hitSpringStiffness - springDecay ** 2);
         let scale = 1;
-        if (hitAge < 1) {
-            const phase = springFrequency * hitAge;
+        if (age < 1) {
+            const phase = springFrequency * age;
             scale +=
-                this.hitScaleOffset *
-                Math.exp(-springDecay * hitAge) *
+                (hitAge <= fireAge ? this.hitScaleOffset : 0.16) *
+                Math.exp(-springDecay * age) *
                 (Math.cos(phase) + (springDecay / springFrequency) * Math.sin(phase));
         }
+        const windup = enemy.config.id === EnemyKeyEnum.Headbutter && enemy.chargeRemaining > enemy.config.skillDuration;
+        if (windup && enemy.config.skillDelay > 0) {
+            const remaining = Math.min(1, (enemy.chargeRemaining - enemy.config.skillDuration) / enemy.config.skillDelay);
+            bodyColor = color.clone().lerp(ColorConst.WHITE, 1 - remaining ** 2);
+            scale += 0.12 * (1 - remaining);
+        }
         body.setScale(scale, scale, 1);
-        body.getComponent(Sprite).color = hitAge < this.hitFlashDuration ? ColorConst.WHITE : color;
+        body.getComponent(Sprite).color = hitAge < this.hitFlashDuration || fireAge < 0.08 ? ColorConst.WHITE : bodyColor;
         const visible = enemy.config.boss || enemy.hp < enemy.maxHp;
         this.getNode("enemyHpTrack").active = visible;
         this.getNode("enemyHpFill").active = visible;
@@ -58,6 +68,6 @@ export class EnemyView extends GameComponent {
             object.kind === EnemyObjectKind.Gold ? ColorConst.YELLOW : ColorConst.getEnemyColor(object.configId);
         this.getNode("enemyHpTrack").active = false;
         this.getNode("enemyHpFill").active = false;
-        body.active = object.delay <= 0;
+        body.active = object.delay <= 0 && object.kind !== EnemyObjectKind.SpawnMarker;
     }
 }

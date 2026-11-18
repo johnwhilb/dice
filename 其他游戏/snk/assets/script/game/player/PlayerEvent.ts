@@ -32,6 +32,8 @@ export enum PlayerActionKind {
     Shot,
     /** 延迟死亡到期。 */
     Death,
+    /** 炮弹引爆后排程的余爆，可在炮手退场后完成。 */
+    ProjectileArea,
 }
 
 /** 战斗内延迟指令，统一随战场重置，不使用异步定时器。 */

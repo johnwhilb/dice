@@ -19,6 +19,7 @@ import { BuffBll } from "../../buff/bll/BuffBll";
 import { BuffKind } from "../../buff/BuffEvent";
 import type { IBuffData } from "../../buff/BuffEvent";
 import type { IEnemyData } from "../../enemy/EnemyEvent";
+import { EffectBll } from "../../effect/bll/EffectBll";
 
 export class PlayerActionBll extends CCBusiness<Player> {
     /** 推进 delta 秒角色技能和延迟指令，仅存活角色发动主动技能。 */
@@ -36,8 +37,14 @@ export class PlayerActionBll extends CCBusiness<Player> {
             }
             const player = model.players[action.source];
             if (action.kind === PlayerActionKind.Death) {
-                this.ent.getBusiness<PlayerBll>(PlayerBll).setHp(action.source, 0);
-                this.onPlayerDeath(action.source);
+                if (player.hp > 0) {
+                    this.ent.getBusiness<PlayerBll>(PlayerBll).setHp(action.source, 0);
+                    this.onPlayerDeath(action.source);
+                }
+                return;
+            }
+            if (action.kind === PlayerActionKind.ProjectileArea) {
+                game.combat.getBusiness<CombatBll>(CombatBll).area(action.source, player.skill.id, action.x, action.y, player.skill.radius / 2, action.damage, false);
                 return;
             }
             if (player.hp <= 0) {
@@ -141,7 +148,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
         const summon = game.summon.getBusiness<SummonBll>(SummonBll);
         const buffs = game.buff.getBusiness<BuffBll>(BuffBll);
         const rule = TableCombatRule.getCurrent();
-        const enemies = combat.targets(player.pose.x, player.pose.y, skill.range);
+        const enemies = player.roleId === RoleKeyEnum.Spellblade ? [] : combat.targets(player.pose.x, player.pose.y, skill.range);
         const target = skill.targetCenter || skill.kind === SkillTypeKeyEnum.GoldHit ? enemies[Math.floor(Math.random() * enemies.length)] : enemies[0];
         const requiresTarget = skill.kind === SkillTypeKeyEnum.Projectile || skill.kind === SkillTypeKeyEnum.Area || skill.kind === SkillTypeKeyEnum.Curse || skill.kind === SkillTypeKeyEnum.GoldHit || skill.kind === SkillTypeKeyEnum.Force;
         if (requiresTarget && skill.range > 0 && !target || buffs.get(CombatCamp.Player, index, BuffKind.Stun) || buffs.get(CombatCamp.Player, index, BuffKind.Silence)) {
@@ -182,8 +189,12 @@ export class PlayerActionBll extends CCBusiness<Player> {
                 }
             }
         } else if (skill.kind === SkillTypeKeyEnum.Area) {
-            combat.area(index, skill.id, x, y, skill.radius, damage);
-            this.areaStatuses(index, skill.id, x, y, skill.radius);
+            if (player.roleId === RoleKeyEnum.Elementor) {
+                combat.squareArea(index, skill.id, x, y, skill.radius, damage, player.pose.angle * Math.PI / 180);
+            } else {
+                combat.area(index, skill.id, x, y, skill.radius, damage);
+                this.areaStatuses(index, skill.id, x, y, skill.radius);
+            }
             for (let repeat = 1; repeat < skill.shots; repeat++) {
                 this.queue(index, PlayerActionKind.Area, repeat * skill.burstDelay, x, y, damage);
             }
@@ -195,7 +206,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
             }
         } else if (skill.kind === SkillTypeKeyEnum.HealOrb || skill.kind === SkillTypeKeyEnum.Fairy) {
             const arena = game.battle.BattleModel;
-            summon.orb((Math.random() - .5) * arena.arenaWidth, (Math.random() - .5) * arena.arenaHeight, skill.shots);
+            summon.orb((Math.random() - .5) * arena.combatWidth, (Math.random() - .5) * arena.combatHeight, skill.shots);
             if (skill.kind === SkillTypeKeyEnum.Fairy) {
                 this.aliveIndices().slice().sort(() => {
                     return Math.random() - .5;
@@ -270,10 +281,14 @@ export class PlayerActionBll extends CCBusiness<Player> {
         const rule = TableCombatRule.getCurrent();
         const muzzle = player.config.bodySize * rule.projectileMuzzle;
         const parallel = skill.parallel ? (shot - (count - 1) / 2) * player.config.bodySize : 0;
-        this.ent.game.projectile.getBusiness<ProjectileBll>(ProjectileBll).fire(index, skill.id,
+        const projectile = this.ent.game.projectile.getBusiness<ProjectileBll>(ProjectileBll).fire(index, skill.id,
             player.pose.x + Math.cos(angle) * muzzle - Math.sin(angle) * parallel,
             player.pose.y + Math.sin(angle) * muzzle + Math.cos(angle) * parallel,
             angle, damage * (1 + stats.item(ShopContentKeyEnum.ItemBallista)), shot * skill.burstDelay, proc, homing);
+        projectile.muzzle = {
+            x: projectile.x - Math.cos(angle) * muzzle / 2,
+            y: projectile.y - Math.sin(angle) * muzzle / 2,
+        };
     }
 
     /** 对技能区域内敌人应用减速、眩晕、击退和火焰死亡标记。 */
@@ -323,12 +338,17 @@ export class PlayerActionBll extends CCBusiness<Player> {
         if (critical && player.roleId === RoleKeyEnum.Thief && skill.extraPower) {
             game.enemy.EnemyModel.pickedUpGold += 1;
         }
-        if (player.roleId === RoleKeyEnum.Cannoneer && skill.extraShots) {
-            for (let shot = 0; shot < skill.extraShots; shot++) {
-                this.queue(source, PlayerActionKind.Area, (shot + 1) * skill.extraDelay, enemy.x, enemy.y, player.stats.damage * skill.extraPower, false);
-            }
-        }
         this.ent.getBusiness<PlayerPassiveBll>(PlayerPassiveBll).onHit(source, enemy, damage);
+    }
+
+    /** 炮手的炮弹在 x、y 引爆后，为 source 按技能参数排程一组分散的余爆。 */
+    queueCannonAftershocks(source: number, skill: TablePlayerSkill, x: number, y: number, damage: number) {
+        const spread = skill.radius * 2 / 3;
+        for (let shot = 0; shot < skill.extraShots; shot++) {
+            const offsetX = (Math.random() * 2 - 1) * spread;
+            const offsetY = (Math.random() * 2 - 1) * spread;
+            this.queue(source, PlayerActionKind.ProjectileArea, (shot + 1) * skill.extraDelay, x + offsetX, y + offsetY, damage * skill.extraPower, false);
+        }
     }
 
     /** 在 x、y 生成 count 只 source 所属幼虫。 */
@@ -361,7 +381,8 @@ export class PlayerActionBll extends CCBusiness<Player> {
             } else if (player.roleId === RoleKeyEnum.Bane) {
                 game.summon.getBusiness<SummonBll>(SummonBll).zone(buff.source, skill.id, enemy.x, enemy.y);
             } else if (player.roleId === RoleKeyEnum.Pyromancer) {
-                game.combat.getBusiness<CombatBll>(CombatBll).area(buff.source, skill.id, enemy.x, enemy.y, skill.radius, player.stats.damage * skill.extraPower, false);
+                game.combat.getBusiness<CombatBll>(CombatBll).squareArea(buff.source, skill.id, enemy.x, enemy.y, skill.radius, player.stats.damage * skill.extraPower,
+                    Math.random() * Math.PI * 2, false);
             }
         });
         if (source >= 0) {
@@ -424,6 +445,8 @@ export class PlayerActionBll extends CCBusiness<Player> {
 
     /** 角色 index 阵亡后的道具效果由被动业务统一处理。 */
     onPlayerDeath(index: number) {
+        const player = this.ent.PlayerModel.players[index];
+        this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showPlayerDeath(player.pose.x, player.pose.y, player.roleId);
         this.ent.getBusiness<PlayerPassiveBll>(PlayerPassiveBll).onDeath(index);
     }
 

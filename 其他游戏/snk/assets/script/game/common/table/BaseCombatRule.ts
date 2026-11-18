@@ -64,6 +64,11 @@ interface CombatRuleConfigData {
     tauntDuration: number;
     orbLimit: number;
     insuranceGold: number;
+    projectileChainRange: number;
+    projectileHomingRange: number;
+    lightningRange: number;
+    magnetAttract: number;
+    healPickupRadius: number;
 }
 
 /**
@@ -499,5 +504,30 @@ export class BaseCombatRule {
     /** insuranceGold */
     get insuranceGold(): number {
         return this.data.insuranceGold;
+    }
+
+    /** 弹射距离 */
+    get projectileChainRange(): number {
+        return this.data.projectileChainRange;
+    }
+
+    /** 追踪距离 */
+    get projectileHomingRange(): number {
+        return this.data.projectileHomingRange;
+    }
+
+    /** 闪电距离 */
+    get lightningRange(): number {
+        return this.data.lightningRange;
+    }
+
+    /** 磁吸距离 */
+    get magnetAttract(): number {
+        return this.data.magnetAttract;
+    }
+
+    /** 治疗球拾取距离 */
+    get healPickupRadius(): number {
+        return this.data.healPickupRadius;
     }
 }

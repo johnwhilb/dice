@@ -17,6 +17,7 @@ import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
 import { PlayerPassiveBll } from "../../player/bll/PlayerPassiveBll";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
 import { TableCombatRule } from "../../common/table/TableCombatRule";
+import { EffectBll } from "../../effect/bll/EffectBll";
 
 export class EnemyActionBll extends CCBusiness<Enemy> {
     /** 推进 delta 秒的移动、技能、碰撞和战场对象，width、height 为战场尺寸。 */
@@ -338,6 +339,9 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
         }
         enemy.hp = 0;
         enemy.dead = true;
+        if (!enemy.config.critter) {
+            this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showEnemyDeath(enemy.x, enemy.y, enemy.config.width / 2, enemy.config.id, enemy.config.boss);
+        }
         if (enemy.config.id === EnemyKeyEnum.SpeedBooster) {
             this.nearby(enemy, enemy.config.skillRange).forEach((other) => {
                 this.boost(other, true);
@@ -421,6 +425,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
     private updateObjects(delta: number) {
         const model = this.ent.EnemyModel;
         const rule = TableBattleRule.getCurrent();
+        const combatRule = TableCombatRule.getCurrent();
         const players = this.ent.game.player.PlayerModel.players;
         model.objects.slice().forEach((object) => {
             if (object.dead) {
@@ -452,8 +457,9 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                 const radius = object.kind === EnemyObjectKind.Gold ? rule.goldPickupRadius : (player.config.bodySize + object.height) / 2;
                 const distance = Math.hypot(player.pose.x - object.x, player.pose.y - object.y);
                 const magnetism = this.ent.game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll).item(ShopContentKeyEnum.ItemMagnetism);
-                if (object.kind === EnemyObjectKind.Gold && distance > radius && distance <= radius * (1 + magnetism)) {
-                    const step = Math.min(distance, TableCombatRule.getCurrent().orbSpeed * delta);
+                const magnetRange = magnetism > 0 ? combatRule.magnetAttract : combatRule.orbAttract;
+                if (object.kind === EnemyObjectKind.Gold && distance > radius && distance <= magnetRange) {
+                    const step = Math.min(distance, combatRule.orbSpeed * delta);
                     object.x += (player.pose.x - object.x) / distance * step;
                     object.y += (player.pose.y - object.y) / distance * step;
                 }

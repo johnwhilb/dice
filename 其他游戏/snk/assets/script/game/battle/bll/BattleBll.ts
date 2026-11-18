@@ -7,6 +7,8 @@ import { GamePhase } from "../../game/model/GameModel";
 import { EnemyBll } from "../../enemy/bll/EnemyBll";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 import { CombatBll } from "../../combat/bll/CombatBll";
+import { EffectBll } from "../../effect/bll/EffectBll";
+import { bossSlowScale } from "../../effect/EffectEvent";
 
 export class BattleBll extends CCBusiness<Battle> {
     /** 将商店 team 交给 Player 模块建立战场快照，并请求打开战场。 */
@@ -33,8 +35,7 @@ export class BattleBll extends CCBusiness<Battle> {
 
     /** 保存预制体提供的战斗区域宽高 width、height。 */
     setArenaSize(width: number, height: number) {
-        this.ent.BattleModel.arenaWidth = width;
-        this.ent.BattleModel.arenaHeight = height;
+        this.ent.BattleModel.setArenaSize(width, height);
     }
 
     /** 战斗阶段根据局部触摸坐标 x、y 请求角色转向。 */
@@ -52,36 +53,56 @@ export class BattleBll extends CCBusiness<Battle> {
             return;
         }
         const rule = TableBattleRule.getCurrent();
-        if (model.state === BattleState.Victory) {
-            model.resultTime += deltaTime;
-            if (model.resultTime >= rule.resultDelay) {
-                this.returnAfterResult();
+        if (model.state === BattleState.Victory || model.state === BattleState.Defeat) {
+            const game = this.ent.game;
+            const effects = game.effect.EffectModel;
+            if (effects.effects.length || effects.projectileHitParticles.length || effects.recoilLife.size || effects.hurtLife.size || effects.shakeLife || effects.slowLife) {
+                const wasSlowed = effects.slowLife > 0;
+                game.effect.getBusiness<EffectBll>(EffectBll).update(this.toBattleDelta(Math.min(deltaTime, rule.maxFrameTime)));
+                game.combat.getBusiness<CombatBll>(CombatBll).refreshView();
+                if (wasSlowed && !effects.slowLife) {
+                    this.dispatchEvent(BattleEvent.UpdateState);
+                }
+            }
+            if (model.state === BattleState.Victory) {
+                model.resultTime += deltaTime;
+                if (model.resultTime >= rule.resultDelay) {
+                    this.returnAfterResult();
+                }
             }
             return;
         }
-        if (model.state === BattleState.Defeat) {
-            return;
-        }
         const manager = this.ent.game.enemy.getBusiness<EnemyBll>(EnemyBll);
+        const width = model.combatWidth;
+        const height = model.combatHeight;
         let remaining = Math.min(deltaTime, rule.maxFrameTime);
         while (remaining > 0 && (model.state === BattleState.Countdown || model.state === BattleState.Running)) {
-            const delta = Math.min(remaining, rule.simulationStep);
-            this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).updateMovement(delta, model.arenaWidth, model.arenaHeight);
+            const frameStep = Math.min(remaining, rule.simulationStep);
+            const delta = this.toBattleDelta(frameStep);
+            this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).updateMovement(delta, width, height);
             if (model.state === BattleState.Countdown) {
                 model.countdown = Math.max(0, model.countdown - delta);
                 if (!model.countdown) {
                     model.state = BattleState.Running;
                 }
             } else {
-                manager.update(delta, model.arenaWidth, model.arenaHeight);
-                this.ent.game.combat.getBusiness<CombatBll>(CombatBll).update(delta, model.arenaWidth, model.arenaHeight);
+                manager.update(delta, width, height);
+                this.ent.game.combat.getBusiness<CombatBll>(CombatBll).update(delta, width, height);
                 this.checkProgress();
             }
-            remaining -= delta;
+            remaining -= frameStep;
         }
         manager.refreshView();
         this.ent.game.combat.getBusiness<CombatBll>(CombatBll).refreshView();
         this.dispatchEvent(BattleEvent.UpdateState);
+    }
+
+    /** 将现实时间 delta 换算成战斗时间，慢放到期的余量按正常速度推进。 */
+    private toBattleDelta(delta: number) {
+        const effects = this.ent.game.effect.EffectModel;
+        const slowed = Math.min(delta, effects.slowLife);
+        effects.slowLife -= slowed;
+        return delta - slowed * (1 - bossSlowScale);
     }
 
     /** 检查全队阵亡、当前波清场和首领增援，仅在本场结束时切换终态。 */
@@ -112,14 +133,14 @@ export class BattleBll extends CCBusiness<Battle> {
                 model.state = BattleState.Victory;
             } else if (bossAlive && enemies.enemies.length === 1) {
                 model.wave += 1;
-                manager.scheduleWave(model.wave, model.arenaWidth, model.arenaHeight, true);
+                manager.scheduleWave(model.wave, model.combatWidth, model.combatHeight, true);
             }
         } else if (!enemies.enemies.length && !enemies.pending.length) {
             if (model.wave >= enemies.stage.maxWaves) {
                 model.state = BattleState.Victory;
             } else {
                 model.wave += 1;
-                manager.scheduleWave(model.wave, model.arenaWidth, model.arenaHeight);
+                manager.scheduleWave(model.wave, model.combatWidth, model.combatHeight);
             }
         }
     }

@@ -13,6 +13,7 @@ import { BattleEvent, BattleState } from "../BattleEvent";
 import { EnemyEvent } from "../../enemy/EnemyEvent";
 import { EnemyView } from "../../enemy/view/EnemyView";
 import { EffectView } from "../../effect/view/EffectView";
+import { playerHurtDuration, recoilDuration } from "../../effect/EffectEvent";
 import { CombatEvent } from "../../combat/CombatEvent";
 
 const { ccclass, property } = _decorator;
@@ -31,6 +32,8 @@ export class BattleView extends CCView<Battle> {
     private enemies: EnemyView[] = [];
     private objects: EnemyView[] = [];
     private arenaTransform: UITransform;
+    private combatTransform: UITransform;
+    private arenaOrigin: Vec3;
     private effects: EffectView;
 
     get model() {
@@ -50,13 +53,23 @@ export class BattleView extends CCView<Battle> {
         this.on(CombatEvent.UpdateFrame, this.refreshEffects, this);
         const arena = this.getNode("arena");
         this.arenaTransform = arena.getComponent(UITransform);
+        this.arenaOrigin = arena.position.clone();
+        this.business.setArenaSize(this.arenaTransform.width, this.arenaTransform.height);
+        const model = this.ent.BattleModel;
+        const combatLayer = new Node("combatLayer");
+        combatLayer.layer = arena.layer;
+        combatLayer.parent = arena;
+        combatLayer.setScale(model.combatScale, model.combatScale, 1);
+        this.combatTransform = combatLayer.addComponent(UITransform);
+        this.combatTransform.setContentSize(model.combatWidth, model.combatHeight);
+        this.getNode("enemyLayer").parent = combatLayer;
+        this.getNode("enemyObjectLayer").parent = combatLayer;
         const effects = new Node("combatEffects");
         effects.layer = arena.layer;
-        effects.parent = arena;
-        effects.addComponent(UITransform).setContentSize(this.arenaTransform.contentSize);
+        effects.parent = combatLayer;
+        effects.addComponent(UITransform).setContentSize(this.combatTransform.contentSize);
         effects.addComponent(Graphics);
         this.effects = effects.addComponent(EffectView);
-        this.business.setArenaSize(this.arenaTransform.width, this.arenaTransform.height);
         arena.on(Node.EventType.TOUCH_START, this.steer, this);
         arena.on(Node.EventType.TOUCH_MOVE, this.steer, this);
         this.refresh();
@@ -66,14 +79,26 @@ export class BattleView extends CCView<Battle> {
     }
 
     private refreshEffects() {
-        this.effects.render(this.ent.game);
+        const game = this.ent.game;
+        const model = game.effect.EffectModel;
+        const remaining = model.shakeLife > 0 ? model.shakeLife / model.shakeDuration : 0;
+        const phase = (1 - remaining) * Math.PI * 5;
+        const amplitude = model.shakeAmplitude * remaining ** 2;
+        const origin = this.arenaOrigin;
+        this.arenaTransform.node.setPosition(origin.x + Math.sin(phase) * amplitude, origin.y + Math.sin(phase * 1.5) * amplitude * 0.65, origin.z);
+        this.bodies.forEach((body, index) => {
+            if (body.node.active) {
+                body.setFeedback((model.recoilLife.get(index) ?? 0) / recoilDuration, (model.hurtLife.get(index) ?? 0) / playerHurtDuration);
+            }
+        });
+        this.effects.render(game);
     }
 
     refresh() {
-        const arena = this.getNode("arena");
+        const combatLayer = this.combatTransform.node;
         for (let index = this.bodies.length; index < this.model.players.length; index++) {
             const node = instantiate(this.playerPrefab);
-            node.parent = arena;
+            node.parent = combatLayer;
             const body = node.getComponent(PlayerView);
             this.bodies.push(body);
         }
@@ -146,7 +171,7 @@ export class BattleView extends CCView<Battle> {
         const model = this.ent.BattleModel;
         const enemy = this.ent.game.enemy.EnemyModel;
         const ended = model.state === BattleState.Victory || model.state === BattleState.Defeat;
-        this.getNode("battleResult").active = ended;
+        this.getNode("battleResult").active = ended && !this.ent.game.effect.EffectModel.slowLife;
         this.getNode("lbtBattleResult").getComponent(Label).string = model.state === BattleState.Victory ? "关卡胜利" : "全队阵亡";
         this.getNode("lbtBattleStatus").getComponent(Label).string = model.state === BattleState.Countdown
             ? `第 ${model.level} 关 · ${Math.ceil(model.countdown)}`
@@ -167,7 +192,10 @@ export class BattleView extends CCView<Battle> {
             return;
         }
         const point = event.getUILocation();
-        const local = this.arenaTransform.convertToNodeSpaceAR(new Vec3(point.x, point.y, 0));
+        const arena = this.arenaTransform.node;
+        const origin = Vec3.transformMat4(new Vec3(), this.arenaOrigin, arena.parent.worldMatrix);
+        const offset = Vec3.subtract(new Vec3(), arena.worldPosition, origin);
+        const local = this.combatTransform.convertToNodeSpaceAR(new Vec3(point.x + offset.x, point.y + offset.y, 0));
         this.business.steer(local.x, local.y);
     }
 

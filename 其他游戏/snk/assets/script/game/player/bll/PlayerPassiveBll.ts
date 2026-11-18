@@ -3,6 +3,7 @@ import type { Player } from "../Player";
 import { PlayerBattleBll } from "./PlayerBattleBll";
 import { PlayerActionBll } from "./PlayerActionBll";
 import { RoleClassKeyEnum } from "../../common/table/RoleClassKeyEnum";
+import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
 import { SummonTypeKeyEnum } from "../../common/table/SummonTypeKeyEnum";
 import { TableCombatRule } from "../../common/table/TableCombatRule";
@@ -14,7 +15,6 @@ import { ProjectileBll } from "../../projectile/bll/ProjectileBll";
 import { SummonBll } from "../../summon/bll/SummonBll";
 import type { IEnemyData } from "../../enemy/EnemyEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
-import { EffectKind } from "../../effect/EffectEvent";
 import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
 import { PlayerActionKind } from "../PlayerEvent";
 import { EnemySpawnBll } from "../../enemy/bll/EnemySpawnBll";
@@ -57,6 +57,7 @@ export class PlayerPassiveBll extends CCBusiness<Player> {
         for (let shot = 0; shot < count; shot++) {
             const bullet = this.ent.game.projectile.getBusiness<ProjectileBll>(ProjectileBll).fire(source, player.skill.id, x, y, angle + (shot - (count - 1) / 2) * rule.barrageSpread, damage, shot * rule.barrageInterval, false, homing, true);
             bullet.bounces += Number(ricochet);
+            bullet.arrow = true;
         }
     }
 
@@ -164,12 +165,15 @@ export class PlayerPassiveBll extends CCBusiness<Player> {
         }
         const infused = buff.get(CombatCamp.Player, source, BuffKind.Chain);
         if (infused || Math.random() < stats.item(ShopContentKeyEnum.ItemLightningStrike)) {
-            const targets = combat.targets(enemy.x, enemy.y, rule.chainRange).filter((entry) => {
+            const enhanced = infused > 0 && game.player.PlayerModel.players.some((entry) => {
+                return entry.roleId === RoleKeyEnum.Stormweaver && entry.level === 3;
+            });
+            const targets = combat.targets(enemy.x, enemy.y, enhanced ? rule.chainRange : rule.lightningRange).filter((entry) => {
                 return entry.id !== enemy.id;
             }).slice(0, infused ? rule.chainInfusionCount : rule.lightningCount);
             targets.forEach((target) => {
                 combat.hitEnemy(target, damage * (infused > 0 ? infused : rule.lightningBase + rule.lightningStep * stats.itemLevel(ShopContentKeyEnum.ItemLightningStrike)), source, skill.id, false);
-                game.effect.getBusiness<EffectBll>(EffectBll).show(EffectKind.Chain, enemy.x, enemy.y, 0, 0, player.roleId, target.x, target.y);
+                game.effect.getBusiness<EffectBll>(EffectBll).showChain(enemy.x, enemy.y, target.x, target.y, player.roleId);
             });
         }
         if (Math.random() < stats.item(ShopContentKeyEnum.ItemLuckyStrike)) {

@@ -14,7 +14,7 @@ import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
 import { EnemyActionBll } from "../../enemy/bll/EnemyActionBll";
 import type { IEnemyData } from "../../enemy/EnemyEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
-import { EffectKind } from "../../effect/EffectEvent";
+import { AreaFeedback, EffectKind } from "../../effect/EffectEvent";
 import { ProjectileBll } from "../../projectile/bll/ProjectileBll";
 import { SummonBll } from "../../summon/bll/SummonBll";
 import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
@@ -30,13 +30,38 @@ export class CombatBll extends CCBusiness<Combat> {
         game.effect.EffectModel.reset();
     }
 
-    /** 返回中心 x、y 周围 range 内的存活敌人，按距离排序。 */
-    targets(x: number, y: number, range: number) {
+    /** 返回中心 x、y 的存活目标，squareAngle 为方形判定的旋转角，range 为半边长或圆形半径。 */
+    targets(x: number, y: number, range: number, squareAngle?: number) {
+        const angle = squareAngle ?? 0;
+        const directionX = Math.cos(angle);
+        const directionY = Math.sin(angle);
         return this.ent.game.enemy.EnemyModel.enemies.filter((enemy) => {
-            return !enemy.dead && Math.hypot(enemy.x - x, enemy.y - y) <= range;
+            if (enemy.dead) {
+                return false;
+            }
+            return squareAngle === undefined
+                ? Math.hypot(enemy.x - x, enemy.y - y) <= range
+                : this.overlapsEnemyBox(enemy, x, y, directionX, directionY, range, range);
         }).sort((left, right) => {
             return Math.hypot(left.x - x, left.y - y) - Math.hypot(right.x - x, right.y - y);
         });
+    }
+
+    /** 用四条分离轴判断 enemy 是否与指定中心、方向和半尺寸的矩形重叠。 */
+    overlapsEnemyBox(enemy: IEnemyData, x: number, y: number, directionX: number, directionY: number, halfLength: number, halfThickness: number) {
+        const angle = enemy.angle * Math.PI / 180;
+        const enemyX = Math.cos(angle);
+        const enemyY = Math.sin(angle);
+        const alignment = Math.abs(directionX * enemyX + directionY * enemyY);
+        const crossing = Math.abs(directionX * enemyY - directionY * enemyX);
+        const dx = enemy.x - x;
+        const dy = enemy.y - y;
+        const halfWidth = enemy.config.width / 2;
+        const halfHeight = enemy.config.height / 2;
+        return Math.abs(dx * directionX + dy * directionY) <= halfLength + halfWidth * alignment + halfHeight * crossing
+            && Math.abs(-dx * directionY + dy * directionX) <= halfThickness + halfWidth * crossing + halfHeight * alignment
+            && Math.abs(dx * enemyX + dy * enemyY) <= halfWidth + halfLength * alignment + halfThickness * crossing
+            && Math.abs(-dx * enemyY + dy * enemyX) <= halfHeight + halfLength * crossing + halfThickness * alignment;
     }
 
     /** 查找最近敌人，excluded 为已命中的实例集合。 */
@@ -122,7 +147,12 @@ export class CombatBll extends CCBusiness<Combat> {
             enemy.hitTime = this.ent.CombatModel.elapsed;
         }
         game.enemy.getBusiness<EnemyActionBll>(EnemyActionBll).applyDamage(enemy, amount);
-        game.effect.getBusiness<EffectBll>(EffectBll).show(EffectKind.Damage, enemy.x, enemy.y, 0, amount, source >= 0 ? game.player.PlayerModel.players[source].roleId : 0);
+        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+        const roleId = source >= 0 ? game.player.PlayerModel.players[source].roleId : 0;
+        effects.show(EffectKind.Damage, enemy.x, enemy.y, 0, amount, roleId);
+        if (critical && amount > 0) {
+            effects.showCritical(enemy.x, enemy.y, roleId, enemy.config.id);
+        }
         if (source >= 0 && proc) {
             action.onHit(source, enemy, sourceSkillId, damage, critical);
         }
@@ -131,19 +161,33 @@ export class CombatBll extends CCBusiness<Combat> {
         }
     }
 
-    /** 在 x、y 周围造成范围伤害，半径和伤害受施放者实时属性影响。 */
-    area(source: number, skillId: number, x: number, y: number, radius: number, damage: number, proc: boolean = true, dot: boolean = false, scaledRadius: boolean = false) {
+    /** 在 x、y 周围结算范围伤害，scaledRadius 表示尺寸已乘属性，squareAngle 启用按角度旋转的方形判定。 */
+    area(source: number, skillId: number, x: number, y: number, radius: number, damage: number, proc: boolean = true, dot: boolean = false, scaledRadius: boolean = false,
+        feedback: AreaFeedback = dot ? AreaFeedback.Targets : AreaFeedback.Burst, squareAngle?: number) {
         const game = this.ent.game;
         const stats = game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll);
         const values = stats.stats(source);
         const skill = TablePlayerSkill.getConfigById<TablePlayerSkill>(skillId);
         const range = scaledRadius ? radius : radius * values.areaSizeMultiplier;
-        const targets = this.targets(x, y, range);
+        const targets = this.targets(x, y, range, squareAngle);
         const amount = damage * values.areaDamageMultiplier * (1 + (skill.perTarget + stats.item(ShopContentKeyEnum.ItemResonance)) * targets.length);
+        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+        const roleId = game.player.PlayerModel.players[source].roleId;
+        const impact = amount > 0;
+        if (feedback === AreaFeedback.Burst) {
+            effects.showArea(x, y, range, roleId, impact && targets.length > 0, squareAngle);
+        }
         targets.forEach((enemy) => {
+            if (impact && !enemy.dead) {
+                effects.showProjectileHit(enemy.x, enemy.y, false, roleId, enemy.config.id);
+            }
             this.hitEnemy(enemy, amount, source, skillId, proc, dot);
         });
-        game.effect.getBusiness<EffectBll>(EffectBll).show(EffectKind.Area, x, y, range, 0, game.player.PlayerModel.players[source].roleId);
+    }
+
+    /** 在 x、y 播放方形爆发并结算命中，angle 为弧度，halfSide 为未乘范围加成的半边长。 */
+    squareArea(source: number, skillId: number, x: number, y: number, halfSide: number, damage: number, angle: number, proc: boolean = true) {
+        this.area(source, skillId, x, y, halfSide, damage, proc, false, false, AreaFeedback.Burst, angle);
     }
 
     /** 对角色 index 结算伤害，统一处理护盾、免死、受伤事件和死亡技能。 */
@@ -165,8 +209,12 @@ export class CombatBll extends CCBusiness<Combat> {
             hp = stats.hp;
         }
         game.player.getBusiness<PlayerBll>(PlayerBll).setHp(index, hp);
+        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+        if (actual > 0 && player.hp > 0) {
+            effects.showPlayerHurt(index);
+        }
         action.onHurt(index, actual);
-        game.effect.getBusiness<EffectBll>(EffectBll).show(EffectKind.Damage, player.pose.x, player.pose.y, 0, actual, player.roleId);
+        effects.show(EffectKind.Damage, player.pose.x, player.pose.y, 0, actual, player.roleId);
         if (player.hp <= 0) {
             action.onPlayerDeath(index);
         }

@@ -51,6 +51,7 @@ interface PlayerSkillConfigData {
     deathShots: number;
     zoneRadius: number;
     zoneDuration: number;
+    angularSpeedEnd: number;
 }
 
 /**
@@ -421,5 +422,10 @@ export class BasePlayerSkill {
     /** zoneDuration */
     get zoneDuration(): number {
         return this.data.zoneDuration;
+    }
+
+    /** 螺旋后段角速度 */
+    get angularSpeedEnd(): number {
+        return this.data.angularSpeedEnd;
     }
 }

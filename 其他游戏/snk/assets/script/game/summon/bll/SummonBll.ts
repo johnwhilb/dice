@@ -14,6 +14,8 @@ import { ProjectileBll } from "../../projectile/bll/ProjectileBll";
 import { BuffBll } from "../../buff/bll/BuffBll";
 import { BuffKind } from "../../buff/BuffEvent";
 import { CombatCamp } from "../../combat/CombatEvent";
+import type { ISummonData } from "../SummonEvent";
+import { AreaFeedback } from "../../effect/EffectEvent";
 
 export class SummonBll extends CCBusiness<Summon> {
     /** 在 x、y 生成 source 所属的 typeId 造物，damage 为主人实时伤害快照。 */
@@ -24,7 +26,8 @@ export class SummonBll extends CCBusiness<Summon> {
         const conjurer = 1 + stats.classValue(RoleClassKeyEnum.Conjurer);
         const critter = typeId === SummonTypeKeyEnum.Critter;
         const hp = config.hp + (critter ? stats.classValue(RoleClassKeyEnum.Swarmer) + stats.item(ShopContentKeyEnum.ItemHive) : 0);
-        const data = { id: this.ent.SummonModel.nextId++, source, typeId, x, y, angle: Math.random() * Math.PI * 2, hp, life: config.life * conjurer, timer: 0, damage: damage * config.damage * conjurer, dead: false };
+        const data: ISummonData = { id: this.ent.SummonModel.nextId++, source, typeId, x, y, angle: Math.random() * Math.PI * 2, hp, life: config.life * conjurer,
+            timer: 0, damage: damage * config.damage * conjurer, dead: false, createdAt: game.combat.CombatModel.elapsed };
         this.ent.SummonModel.summons.push(data);
         return data;
     }
@@ -49,8 +52,11 @@ export class SummonBll extends CCBusiness<Summon> {
         const stats = this.ent.game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll).stats(source);
         const radius = skill.zoneRadius > 0 ? skill.zoneRadius : skill.radius;
         const duration = skill.zoneDuration > 0 ? skill.zoneDuration : skill.duration;
+        const angle = Math.random() * Math.PI * 2;
+        const arcSpeed = force ? (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random() * 2) * Math.PI : (Math.random() - 0.5) * Math.PI / 2;
         this.ent.SummonModel.areas.push({ source, skillId, x, y, shotTimer: 0, radius: radius * stats.areaSizeMultiplier, damage: stats.damage * skill.damage * damageScale,
-            life: duration, timer: 0, interval: skill.tick, follow: skill.follow, force, speed: skill.projectileSpeed, angle: Math.random() * Math.PI * 2 });
+            life: duration, timer: 0, interval: skill.tick, follow: skill.follow, force, speed: skill.projectileSpeed, angle,
+            createdAt: this.ent.game.combat.CombatModel.elapsed, arcSpeed });
     }
 
     /** 更新 delta 秒造物、持续区域与治疗球拾取，width、height 为边界。 */
@@ -92,7 +98,7 @@ export class SummonBll extends CCBusiness<Summon> {
             if (area.force) {
                 combat.pull(area.x, area.y, area.radius, skill.pull, delta);
                 if (area.life <= 0 && skill.extraPower > 0) {
-                    combat.area(area.source, area.skillId, area.x, area.y, area.radius, stats.stats(area.source).damage * skill.extraPower, true, false, true);
+                    combat.area(area.source, area.skillId, area.x, area.y, area.radius, stats.stats(area.source).damage * skill.extraPower, true, false, true, AreaFeedback.Targets);
                 }
             } else {
                 const chronomancer = game.player.PlayerModel.players.find((player) => {
@@ -135,13 +141,16 @@ export class SummonBll extends CCBusiness<Summon> {
             const interval = config.interval / fast;
             if (summon.timer >= interval && interval > 0) {
                 if (config.heal) {
+                    summon.attackAt = game.combat.CombatModel.elapsed;
                     this.orb(summon.x, summon.y, config.shots);
                     summon.timer = 0;
                 } else if (summon.typeId === SummonTypeKeyEnum.Volcano) {
+                    summon.attackAt = game.combat.CombatModel.elapsed;
                     combat.area(summon.source, skill.id, summon.x, summon.y, config.radius, summon.damage);
                     summon.timer = 0;
                 } else if (target) {
                     if (config.orbit || summon.typeId === SummonTypeKeyEnum.Critter || summon.typeId === SummonTypeKeyEnum.Pet) {
+                        summon.attackAt = game.combat.CombatModel.elapsed;
                         combat.hitEnemy(target, summon.damage * (config.orbit ? 1 + stats.item(ShopContentKeyEnum.ItemPsychosink) : 1), summon.source, skill.id, false);
                         if (!config.orbit) {
                             summon.hp -= 1;
@@ -158,6 +167,7 @@ export class SummonBll extends CCBusiness<Summon> {
                             const bullet = game.projectile.getBusiness<ProjectileBll>(ProjectileBll).fire(summon.source, skill.id, summon.x, summon.y, angle, summon.damage, shot * rule.barrageInterval, false, false, true);
                             bullet.speed = rule.projectileSpeed;
                             bullet.bounces = skill.bounces;
+                            bullet.summon = summon;
                         }
                     }
                     summon.timer = 0;
@@ -190,13 +200,13 @@ export class SummonBll extends CCBusiness<Summon> {
             }
             const distance = Math.hypot(target.pose.x - orb.x, target.pose.y - orb.y);
             const magnet = stats.item(ShopContentKeyEnum.ItemMagnetism);
-            if (distance <= rule.orbAttract * (1 + magnet)) {
+            if (distance <= (magnet > 0 ? rule.magnetAttract : rule.orbAttract)) {
                 const step = Math.min(distance, rule.orbSpeed * delta);
                 if (distance > 0) {
                     orb.x += (target.pose.x - orb.x) / distance * step;
                     orb.y += (target.pose.y - orb.y) / distance * step;
                 }
-                if (distance <= target.config.bodySize) {
+                if (distance <= rule.healPickupRadius) {
                     const lowest = game.player.PlayerModel.players.filter((player) => {
                         return player.hp > 0;
                     }).sort((left, right) => {
