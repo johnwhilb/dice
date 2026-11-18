@@ -1,3 +1,13 @@
+/** 计时以秒为单位，scale 和 velocity 用于弹体的阻尼回弹。 */
+export interface IProjectileVisual {
+    age: number;
+    trailTime: number;
+    flashTime: number;
+    scale: number;
+    velocity: number;
+    spin: number;
+}
+
 /** 玩家弹丸实例，与角色技能配置关联。 */
 export interface IProjectileData {
     source: number;
@@ -19,4 +29,5 @@ export interface IProjectileData {
     timer: number;
     proc: boolean;
     generic: boolean;
+    visual?: IProjectileVisual;
 }

@@ -8,6 +8,7 @@ import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
 import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
 import { RoleClassKeyEnum } from "../../common/table/RoleClassKeyEnum";
 import { CombatBll } from "../../combat/bll/CombatBll";
+import { EffectBll } from "../../effect/bll/EffectBll";
 import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 import { SummonTypeKeyEnum } from "../../common/table/SummonTypeKeyEnum";
@@ -18,6 +19,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
         const skill = TablePlayerSkill.getConfigById<TablePlayerSkill>(skillId);
         const stats = this.ent.game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll);
         const rogue = stats.hasClass(source, RoleClassKeyEnum.Rogue);
+        const roleId = this.ent.game.player.PlayerModel.players[source].roleId;
         const data: IProjectileData = {
             source, skillId, x, y, angle, speed: skill.projectileSpeed, damage,
             life: TableCombatRule.getCurrent().projectileLife, delay,
@@ -25,6 +27,13 @@ export class ProjectileBll extends CCBusiness<Projectile> {
             bounces: skill.bounces, warps: stats.item(ShopContentKeyEnum.ItemWarpingShots), homing: homing || skill.homing,
             hitIds: new Set<number>(), dead: false, timer: 0, proc, generic,
         };
+        if (!generic && (roleId === RoleKeyEnum.Arcanist || roleId === RoleKeyEnum.Lich || roleId === RoleKeyEnum.Sage)) {
+            data.visual = {
+                age: 0, trailTime: 0, flashTime: 0, velocity: 0,
+                scale: roleId === RoleKeyEnum.Lich ? 1.15 : 1,
+                spin: roleId === RoleKeyEnum.Sage ? (Math.random() - 0.5) * Math.PI / 2 : 0,
+            };
+        }
         if (stats.hasClass(source, RoleClassKeyEnum.Ranger) && Math.random() < stats.item(ShopContentKeyEnum.ItemDivineMachineArrow)) {
             data.homing = true;
             data.pierce += stats.itemLevel(ShopContentKeyEnum.ItemDivineMachineArrow);
@@ -39,6 +48,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
         const model = this.ent.ProjectileModel;
         const rule = TableCombatRule.getCurrent();
         const combat = game.combat.getBusiness<CombatBll>(CombatBll);
+        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
         const passives = game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll);
         model.projectiles.slice().forEach((shot) => {
             if (shot.dead) {
@@ -49,6 +59,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                 return;
             }
             const skill = TablePlayerSkill.getConfigById<TablePlayerSkill>(shot.skillId);
+            const roleId = game.player.PlayerModel.players[shot.source].roleId;
             const oldX = shot.x;
             const oldY = shot.y;
             if (shot.homing) {
@@ -64,10 +75,30 @@ export class ProjectileBll extends CCBusiness<Projectile> {
             shot.y += Math.sin(shot.angle) * shot.speed * delta;
             shot.life -= delta;
             shot.timer += delta;
+            const visual = shot.visual;
+            if (visual) {
+                const previousAge = visual.age;
+                visual.age += delta;
+                visual.flashTime = Math.max(0, visual.flashTime - delta);
+                if (roleId === RoleKeyEnum.Sage && previousAge < 0.05 && visual.age >= 0.05) {
+                    visual.scale += 0.15;
+                }
+                visual.velocity += (-100 * (visual.scale - 1) - 10 * visual.velocity) * delta;
+                visual.scale += visual.velocity * delta;
+                visual.trailTime += delta;
+                while (visual.trailTime >= 0.08) {
+                    visual.trailTime -= 0.08;
+                    effects.showProjectileTrail(shot, roleId, roleId === RoleKeyEnum.Arcanist);
+                }
+            }
             if (skill.orb && !shot.generic && shot.timer >= (1 / (1 + skill.power))) {
                 shot.timer = 0;
                 const target = combat.nearest(shot.x, shot.y, skill.range, new Set<number>());
                 if (target) {
+                    if (visual && roleId === RoleKeyEnum.Arcanist) {
+                        visual.flashTime = 0.15;
+                        visual.scale += 0.5;
+                    }
                     for (let index = 0; index < Math.max(1, skill.extraShots); index++) {
                         const child = this.fire(shot.source, shot.skillId, shot.x, shot.y, Math.atan2(target.y - shot.y, target.x - shot.x), shot.damage, index * rule.barrageInterval, false, false, true);
                         child.speed = rule.projectileSpeed;
@@ -109,7 +140,9 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                 const dy = shot.y - oldY;
                 const length = dx * dx + dy * dy;
                 const t = length > 0 ? Math.max(0, Math.min(1, ((enemy.x - oldX) * dx + (enemy.y - oldY) * dy) / length)) : 0;
-                if (Math.hypot(enemy.x - oldX - dx * t, enemy.y - oldY - dy * t) > rule.projectileRadius + enemy.config.height / 2) {
+                const hitX = oldX + dx * t;
+                const hitY = oldY + dy * t;
+                if (Math.hypot(enemy.x - hitX, enemy.y - hitY) > rule.projectileRadius + enemy.config.height / 2) {
                     continue;
                 }
                 shot.hitIds.add(enemy.id);
@@ -127,6 +160,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                         shot.angle = Math.atan2(next.y - enemy.y, next.x - enemy.x);
                         const player = game.player.PlayerModel.players[shot.source];
                         shot.damage *= 1 + passives.item(ShopContentKeyEnum.ItemUltimatum) + (player.roleId === RoleKeyEnum.Scout ? skill.extraPower : 0);
+                        effects.showProjectileHit(hitX, hitY, false, roleId, enemy.config.id);
                         break;
                     }
                 }
@@ -135,6 +169,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                 } else {
                     shot.dead = true;
                 }
+                effects.showProjectileHit(hitX, hitY, shot.dead, roleId, enemy.config.id);
             }
         });
         model.enemyProjectiles.forEach((shot) => {

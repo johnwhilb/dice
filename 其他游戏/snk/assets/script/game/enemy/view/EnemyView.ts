@@ -13,19 +13,37 @@ export class EnemyView extends GameComponent {
         super.setButton(false);
     }
 
-    setEnemy(enemy: IEnemyData) {
+    private hitFlashDuration: number = 0.1;
+    private hitScaleOffset: number = 0.25;
+    private hitSpringStiffness: number = 200;
+    private hitSpringDamping: number = 10;
+
+    setEnemy(enemy: IEnemyData, combatTime: number) {
         this.nodeTreeInfoLite();
         this.node.setPosition(enemy.x, enemy.y, 0);
         const body = this.getNode("enemyBody");
         body.active = true;
         body.angle = enemy.angle;
         body.getComponent(UITransform).setContentSize(enemy.config.width, enemy.config.height);
-        body.getComponent(Sprite).color = ColorConst.getEnemyColor(enemy.config.id);
+        const color = ColorConst.getEnemyColor(enemy.config.id);
+        const hitAge = combatTime - (enemy.hitTime ?? Number.NEGATIVE_INFINITY);
+        const springDecay = this.hitSpringDamping / 2;
+        const springFrequency = Math.sqrt(this.hitSpringStiffness - springDecay ** 2);
+        let scale = 1;
+        if (hitAge < 1) {
+            const phase = springFrequency * hitAge;
+            scale +=
+                this.hitScaleOffset *
+                Math.exp(-springDecay * hitAge) *
+                (Math.cos(phase) + (springDecay / springFrequency) * Math.sin(phase));
+        }
+        body.setScale(scale, scale, 1);
+        body.getComponent(Sprite).color = hitAge < this.hitFlashDuration ? ColorConst.WHITE : color;
         const visible = enemy.config.boss || enemy.hp < enemy.maxHp;
         this.getNode("enemyHpTrack").active = visible;
         this.getNode("enemyHpFill").active = visible;
         const fill = this.getNode("enemyHpFill").getComponent(Sprite);
-        fill.color = ColorConst.getEnemyColor(enemy.config.id);
+        fill.color = color;
         fill.fillRange = enemy.hp / enemy.maxHp;
     }
 
@@ -34,8 +52,10 @@ export class EnemyView extends GameComponent {
         this.node.setPosition(object.x, object.y, 0);
         const body = this.getNode("enemyBody");
         body.angle = object.angle;
+        body.setScale(1, 1, 1);
         body.getComponent(UITransform).setContentSize(object.width, object.height);
-        body.getComponent(Sprite).color = object.kind === EnemyObjectKind.Gold ? ColorConst.YELLOW : ColorConst.getEnemyColor(object.configId);
+        body.getComponent(Sprite).color =
+            object.kind === EnemyObjectKind.Gold ? ColorConst.YELLOW : ColorConst.getEnemyColor(object.configId);
         this.getNode("enemyHpTrack").active = false;
         this.getNode("enemyHpFill").active = false;
         body.active = object.delay <= 0;

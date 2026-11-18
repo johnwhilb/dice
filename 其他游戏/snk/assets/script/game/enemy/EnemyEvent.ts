@@ -32,6 +32,7 @@ export interface IEnemyData extends IEnemySource {
     angle: number;
     hp: number;
     maxHp: number;
+    hitTime?: number;
     speed: number;
     dead: boolean;
     skillTimer: number;

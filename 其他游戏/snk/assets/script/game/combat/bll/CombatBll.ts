@@ -118,6 +118,9 @@ export class CombatBll extends CCBusiness<Combat> {
             defense *= 1 - stats.item(ShopContentKeyEnum.ItemSeeping);
         }
         amount = Math.max(0, this.mitigate(amount, defense) * (1 + buffs.get(CombatCamp.Enemy, enemy.id, BuffKind.DamageTaken)));
+        if (amount > 0) {
+            enemy.hitTime = this.ent.CombatModel.elapsed;
+        }
         game.enemy.getBusiness<EnemyActionBll>(EnemyActionBll).applyDamage(enemy, amount);
         game.effect.getBusiness<EffectBll>(EffectBll).show(EffectKind.Damage, enemy.x, enemy.y, 0, amount, source >= 0 ? game.player.PlayerModel.players[source].roleId : 0);
         if (source >= 0 && proc) {

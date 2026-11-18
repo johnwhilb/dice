@@ -131,7 +131,7 @@ export class BattleView extends CCView<Battle> {
         this.enemies.forEach((view, index) => {
             view.node.active = index < model.enemies.length;
             if (view.node.active) {
-                view.setEnemy(model.enemies[index]);
+                view.setEnemy(model.enemies[index], this.ent.game.combat.CombatModel.elapsed);
             }
         });
         this.objects.forEach((view, index) => {
