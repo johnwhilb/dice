@@ -8,7 +8,8 @@ export class MainMenuSnakeView extends GameComponent {
     private body: Node;
     private shadow: Node;
 
-    init(color: Color) {
+    init(color: Color, scale: number) {
+        this.node.setScale(scale, scale, 1);
         this.body = this.getNode("body");
         this.shadow = this.getNode("shadow");
         this.body.getComponent(Sprite).color = color;

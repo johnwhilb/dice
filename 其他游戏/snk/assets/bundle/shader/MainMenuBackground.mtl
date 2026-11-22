@@ -1,0 +1,21 @@
+{
+  "__type__": "cc.Material",
+  "_name": "MainMenuBackground",
+  "_objFlags": 0,
+  "__editorExtras__": {},
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "bddd6181-c4e5-4999-979b-38ba79459bd5",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": 0,
+  "_defines": [
+    {}
+  ],
+  "_states": [
+    {}
+  ],
+  "_props": [
+    {}
+  ]
+}

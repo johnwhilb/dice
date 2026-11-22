@@ -31,7 +31,8 @@ import { ColorConst } from "../../common/config/ColorConst";
 import List from "../../ui/List";
 import type { IShopClassProgress } from "../model/ShopModel";
 import { ShopCardItem } from "./ShopCardItem";
-import { ShopTeamItem } from "./ShopTeamItem";
+import { ShopTeamRole } from "./ShopTeamRole";
+import { ShopOfferEffect } from "../../effect/view/ShopOfferEffect";
 import { ShopClassItem } from "./ShopClassItem";
 import { ShopPassiveItem } from "./ShopPassiveItem";
 import { UICommon } from "../../ui/UICommon";
@@ -51,6 +52,7 @@ export class ShopView extends CCView<Shop> {
     private dragStartPoint: Vec2 = new Vec2();
     private classProgress: IShopClassProgress[] = [];
     private teamList: List;
+    private offerEffect: ShopOfferEffect;
     private classList: List;
     private passiveList: List;
     private readonly preventContextMenu: (event: Event) => void = (event: Event) => {
@@ -74,7 +76,14 @@ export class ShopView extends CCView<Shop> {
     }
 
     start() {
+        const effects = new Node("shopOfferEffects");
+        effects.layer = this.node.layer;
+        effects.parent = this.node;
+        effects.addComponent(UITransform);
+        this.offerEffect = effects.addComponent(ShopOfferEffect);
         this.on(ShopEvent.UpdateShopContent, this.refresh, this);
+        this.on(ShopEvent.ShowOfferRemoval, this.showOfferRemoval, this);
+        this.on(ShopEvent.UpdateTeamOrder, this.refreshTeamOrder, this);
         this.on(ShopEvent.StartTeamDrag, this.startDrag, this);
         this.teamList = this.getNode("teamList").getComponent(List);
         this.classList = this.getNode("classList").getComponent(List);
@@ -99,8 +108,12 @@ export class ShopView extends CCView<Shop> {
         this.refresh();
     }
 
-    updateTeamItem(node: Node, index: number) {
-        node.getComponent(ShopTeamItem).setData(index, this.model.team[index]);
+    updateTeamItem(node: Node, index: number, isCalculateSize?: boolean) {
+        if (isCalculateSize) {
+            // 由条目自身的 Layout 测量每个角色分组的高度。
+            return node.getComponent(ShopTeamRole).measure(index, this.model.team[index].level);
+        }
+        node.getComponent(ShopTeamRole).setData(index, this.model.team[index]);
     }
 
     updateClassItem(node: Node, index: number) {
@@ -137,7 +150,7 @@ export class ShopView extends CCView<Shop> {
         this.classList.content.getComponent(UITransform).width = columns * 56;
         this.classList.setGridColumns(columns);
         this.refreshCards();
-        this.teamList.numItems = model.team.length;
+        this.refreshTeamList();
         this.classList.numItems = this.classProgress.length;
         this.passiveList.numItems = model.items.length;
         const required = TableShopLevel.getConfigByLevel(model.shopLevel).xpToNextLevel;
@@ -167,6 +180,17 @@ export class ShopView extends CCView<Shop> {
             }
         }
         box.getComponent(Layout).updateLayout();
+    }
+
+    private showOfferRemoval(event: string, index?: number) {
+        this.getNode("cardsBox").children.forEach((card, slot) => {
+            if (card.active && (index === undefined || slot === index)) {
+                const targets = card.getComponent(ShopCardItem).getRemovalEffectTargets();
+                for (const target of targets) {
+                    this.offerEffect.play(target);
+                }
+            }
+        });
     }
 
     private updateShopXpMarks(required: number) {
@@ -223,14 +247,20 @@ export class ShopView extends CCView<Shop> {
     private moveDrag(point: Vec2) {
         const content = this.teamList.content.getComponent(UITransform);
         const local = content.convertToNodeSpaceAR(new Vec3(point.x, point.y, 0));
-        const height = this.teamPrefab.data.getComponent(UITransform).height;
-        const target = Math.max(0, Math.min(this.model.team.length - 1, Math.floor(-local.y / height)));
-        if (target !== this.model.grabbedIndex) {
-            this.business.moveUnit(this.model.grabbedIndex, target);
-            this.model.grabbedIndex = target;
-            this.teamList.updateAll();
+        const grabbed = this.model.grabbedIndex;
+        const last = this.model.team.length - 1;
+        const direction = local.y < this.teamList.getItemPos(grabbed).y ? 1 : -1;
+        let target = grabbed;
+        for (let index = grabbed + direction; index >= 0 && index <= last; index += direction) {
+            if (direction * (this.teamList.getItemPos(index).y - local.y) <= 0) {
+                break;
+            }
+            target = index;
         }
-        const y = Math.max(-(this.model.team.length - 0.5) * height, Math.min(-height / 2, local.y));
+        if (target !== grabbed) {
+            this.business.moveUnit(grabbed, target);
+        }
+        const y = Math.max(this.teamList.getItemPos(last).y, Math.min(this.teamList.getItemPos(0).y, local.y));
         const world = content.convertToWorldSpaceAR(new Vec3(0, y, 0));
         const ghost = this.getNode("dragGhostBox");
         ghost.setPosition(this.getNode("content").getComponent(UITransform).convertToNodeSpaceAR(world));
@@ -242,7 +272,7 @@ export class ShopView extends CCView<Shop> {
         ghost.children.forEach((node, index) => {
             node.active = index === 0;
             if (node.active) {
-                node.getComponent(ShopTeamItem).setData(
+                node.getComponent(ShopTeamRole).setData(
                     this.model.grabbedIndex,
                     this.model.team[this.model.grabbedIndex],
                     true
@@ -250,6 +280,19 @@ export class ShopView extends CCView<Shop> {
             }
         });
         ghost.getComponent(Layout).updateLayout();
+    }
+
+    private refreshTeamList() {
+        const count = this.model.team.length;
+        this.teamList.calcCustomSize(count);
+        this.teamList.numItems = count;
+    }
+
+    private refreshTeamOrder(event: string, from: number, to: number) {
+        if (this.model.grabbedIndex === from) {
+            this.model.grabbedIndex = to;
+        }
+        this.refreshTeamList();
     }
 
     private releaseGrabbed() {
@@ -325,7 +368,7 @@ export class ShopView extends CCView<Shop> {
 
     btnBattle() {
         if (!this.clickBlocked) {
-            this.ent.game.openBattle();
+            this.ent.game.openBattle(this.getNode("btnBattle").worldPosition.clone());
         }
     }
 
@@ -341,7 +384,7 @@ export class ShopView extends CCView<Shop> {
             this.teamList.scrollView.scrollToTop(0);
             this.classList.scrollView.scrollToTop(0);
             this.passiveList.scrollView.scrollToTop(0);
-            this.business.newRun();
+            this.ent.game.restartShop();
         }
     }
 

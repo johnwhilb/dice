@@ -24,7 +24,7 @@ export class MainMenu extends CCEntity {
         if (this.has(MainMenuView)) {
             return Promise.resolve(this.MainMenuView.node);
         }
-        this.addUi(MainMenuView);
+        return this.addUi(MainMenuView);
     }
 
     entryGame() {

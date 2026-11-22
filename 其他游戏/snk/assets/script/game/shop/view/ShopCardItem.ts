@@ -4,7 +4,7 @@ import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import type { TableRoleClass } from "../../common/table/TableRoleClass";
-import { _decorator, Color, Label, Prefab, instantiate, Layout } from "cc";
+import { _decorator, Color, Label, Prefab, Sprite, instantiate, Layout, UIOpacity } from "cc";
 import { TableRole } from "../../common/table/TableRole";
 import { TableShopContent } from "../../common/table/TableShopContent";
 import { TableShopRule } from "../../common/table/TableShopRule";
@@ -40,6 +40,13 @@ export class ShopCardItem extends GameComponent {
     setData(index: number, roleId: number) {
         this.index = index;
         this.roleId = roleId;
+        const opacity = this.getComponent(UIOpacity) ?? this.addComponent(UIOpacity);
+        opacity.opacity = roleId ? 255 : 0;
+        if (!roleId) {
+            this.node.pauseSystemEvents(true);
+            return;
+        }
+        this.node.resumeSystemEvents(true);
         const name = this.getNode("lbtName").getComponent(Label);
         const role = TableRole.getConfigById<TableRole>(roleId);
         const content = TableShopContent.getRole(roleId);
@@ -51,7 +58,7 @@ export class ShopCardItem extends GameComponent {
         const owned = smc.game.shop.ShopModel.team.find((item) => {
             return item.roleId === roleId;
         });
-        this.updateClasses(role.getClasses());
+        this.updateClasses(role.getClasses(), !owned);
         if (!owned) {
             this.updateOwnedMarks(0);
             return;
@@ -63,7 +70,21 @@ export class ShopCardItem extends GameComponent {
         this.updateOwnedMarks(count);
     }
 
-    private updateClasses(items?: TableRoleClass[]) {
+    getRemovalEffectTargets() {
+        if (!this.roleId) {
+            return [];
+        }
+        const role = this.getNode("ShopRoleItem").getComponent(ShopRoleItem);
+        const targets = [role.getNode("background").getComponent(Sprite)];
+        for (const node of this.getNode("classesBox").children) {
+            if (node.active) {
+                targets.push(node.getComponent(ShopClassItem).getNode("background").getComponent(Sprite));
+            }
+        }
+        return targets;
+    }
+
+    private updateClasses(items: TableRoleClass[], previewNext: boolean) {
         const box = this.getNode("classesBox");
         const progress = this.business.getClassProgress();
         const length = Math.max(box.children.length, items.length);
@@ -82,7 +103,7 @@ export class ShopCardItem extends GameComponent {
                 node.getComponent(ShopClassItem).setData({
                     classId: item.id,
                     count: classProgress ? classProgress.count : 0,
-                    buyIndex: this.index,
+                    previewNext,
                 });
             }
         }

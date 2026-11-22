@@ -88,9 +88,16 @@ export class InitialViewComp extends CCView<Initialize> {
         }
     }
 
-    private async enter() {
-        await this.ent.addUi(LoadingViewComp);
-        this.remove();
+    private enter() {
+        this.ent.addUi(LoadingViewComp).then((node) => {
+            if (node) {
+                this.remove();
+            } else {
+                this.onOpenFailure();
+            }
+        }, () => {
+            this.onOpenFailure();
+        });
     }
 
     /** 窗口打开失败事件 */

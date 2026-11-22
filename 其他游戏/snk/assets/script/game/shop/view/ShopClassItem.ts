@@ -11,7 +11,13 @@ import { ResPath } from "../../common/config/ResPath";
 export interface IShopClassData {
     classId: number;
     count: number;
-    buyIndex?: number;
+    previewNext?: boolean;
+}
+
+interface IClassPreview {
+    mark: Sprite;
+    color: Color;
+    lit: boolean;
 }
 
 const { ccclass } = _decorator;
@@ -19,6 +25,7 @@ const { ccclass } = _decorator;
 @ccclass("ShopClassItem")
 export class ShopClassItem extends GameComponent {
     private data: IShopClassData;
+    private preview?: IClassPreview;
 
     private get blocked() {
         const model = smc.game.shop.ShopModel;
@@ -30,16 +37,24 @@ export class ShopClassItem extends GameComponent {
     }
 
     setData(data: IShopClassData) {
+        if (this.preview) {
+            this.unschedule(this.togglePreview);
+            this.preview.mark.color = ColorConst.shopTick;
+            this.preview = undefined;
+        }
         this.data = data;
         const content = TableShopContent.getRoleClass(data.classId);
         const thresholds = TableRoleClass.getConfigById<TableRoleClass>(data.classId).getActivationCounts();
         const color = new Color(content.color);
         const active = data.count >= thresholds[0];
         this.getNode("background").getComponent(Sprite).color = active ? color : ColorConst.shopPanel;
-        const icon = this.getNode("icon").getComponent(Sprite);
-        this.setSprite(this.getNode("icon"), ResPath.getClassSpriteItemIcon(content.id), "bundle");
-        icon.color = active ? new Color(content.color) : ColorConst.shopTick;
+        const icon = this.getNode("icon");
+        this.setSprite(icon, ResPath.getClassSpriteItemIcon(content.id), "bundle");
+        icon.getComponent(Sprite).color = active ? ColorConst.getShopDarkAccentColor(color) : ColorConst.shopTick;
         this.updateProgressMarks(thresholds, data.count, color);
+        if (this.preview) {
+            this.schedule(this.togglePreview, 0.5);
+        }
     }
 
     private updateProgressMarks(thresholds: number[], count: number, color: Color) {
@@ -70,9 +85,20 @@ export class ShopClassItem extends GameComponent {
             }
             const mark = column.children[index];
             mark.active = index < maximum;
-            mark.getComponent(Sprite).color = index < count ? color : ColorConst.shopTick;
+            const sprite = mark.getComponent(Sprite);
+            sprite.color = index < count ? color : ColorConst.shopTick;
+            if (this.data.previewNext && index === count && mark.active) {
+                this.preview = { mark: sprite, color, lit: false };
+            }
         }
         column.getComponent(Layout).updateLayout();
+    }
+
+    private togglePreview() {
+        if (this.preview) {
+            this.preview.lit = !this.preview.lit;
+            this.preview.mark.color = this.preview.lit ? this.preview.color : ColorConst.shopTick;
+        }
     }
 
     protected btnClass() {

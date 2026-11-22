@@ -2203,9 +2203,11 @@ export default class List extends Component {
         let ut: UITransform = temp.getComponent(UITransform);
         t.content.addChild(temp);
         for (let n: number = 0; n < numItems; n++) {
-            EventHandler.emitEvents([t.renderEvent], temp, n);
-            if (ut.height != t._itemSize.height || ut.width != t._itemSize.width) {
-                t._customSize[n] = t._sizeType ? ut.height : ut.width;
+            EventHandler.emitEvents([t.renderEvent], temp, n, true);
+            const size = t._sizeType ? ut.height : ut.width;
+            const defaultSize = t._sizeType ? t._itemSize.height : t._itemSize.width;
+            if (size !== defaultSize) {
+                t._customSize[n] = size;
             }
         }
         if (!Object.keys(t._customSize).length)

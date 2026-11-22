@@ -5,7 +5,7 @@ import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { ShopBll } from "../bll/ShopBll";
-import { _decorator, Color, Button, EventMouse, EventTouch, Label, Node, Sprite } from "cc";
+import { _decorator, Color, Button, EventMouse, EventTouch, Label, Node, Sprite, UITransform } from "cc";
 import { TableRole } from "../../common/table/TableRole";
 import { TableShopContent } from "../../common/table/TableShopContent";
 import { ColorConst } from "../../common/config/ColorConst";
@@ -36,15 +36,24 @@ export class ShopRoleItem extends GameComponent {
         this.getNode("btnRole").on(Node.EventType.TOUCH_START, this.prepareTouchDrag, this);
     }
 
-    setData(data: IShopRoleData) {
+    setData(data: IShopRoleData, width?: number) {
+        if (!this.nodes) {
+            this.nodeTreeInfoLite();
+        }
         this.data = data;
         const content = TableShopContent.getRole(data.roleId);
         const preview = data.kind === ShopRoleKind.Preview;
+        if (width) {
+            this.node.getComponent(UITransform).width = width;
+            for (const name of ["btnRole", "background", "shadow"]) {
+                this.getNode(name).getComponent(UITransform).width = width;
+            }
+        }
         this.getNode("btnRole").getComponent(Button).interactable = !preview;
-        this.getNode("background").getComponent(Sprite).color = preview
-            ? ColorConst.shopTick
-            : new Color(content.color);
+        const backgroundColor = preview ? ColorConst.shopTick : new Color(content.color);
+        this.getNode("background").getComponent(Sprite).color = backgroundColor;
         const label = this.getNode("lbtValue").getComponent(Label);
+        label.color = data.kind === ShopRoleKind.Offer ? ColorConst.shopText : ColorConst.getShopDarkAccentColor(backgroundColor);
         label.string = `${data.kind === ShopRoleKind.Offer ? TableRole.getConfigById<TableRole>(data.roleId).price : data.level}`;
     }
 

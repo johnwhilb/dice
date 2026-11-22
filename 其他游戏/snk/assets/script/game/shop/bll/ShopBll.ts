@@ -17,23 +17,25 @@ import { CommonStorageConfig } from "../../common/config/GameStorageConfig";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 
 export class ShopBll extends CCBusiness<Shop> {
-    /** 根据开局配置创建新一局。 */
-    newRun() {
+    /** 根据开局配置创建新一局，restart 表示已在商店遮罩内重开。 */
+    newRun(restart: boolean = false) {
         const rule = TableShopRule.getInitial();
-        if (this.ent.game.GameModel.transitioning) {
+        if (this.ent.game.GameModel.transitioning && !restart) {
             this.toast("shop_config_missing");
-            return;
+            return false;
         }
         const initialLevel = rule.getInitialShopLevel();
         const offers = this.rollOffers(initialLevel.level);
         if (!offers.length) {
             this.toast("shop_config_missing");
-            return;
+            return false;
         }
         const model = this.ent.ShopModel;
         const newGamePlus = model.newGamePlus;
         model.reset();
-        this.ent.game.GameModel.reset();
+        if (!restart) {
+            this.ent.game.GameModel.reset();
+        }
         model.newGamePlus = newGamePlus;
         model.gold = rule.startingGold;
         model.shopLevel = initialLevel.level;
@@ -46,7 +48,10 @@ export class ShopBll extends CCBusiness<Shop> {
         model.offers = offers;
         this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
-        this.dispatchEvent(ShopEvent.OpenShop);
+        if (!restart) {
+            this.dispatchEvent(ShopEvent.OpenShop);
+        }
+        return true;
     }
 
     /** 按阶级权重和可招募角色池生成商品，保证至少存在一名攻击角色。 */
@@ -120,6 +125,7 @@ export class ShopBll extends CCBusiness<Shop> {
         model.gold -= rule.refreshCost;
         model.offers = offers;
         this.saveRun();
+        this.dispatchEvent(ShopEvent.ShowOfferRemoval);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
     }
 
@@ -161,7 +167,7 @@ export class ShopBll extends CCBusiness<Shop> {
             return;
         }
         model.gold -= role.price;
-        model.offers.splice(index, 1);
+        model.offers[index] = 0;
         if (owned) {
             owned.copies += 1;
             owned.level = levels.filter((level) => {
@@ -171,6 +177,7 @@ export class ShopBll extends CCBusiness<Shop> {
             model.team.push({ roleId: role.id, level: 1, copies: 1 });
         }
         this.saveRun();
+        this.dispatchEvent(ShopEvent.ShowOfferRemoval, index);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
     }
 
@@ -489,15 +496,15 @@ export class ShopBll extends CCBusiness<Shop> {
             return;
         }
         const gold = reward.minGold + Math.floor(Math.random() * (reward.maxGold - reward.minGold + 1));
-        model.gold +=
-            gold * Math.max(1, Math.floor(model.battleLevel / rule.roundsPerLoop)) + pickedUpGold + this.getInterest();
+        const roundGold = gold * Math.max(1, Math.floor(model.battleLevel / rule.roundsPerLoop));
+        const interest = this.getInterest();
+        model.gold += roundGold + pickedUpGold + interest;
         model.offers = offers;
         model.battleLevel = Math.min(model.battleLevel + 1, TableBattleRule.getCurrent().maxLevel);
         model.loop = Math.floor((model.battleLevel - 1) / rule.roundsPerLoop);
-        this.ent.game.GameModel.phase = GamePhase.Shop;
         this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
-        this.dispatchEvent(ShopEvent.RoundCompleted);
+        this.dispatchEvent(ShopEvent.RoundCompleted, { roundGold, pickedUpGold, interest });
     }
 
     /** 判断商店是否可交易，加载中及竞技场阶段禁止修改。 */
@@ -538,7 +545,7 @@ export class ShopBll extends CCBusiness<Shop> {
             !data ||
             data.version !== ShopModel.saveVersion ||
             !Array.isArray(data.offers) ||
-            data.offers.length !== rule.cardSlots ||
+            data.offers.length > rule.cardSlots ||
             !Array.isArray(data.team) ||
             !Array.isArray(data.items) ||
             !Array.isArray(data.itemPool) ||
@@ -611,7 +618,9 @@ export class ShopBll extends CCBusiness<Shop> {
         model.reset();
         this.ent.game.GameModel.reset();
         model.gold = data.gold;
-        model.offers = data.offers.slice();
+        model.offers = Array.from({ length: rule.cardSlots }, (value, index) => {
+            return data.offers[index] ?? 0;
+        });
         model.team = data.team.map((unit) => {
             return { ...unit };
         });

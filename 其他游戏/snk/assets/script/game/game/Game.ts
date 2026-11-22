@@ -23,6 +23,11 @@ import { Buff } from "../buff/Buff";
 import { Summon } from "../summon/Summon";
 import { Effect } from "../effect/Effect";
 import { CombatBll } from "../combat/bll/CombatBll";
+import type { Vec3 } from "cc";
+import { ColorConst } from "../common/config/ColorConst";
+import { TransitionView } from "../initialize/view/TransitionView";
+import type { ITransitionOptions } from "../initialize/view/TransitionView";
+import type { IRoundGoldReward } from "../shop/ShopEvent";
 
 @ecs.register("Game")
 export class Game extends CCEntity {
@@ -37,6 +42,8 @@ export class Game extends CCEntity {
     buff: Buff;
     summon: Summon;
     effect: Effect;
+    private battleTransitionOrigin?: Readonly<Vec3>;
+    private pendingRoundReward?: IRoundGoldReward;
 
     static create() {
         return ecs.getEntity<Game>(Game);
@@ -83,66 +90,86 @@ export class Game extends CCEntity {
         if (this.shop.has(ShopView)) {
             return;
         }
-        this.GameModel.transitioning = true;
-        this.shop.addUi(ShopView).then(
-            (node) => {
-                this.GameModel.transitioning = false;
-                if (node) {
-                    smc.mainMenu.removeUi(MainMenuView);
-                    this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).show();
+        this.transition({ message: "starting..." }, () => {
+            return this.shop.addUi(ShopView).then((node) => {
+                if (!node) {
+                    return false;
                 }
-            },
-            () => {
-                this.GameModel.transitioning = false;
-                oops.gui.toast(lang("shop_load_failed"));
-            }
-        );
+                smc.mainMenu.removeUi(MainMenuView);
+                this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).show();
+                return true;
+            });
+        });
     }
 
-    openBattle() {
+    openBattle(origin?: Readonly<Vec3>) {
         if (this.GameModel.transitioning || this.GameModel.phase !== GamePhase.Shop) {
             return;
         }
+        this.battleTransitionOrigin = origin;
         this.battle.getBusiness<BattleBll>(BattleBll).prepareBattle(this.shop.ShopModel.team);
     }
 
     showBattle() {
-        this.GameModel.transitioning = true;
-        this.battle.addUi(BattleView).then(
-            (node) => {
-                this.GameModel.transitioning = false;
-                if (node) {
-                    this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Battle);
-                    this.shop.removeUi(ShopView);
+        const shop = this.shop.ShopModel;
+        const origin = this.battleTransitionOrigin;
+        this.battleTransitionOrigin = undefined;
+        const unit = shop.team[Math.floor(Math.random() * shop.team.length)];
+        const color = unit ? ColorConst.getPlayerColor(unit.roleId) : ColorConst.shopText;
+        const loopLimit = TableShopRule.getInitial().roundsPerLoop * (shop.loop + 1);
+        this.transition({ message: `level ${shop.battleLevel}/${loopLimit}`, origin, color }, () => {
+            return this.battle.addUi(BattleView).then((node) => {
+                if (!node) {
+                    return false;
                 }
-            },
-            () => {
-                this.GameModel.transitioning = false;
-                oops.gui.toast(lang("shop_load_failed"));
-            }
-        );
+                this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Battle);
+                this.shop.removeUi(ShopView);
+                return true;
+            });
+        });
     }
 
-    returnShop() {
+    returnShop(event?: string, reward?: IRoundGoldReward) {
+        if (this.GameModel.transitioning) {
+            return;
+        }
+        this.pendingRoundReward = reward ?? this.pendingRoundReward;
+        const battleView = this.battle.BattleView;
+        const leader = this.player.PlayerModel.players[0];
+        const origin = battleView?.getTransitionOrigin();
+        const color = leader ? ColorConst.getPlayerColor(leader.roleId) : ColorConst.shopText;
+        this.transition({ reward: this.pendingRoundReward, origin, color }, () => {
+            return this.shop.addUi(ShopView).then((node) => {
+                if (!node) {
+                    return false;
+                }
+                this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Shop);
+                this.battle.removeUi(BattleView);
+                this.enemy.EnemyModel.reset();
+                this.combat.getBusiness<CombatBll>(CombatBll).reset();
+                this.pendingRoundReward = undefined;
+                return true;
+            });
+        });
+    }
+
+    restartShop() {
+        this.transition({ message: "restarting..." }, () => {
+            return Promise.resolve(this.shop.getBusiness<ShopBll>(ShopBll).newRun(true));
+        });
+    }
+
+    private transition(options: ITransitionOptions, open: () => Promise<boolean>) {
         if (this.GameModel.transitioning) {
             return;
         }
         this.GameModel.transitioning = true;
-        this.shop.addUi(ShopView).then(
-            (node) => {
-                this.GameModel.transitioning = false;
-                if (node) {
-                    this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Shop);
-                    this.battle.removeUi(BattleView);
-                    this.enemy.EnemyModel.reset();
-                    this.combat.getBusiness<CombatBll>(CombatBll).reset();
-                }
-            },
-            () => {
-                this.GameModel.transitioning = false;
+        TransitionView.play(options, open).then((ready) => {
+            this.GameModel.transitioning = false;
+            if (!ready) {
                 oops.gui.toast(lang("shop_load_failed"));
             }
-        );
+        });
     }
 
     finishBattle(pickedUpGold: number = 0) {
@@ -164,22 +191,15 @@ export class Game extends CCEntity {
     }
 
     returnMenu() {
-        if (this.GameModel.transitioning) {
-            return;
-        }
-        this.GameModel.transitioning = true;
-        smc.mainMenu.addUi(MainMenuView).then(
-            (node) => {
-                this.GameModel.transitioning = false;
-                if (node) {
-                    this.shop.removeUi(ShopView);
-                    this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).hide();
+        this.transition({}, () => {
+            return smc.mainMenu.open().then((node) => {
+                if (!node) {
+                    return false;
                 }
-            },
-            () => {
-                this.GameModel.transitioning = false;
-                oops.gui.toast(lang("shop_load_failed"));
-            }
-        );
+                this.shop.removeUi(ShopView);
+                this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).hide();
+                return true;
+            });
+        });
     }
 }

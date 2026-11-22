@@ -1,0 +1,21 @@
+{
+  "__type__": "cc.Material",
+  "_name": "ShopBackground",
+  "_objFlags": 0,
+  "__editorExtras__": {},
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "d5f7fb73-0f79-4642-bd43-3ae66b800668",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": 0,
+  "_defines": [
+    {}
+  ],
+  "_states": [
+    {}
+  ],
+  "_props": [
+    {}
+  ]
+}

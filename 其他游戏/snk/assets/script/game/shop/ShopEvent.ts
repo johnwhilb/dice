@@ -4,14 +4,23 @@
 export enum ShopEvent {
     /** 商店数据变更后刷新界面，无参数。 */
     UpdateShopContent = "shop_update_content",
+    /** 商品视觉消散；购买传移除槽位 index，手动刷新不传槽位。 */
+    ShowOfferRemoval = "shop_show_offer_removal",
     /** 新局或读档成功后打开商店。 */
     OpenShop = "shop_open",
-    /** 回合结算成功后返回商店。 */
+    /** 回合结算成功后返回商店，并携带金币结算明细。 */
     RoundCompleted = "shop_round_completed",
     /** 记录队员拖拽起点；参数 index 为队伍下标，point 为触摸的 UI 坐标。 */
     StartTeamDrag = "shop_start_team_drag",
     /** 队员交换位置后通知列表更新；参数 from、to 为交换前的两个队伍下标。 */
     UpdateTeamOrder = "shop_update_team_order",
+}
+
+/** 回合结算转场展示的金币来源。 */
+export interface IRoundGoldReward {
+    roundGold: number;
+    pickedUpGold: number;
+    interest: number;
 }
 
 /**

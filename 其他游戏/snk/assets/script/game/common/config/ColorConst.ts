@@ -20,6 +20,22 @@ export class ColorConst {
         return new Color(content.color);
     }
 
+    static getShopDarkAccentColor(base: Color) {
+        const max = Math.max(base.r, base.g, base.b);
+        const min = Math.min(base.r, base.g, base.b);
+        const lightness = (max + min) / 510;
+        const levelLightness = Math.max(0, lightness - 5 * 0.025);
+        const chroma = 1 - Math.abs(2 * lightness - 1);
+        const levelChroma = 1 - Math.abs(2 * levelLightness - 1);
+        const ratio = chroma > 0 ? levelChroma / chroma : 0;
+        return new Color(
+            Math.round(levelLightness * 255 + (base.r - lightness * 255) * ratio),
+            Math.round(levelLightness * 255 + (base.g - lightness * 255) * ratio),
+            Math.round(levelLightness * 255 + (base.b - lightness * 255) * ratio),
+            base.a,
+        );
+    }
+
     static readonly shopText: Color = new Color("#dadada");
     static readonly shopMuted: Color = new Color("#777777");
     static readonly shopPanel: Color = new Color("#434343");
@@ -43,7 +59,6 @@ export class ColorConst {
         ["yellow2", "#f59f10"],
         ["fgm5", "#bababa"],
     ]);
-    static readonly menuStar: Color = new Color(150, 150, 150, 255);
 
     static readonly menuSnakeColors: Color[] = [
         new Color("#8e559e69"),

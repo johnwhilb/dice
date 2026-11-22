@@ -217,11 +217,20 @@ export class BattleView extends CCView<Battle> {
         this.objects = [];
     }
 
+    getTransitionOrigin() {
+        const leader = this.model.players[0];
+        return leader ? this.combatTransform.convertToWorldSpaceAR(new Vec3(leader.pose.x, leader.pose.y, 0)) : undefined;
+    }
+
     btnShop() {
         this.ent.game.returnShop();
     }
 
     btnBattleReturnShop() {
-        this.business.returnAfterResult();
+        if (this.ent.BattleModel.settled) {
+            this.ent.game.returnShop();
+        } else {
+            this.business.returnAfterResult();
+        }
     }
 }
