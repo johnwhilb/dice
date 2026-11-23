@@ -20,7 +20,6 @@ export class EnemyView extends GameComponent {
     private hitSpringDamping: number = 10;
 
     setEnemy(enemy: IEnemyData, combatTime: number) {
-        this.nodeTreeInfoLite();
         this.node.setPosition(enemy.x, enemy.y, 0);
         const body = this.getNode("enemyBody");
         body.active = true;
@@ -58,7 +57,6 @@ export class EnemyView extends GameComponent {
     }
 
     setObject(object: IEnemyObject) {
-        this.nodeTreeInfoLite();
         this.node.setPosition(object.x, object.y, 0);
         const body = this.getNode("enemyBody");
         body.angle = object.angle;

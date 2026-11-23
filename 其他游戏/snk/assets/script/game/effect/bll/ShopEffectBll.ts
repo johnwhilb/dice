@@ -12,10 +12,10 @@ export class ShopEffectBll {
     constructor(private readonly model: ShopEffectModel) {
     }
 
-    /** 在图标中心 x、y 的下方生成消散，color 为旧图标的显示底色。 */
+    /** 在局部坐标 x、y 播放碎裂，color 为碎片颜色。 */
     play(x: number, y: number, color: Color) {
         this.model.bursts.push({
-            x, y: y - 4 * shopEffectScale, color: color.clone(),
+            x, y, color: color.clone(),
             elapsed: 0, radius: 0, springScale: 1, springVelocity: 0, particles: [],
         });
     }

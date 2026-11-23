@@ -153,8 +153,9 @@ export class EffectView extends Component {
         const particleStrokeColor = graphics.strokeColor.clone();
         graphics.lineCap = Graphics.LineCap.ROUND;
         for (const particle of game.effect.EffectModel.projectileHitParticles) {
-            const width = projectileParticleEndSize + (particle.width - projectileParticleEndSize) * particle.sizeFactor;
-            const height = projectileParticleEndSize + (particle.width / 2 - projectileParticleEndSize) * particle.sizeFactor;
+            const sizeScale = particle.sizeScale ?? 1;
+            const width = (projectileParticleEndSize + (particle.width - projectileParticleEndSize) * particle.sizeFactor) * sizeScale;
+            const height = (projectileParticleEndSize + (particle.width / 2 - projectileParticleEndSize) * particle.sizeFactor) * sizeScale;
             const halfSegment = (width - height) / 2;
             const offsetX = particle.directionX * halfSegment;
             const offsetY = particle.directionY * halfSegment;

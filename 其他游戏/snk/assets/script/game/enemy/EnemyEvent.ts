@@ -4,6 +4,8 @@ import type { TableEnemy } from "../common/table/TableEnemy";
 export enum EnemyEvent {
     /** 敌人、弹丸、地雷和金币数据完成更新，无参数。 */
     UpdateFrame = "enemy_update_frame",
+    /** 刷怪队列中的敌人实际出场，参数为战场局部坐标 x、y。 */
+    SpawnArrival = "enemy_spawn_arrival",
 }
 
 /** 战场内的非敌人对象类型。 */

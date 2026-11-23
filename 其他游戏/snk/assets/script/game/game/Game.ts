@@ -90,7 +90,7 @@ export class Game extends CCEntity {
         if (this.shop.has(ShopView)) {
             return;
         }
-        this.transition({ message: "starting..." }, () => {
+        this.transition({ message: "正在开始…" }, () => {
             return this.shop.addUi(ShopView).then((node) => {
                 if (!node) {
                     return false;
@@ -117,7 +117,7 @@ export class Game extends CCEntity {
         const unit = shop.team[Math.floor(Math.random() * shop.team.length)];
         const color = unit ? ColorConst.getPlayerColor(unit.roleId) : ColorConst.shopText;
         const loopLimit = TableShopRule.getInitial().roundsPerLoop * (shop.loop + 1);
-        this.transition({ message: `level ${shop.battleLevel}/${loopLimit}`, origin, color }, () => {
+        this.transition({ message: `第 ${shop.battleLevel}/${loopLimit} 关`, origin, color }, () => {
             return this.battle.addUi(BattleView).then((node) => {
                 if (!node) {
                     return false;
@@ -154,7 +154,7 @@ export class Game extends CCEntity {
     }
 
     restartShop() {
-        this.transition({ message: "restarting..." }, () => {
+        this.transition({ message: "正在重新开始…" }, () => {
             return Promise.resolve(this.shop.getBusiness<ShopBll>(ShopBll).newRun(true));
         });
     }

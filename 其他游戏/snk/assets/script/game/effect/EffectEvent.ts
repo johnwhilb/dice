@@ -97,6 +97,8 @@ export interface IProjectileHitParticle {
     duration: number;
     life: number;
     sizeFactor: number;
+    /** 碎片的额外显示倍率，默认使用原版换算尺寸。 */
+    sizeScale?: number;
     roleId: number;
     enemyConfigId?: number;
     parentShot?: IProjectileData;

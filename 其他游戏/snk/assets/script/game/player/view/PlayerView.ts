@@ -13,7 +13,6 @@ export class PlayerView extends GameComponent {
     private bodyColor: Color;
 
     setData(player: IPlayerData) {
-        this.nodeTreeInfoLite();
         this.body = this.getNode("body");
         this.shadow = this.getNode("shadow");
         this.bodyColor = ColorConst.getPlayerColor(player.roleId);

@@ -20,9 +20,6 @@ export class ShopTeamRole extends GameComponent {
     }
 
     setData(index: number, unit: IPlayerUnit, preview: boolean = false) {
-        if (!this.nodes) {
-            this.nodeTreeInfoLite();
-        }
         const visible = preview || index !== smc.game.shop.ShopModel.grabbedIndex;
         this.getComponent(Sprite).enabled = visible;
         this.getNode("lbtName").getComponent(Label).string = TableRole.getConfigById<TableRole>(unit.roleId).name;
@@ -55,9 +52,6 @@ export class ShopTeamRole extends GameComponent {
     }
 
     measure(index: number, level: number) {
-        if (!this.nodes) {
-            this.nodeTreeInfoLite();
-        }
         const reserves = this.business.getReserves(index);
         this.getNode("roleBox").active = true;
         this.getNode("reserveBox").active = (level > 1 && reserves.level1 > 0) || (level > 2 && reserves.level2 > 0);

@@ -13,7 +13,6 @@ export class PlayerHpItem extends GameComponent {
     }
 
     setData(player: IPlayerData) {
-        this.nodeTreeInfoLite();
         const color = ColorConst.getPlayerColor(player.roleId);
         this.getNode("hpFrame").getComponent(Sprite).color = player.hp > 0 ? color : ColorConst.shopMuted;
         const fill = this.getNode("hpFill");

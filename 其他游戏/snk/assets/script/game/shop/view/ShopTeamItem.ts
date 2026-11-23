@@ -20,9 +20,6 @@ export class ShopTeamItem extends GameComponent {
     }
 
     setData(index: number, unit: IPlayerUnit, preview: boolean = false) {
-        if (!this.nodes) {
-            this.nodeTreeInfoLite();
-        }
         const body = this.getNode("teamBody");
         body.active = preview || index !== smc.game.shop.ShopModel.grabbedIndex;
         this.getNode("lbtName").getComponent(Label).string = TableRole.getConfigById<TableRole>(unit.roleId).name;

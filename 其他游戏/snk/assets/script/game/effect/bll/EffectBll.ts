@@ -5,6 +5,14 @@ import { TableCombatRule } from "../../common/table/TableCombatRule";
 import type { IProjectileData } from "../../projectile/ProjectileEvent";
 import { arrowResidueDuration, criticalDuration, knifeResidueDuration, playerDeathDuration, playerDeathSlowDuration, playerHurtDuration } from "../EffectEvent";
 
+const collisionShakeDuration = 0.5;
+const collisionShakeFrequency = 60;
+const collisionShakeAmplitude = 4;
+const wallShakeAmplitude = 2;
+const wallSpringStiffness = 100;
+const wallSpringDamping = 10;
+const projectileHitParticleSizeScale = 1.25;
+
 export class EffectBll extends CCBusiness<Effect> {
     /** 记录位置 x、y 的 kind 表现，amount 为飘字数值，roleId 决定动态颜色。 */
     show(kind: EffectKind, x: number, y: number, radius: number, amount: number, roleId: number, endX: number = x, endY: number = y) {
@@ -16,13 +24,14 @@ export class EffectBll extends CCBusiness<Effect> {
     /** 在 x、y 生成亮斑和碎片，ended 表示弹丸终止，颜色来自 roleId 和 enemyConfigId。 */
     showProjectileHit(x: number, y: number, ended: boolean, roleId: number, enemyConfigId?: number) {
         const kind = ended ? EffectKind.ProjectileEnd : EffectKind.ProjectileHit;
-        const radius = ended ? 8 : 6;
+        const radius = (ended ? 8 : 6) * projectileParticleScale;
         const life = ended ? projectileEndDuration : 0.1;
         this.ent.EffectModel.effects.push({ kind, x, y, endX: x, endY: y, radius, amount: 0, roleId: 0, life });
         const count = ended ? 2 + Math.floor(Math.random() * 2) : 2;
         for (let index = 0; index < count; index++) {
             const angle = Math.random() * 2 * Math.PI;
-            this.spawnProjectileParticle(x, y, angle, 50 + Math.random() * 100, roleId, !ended && index === 1 ? enemyConfigId : undefined);
+            const particleEnemyId = !ended && index === 1 ? enemyConfigId : undefined;
+            this.spawnProjectileParticle(x, y, angle, 50 + Math.random() * 100, roleId, particleEnemyId, undefined, projectileHitParticleSizeScale);
         }
     }
 
@@ -84,10 +93,75 @@ export class EffectBll extends CCBusiness<Effect> {
         this.ent.EffectModel.effects.push({ kind, x, y, endX: wallAngle, endY: speed, radius: 0, amount: angle, roleId, life });
     }
 
-    /** 为角色下标 source 记录受击闪白与轻震。 */
+    /** 为角色下标 source 记录受击闪白。 */
     showPlayerHurt(source: number) {
         this.ent.EffectModel.hurtLife.set(source, playerHurtDuration);
-        this.shake(playerHurtDuration, 4);
+    }
+
+    /** 添加一次可叠加的双轴随机受伤震动。 */
+    showPlayerHurtShake() {
+        this.addCameraShake(collisionShakeAmplitude, collisionShakeDuration);
+    }
+
+    /** 每显示一个胜利播报字符，添加一次短震。 */
+    showVictoryAnnouncementShake() {
+        this.addCameraShake(3, 0.075);
+    }
+
+    /** 添加双轴随机震动，amplitude 为原版坐标单位，duration 为秒。 */
+    private addCameraShake(amplitude: number, duration: number) {
+        const sampleCount = Math.floor(duration * collisionShakeFrequency);
+        const samplesX = [0];
+        const samplesY = [0];
+        for (let index = 0; index < sampleCount; index++) {
+            samplesX.push(2 * Math.random() - 1);
+            samplesY.push(2 * Math.random() - 1);
+        }
+        samplesX.push(0);
+        samplesY.push(0);
+        this.ent.EffectModel.collisionShakes.push({ elapsed: 0, amplitude, duration, samplesX, samplesY });
+    }
+
+    /** 根据蛇头反弹前的朝向 heading 给镜头弹簧施加初始偏移。 */
+    showPlayerWallShake(heading: number) {
+        const model = this.ent.EffectModel;
+        model.wallShakeX += wallShakeAmplitude * Math.cos(heading);
+        model.wallShakeY -= wallShakeAmplitude * Math.sin(heading);
+    }
+
+    /** 按现实时间 delta 推进可叠加随机震动和墙面弹簧，输出原版坐标下的位移。 */
+    updateCollisionShake(delta: number) {
+        const model = this.ent.EffectModel;
+        model.collisionShakeX = 0;
+        model.collisionShakeY = 0;
+        model.collisionShakes = model.collisionShakes.filter((shake) => {
+            shake.elapsed += delta;
+            if (shake.elapsed >= shake.duration) {
+                return false;
+            }
+            const sample = shake.elapsed * collisionShakeFrequency;
+            const index = Math.floor(sample);
+            const blend = sample - index;
+            const amplitude = shake.amplitude * (1 - shake.elapsed / shake.duration);
+            model.collisionShakeX += (shake.samplesX[index] * (1 - blend) + shake.samplesX[index + 1] * blend) * amplitude;
+            model.collisionShakeY += (shake.samplesY[index] * (1 - blend) + shake.samplesY[index + 1] * blend) * amplitude;
+            return true;
+        });
+        let remaining = Math.min(delta, 0.1);
+        while (remaining > 0) {
+            const step = Math.min(remaining, 1 / collisionShakeFrequency);
+            model.wallVelocityX -= (wallSpringStiffness * model.wallShakeX + wallSpringDamping * model.wallVelocityX) * step;
+            model.wallVelocityY -= (wallSpringStiffness * model.wallShakeY + wallSpringDamping * model.wallVelocityY) * step;
+            model.wallShakeX += model.wallVelocityX * step;
+            model.wallShakeY += model.wallVelocityY * step;
+            remaining -= step;
+        }
+        if (Math.abs(model.wallShakeX) + Math.abs(model.wallShakeY) + Math.abs(model.wallVelocityX) + Math.abs(model.wallVelocityY) < 0.001) {
+            model.wallShakeX = 0;
+            model.wallShakeY = 0;
+            model.wallVelocityX = 0;
+            model.wallVelocityY = 0;
+        }
     }
 
     /** 在退场位置生成角色色收束环和碎片，并短暂放慢战斗。 */
@@ -130,14 +204,14 @@ export class EffectBll extends CCBusiness<Effect> {
         this.spawnProjectileParticle(shot.x, shot.y, angle, speed, roleId, undefined, arcane ? shot : undefined);
     }
 
-    /** 生成从 x、y 沿 angle 运动的碎片，speed 为原版坐标下的初速，颜色由角色、敌人或主球状态决定。 */
-    private spawnProjectileParticle(x: number, y: number, angle: number, speed: number, roleId: number, enemyConfigId?: number, parentShot?: IProjectileData) {
+    /** 生成从 x、y 沿 angle 运动的碎片，speed 为原版初速，sizeScale 为额外显示倍率，颜色由角色、敌人或主球状态决定。 */
+    private spawnProjectileParticle(x: number, y: number, angle: number, speed: number, roleId: number, enemyConfigId?: number, parentShot?: IProjectileData, sizeScale?: number) {
         const duration = 0.2 + Math.random() * 0.4;
         this.ent.EffectModel.projectileHitParticles.push({
             x, y, directionX: Math.cos(angle), directionY: Math.sin(angle),
             speed: speed * projectileParticleScale,
             width: (3.5 + Math.random() * 3.5) * projectileParticleScale,
-            duration, life: duration, sizeFactor: 1, roleId, enemyConfigId, parentShot,
+            duration, life: duration, sizeFactor: 1, sizeScale, roleId, enemyConfigId, parentShot,
         });
     }
 

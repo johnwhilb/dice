@@ -210,8 +210,11 @@ export class CombatBll extends CCBusiness<Combat> {
         }
         game.player.getBusiness<PlayerBll>(PlayerBll).setHp(index, hp);
         const effects = game.effect.getBusiness<EffectBll>(EffectBll);
-        if (actual > 0 && player.hp > 0) {
-            effects.showPlayerHurt(index);
+        if (actual > 0) {
+            effects.showPlayerHurtShake();
+            if (player.hp > 0) {
+                effects.showPlayerHurt(index);
+            }
         }
         action.onHurt(index, actual);
         effects.show(EffectKind.Damage, player.pose.x, player.pose.y, 0, actual, player.roleId);

@@ -3,6 +3,7 @@ import type { Player } from "../Player";
 import { PlayerBattleBll } from "./PlayerBattleBll";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 import { PlayerEvent } from "../PlayerEvent";
+import { EffectBll } from "../../effect/bll/EffectBll";
 
 export class PlayerMoveBll extends CCBusiness<Player> {
     /** 根据当前阵容重新计算跟随间距、转向速度、角色半径与平均移速。 */
@@ -68,12 +69,17 @@ export class PlayerMoveBll extends CCBusiness<Player> {
         head.y += Math.sin(model.heading) * model.speed * delta;
         const halfWidth = width / 2 - model.radius;
         const halfHeight = height / 2 - model.radius;
-        if (Math.abs(head.x) > halfWidth) {
+        const hitHorizontal = Math.abs(head.x) > halfWidth;
+        const hitVertical = Math.abs(head.y) > halfHeight;
+        if (hitHorizontal || hitVertical) {
+            this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showPlayerWallShake(model.heading);
+        }
+        if (hitHorizontal) {
             head.x = Math.max(-halfWidth, Math.min(halfWidth, head.x));
             model.heading = Math.PI - model.heading;
             model.targetHeading = model.heading;
         }
-        if (Math.abs(head.y) > halfHeight) {
+        if (hitVertical) {
             head.y = Math.max(-halfHeight, Math.min(halfHeight, head.y));
             model.heading = -model.heading;
             model.targetHeading = model.heading;

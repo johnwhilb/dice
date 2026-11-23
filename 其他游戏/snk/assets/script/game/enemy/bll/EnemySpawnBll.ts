@@ -3,7 +3,7 @@ import { TableBattleRule } from "../../common/table/TableBattleRule";
 import { TableEnemy } from "../../common/table/TableEnemy";
 import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
 import type { Enemy } from "../Enemy";
-import { EnemyObjectKind } from "../EnemyEvent";
+import { EnemyEvent, EnemyObjectKind } from "../EnemyEvent";
 import type { IDistributedSpawn, IEnemyData, IEnemyObject, IEnemySource } from "../EnemyEvent";
 import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
@@ -22,6 +22,7 @@ export class EnemySpawnBll extends CCBusiness<Enemy> {
         due.forEach((entry) => {
             const enemy = this.spawn(entry.configId, entry.x, entry.y);
             this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showSpawnArrival(enemy.x, enemy.y, enemy.config.width / 2, enemy.config.id);
+            this.dispatchEvent(EnemyEvent.SpawnArrival, enemy.x, enemy.y);
         });
     }
 

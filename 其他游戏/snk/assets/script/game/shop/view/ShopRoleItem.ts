@@ -37,9 +37,6 @@ export class ShopRoleItem extends GameComponent {
     }
 
     setData(data: IShopRoleData, width?: number) {
-        if (!this.nodes) {
-            this.nodeTreeInfoLite();
-        }
         this.data = data;
         const content = TableShopContent.getRole(data.roleId);
         const preview = data.kind === ShopRoleKind.Preview;

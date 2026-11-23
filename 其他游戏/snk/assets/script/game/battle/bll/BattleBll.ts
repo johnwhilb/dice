@@ -46,6 +46,14 @@ export class BattleBll extends CCBusiness<Battle> {
         this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).steer(x, y);
     }
 
+    /** 播报最后一个字符显示后，开始胜利面板的半秒等待。 */
+    finishVictoryAnnouncement() {
+        const model = this.ent.BattleModel;
+        if (model.state === BattleState.Victory && model.victoryPanelDelay === undefined) {
+            model.victoryPanelDelay = 0.5;
+        }
+    }
+
     /** 在战斗阶段推进 deltaTime 秒的玩家、敌人、刷怪和结算流程。 */
     updateMovement(deltaTime: number) {
         const model = this.ent.BattleModel;
@@ -53,22 +61,27 @@ export class BattleBll extends CCBusiness<Battle> {
             return;
         }
         const rule = TableBattleRule.getCurrent();
+        const game = this.ent.game;
+        const effects = game.effect.EffectModel;
+        const effectBll = game.effect.getBusiness<EffectBll>(EffectBll);
+        const hadCollisionShake = effects.hasCollisionShake;
+        if (hadCollisionShake) {
+            effectBll.updateCollisionShake(deltaTime);
+        }
         if (model.state === BattleState.Victory || model.state === BattleState.Defeat) {
-            const game = this.ent.game;
-            const effects = game.effect.EffectModel;
-            if (effects.effects.length || effects.projectileHitParticles.length || effects.recoilLife.size || effects.hurtLife.size || effects.shakeLife || effects.slowLife) {
+            let stateChanged = false;
+            if (effects.effects.length || effects.projectileHitParticles.length || effects.recoilLife.size || effects.hurtLife.size || effects.shakeLife || effects.slowLife || hadCollisionShake) {
                 const wasSlowed = effects.slowLife > 0;
-                game.effect.getBusiness<EffectBll>(EffectBll).update(this.toBattleDelta(Math.min(deltaTime, rule.maxFrameTime)));
+                effectBll.update(this.toBattleDelta(Math.min(deltaTime, rule.maxFrameTime)));
                 game.combat.getBusiness<CombatBll>(CombatBll).refreshView();
-                if (wasSlowed && !effects.slowLife) {
-                    this.dispatchEvent(BattleEvent.UpdateState);
-                }
+                stateChanged = wasSlowed && !effects.slowLife;
             }
-            if (model.state === BattleState.Victory) {
-                model.resultTime += deltaTime;
-                if (model.resultTime >= rule.resultDelay) {
-                    this.returnAfterResult();
-                }
+            if (model.victoryPanelDelay) {
+                model.victoryPanelDelay = Math.max(0, model.victoryPanelDelay - deltaTime);
+                stateChanged = stateChanged || model.victoryPanelDelay === 0;
+            }
+            if (stateChanged) {
+                this.dispatchEvent(BattleEvent.UpdateState);
             }
             return;
         }
@@ -80,10 +93,12 @@ export class BattleBll extends CCBusiness<Battle> {
             const frameStep = Math.min(remaining, rule.simulationStep);
             const delta = this.toBattleDelta(frameStep);
             this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).updateMovement(delta, width, height);
+            this.updateCamera(delta, width, height);
             if (model.state === BattleState.Countdown) {
                 model.countdown = Math.max(0, model.countdown - delta);
                 if (!model.countdown) {
                     model.state = BattleState.Running;
+                    this.dispatchEvent(BattleEvent.CountdownFinished);
                 }
             } else {
                 manager.update(delta, width, height);
@@ -95,6 +110,22 @@ export class BattleBll extends CCBusiness<Battle> {
         manager.refreshView();
         this.ent.game.combat.getBusiness<CombatBll>(CombatBll).refreshView();
         this.dispatchEvent(BattleEvent.UpdateState);
+    }
+
+    /** 按原版速度系数积分镜头位移，delta 为战斗步长，width、height 为逻辑战场尺寸。 */
+    private updateCamera(delta: number, width: number, height: number) {
+        const player = this.ent.game.player.PlayerModel;
+        const head = player.players.find((unit) => {
+            return unit.hp > 0;
+        });
+        if (!head) {
+            return;
+        }
+        const model = this.ent.BattleModel;
+        const horizontalWeight = Math.max(0, 1 - 2 * Math.abs(head.pose.x) / width);
+        const verticalWeight = Math.max(0, 1 - 2 * Math.abs(head.pose.y) / height);
+        model.cameraX += Math.cos(player.heading) * player.speed * 0.24 * horizontalWeight * delta;
+        model.cameraY += Math.sin(player.heading) * player.speed * 0.08 * verticalWeight * delta;
     }
 
     /** 将现实时间 delta 换算成战斗时间，慢放到期的余量按正常速度推进。 */
@@ -151,7 +182,7 @@ export class BattleBll extends CCBusiness<Battle> {
         if (model.settled || this.ent.game.GameModel.transitioning) {
             return;
         }
-        if (model.state === BattleState.Victory) {
+        if (model.state === BattleState.Victory && model.victoryPanelDelay === 0 && !this.ent.game.effect.EffectModel.slowLife) {
             model.settled = true;
             this.ent.game.finishBattle(this.ent.game.enemy.EnemyModel.pickedUpGold);
         } else if (model.state === BattleState.Defeat) {

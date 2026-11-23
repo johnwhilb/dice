@@ -4,6 +4,8 @@ export enum BattleEvent {
     OpenBattle = "battle_open",
     /** 关卡、倒计时、波次或战斗结果变化，无参数。 */
     UpdateState = "battle_update_state",
+    /** 开场倒计时归零，无参数。 */
+    CountdownFinished = "battle_countdown_finished",
 }
 
 /** 本场战斗流程状态。 */

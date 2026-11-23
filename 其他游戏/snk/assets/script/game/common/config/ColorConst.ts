@@ -37,6 +37,7 @@ export class ColorConst {
     }
 
     static readonly shopText: Color = new Color("#dadada");
+    static readonly enemySpawnParticle: Color = new Color("#e91d39");
     static readonly shopMuted: Color = new Color("#777777");
     static readonly shopPanel: Color = new Color("#434343");
     static readonly shopHover: Color = new Color("#292929");

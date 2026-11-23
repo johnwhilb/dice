@@ -9,13 +9,16 @@ export class BattleModel extends ecs.Comp {
     arenaWidth: number = 0;
     arenaHeight: number = 0;
     combatScale: number = 1;
+    cameraX: number = 0;
+    cameraY: number = 0;
     level: number = 0;
     wave: number = 0;
     countdown: number = 0;
     state: BattleState = BattleState.Countdown;
     bossScheduled: boolean = false;
     settled: boolean = false;
-    resultTime: number = 0;
+    /** 胜利播报完成后到面板出现的剩余秒数，未播完时为空。 */
+    victoryPanelDelay?: number;
 
     /** 预制体提供显示尺寸，战斗数值沿用按原版三倍坐标录入的尺度。 */
     setArenaSize(width: number, height: number) {
@@ -35,17 +38,24 @@ export class BattleModel extends ecs.Comp {
         return this.arenaHeight / this.combatScale;
     }
 
+    /** 将原版镜头位移换算为战场显示坐标。 */
+    get originalToViewScale() {
+        return combatConfigScale * this.combatScale;
+    }
+
     /** 清空预制体提供的战斗区域尺寸，角色数据由 PlayerModel 管理。 */
     reset() {
         this.arenaWidth = 0;
         this.arenaHeight = 0;
         this.combatScale = 1;
+        this.cameraX = 0;
+        this.cameraY = 0;
         this.level = 0;
         this.wave = 0;
         this.countdown = 0;
         this.state = BattleState.Countdown;
         this.bossScheduled = false;
         this.settled = false;
-        this.resultTime = 0;
+        this.victoryPanelDelay = undefined;
     }
 }
