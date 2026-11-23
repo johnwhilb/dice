@@ -54,7 +54,6 @@ export class TransitionView extends Component {
         this.title.parent = this.node;
         this.title.layer = this.node.layer;
         this.title.setScale(0, 0, 1);
-        this.font = oops.res.getBundle("bundle")?.get("gui/mainMenu/texture/FatPixelFont", TTFFont) ?? undefined;
         this.rewardText = !!options.reward;
         if (options.reward) {
             this.setLine(0, "gold gained: 0 + 0");
