@@ -43,6 +43,7 @@ export interface IProjectileData {
     generic: boolean;
     /** 角色直接发射的弹丸记录预先计算的枪口位置。 */
     muzzle?: IProjectileMuzzle;
+    playLaunchSound?: boolean;
     /** 启动飞行后只生成一次发射表现。 */
     launched?: boolean;
     /** 发射时需要更新表现的召唤物。 */

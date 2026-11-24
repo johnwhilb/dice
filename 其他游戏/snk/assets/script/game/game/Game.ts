@@ -28,6 +28,7 @@ import { ColorConst } from "../common/config/ColorConst";
 import { TransitionView } from "../initialize/view/TransitionView";
 import type { ITransitionOptions } from "../initialize/view/TransitionView";
 import type { IRoundGoldReward } from "../shop/ShopEvent";
+import { GameAudio } from "../common/GameAudio";
 
 @ecs.register("Game")
 export class Game extends CCEntity {
@@ -96,6 +97,7 @@ export class Game extends CCEntity {
                     return false;
                 }
                 smc.mainMenu.removeUi(MainMenuView);
+                GameAudio.setMusic(0.2, 1, 1);
                 this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).show();
                 return true;
             });
@@ -123,6 +125,8 @@ export class Game extends CCEntity {
                     return false;
                 }
                 this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Battle);
+                GameAudio.setMusic(0.5, 1, 2);
+                GameAudio.preloadEffects(["Click", "Buff 13", "Bloody punches 7", "Bloody punches 10", "Body Fall 2", "Body Fall 18"]);
                 this.shop.removeUi(ShopView);
                 return true;
             });
@@ -134,6 +138,11 @@ export class Game extends CCEntity {
             return;
         }
         this.pendingRoundReward = reward ?? this.pendingRoundReward;
+        if (this.pendingRoundReward) {
+            GameAudio.playEffect("Wind Bolt 12");
+        } else {
+            GameAudio.playTransition(false);
+        }
         const battleView = this.battle.BattleView;
         const leader = this.player.PlayerModel.players[0];
         const origin = battleView?.getTransitionOrigin();
@@ -144,6 +153,7 @@ export class Game extends CCEntity {
                     return false;
                 }
                 this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Shop);
+                GameAudio.setMusic(0.2, 1, 1);
                 this.battle.removeUi(BattleView);
                 this.enemy.EnemyModel.reset();
                 this.combat.getBusiness<CombatBll>(CombatBll).reset();
@@ -154,8 +164,16 @@ export class Game extends CCEntity {
     }
 
     restartShop() {
+        if (this.GameModel.transitioning) {
+            return;
+        }
+        GameAudio.playTransition(false);
         this.transition({ message: "正在重新开始…" }, () => {
-            return Promise.resolve(this.shop.getBusiness<ShopBll>(ShopBll).newRun(true));
+            const ready = this.shop.getBusiness<ShopBll>(ShopBll).newRun(true);
+            if (ready) {
+                GameAudio.restartMusic();
+            }
+            return Promise.resolve(ready);
         });
     }
 
@@ -191,6 +209,10 @@ export class Game extends CCEntity {
     }
 
     returnMenu() {
+        if (this.GameModel.transitioning) {
+            return;
+        }
+        GameAudio.playTransition(false);
         this.transition({}, () => {
             return smc.mainMenu.open().then((node) => {
                 if (!node) {

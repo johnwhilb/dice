@@ -1,40 +1,37 @@
 import { CCBusiness } from "db://oops-framework/module/common/CCBusiness";
-import { oops } from "db://oops-framework/core/Oops";
 import type { Shop } from "../Shop";
 import { ShopSound } from "../ShopEvent";
-import { ResPath } from "../../common/config/ResPath";
-
-const shopSoundVolumes = new Map<ShopSound, number>([
-    [ShopSound.Buy, 0.56],
-    [ShopSound.Sell, 0.56],
-    [ShopSound.Upgrade, 0.68],
-    [ShopSound.MaxUpgrade, 0.78],
-    [ShopSound.Refresh, 0.52],
-    [ShopSound.Lock, 0.54],
-    [ShopSound.Swap, 0.45],
-    [ShopSound.Click, 0.42],
-    [ShopSound.Synergy, 0.62],
-    [ShopSound.StartBattle, 0.62],
-    [ShopSound.Error, 0.58],
-]);
+import { coinSounds, GameAudio, switchAltSound, switchSound } from "../../common/GameAudio";
 
 export class ShopAudioBll extends CCBusiness<Shop> {
-    private lastPlayedAt = new Map<ShopSound, number>();
-
-    /** 播放商店音效 sound，带轻度节流避免连点破音，遵循框架全局音效开关与音量。 */
-    play(sound: ShopSound, volumeScale: number = 1) {
-        if (!oops.audio.effect.getSwitch()) {
-            return;
+    /** 根据操作 sound 播放商店反馈，购买和道具升级可同时播放多层音效。 */
+    play(sound: ShopSound) {
+        switch (sound) {
+            case ShopSound.Buy:
+                GameAudio.playEffect(switchSound);
+                GameAudio.playEffect(coinSounds);
+                break;
+            case ShopSound.Sell:
+                GameAudio.playEffect(coinSounds);
+                break;
+            case ShopSound.Refresh:
+            case ShopSound.Lock:
+            case ShopSound.Experience:
+                GameAudio.playEffect(switchAltSound);
+                break;
+            case ShopSound.Upgrade:
+                GameAudio.playEffect("Bonus 2", 0.6, 1, 1);
+                break;
+            case ShopSound.MaxUpgrade:
+                GameAudio.playEffect("Bonus 2", 0.6, 1.2, 1.2);
+                GameAudio.playEffect("Buff 4", 0.5, 1, 1);
+                break;
+            case ShopSound.StartBattle:
+                GameAudio.playTransition(true);
+                break;
+            case ShopSound.Error:
+                GameAudio.playEffect("Error 2");
+                break;
         }
-        const now = Date.now();
-        const last = this.lastPlayedAt.get(sound) ?? 0;
-        if (now - last < 45) {
-            return;
-        }
-        this.lastPlayedAt.set(sound, now);
-        const baseVolume = shopSoundVolumes.get(sound) ?? 0.5;
-        const masterVolume = oops.audio.effect.getVolume();
-        const volume = Math.max(0, Math.min(1, baseVolume * volumeScale * masterVolume));
-        oops.audio.playEffect(ResPath.getShopAudio(sound), { bundle: "bundle", volume });
     }
 }

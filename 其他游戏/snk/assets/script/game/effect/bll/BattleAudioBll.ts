@@ -1,127 +1,186 @@
 import { CCBusiness } from "db://oops-framework/module/common/CCBusiness";
-import { oops } from "db://oops-framework/core/Oops";
+import { coinSounds, GameAudio } from "../../common/GameAudio";
+import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
+import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
 import type { Effect } from "../Effect";
 import { BattleSound } from "../EffectEvent";
-import { ResPath } from "../../common/config/ResPath";
-import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
 
-const soundCooldowns = new Map<BattleSound, number>([
-    [BattleSound.Shoot, 55],
-    [BattleSound.Knife, 55],
-    [BattleSound.Arrow, 55],
-    [BattleSound.Cannon, 85],
-    [BattleSound.Magic, 65],
-    [BattleSound.Hit, 45],
-    [BattleSound.Crit, 65],
-    [BattleSound.Area, 75],
-    [BattleSound.Chain, 70],
-    [BattleSound.EnemyDeath, 55],
-    [BattleSound.BossDeath, 200],
-    [BattleSound.Spawn, 90],
-    [BattleSound.WallHit, 80],
-    [BattleSound.PlayerHurt, 95],
-    [BattleSound.PlayerDeath, 150],
-    [BattleSound.Shield, 90],
-    [BattleSound.Gold, 40],
-    [BattleSound.Heal, 65],
-    [BattleSound.Countdown, 150],
-    [BattleSound.BattleStart, 200],
-    [BattleSound.Victory, 300],
-    [BattleSound.Defeat, 300],
+const arrows = new Set<number>([RoleKeyEnum.Archer, RoleKeyEnum.Hunter, RoleKeyEnum.Barrager, RoleKeyEnum.Corruptor]);
+const knives = new Set<number>([
+    RoleKeyEnum.Scout, RoleKeyEnum.Outlaw, RoleKeyEnum.Blade, RoleKeyEnum.Spellblade,
+    RoleKeyEnum.Jester, RoleKeyEnum.Assassin, RoleKeyEnum.Beastmaster, RoleKeyEnum.Thief,
 ]);
-
-const soundVolumes = new Map<BattleSound, number>([
-    [BattleSound.Shoot, 0.34],
-    [BattleSound.Knife, 0.38],
-    [BattleSound.Arrow, 0.38],
-    [BattleSound.Cannon, 0.56],
-    [BattleSound.Magic, 0.4],
-    [BattleSound.Hit, 0.28],
-    [BattleSound.Crit, 0.62],
-    [BattleSound.Area, 0.48],
-    [BattleSound.Chain, 0.42],
-    [BattleSound.EnemyDeath, 0.42],
-    [BattleSound.BossDeath, 0.82],
-    [BattleSound.Spawn, 0.26],
-    [BattleSound.WallHit, 0.42],
-    [BattleSound.PlayerHurt, 0.64],
-    [BattleSound.PlayerDeath, 0.72],
-    [BattleSound.Shield, 0.52],
-    [BattleSound.Gold, 0.46],
-    [BattleSound.Heal, 0.52],
-    [BattleSound.Countdown, 0.5],
-    [BattleSound.BattleStart, 0.6],
-    [BattleSound.Victory, 0.72],
-    [BattleSound.Defeat, 0.68],
-]);
-
-const arrowAudioRoles = new Set<number>([
-    RoleKeyEnum.Archer,
-    RoleKeyEnum.Hunter,
-    RoleKeyEnum.Barrager,
-    RoleKeyEnum.Sentry,
-]);
-
-const knifeAudioRoles = new Set<number>([
-    RoleKeyEnum.Scout,
-    RoleKeyEnum.Outlaw,
-    RoleKeyEnum.Blade,
-    RoleKeyEnum.Spellblade,
-    RoleKeyEnum.Jester,
-    RoleKeyEnum.Beastmaster,
-    RoleKeyEnum.Thief,
-]);
-
-const cannonAudioRoles = new Set<number>([
-    RoleKeyEnum.Cannoneer,
-    RoleKeyEnum.Wizard,
-]);
-
-const magicAudioRoles = new Set<number>([
-    RoleKeyEnum.Arcanist,
-    RoleKeyEnum.Lich,
-    RoleKeyEnum.Sage,
-    RoleKeyEnum.Witch,
-]);
+const magic = new Set<number>([RoleKeyEnum.Wizard, RoleKeyEnum.Lich, RoleKeyEnum.Arcanist]);
+const mechanical = new Set<number>([RoleKeyEnum.Engineer, RoleKeyEnum.DualGunner, RoleKeyEnum.Miner]);
+const melee = new Set<number>([RoleKeyEnum.Swordsman, RoleKeyEnum.Barbarian, RoleKeyEnum.Juggernaut, RoleKeyEnum.Highlander]);
+const heavyHit = "Body Head (Headshot) 1";
+const magicHit = "Fire bolt 10";
+const fists = ["Bloody punches 7", "Bloody punches 10"];
+const playerHits = ["Body Fall 2", "Body Fall 18"];
+const explosions = ["Explosion Flesh_01", "Explosion Flesh_02"];
 
 export class BattleAudioBll extends CCBusiness<Effect> {
-    private lastPlayedAt = new Map<BattleSound, number>();
-
-    /** 按节流冷却播放指定战斗音效 sound，volumeScale 用于按强度微调音量。 */
-    play(sound: BattleSound, volumeScale: number = 1) {
-        if (!oops.audio.effect.getSwitch()) {
-            return;
+    /** 播放拾取、倒计时、暴击等独立战斗事件 sound，保留原版采样池及叠音。 */
+    play(sound: BattleSound) {
+        switch (sound) {
+            case BattleSound.Crit:
+                GameAudio.playEffect("Dagger Stab (Flesh) 4");
+                GameAudio.playEffect("Sword hits another sword 6", 0.15);
+                break;
+            case BattleSound.Chain:
+                GameAudio.playEffect(["Spark 1", "Spark 2", "Spark 3"], 0.3, 0.9, 1.1);
+                break;
+            case BattleSound.Spawn:
+                GameAudio.playEffect("Buff 13", 0.15, 0.8, 1.2);
+                break;
+            case BattleSound.PlayerHurt:
+                GameAudio.playEffect(playerHits);
+                break;
+            case BattleSound.Gold:
+                GameAudio.playEffect(["Coins - Gears - Slot", ...coinSounds], 0.3, 0.9, 1.1);
+                break;
+            case BattleSound.GoldDrop:
+                GameAudio.playEffect("Collect 5");
+                break;
+            case BattleSound.HealPickup:
+                GameAudio.playEffect("Collect 2", 1);
+                GameAudio.playEffect("Buff 3");
+                break;
+            case BattleSound.Heal:
+                GameAudio.playEffect("Buff 3");
+                break;
+            case BattleSound.Countdown:
+                GameAudio.playEffect("Click", 0.5, 1, 1);
+                break;
+            case BattleSound.BattleStart:
+                GameAudio.playEffect("Click", 0.5, 1.2, 1.2);
+                break;
+            case BattleSound.Thunder:
+                GameAudio.playEffect("399656__bajko__sfx-thunder-blast");
+                break;
         }
-        const now = Date.now();
-        const cooldown = soundCooldowns.get(sound) ?? 50;
-        const last = this.lastPlayedAt.get(sound) ?? 0;
-        if (now - last < cooldown) {
-            return;
-        }
-        this.lastPlayedAt.set(sound, now);
-        const baseVolume = soundVolumes.get(sound) ?? 0.5;
-        const masterVolume = oops.audio.effect.getVolume();
-        const volume = Math.max(0, Math.min(1, baseVolume * volumeScale * masterVolume));
-        oops.audio.playEffect(ResPath.getBattleAudio(sound), { bundle: "bundle", volume });
     }
 
-    /** 根据发射角色 roleId 自动匹配对应的弹丸发射音效并播放。 */
-    playShot(roleId: number) {
-        if (cannonAudioRoles.has(roleId)) {
-            this.play(BattleSound.Cannon);
-        } else if (arrowAudioRoles.has(roleId)) {
-            this.play(BattleSound.Arrow);
-        } else if (knifeAudioRoles.has(roleId)) {
-            this.play(BattleSound.Knife);
-        } else if (magicAudioRoles.has(roleId)) {
-            this.play(BattleSound.Magic);
+    /** 根据角色 roleId 选择发射采样，generic 表示角色生成的次级弹丸。 */
+    playShot(roleId: number, generic: boolean = false) {
+        if (generic) {
+            if (roleId === RoleKeyEnum.Arcanist) {
+                GameAudio.playEffect("Magical Impact 12", 0.15, 0.7, 1.3);
+            }
+        } else if (arrows.has(roleId) || roleId === RoleKeyEnum.Sentry) {
+            GameAudio.playEffect("Releasing Bow String 1", 0.35);
+        } else if (knives.has(roleId)) {
+            GameAudio.playEffect(["Throwing Knife (Thrown) 3", "Throwing Knife (Thrown) 4"], 0.35);
+            if (roleId === RoleKeyEnum.Spellblade) {
+                GameAudio.playEffect("Wind Bolt 20", 0.15);
+            }
+        } else if (magic.has(roleId)) {
+            GameAudio.playEffect("Wind Bolt 20", 0.15);
+        } else if (roleId === RoleKeyEnum.Cannoneer) {
+            GameAudio.playEffect(["Cannon shots 1", "Cannon shots 7"]);
+        } else if (roleId === RoleKeyEnum.DualGunner) {
+            GameAudio.playEffect("Revolver Shot_07", 0.3);
+            GameAudio.playEffect("Revolver Shot_08", 0.3);
+        } else if (roleId === RoleKeyEnum.Engineer) {
+            GameAudio.playEffect("Sci Fi Machine Gun 7", 0.35);
+            GameAudio.playEffect("Sniper Shot_09", 0.35);
+        } else if (roleId === RoleKeyEnum.Illusionist) {
+            GameAudio.playEffect("Sci Fi Machine Gun 7", 0.1);
+            GameAudio.playEffect("Sniper Shot_09", 0.1);
+            GameAudio.playEffect("Wind Bolt 20", 0.1);
+        } else if (roleId === RoleKeyEnum.Vagrant || roleId === RoleKeyEnum.Artificer) {
+            GameAudio.playEffect("Shooting Projectile (Classic) 11", 0.2);
+        }
+    }
+
+    /** 根据 roleId、arrow 和 generic 区分弹丸命中敌人的反馈。 */
+    playProjectileHit(roleId: number, arrow: boolean, generic: boolean) {
+        if (generic && roleId === RoleKeyEnum.Arcanist) {
+            GameAudio.playEffect(magicHit, 0.075);
+        } else if (!generic && magic.has(roleId)) {
+            GameAudio.playEffect(magicHit, 0.15);
+        } else if (arrow || arrows.has(roleId) || knives.has(roleId) || mechanical.has(roleId)
+            || roleId === RoleKeyEnum.Witch || roleId === RoleKeyEnum.Sentry) {
+            GameAudio.playEffect(heavyHit, 0.35);
+            if (roleId === RoleKeyEnum.Spellblade) {
+                GameAudio.playEffect(magicHit, 0.15);
+            }
         } else {
-            this.play(BattleSound.Shoot);
+            GameAudio.playEffect("Kick 16_1", 0.35);
         }
     }
 
-    /** 清空各音效的节流时间戳，在新一场战斗开始时调用。 */
-    resetCooldowns() {
-        this.lastPlayedAt.clear();
+    /** 根据 roleId 和弹丸 arrow 标记选择擦墙、撞墙或魔法碎裂反馈。 */
+    playProjectileWall(roleId: number, arrow: boolean) {
+        if (arrow || arrows.has(roleId) || roleId === RoleKeyEnum.Sentry) {
+            GameAudio.playEffect(["Arrow Impact wood 3", "Arrow Impact wood 1"], 0.2, 0.9, 1.1);
+        } else if (knives.has(roleId) || roleId === RoleKeyEnum.Witch) {
+            GameAudio.playEffect("Shield Impacts Sword 1", 0.2, 0.9, 1.1);
+            if (roleId === RoleKeyEnum.Spellblade) {
+                GameAudio.playEffect(magicHit, 0.075);
+            }
+        } else if (magic.has(roleId)) {
+            GameAudio.playEffect(magicHit, 0.075);
+        } else if (roleId === RoleKeyEnum.Cannoneer) {
+            GameAudio.playEffect("Cannon impact sounds (Hitting ship) 4", 0.1);
+        } else if (mechanical.has(roleId)) {
+            GameAudio.playEffect(["Concrete 6", "Concrete 7"], 0.2, 0.9, 1.1);
+        } else {
+            GameAudio.playEffect("Player Takes Damage 2", 0.2, 0.9, 1.1);
+        }
+    }
+
+    /** 按蛇头至队尾的顺序 rank 播放撞墙木击和弹响，rate 为本次撞墙共享的音高。 */
+    playPlayerWall(rank: number, rate: number) {
+        GameAudio.playEffect("Wood Heavy 5", 0.1, rate + rank * 0.025, rate + rank * 0.025);
+        GameAudio.playEffect("Pop sounds 10", 0.2, rate + rank * 0.05, rate + rank * 0.05);
+    }
+
+    /** 根据角色 roleId 播放范围攻击出手声，和命中音分开触发。 */
+    playAreaCast(roleId: number) {
+        if (melee.has(roleId)) {
+            GameAudio.playEffect(["Heavy sword woosh 1", "Heavy sword woosh 19"], 0.75, 0.9, 1.1);
+        }
+        if (roleId === RoleKeyEnum.Elementor || roleId === RoleKeyEnum.Juggernaut) {
+            GameAudio.playEffect("Wind Bolt 18", 0.5, 0.9, 1.1);
+        } else if (roleId === RoleKeyEnum.Psychic) {
+            GameAudio.playEffect("Magical Impact 13", 0.4, 0.9, 1.1);
+        } else if (roleId === RoleKeyEnum.Launcher) {
+            GameAudio.playEffect("Buff 14", 0.5, 0.9, 1.1);
+        }
+    }
+
+    /** 根据攻击角色 roleId 和持续伤害标记 dot 选择范围命中的采样。 */
+    playAreaHit(roleId: number, dot: boolean) {
+        if (dot) {
+            GameAudio.playEffect(heavyHit, 0.2, 0.8, 1.2);
+            if (roleId === RoleKeyEnum.Pyromancer) {
+                GameAudio.playEffect("Fire bolt 5", 0.1, 1.5, 1.8);
+            }
+        } else if (roleId === RoleKeyEnum.Wizard || roleId === RoleKeyEnum.Magician || roleId === RoleKeyEnum.Elementor || roleId === RoleKeyEnum.Psychic) {
+            GameAudio.playEffect("Shadow Punch 1");
+        } else if (melee.has(roleId)) {
+            GameAudio.playEffect(heavyHit, 0.35);
+        } else if (roleId === RoleKeyEnum.Blade) {
+            GameAudio.playEffect("Sword impact (Flesh) 2", 0.35, 0.9, 1.1);
+            GameAudio.playEffect(heavyHit, 0.2);
+        } else if (roleId === RoleKeyEnum.Cannoneer) {
+            GameAudio.playEffect(explosions, 0.075);
+        } else if (roleId === RoleKeyEnum.Saboteur || roleId === RoleKeyEnum.Bomber || roleId === RoleKeyEnum.Pyromancer) {
+            if (roleId === RoleKeyEnum.Pyromancer) {
+                GameAudio.playEffect("Explosion Fireworks_01", 0.4);
+            }
+            GameAudio.playEffect(explosions, 0.2);
+        }
+    }
+
+    /** 为敌人 configId 播放死亡采样，boss 标记追加首领专用的魔法冲击。 */
+    playEnemyDeath(configId: number, boss: boolean) {
+        GameAudio.playEffect(fists, 0.5, 0.9, 1.1);
+        if (boss) {
+            GameAudio.playEffect("Magical Impact 27");
+        } else if (configId === EnemyKeyEnum.Critter) {
+            GameAudio.playEffect("Crickets Chirping 4", 0.2);
+        }
     }
 }

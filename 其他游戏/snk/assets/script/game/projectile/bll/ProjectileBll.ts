@@ -10,6 +10,8 @@ import { EnemyKeyEnum } from "../../common/table/EnemyKeyEnum";
 import { RoleClassKeyEnum } from "../../common/table/RoleClassKeyEnum";
 import { CombatBll } from "../../combat/bll/CombatBll";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { BattleAudioBll } from "../../effect/bll/BattleAudioBll";
+import { GameAudio } from "../../common/GameAudio";
 import { AreaFeedback } from "../../effect/EffectEvent";
 import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
 import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
@@ -66,6 +68,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
         const rule = TableCombatRule.getCurrent();
         const combat = game.combat.getBusiness<CombatBll>(CombatBll);
         const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+        const audio = game.effect.getBusiness<BattleAudioBll>(BattleAudioBll);
         const passives = game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll);
         model.projectiles.slice().forEach((shot) => {
             if (shot.dead) {
@@ -87,6 +90,9 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                 }
                 const muzzle = shot.muzzle;
                 effects.showMuzzle(muzzle?.x ?? oldX, muzzle?.y ?? oldY, shot.angle, roleId, muzzle ? shot.source : undefined);
+                if (shot.playLaunchSound || (shot.generic && roleId === RoleKeyEnum.Arcanist)) {
+                    audio.playShot(roleId, shot.generic && !shot.summon);
+                }
             }
             if (shot.homing) {
                 const target = combat.nearest(shot.x, shot.y, rule.projectileHomingRange, shot.hitIds);
@@ -204,6 +210,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                         }
                         shot.damage *= 1 + passives.item(ShopContentKeyEnum.ItemUltimatum) + (roleId === RoleKeyEnum.Scout ? skill.extraPower : 0);
                         effects.showProjectileHit(hitX, hitY, false, roleId, enemy.config.id);
+                        audio.playProjectileHit(roleId, !!shot.arrow, !!shot.generic);
                         break;
                     }
                 }
@@ -216,6 +223,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                     }
                 }
                 effects.showProjectileHit(hitX, hitY, shot.dead, roleId, enemy.config.id);
+                audio.playProjectileHit(roleId, !!shot.arrow, !!shot.generic);
             }
             if (shot.dead || (redirected && shot.life > 0)) {
                 return;
@@ -228,6 +236,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                 return;
             }
             if (wall && shot.life > 0 && shot.bounces > 0) {
+                audio.playProjectileWall(roleId, !!shot.arrow);
                 shot.bounces -= 1;
                 shot.x = endX;
                 shot.y = endY;
@@ -249,6 +258,9 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                 effects.showProjectileHit(endX, endY, true, roleId);
                 const arrow = shot.arrow || arrowRoles.has(roleId);
                 const knife = !arrow && knifeRoles.has(roleId);
+                if (wall) {
+                    audio.playProjectileWall(roleId, arrow);
+                }
                 if (wall && (arrow || knife)) {
                     const wallAngle = wallX ? (directionX > 0 ? Math.PI : 0) : (directionY > 0 ? -Math.PI / 2 : Math.PI / 2);
                     effects.showWallResidue(endX, endY, shot.angle, wallAngle, roleId, knife, shot.speed * 0.1);
@@ -274,12 +286,17 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                         shooter.fireTime = game.combat.CombatModel.elapsed;
                     }
                     effects.showMuzzle(shot.x, shot.y, angle, 0);
+                    GameAudio.playEffect("Shooting Projectile (Classic) 11", 0.1);
                 }
             }
             shot.x += Math.cos(angle) * shot.speed * delta;
             shot.y += Math.sin(angle) * shot.speed * delta;
             shot.life -= delta;
-            shot.dead = shot.life <= 0 || Math.abs(shot.x) > width / 2 || Math.abs(shot.y) > height / 2;
+            const hitWall = Math.abs(shot.x) > width / 2 || Math.abs(shot.y) > height / 2;
+            shot.dead = shot.life <= 0 || hitWall;
+            if (hitWall) {
+                GameAudio.playEffect("Player Takes Damage 2", 0.05, 0.9, 1.1);
+            }
             if (!shot.dead && passives.item(ShopContentKeyEnum.ItemMeatShield)) {
                 const shield = game.summon.SummonModel.summons.find((entry) => {
                     return !entry.dead && entry.typeId === SummonTypeKeyEnum.Critter && Math.hypot(entry.x - shot.x, entry.y - shot.y) < rule.orbAttract;

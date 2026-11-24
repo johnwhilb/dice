@@ -15,8 +15,17 @@ import { BuffBll } from "../../buff/bll/BuffBll";
 import { BuffKind } from "../../buff/BuffEvent";
 import { CombatCamp } from "../../combat/CombatEvent";
 import type { ISummonData } from "../SummonEvent";
-import { AreaFeedback } from "../../effect/EffectEvent";
+import { AreaFeedback, BattleSound } from "../../effect/EffectEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { BattleAudioBll } from "../../effect/bll/BattleAudioBll";
+import { GameAudio } from "../../common/GameAudio";
+
+const deploySounds = new Map<number, string>([
+    [SummonTypeKeyEnum.Pet, "Wolf barks 5"],
+    [SummonTypeKeyEnum.Bomb, "Weapon Swap 2"],
+    [SummonTypeKeyEnum.Illusion, "Buff 5"],
+    [SummonTypeKeyEnum.Automaton, "458586__inspectorj__ui-mechanical-notification-01-fx"],
+]);
 
 export class SummonBll extends CCBusiness<Summon> {
     /** 在 x、y 生成 source 所属的 typeId 造物，damage 为主人实时伤害快照。 */
@@ -31,6 +40,14 @@ export class SummonBll extends CCBusiness<Summon> {
             timer: 0, damage: damage * config.damage * conjurer, dead: false, createdAt: game.combat.CombatModel.elapsed };
         this.ent.SummonModel.summons.push(data);
         const owner = game.player.PlayerModel.players[source];
+        const deploy = deploySounds.get(typeId);
+        if (deploy) {
+            GameAudio.playEffect(deploy, typeId === SummonTypeKeyEnum.Pet ? 0.35 : 0.5);
+        } else if (typeId === SummonTypeKeyEnum.Turret) {
+            GameAudio.playEffect("321215__hybrid-v__sci-fi-weapons-deploy", 0.2, 1.2, 1.2);
+        } else if (typeId === SummonTypeKeyEnum.Saboteur) {
+            GameAudio.playEffect(["Male Jump 1", "Male Jump 2", "Male Jump 3"], 0.2, 0.8, 1.2);
+        }
         game.effect.getBusiness<EffectBll>(EffectBll).showSpawnRing(x, y, critter ? 14 : 24, owner.roleId);
         return data;
     }
@@ -44,6 +61,7 @@ export class SummonBll extends CCBusiness<Summon> {
                 break;
             }
             this.ent.SummonModel.orbs.push({ x, y, dead: false });
+            GameAudio.playEffect("Buff 5");
             effects.showSpawnRing(x, y, 20, RoleKeyEnum.Cleric);
             if (Math.random() < chance) {
                 this.ent.SummonModel.orbs.push({ x, y, dead: false });
@@ -58,6 +76,12 @@ export class SummonBll extends CCBusiness<Summon> {
         const radius = skill.zoneRadius > 0 ? skill.zoneRadius : skill.radius;
         const duration = skill.zoneDuration > 0 ? skill.zoneDuration : skill.duration;
         const angle = Math.random() * Math.PI * 2;
+        const roleId = this.ent.game.player.PlayerModel.players[source].roleId;
+        if (roleId === RoleKeyEnum.PlagueDoctor || roleId === RoleKeyEnum.Witch) {
+            GameAudio.playEffect("Magical Swoosh 18", roleId === RoleKeyEnum.Witch ? 0.3 : 0.5);
+        } else if (roleId === RoleKeyEnum.Psykino) {
+            GameAudio.playEffect("Magical Impact 18");
+        }
         const arcSpeed = force ? (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random() * 2) * Math.PI : (Math.random() - 0.5) * Math.PI / 2;
         this.ent.SummonModel.areas.push({ source, skillId, x, y, shotTimer: 0, radius: radius * stats.areaSizeMultiplier, damage: stats.damage * skill.damage * damageScale,
             life: duration, timer: 0, interval: skill.tick, follow: skill.follow, force, speed: skill.projectileSpeed, angle,
@@ -146,16 +170,21 @@ export class SummonBll extends CCBusiness<Summon> {
             const interval = config.interval / fast;
             if (summon.timer >= interval && interval > 0) {
                 if (config.heal) {
+                    game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).play(BattleSound.Heal);
                     summon.attackAt = game.combat.CombatModel.elapsed;
                     this.orb(summon.x, summon.y, config.shots);
                     summon.timer = 0;
                 } else if (summon.typeId === SummonTypeKeyEnum.Volcano) {
                     summon.attackAt = game.combat.CombatModel.elapsed;
+                    GameAudio.playEffect(["Cannon shots 1", "Cannon shots 7"]);
                     combat.area(summon.source, skill.id, summon.x, summon.y, config.radius, summon.damage, true, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                     summon.timer = 0;
                 } else if (target) {
                     if (config.orbit || summon.typeId === SummonTypeKeyEnum.Critter || summon.typeId === SummonTypeKeyEnum.Pet) {
                         summon.attackAt = game.combat.CombatModel.elapsed;
+                        if (summon.typeId === SummonTypeKeyEnum.Pet) {
+                            GameAudio.playEffect("Body Head (Headshot) 1", 0.35);
+                        }
                         combat.hitEnemy(target, summon.damage * (config.orbit ? 1 + stats.item(ShopContentKeyEnum.ItemPsychosink) : 1), summon.source, skill.id, false);
                         if (!config.orbit) {
                             summon.hp -= 1;
@@ -173,6 +202,7 @@ export class SummonBll extends CCBusiness<Summon> {
                             bullet.speed = rule.projectileSpeed;
                             bullet.bounces = skill.bounces;
                             bullet.summon = summon;
+                            bullet.playLaunchSound = shot === 0 || summon.typeId === SummonTypeKeyEnum.Sentry;
                         }
                     }
                     summon.timer = 0;
@@ -187,6 +217,11 @@ export class SummonBll extends CCBusiness<Summon> {
             if (summon.life <= 0 || summon.hp <= 0 || detonate) {
                 summon.dead = true;
                 if (config.explode || stats.item(ShopContentKeyEnum.ItemConstructInstability)) {
+                    if (config.explode) {
+                        GameAudio.playEffect(["Cannon shots 1", "Cannon shots 7"]);
+                        GameAudio.playEffect(["Explosion Flesh_01", "Explosion Flesh_02"]);
+                        GameAudio.playEffect("Explosion Grenade_04");
+                    }
                     combat.area(summon.source, skill.id, summon.x, summon.y, config.radius, summon.damage * (config.explode ? skill.damage : stats.item(ShopContentKeyEnum.ItemConstructInstability)), false, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                 }
                 for (let shot = 0; shot < skill.deathShots; shot++) {
@@ -212,6 +247,7 @@ export class SummonBll extends CCBusiness<Summon> {
                     orb.y += (target.pose.y - orb.y) / distance * step;
                 }
                 if (distance <= rule.healPickupRadius) {
+                    game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).play(BattleSound.HealPickup);
                     const lowest = game.player.PlayerModel.players.filter((player) => {
                         return player.hp > 0;
                     }).sort((left, right) => {

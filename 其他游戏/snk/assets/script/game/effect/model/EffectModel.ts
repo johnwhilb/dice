@@ -12,6 +12,8 @@ interface ICameraShake {
 interface IWallRipple {
     source: number;
     delay: number;
+    rank: number;
+    rate: number;
 }
 
 @ecs.register("EffectModel")

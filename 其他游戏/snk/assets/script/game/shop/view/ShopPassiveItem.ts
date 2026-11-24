@@ -2,9 +2,8 @@ import { smc } from "../../common/SingletonModuleComp";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { ShopBll } from "../bll/ShopBll";
-import { ShopAudioBll } from "../bll/ShopAudioBll";
 import { _decorator, Sprite, instantiate, Layout } from "cc";
-import { ShopSound, ShopTooltipSaleKind } from "../ShopEvent";
+import { ShopTooltipSaleKind } from "../ShopEvent";
 import type { IShopTooltipData } from "../ShopEvent";
 import type { IShopItem } from "../model/ShopModel";
 import { ColorConst } from "../../common/config/ColorConst";
@@ -80,7 +79,6 @@ export class ShopPassiveItem extends GameComponent {
 
     btnItemInfo() {
         if (!this.clickBlocked) {
-            smc.game.shop.getBusiness<ShopAudioBll>(ShopAudioBll).play(ShopSound.Click);
             const item = this.item;
             const content = TableShopContent.getConfigById<TableShopContent>(item.contentId);
             const required = this.business.getItemXpNeeded(this.index);

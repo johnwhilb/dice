@@ -8,6 +8,8 @@ import type { IDistributedSpawn, IEnemyData, IEnemyObject, IEnemySource } from "
 import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { BattleAudioBll } from "../../effect/bll/BattleAudioBll";
+import { BattleSound } from "../../effect/EffectEvent";
 
 export class EnemySpawnBll extends CCBusiness<Enemy> {
     /** 按当前战场时间生成已到期的刷怪队列。 */
@@ -145,6 +147,9 @@ export class EnemySpawnBll extends CCBusiness<Enemy> {
             this.ent.game.projectile.ProjectileModel.enemyProjectiles.push(object);
         } else {
             model.objects.push(object);
+        }
+        if (kind === EnemyObjectKind.Gold) {
+            this.ent.game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).play(BattleSound.GoldDrop);
         }
         return object;
     }

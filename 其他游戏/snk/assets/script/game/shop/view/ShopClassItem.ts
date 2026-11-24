@@ -1,7 +1,5 @@
 import { smc } from "../../common/SingletonModuleComp";
 import { TooltipPanelView } from "./TooltipPanelView";
-import { ShopAudioBll } from "../bll/ShopAudioBll";
-import { ShopSound } from "../ShopEvent";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { _decorator, Color, Layout, Node, Sprite, Vec4, instantiate } from "cc";
 import { TableRoleClass } from "../../common/table/TableRoleClass";
@@ -143,7 +141,6 @@ export class ShopClassItem extends GameComponent {
 
     protected btnClass() {
         if (!this.clickBlocked) {
-            smc.game.shop.getBusiness<ShopAudioBll>(ShopAudioBll).play(ShopSound.Click);
             const content = TableShopContent.getRoleClass(this.data.classId);
             const roleClass = TableRoleClass.getConfigById<TableRoleClass>(this.data.classId);
             const text = `<color=${content.color}>${roleClass.name}</color>[fg]（${this.data.count}人）\n\n${content.description1}`;

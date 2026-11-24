@@ -45,7 +45,7 @@ import { UICommon } from "../../ui/UICommon";
 
 const { ccclass, property } = _decorator;
 const classFadeDuration = 0.3;
-const dragHoldDuration = 0.5;
+const dragHoldDuration = 0.3;
 const dragCancelDistance = 12;
 const dragEdgeScrollZone = 90;
 const dragEdgeScrollMinSpeed = 95;
@@ -266,7 +266,6 @@ export class ShopView extends CCView<Shop> {
         if (!upgradedIndices.length) {
             return;
         }
-        this.audio.play(ShopSound.Synergy);
         for (const index of upgradedIndices) {
             const progress = this.classProgress[index];
             const itemNode = this.classList.getItemByListId(index);
@@ -522,7 +521,6 @@ export class ShopView extends CCView<Shop> {
         this.pendingDragIndex = -1;
         this.pendingDragElapsed = 0;
         this.model.grabbedIndex = index;
-        this.audio.play(ShopSound.Swap, 0.9);
         this.teamList.scrollView.stopAutoScroll();
         this.teamList.scrollView.enabled = false;
         this.teamList.updateAll();
@@ -713,9 +711,8 @@ export class ShopView extends CCView<Shop> {
         const minViewY = -viewport.anchorY * viewport.height + 24;
         const maxViewY = (1 - viewport.anchorY) * viewport.height - 24;
         viewLocal.y = Math.max(minViewY, Math.min(maxViewY, viewLocal.y));
-        const clampedWorld = viewport.convertToWorldSpaceAR(viewLocal);
         const ghost = this.getNode("dragGhostBox");
-        ghost.setPosition(this.getNode("content").getComponent(UITransform).convertToNodeSpaceAR(clampedWorld));
+        ghost.setPosition(viewLocal);
         ghost.setScale(1.06, 1.06, 1);
         ghost.active = true;
         if (!ghost.children.length) {
@@ -853,7 +850,6 @@ export class ShopView extends CCView<Shop> {
 
     btnShopInfo() {
         if (!this.clickBlocked) {
-            this.audio.play(ShopSound.Click);
             const model = this.model;
             const level = TableShopLevel.getConfigByLevel(model.shopLevel);
             const next = level.getNextLevel();
@@ -884,7 +880,6 @@ export class ShopView extends CCView<Shop> {
 
     btnGuide() {
         if (!this.clickBlocked) {
-            this.audio.play(ShopSound.Click);
             this.model.guideOpen = true;
             this.guideOpening = true;
             this.guideProgress = 0;
@@ -899,7 +894,6 @@ export class ShopView extends CCView<Shop> {
 
     btnRestart() {
         if (!this.clickBlocked) {
-            this.audio.play(ShopSound.Click);
             this.teamList.scrollView.scrollToTop(0);
             this.classList.scrollView.scrollToTop(0);
             this.passiveList.scrollView.scrollToTop(0);
@@ -909,7 +903,6 @@ export class ShopView extends CCView<Shop> {
 
     btnMenu() {
         if (!this.clickBlocked) {
-            this.audio.play(ShopSound.Click);
             this.business.saveRun();
             this.ent.game.returnMenu();
         }
@@ -919,7 +912,6 @@ export class ShopView extends CCView<Shop> {
         if (this.model.rightButtonDown) {
             return;
         }
-        this.audio.play(ShopSound.Click);
         this.model.guideOpen = false;
         this.guideOpening = false;
     }

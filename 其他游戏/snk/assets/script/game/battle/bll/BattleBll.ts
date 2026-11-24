@@ -10,6 +10,7 @@ import { CombatBll } from "../../combat/bll/CombatBll";
 import { EffectBll } from "../../effect/bll/EffectBll";
 import { BattleAudioBll } from "../../effect/bll/BattleAudioBll";
 import { BattleSound, bossSlowScale } from "../../effect/EffectEvent";
+import { GameAudio } from "../../common/GameAudio";
 
 export class BattleBll extends CCBusiness<Battle> {
     /** 将商店 team 交给 Player 模块建立战场快照，并请求打开战场。 */
@@ -19,7 +20,6 @@ export class BattleBll extends CCBusiness<Battle> {
             return;
         }
         this.ent.game.combat.getBusiness<CombatBll>(CombatBll).reset();
-        this.ent.game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).resetCooldowns();
         this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).prepare(team);
         this.ent.BattleModel.reset();
         const shop = this.ent.game.shop.ShopModel;
@@ -32,6 +32,7 @@ export class BattleBll extends CCBusiness<Battle> {
         if (openView) {
             this.dispatchEvent(BattleEvent.OpenBattle);
         } else {
+            GameAudio.setMusic(0.5, 1, 2);
             this.ent.game.combat.getBusiness<CombatBll>(CombatBll).refreshView();
         }
     }
@@ -80,6 +81,9 @@ export class BattleBll extends CCBusiness<Battle> {
         const audioBll = game.effect.getBusiness<BattleAudioBll>(BattleAudioBll);
         const hadCollisionShake = effects.hasCollisionShake || effects.screenHurtFlash > 0 || effects.wallFlashLife.size > 0;
         effectBll.updateCollisionShake(deltaTime);
+        if (model.state !== BattleState.Defeat) {
+            GameAudio.setMusic(0.5, effects.slowLife > 0 ? bossSlowScale : 1, 0.2);
+        }
         if (!model.steerActive && model.steerFade > 0) {
             model.steerFade = Math.max(0, model.steerFade - deltaTime * 3.8);
         }
@@ -169,21 +173,19 @@ export class BattleBll extends CCBusiness<Battle> {
         const model = this.ent.BattleModel;
         const enemies = this.ent.game.enemy.EnemyModel;
         const manager = this.ent.game.enemy.getBusiness<EnemyBll>(EnemyBll);
-        const audioBll = this.ent.game.effect.getBusiness<BattleAudioBll>(BattleAudioBll);
         const alive = this.ent.game.player.PlayerModel.players.some((player) => {
             return player.hp > 0;
         });
         if (!alive) {
             model.state = BattleState.Defeat;
             model.steerActive = false;
-            audioBll.play(BattleSound.Defeat);
+            GameAudio.setMusic(0.5, 0.05, 2);
             return;
         }
         if (enemies.stage.bossId) {
             if (!model.bossScheduled) {
                 model.bossScheduled = true;
                 manager.scheduleBoss();
-                audioBll.play(BattleSound.BattleStart, 1.15);
                 this.dispatchEvent(BattleEvent.WaveAnnounce, "首领降临", true);
                 return;
             }
@@ -196,7 +198,6 @@ export class BattleBll extends CCBusiness<Battle> {
             if (!bossAlive && !enemies.enemies.length) {
                 model.state = BattleState.Victory;
                 model.steerActive = false;
-                audioBll.play(BattleSound.Victory);
             } else if (bossAlive && enemies.enemies.length === 1) {
                 model.wave += 1;
                 manager.scheduleWave(model.wave, model.combatWidth, model.combatHeight, true);
@@ -206,7 +207,6 @@ export class BattleBll extends CCBusiness<Battle> {
             if (model.wave >= enemies.stage.maxWaves) {
                 model.state = BattleState.Victory;
                 model.steerActive = false;
-                audioBll.play(BattleSound.Victory);
             } else {
                 model.wave += 1;
                 manager.scheduleWave(model.wave, model.combatWidth, model.combatHeight);

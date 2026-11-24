@@ -99,7 +99,6 @@ export class EffectBll extends CCBusiness<Effect> {
             vy: 72,
         });
         this.showPickupRipple(x, y, false);
-        this.audio.play(BattleSound.Heal);
     }
 
     /** 在 x、y 生成特殊短文案飘字 tag（如 +1G、格挡、复活），roleId 为 0 时使用高亮色。 */
@@ -161,7 +160,7 @@ export class EffectBll extends CCBusiness<Effect> {
     }
 
     /** 在 x、y 生成充能、加速、护盾或献祭扩散光环，plasma 为 true 时使用亮电浆蓝。 */
-    showBuffPulse(x: number, y: number, radius: number, roleId: number, plasma: boolean = false, sound?: BattleSound) {
+    showBuffPulse(x: number, y: number, radius: number, roleId: number, plasma: boolean = false) {
         this.ent.EffectModel.effects.push({
             kind: EffectKind.BuffPulse,
             x,
@@ -175,13 +174,11 @@ export class EffectBll extends CCBusiness<Effect> {
             duration: buffPulseDuration,
             plasma,
         });
-        if (sound) {
-            this.audio.play(sound);
-        }
     }
 
     /** 从 x、y 到 endX、endY 绘制赌徒金币砸落的金色连线、闪爆与音效。 */
     showCoinStrike(x: number, y: number, endX: number, endY: number) {
+        this.audio.play(BattleSound.GoldDrop);
         this.ent.EffectModel.effects.push({
             kind: EffectKind.CoinStrike,
             x,
@@ -197,7 +194,6 @@ export class EffectBll extends CCBusiness<Effect> {
         for (let index = 0; index < 4; index++) {
             this.spawnProjectileParticle(endX, endY, Math.random() * Math.PI * 2, 70 + Math.random() * 90, 0);
         }
-        this.audio.play(BattleSound.Gold, 1.15);
     }
 
     /** 在蛇身与敌人接触点 x、y 生成原版双色碰撞碎片与亮斑。 */
@@ -224,16 +220,18 @@ export class EffectBll extends CCBusiness<Effect> {
     showWallRipple(aliveIndices: number[], speed: number) {
         const model = this.ent.EffectModel;
         const stepDelay = 32 / Math.max(140, speed);
+        const rate = 0.9 + Math.random() * 0.2;
         aliveIndices.forEach((source, rank) => {
             if (rank === 0) {
                 model.recoilLife.set(source, recoilDuration);
+                this.audio.playPlayerWall(rank, rate);
             } else {
-                model.wallRipples.push({ source, delay: rank * stepDelay });
+                model.wallRipples.push({ source, delay: rank * stepDelay, rank, rate });
             }
         });
     }
 
-    /** 在 x、y 生成护盾格挡波纹与音效。 */
+    /** 在 x、y 生成护盾格挡波纹。 */
     showShieldBlock(x: number, y: number, roleId: number) {
         this.ent.EffectModel.effects.push({
             kind: EffectKind.ShieldBlock,
@@ -249,7 +247,6 @@ export class EffectBll extends CCBusiness<Effect> {
         });
         this.showTagText(x, y, "BLOCK", roleId);
         this.shake(impactShakeDuration * 0.6, 3.2);
-        this.audio.play(BattleSound.Shield);
     }
 
     /** 在 x、y 生成撞墙冲击光波与墙面边框点亮，side 指定碰撞墙面，heavy 表示猛烈撞击。 */
@@ -287,7 +284,6 @@ export class EffectBll extends CCBusiness<Effect> {
             this.triggerHitstop(0.028);
             this.shake(impactShakeDuration, 6.5);
         }
-        this.audio.play(BattleSound.WallHit, heavy ? 1.25 : 0.85);
     }
 
     /** 在 x、y 生成亮斑和碎片，ended 表示弹丸终止，颜色来自 roleId 和 enemyConfigId。 */
@@ -302,9 +298,6 @@ export class EffectBll extends CCBusiness<Effect> {
             const particleEnemyId = !ended && index === 1 ? enemyConfigId : undefined;
             this.spawnProjectileParticle(x, y, angle, 55 + Math.random() * 115, roleId, particleEnemyId, undefined, projectileHitParticleSizeScale);
         }
-        if (enemyConfigId !== undefined) {
-            this.audio.play(BattleSound.Hit);
-        }
     }
 
     /** 在 x、y 沿 angle 绘制角色色发射闪光，有 source 时记录对应角色的出手回弹。 */
@@ -314,7 +307,6 @@ export class EffectBll extends CCBusiness<Effect> {
         if (source !== undefined) {
             model.recoilLife.set(source, recoilDuration);
             this.shake(impactShakeDuration * 0.55, 2.2);
-            this.audio.playShot(roleId);
         }
     }
 
@@ -325,12 +317,11 @@ export class EffectBll extends CCBusiness<Effect> {
         if (impact) {
             this.shake(impactShakeDuration, 6.5);
             this.triggerHitstop(0.018);
-            this.audio.play(BattleSound.Area);
         }
     }
 
-    /** 在两端坐标生成动态锯齿电弧与端点电火花，plasma 为 true 时启用亮蓝电浆辉光与分叉。 */
-    showChain(x: number, y: number, endX: number, endY: number, roleId: number, plasma: boolean = false) {
+    /** 在两端生成电弧，plasma 控制电浆表现，audible 控制是否播放电火花。 */
+    showChain(x: number, y: number, endX: number, endY: number, roleId: number, plasma: boolean = false, audible: boolean = true) {
         this.ent.EffectModel.effects.push({
             kind: EffectKind.Chain,
             x,
@@ -352,7 +343,9 @@ export class EffectBll extends CCBusiness<Effect> {
         if (plasma) {
             this.spawnProjectileParticle(endX, endY, Math.random() * Math.PI * 2, 110, 0);
         }
-        this.audio.play(BattleSound.Chain, plasma ? 1.1 : 0.85);
+        if (audible) {
+            this.audio.play(BattleSound.Chain);
+        }
     }
 
     /** 在实际刷出敌人的 x、y 生成出场色环，radius 来自敌人体型。 */
@@ -386,11 +379,10 @@ export class EffectBll extends CCBusiness<Effect> {
             this.triggerHitstop(0.085, true);
             this.shake(impactShakeDuration * 1.8, 11);
             this.addCameraShake(6, 0.45);
-            this.audio.play(BattleSound.BossDeath);
         } else {
             this.shake(impactShakeDuration * 0.55, 3.2);
-            this.audio.play(BattleSound.EnemyDeath);
         }
+        this.audio.playEnemyDeath(enemyConfigId, boss);
         const count = boss ? 22 : 5 + Math.floor(Math.random() * 4);
         for (let index = 0; index < count; index++) {
             const speed = boss ? 105 + Math.random() * 190 : 60 + Math.random() * 120;
@@ -513,7 +505,7 @@ export class EffectBll extends CCBusiness<Effect> {
         this.triggerHitstop(0.055, true);
         model.effects.push({ kind: EffectKind.PlayerDeath, x, y, endX: x, endY: y, radius: 40, amount: 0, roleId, life: playerDeathDuration, duration: playerDeathDuration });
         this.shake(playerHurtDuration * 1.3, 7);
-        this.audio.play(BattleSound.PlayerDeath);
+        this.audio.play(BattleSound.PlayerHurt);
         const count = 8 + Math.floor(Math.random() * 4);
         for (let index = 0; index < count; index++) {
             this.spawnProjectileParticle(x, y, Math.random() * 2 * Math.PI, 65 + Math.random() * 130, roleId, undefined, undefined, 1.2);
@@ -537,7 +529,7 @@ export class EffectBll extends CCBusiness<Effect> {
     /** 触发神圣惩罚全场雷鸣的强镜头震动与音效。 */
     showThunderShake() {
         this.shake(impactShakeDuration * 1.6, 8);
-        this.audio.play(BattleSound.BossDeath, 0.6);
+        this.audio.play(BattleSound.Thunder);
     }
 
     /** 以 duration 秒和 amplitude 战场单位请求镜头震动，保留较强的当前冲击。 */
@@ -586,7 +578,7 @@ export class EffectBll extends CCBusiness<Effect> {
             ripple.delay -= delta;
             if (ripple.delay <= 0) {
                 model.recoilLife.set(ripple.source, recoilDuration);
-                this.audio.play(BattleSound.WallHit, 0.55);
+                this.audio.playPlayerWall(ripple.rank, ripple.rate);
                 return false;
             }
             return true;

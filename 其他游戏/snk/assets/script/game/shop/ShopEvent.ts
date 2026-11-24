@@ -40,20 +40,16 @@ export enum ShopSound {
     Buy = "sfxShopBuy",
     /** 出售角色或道具。 */
     Sell = "sfxShopSell",
-    /** 角色升 2 级、商店或道具升级。 */
+    /** 道具升至二级。 */
     Upgrade = "sfxShopUpgrade",
-    /** 角色升至满级 3 级或高阶羁绊突破。 */
+    /** 道具升至三级。 */
     MaxUpgrade = "sfxShopMaxUpgrade",
     /** 刷新商品。 */
     Refresh = "sfxShopRefresh",
     /** 锁定或解锁商店。 */
     Lock = "sfxShopLock",
-    /** 拖拽队员换位。 */
-    Swap = "sfxShopSwap",
-    /** 打开详情或按钮点击。 */
-    Click = "sfxShopClick",
-    /** 职业羁绊激活或晋级。 */
-    Synergy = "sfxShopSynergy",
+    /** 成功购买或降低商店经验，或购买道具经验。 */
+    Experience = "shopExperience",
     /** 出发进入战斗。 */
     StartBattle = "sfxShopStartBattle",
     /** 金币不足或操作被拒绝。 */

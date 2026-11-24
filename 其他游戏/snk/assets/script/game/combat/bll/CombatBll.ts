@@ -14,6 +14,7 @@ import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
 import { EnemyActionBll } from "../../enemy/bll/EnemyActionBll";
 import type { IEnemyData } from "../../enemy/EnemyEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { BattleAudioBll } from "../../effect/bll/BattleAudioBll";
 import { AreaFeedback } from "../../effect/EffectEvent";
 import { ProjectileBll } from "../../projectile/bll/ProjectileBll";
 import { SummonBll } from "../../summon/bll/SummonBll";
@@ -176,12 +177,14 @@ export class CombatBll extends CCBusiness<Combat> {
         const effects = game.effect.getBusiness<EffectBll>(EffectBll);
         const roleId = game.player.PlayerModel.players[source].roleId;
         const impact = amount > 0;
+        const audio = game.effect.getBusiness<BattleAudioBll>(BattleAudioBll);
         if (feedback === AreaFeedback.Burst) {
             effects.showArea(x, y, range, roleId, impact && targets.length > 0, squareAngle);
         }
         targets.forEach((enemy) => {
             if (impact && !enemy.dead) {
                 effects.showProjectileHit(enemy.x, enemy.y, false, roleId, enemy.config.id);
+                audio.playAreaHit(roleId, dot);
             }
             this.hitEnemy(enemy, amount, source, skillId, proc, dot);
         });

@@ -20,7 +20,9 @@ import { BuffKind } from "../../buff/BuffEvent";
 import type { IBuffData } from "../../buff/BuffEvent";
 import type { IEnemyData } from "../../enemy/EnemyEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { BattleAudioBll } from "../../effect/bll/BattleAudioBll";
 import { AreaFeedback, BattleSound } from "../../effect/EffectEvent";
+import { GameAudio } from "../../common/GameAudio";
 
 export class PlayerActionBll extends CCBusiness<Player> {
     /** 推进 delta 秒角色技能和延迟指令，仅存活角色发动主动技能。 */
@@ -54,6 +56,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
             if (action.kind === PlayerActionKind.Repeat) {
                 this.cast(action.source, true);
             } else if (action.kind === PlayerActionKind.Area) {
+                game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).playAreaCast(player.roleId);
                 game.combat.getBusiness<CombatBll>(CombatBll).area(action.source, player.skill.id, action.x, action.y, player.skill.radius, action.damage, action.proc, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
             } else {
                 this.fire(action.source, action.x, action.y, action.damage);
@@ -194,6 +197,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
                 }
             }
         } else if (skill.kind === SkillTypeKeyEnum.Area) {
+            game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).playAreaCast(player.roleId);
             if (player.roleId === RoleKeyEnum.Elementor) {
                 combat.squareArea(index, skill.id, x, y, skill.radius, damage, player.pose.angle * Math.PI / 180);
             } else {
@@ -213,8 +217,9 @@ export class PlayerActionBll extends CCBusiness<Player> {
             const arena = game.battle.BattleModel;
             const effects = game.effect.getBusiness<EffectBll>(EffectBll);
             summon.orb((Math.random() - .5) * arena.combatWidth, (Math.random() - .5) * arena.combatHeight, skill.shots);
+            game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).play(BattleSound.Heal);
             if (skill.kind === SkillTypeKeyEnum.Fairy) {
-                effects.showBuffPulse(player.pose.x, player.pose.y, 44, player.roleId, false, BattleSound.Heal);
+                effects.showBuffPulse(player.pose.x, player.pose.y, 44, player.roleId, false);
                 this.aliveIndices().slice().sort(() => {
                     return Math.random() - .5;
                 }).slice(0, skill.shots).forEach((targetIndex) => {
@@ -222,7 +227,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
                     const ally = this.ent.PlayerModel.players[targetIndex];
                     effects.showBuffPulse(ally.pose.x, ally.pose.y, 38, player.roleId, false);
                     if (targetIndex !== index) {
-                        effects.showChain(player.pose.x, player.pose.y, ally.pose.x, ally.pose.y, player.roleId, false);
+                        effects.showChain(player.pose.x, player.pose.y, ally.pose.x, ally.pose.y, player.roleId, false, false);
                     }
                 });
             }
@@ -232,13 +237,19 @@ export class PlayerActionBll extends CCBusiness<Player> {
             const targets = isChain ? this.aliveIndices() : this.aliveIndices().slice().sort(() => {
                 return Math.random() - .5;
             }).slice(0, skill.shots);
-            effects.showBuffPulse(player.pose.x, player.pose.y, 56, player.roleId, isChain, isChain ? BattleSound.Chain : BattleSound.Shield);
+            if (isChain) {
+                GameAudio.playEffect("Buff 8");
+            }
+            effects.showBuffPulse(player.pose.x, player.pose.y, 56, player.roleId, isChain);
             targets.forEach((targetIndex) => {
                 buffs.add(CombatCamp.Player, targetIndex, index, isChain ? BuffKind.Chain : BuffKind.Shield, isChain ? skill.power : 1, skill.duration, skill.id);
                 const ally = this.ent.PlayerModel.players[targetIndex];
+                if (!isChain) {
+                    GameAudio.playEffect("Buff 5");
+                }
                 effects.showBuffPulse(ally.pose.x, ally.pose.y, 38, player.roleId, isChain);
                 if (isChain && targetIndex !== index) {
-                    effects.showChain(player.pose.x, player.pose.y, ally.pose.x, ally.pose.y, 0, true);
+                    effects.showChain(player.pose.x, player.pose.y, ally.pose.x, ally.pose.y, 0, true, false);
                 }
             });
         } else if (skill.kind === SkillTypeKeyEnum.Sacrifice) {
@@ -311,6 +322,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
             player.pose.x + Math.cos(angle) * muzzle - Math.sin(angle) * parallel,
             player.pose.y + Math.sin(angle) * muzzle + Math.cos(angle) * parallel,
             angle, damage * (1 + stats.item(ShopContentKeyEnum.ItemBallista)), shot * skill.burstDelay, proc, homing);
+        projectile.playLaunchSound = shot === 0 || (player.roleId !== RoleKeyEnum.DualGunner && skill.burstDelay > 0);
         projectile.muzzle = {
             x: projectile.x - Math.cos(angle) * muzzle / 2,
             y: projectile.y - Math.sin(angle) * muzzle / 2,

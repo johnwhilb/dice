@@ -18,7 +18,9 @@ import { PlayerPassiveBll } from "../../player/bll/PlayerPassiveBll";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
 import { TableCombatRule } from "../../common/table/TableCombatRule";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { BattleAudioBll } from "../../effect/bll/BattleAudioBll";
 import { ArenaWallSide } from "../../effect/EffectEvent";
+import { GameAudio } from "../../common/GameAudio";
 
 export class EnemyActionBll extends CCBusiness<Enemy> {
     /** 推进 delta 秒的移动、技能、碰撞和战场对象，width、height 为战场尺寸。 */
@@ -85,6 +87,9 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
         enemy.skillTimer -= delta;
         if (enemy.forceRemaining > 0) {
             enemy.forceRemaining = Math.max(0, enemy.forceRemaining - delta);
+            if (!enemy.forceRemaining) {
+                GameAudio.playEffect("Wind Bolt 20");
+            }
             this.ent.EnemyModel.enemies.forEach((other) => {
                 const dx = enemy.forceX - other.x;
                 const dy = enemy.forceY - other.y;
@@ -111,8 +116,12 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
             vx = enemy.knockbackX;
             vy = enemy.knockbackY;
         } else if (enemy.chargeRemaining > 0) {
+            const charging = enemy.chargeRemaining > config.skillDuration;
             enemy.chargeRemaining -= delta;
             if (enemy.chargeRemaining <= config.skillDuration) {
+                if (charging) {
+                    GameAudio.playEffect("Wind Bolt 14", 0.2);
+                }
                 vx = enemy.chargeX * config.skillSpeed;
                 vy = enemy.chargeY * config.skillSpeed;
             }
@@ -229,8 +238,12 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                 return sum + other.y;
             }, 0) / group.length;
             enemy.forceRemaining = config.skillDelay;
+            GameAudio.playEffect("Magical Impact 18");
         } else if (config.id === EnemyKeyEnum.Tank) {
             const targets = this.nearby(enemy, config.skillRange).slice(0, config.skillTargets);
+            if (targets.length) {
+                GameAudio.playEffect("Wind Bolt 20");
+            }
             targets.forEach((other) => {
                 const angle = Math.atan2(target.pose.y - other.y, target.pose.x - other.x);
                 this.push(other, angle, config.skillSpeed, rule.knockbackDuration);
@@ -281,8 +294,11 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
         this.die(target);
         this.ent.game.player.getBusiness<PlayerActionBll>(PlayerActionBll).onEnemyDeath(target, -1, 0);
         if (type === EnemyKeyEnum.BossSwarmer) {
+            GameAudio.playEffect("Critters eating 2");
+            GameAudio.playEffect("Popping bloody Sac 1", 0.6);
             this.spawnCritters(target, config.spawnMin, config.spawnMax);
         } else if (enemy.config.id === EnemyKeyEnum.BossRandomizer) {
+            GameAudio.playEffect("Shooting Projectile (Classic) 11", 0.4);
             this.radial(target, config, true);
         } else {
             this.mine(target, config);
@@ -352,6 +368,8 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
         enemy.dead = true;
         if (!enemy.config.critter) {
             this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showEnemyDeath(enemy.x, enemy.y, enemy.config.width / 2, enemy.config.id, enemy.config.boss);
+        } else {
+            this.ent.game.effect.getBusiness<BattleAudioBll>(BattleAudioBll).playEnemyDeath(enemy.config.id, false);
         }
         if (enemy.config.id === EnemyKeyEnum.SpeedBooster) {
             this.nearby(enemy, enemy.config.skillRange).forEach((other) => {
@@ -452,8 +470,16 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                 return;
             }
             if (object.kind === EnemyObjectKind.Mine) {
+                const interval = Math.max(rule.mineMinInterval, rule.mineInterval - model.newGamePlus * rule.mineNgIntervalStep);
+                const previousPulse = Math.ceil(object.life / interval);
                 object.life -= delta;
+                if (Math.ceil(object.life / interval) < previousPulse) {
+                    const rate = 1 + (rule.minePulses - previousPulse + 1) * 0.1;
+                    GameAudio.playEffect("Weapon Swap 2", 0.5, rate, rate);
+                }
                 if (object.life <= 0) {
+                    GameAudio.playEffect("Shooting Projectile (Classic) 11", 0.4);
+                    GameAudio.playEffect("Cannon shots 1", 0.4);
                     const config = TableEnemy.getConfigById<TableEnemy>(object.configId);
                     const source: IEnemySource = { id: object.id, config, x: object.x, y: object.y, damage: object.damage };
                     this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showArea(object.x, object.y, 48, 0, true);

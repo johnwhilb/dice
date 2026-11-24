@@ -229,11 +229,7 @@ export class ShopBll extends CCBusiness<Shop> {
             teamIndex = model.team.length - 1;
         }
         this.saveRun();
-        if (upgraded) {
-            this.audio.play(newLevel >= maxLevel ? ShopSound.MaxUpgrade : ShopSound.Upgrade);
-        } else {
-            this.audio.play(ShopSound.Buy);
-        }
+        this.audio.play(ShopSound.Buy);
         this.dispatchEvent(ShopEvent.ShowOfferRemoval, index);
         this.dispatchEvent(ShopEvent.GoldChanged, -role.price);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
@@ -332,7 +328,6 @@ export class ShopBll extends CCBusiness<Shop> {
         team[from] = team[to];
         team[to] = unit;
         this.saveRun();
-        this.audio.play(ShopSound.Swap);
         this.dispatchEvent(ShopEvent.UpdateTeamOrder, from, to);
     }
 
@@ -387,7 +382,7 @@ export class ShopBll extends CCBusiness<Shop> {
         this.gainShopXp();
         const leveledUp = model.shopLevel > oldLevel;
         this.saveRun();
-        this.audio.play(leveledUp ? ShopSound.Upgrade : ShopSound.Buy);
+        this.audio.play(ShopSound.Experience);
         this.dispatchEvent(ShopEvent.GoldChanged, -rule.xpPurchaseCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.dispatchEvent(ShopEvent.ShopLevelChanged, { level: model.shopLevel, leveledUp, downgraded: false });
@@ -414,7 +409,7 @@ export class ShopBll extends CCBusiness<Shop> {
         model.shopLevel -= 1;
         model.shopXp = 0;
         this.saveRun();
-        this.audio.play(ShopSound.Lock);
+        this.audio.play(ShopSound.Experience);
         this.dispatchEvent(ShopEvent.GoldChanged, -rule.downgradeCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.dispatchEvent(ShopEvent.ShopLevelChanged, { level: model.shopLevel, leveledUp: false, downgraded: true });
@@ -520,7 +515,10 @@ export class ShopBll extends CCBusiness<Shop> {
             leveledUp = true;
         }
         this.saveRun();
-        this.audio.play(leveledUp ? (item.level >= 3 ? ShopSound.MaxUpgrade : ShopSound.Upgrade) : ShopSound.Buy);
+        this.audio.play(ShopSound.Experience);
+        if (leveledUp) {
+            this.audio.play(item.level >= 3 ? ShopSound.MaxUpgrade : ShopSound.Upgrade);
+        }
         this.dispatchEvent(ShopEvent.GoldChanged, -rule.itemXpCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.dispatchEvent(ShopEvent.ItemUpgraded, { index, level: item.level, leveledUp });

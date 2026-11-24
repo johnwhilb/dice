@@ -68,50 +68,28 @@ export enum ArenaWallSide {
 
 /** 战斗音效标识。 */
 export enum BattleSound {
-    /** 常规弹丸发射。 */
-    Shoot = "sfxShoot",
-    /** 飞刀类发射。 */
-    Knife = "sfxKnife",
-    /** 弓箭发射。 */
-    Arrow = "sfxArrow",
-    /** 重炮发射。 */
-    Cannon = "sfxCannon",
-    /** 魔法弹发射。 */
-    Magic = "sfxMagic",
-    /** 普通命中。 */
-    Hit = "sfxHit",
     /** 暴击命中。 */
     Crit = "sfxCrit",
-    /** 范围爆发。 */
-    Area = "sfxArea",
     /** 连锁闪电。 */
     Chain = "sfxChain",
-    /** 普通敌人死亡。 */
-    EnemyDeath = "sfxEnemyDeath",
-    /** 首领死亡。 */
-    BossDeath = "sfxBossDeath",
     /** 敌人刷出。 */
     Spawn = "sfxSpawn",
-    /** 撞墙反弹。 */
-    WallHit = "sfxWallHit",
     /** 队员受伤。 */
     PlayerHurt = "sfxPlayerHurt",
-    /** 队员阵亡。 */
-    PlayerDeath = "sfxPlayerDeath",
-    /** 护盾格挡。 */
-    Shield = "sfxShield",
     /** 拾取金币。 */
     Gold = "sfxGold",
+    /** 金币掉落。 */
+    GoldDrop = "goldDrop",
     /** 拾取治疗球。 */
+    HealPickup = "healPickup",
+    /** 治疗技能。 */
     Heal = "sfxHeal",
     /** 倒计时滴答。 */
     Countdown = "sfxCountdown",
-    /** 开战与首领警示。 */
+    /** 倒计时结束。 */
     BattleStart = "sfxBattleStart",
-    /** 关卡胜利。 */
-    Victory = "sfxVictory",
-    /** 关卡失败。 */
-    Defeat = "sfxDefeat",
+    /** 神圣惩罚的雷鸣。 */
+    Thunder = "thunder",
 }
 
 /** 首领死亡慢放时长使用现实秒，其余效果时长使用战斗秒。 */

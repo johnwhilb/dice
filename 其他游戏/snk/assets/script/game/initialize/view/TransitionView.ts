@@ -18,6 +18,7 @@ import type { Color } from "cc";
 import { oops } from "db://oops-framework/core/Oops";
 import { ColorConst } from "../../common/config/ColorConst";
 import type { IRoundGoldReward } from "../../shop/ShopEvent";
+import { coinSounds, GameAudio } from "../../common/GameAudio";
 
 const { ccclass } = _decorator;
 
@@ -205,13 +206,16 @@ export class TransitionView extends Component {
 
     private revealReward(reward: IRoundGoldReward) {
         this.scheduleOnce(() => {
+            GameAudio.playEffect(coinSounds);
             this.setLine(0, `获得金币：${reward.roundGold} + ${reward.pickedUpGold}`, true);
         }, 0.1);
         this.scheduleOnce(() => {
+            GameAudio.playEffect(coinSounds);
             this.lines[0].nudgeStarted = undefined;
             this.setLine(1, `利息：${reward.interest}`, true);
         }, 0.3);
         this.scheduleOnce(() => {
+            GameAudio.playEffect(coinSounds);
             this.lines[1].nudgeStarted = undefined;
             this.setLine(2, `合计：${reward.roundGold + reward.pickedUpGold + reward.interest}`, true);
         }, 0.5);

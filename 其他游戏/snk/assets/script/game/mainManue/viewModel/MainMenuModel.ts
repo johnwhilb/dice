@@ -2,13 +2,6 @@ import { ecs } from "db://oops-framework/libs/ecs/ECS";
 
 @ecs.register("MainMenuModel")
 export class MainMenuModel extends ecs.Comp {
-    readonly menuMusicPaths: string[] = [
-        "audios/Kubbi - Ember - 01 Pathfinder",
-        "audios/Kubbi - Ember - 02 Ember",
-        "audios/Kubbi - Ember - 03 Firelight",
-        "audios/Kubbi - Ember - 04 Cascade",
-        "audios/Kubbi - Ember - 05 Compass",
-    ];
     musicEnabled: boolean = true;
     effectEnabled: boolean = true;
 
