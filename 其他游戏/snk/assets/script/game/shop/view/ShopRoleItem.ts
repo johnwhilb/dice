@@ -1,11 +1,11 @@
 import { smc } from "../../common/SingletonModuleComp";
-import { ShopEvent, ShopRoleKind } from "../ShopEvent";
-import type { IShopRoleData } from "../ShopEvent";
+import { ShopEvent, ShopRoleKind, ShopTooltipSaleKind } from "../ShopEvent";
+import type { IShopRoleData, IShopTooltipData } from "../ShopEvent";
 import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { ShopBll } from "../bll/ShopBll";
-import { _decorator, Color, Button, EventMouse, EventTouch, Label, Node, Sprite, UITransform } from "cc";
+import { _decorator, Color, Button, EventTouch, Label, Node, Sprite, UITransform } from "cc";
 import { TableRole } from "../../common/table/TableRole";
 import { TableShopContent } from "../../common/table/TableShopContent";
 import { ColorConst } from "../../common/config/ColorConst";
@@ -31,8 +31,6 @@ export class ShopRoleItem extends GameComponent {
     }
 
     start() {
-        // 原版右键出售由 ShopBll 处理；鼠标按下由 Cocos 转为触摸，统一记录排序起点。
-        this.getNode("btnRole").on(Node.EventType.MOUSE_UP, this.sellRole, this);
         this.getNode("btnRole").on(Node.EventType.TOUCH_START, this.prepareTouchDrag, this);
     }
 
@@ -54,21 +52,9 @@ export class ShopRoleItem extends GameComponent {
         label.string = `${data.kind === ShopRoleKind.Offer ? TableRole.getConfigById<TableRole>(data.roleId).price : data.level}`;
     }
 
-    private sellRole(event: EventMouse) {
-        if (event.getButton() !== EventMouse.BUTTON_RIGHT || this.blocked) {
-            return;
-        }
-        event.propagationStopped = true;
-        if (this.data.kind === ShopRoleKind.Team) {
-            this.business.sell(this.data.index);
-        } else if (this.data.kind === ShopRoleKind.Reserve) {
-            this.business.sellReserve(this.data.index, this.data.level);
-        }
-    }
-
     private prepareTouchDrag(event: EventTouch) {
-        if (this.data.kind === ShopRoleKind.Team) {
-            this.dispatchEvent(ShopEvent.StartTeamDrag, this.data.index, event.getUILocation());
+        if (this.data.kind === ShopRoleKind.Team || this.data.kind === ShopRoleKind.Reserve) {
+            this.dispatchEvent(ShopEvent.StartTeamDrag, this.data.index, event.getUILocation(), event.getID());
         }
     }
 
@@ -92,6 +78,19 @@ export class ShopRoleItem extends GameComponent {
         const effect =
             data.level === 3 ? content.effectDescription : UICommon.toText(content.effectDescription);
         const text = `<color=${content.color}>${role.name}</color>[fg] · 等级 [yellow]${data.level}[fg]，阶级 [yellow]${role.tier}[fg]，售价 [yellow]${price}[fg] 金币\n职业：${classes}\n\n${content.getDescription(data.level)}\n\n[${data.level === 3 ? "yellow" : "light_bg"}]三级效果 · ${content.effectName}\n${data.level === 3 ? "[fg]" : "[light_bg]"}${effect}`;
-        oops.gui.open(TooltipPanelView, { data: text });
+        const tooltip: IShopTooltipData = { text };
+        if (data.kind === ShopRoleKind.Team || data.kind === ShopRoleKind.Reserve) {
+            const background = this.getNode("background");
+            tooltip.sale = {
+                kind: data.kind === ShopRoleKind.Team ? ShopTooltipSaleKind.Team : ShopTooltipSaleKind.Reserve,
+                index: data.index,
+                level: data.level,
+                effectOrigin: {
+                    position: background.worldPosition.clone(),
+                    color: background.getComponent(Sprite).color.clone(),
+                },
+            };
+        }
+        oops.gui.open(TooltipPanelView, { data: tooltip });
     }
 }

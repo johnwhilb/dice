@@ -198,7 +198,7 @@ export class ShopBll extends CCBusiness<Shop> {
         return role.price * (level.saleValueMultiplier + reserveValue);
     }
 
-    /** 出售整个队伍槽位及其储备。参数 index 为零起始队伍槽位。 */
+    /** 出售整个队伍槽位及其储备，index 为零起始队伍槽位，返回是否出售成功。 */
     sell(index: number) {
         const model = this.ent.ShopModel;
         if (
@@ -207,12 +207,13 @@ export class ShopBll extends CCBusiness<Shop> {
             !model.team[index]
         ) {
             this.toast("shop_config_missing");
-            return;
+            return false;
         }
         model.gold += this.getSalePrice(index);
         model.team.splice(index, 1);
         this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        return true;
     }
 
     /** 获取当前难度和循环对应的队伍容量。 */
@@ -236,26 +237,23 @@ export class ShopBll extends CCBusiness<Shop> {
         return { level1: reserve % count, level2: Math.floor(reserve / count) };
     }
 
-    /** 出售一个储备，index 为队员下标，level 只能为一级或二级。 */
+    /** 出售一个储备，index 为队员下标，level 只能为一级或二级，返回是否出售成功。 */
     sellReserve(index: number, level: number) {
         const model = this.ent.ShopModel;
         const unit = model.team[index];
         const reserves = this.getReserves(index);
         const count = level === 1 ? reserves.level1 : level === 2 ? reserves.level2 : 0;
-        if (!unit || !count) {
+        if (!this.canEditShop() || !unit || !count) {
             this.toast("shop_config_missing");
-            return;
+            return false;
         }
         const role = TableRole.getConfigById(unit.roleId);
         const config = TableRoleLevel.getConfigByLevel(level);
-        if (!this.canEditShop() || !unit || !count) {
-            this.toast("shop_config_missing");
-            return;
-        }
         unit.copies -= Math.pow(TableShopRule.getInitial().copiesPerUpgrade, level - 1);
         model.gold += role.price * config.saleValueMultiplier;
         this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        return true;
     }
 
     /** 按原版拖动交互交换队员，from 和 to 为队伍下标。 */

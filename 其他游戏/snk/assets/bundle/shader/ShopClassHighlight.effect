@@ -1,0 +1,101 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: shop-class-highlight-vs:vert
+      frag: shop-class-highlight-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: one
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        focusParams: { value: [0, 0, 0, 0] }
+}%
+
+CCProgram shop-class-highlight-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+  out vec2 tileUv;
+  out float opacity;
+
+  vec4 vert () {
+    vec4 position = vec4(a_position, 1.0);
+    #if USE_LOCAL
+      position = cc_matWorld * position;
+    #endif
+    tileUv = a_texCoord;
+    opacity = a_color.a;
+    return cc_matViewProj * position;
+  }
+}%
+
+CCProgram shop-class-highlight-fs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec2 tileUv;
+  in float opacity;
+
+  uniform ClassHighlight {
+    vec4 focusParams;
+  };
+
+  float octagon (vec2 point) {
+    vec2 axis = abs(point);
+    return max(max(axis.x, axis.y), (axis.x + axis.y) * 0.7071);
+  }
+
+  vec4 frag () {
+    vec2 pixel = floor((tileUv - 0.5) * vec2(27.0, 38.5) + 0.5);
+    vec2 axis = abs(pixel);
+    vec2 edge = vec2(12.0, 18.0) - axis;
+    float depth = min(edge.x, edge.y);
+    float bevel = min(depth, edge.x + edge.y - 2.0);
+    float plate = step(1.0, bevel);
+    vec3 tint = focusParams.rgb;
+    vec3 paper = mix(tint, vec3(1.0, 0.99, 0.92), 0.78);
+    vec3 charcoal = vec3(0.075, 0.082, 0.10) + tint * 0.085;
+
+    float cycle = fract(cc_time.x / 2.4);
+    float radius = octagon(pixel);
+    float waveAge = fract(cycle * 2.0);
+    float waveRadius = mix(2.0, 23.0, waveAge);
+    float wake = waveRadius - radius;
+    float wave = (1.0 - smoothstep(0.0, 1.25, abs(wake)))
+      * smoothstep(0.02, 0.21, waveAge) * (1.0 - smoothstep(0.68, 1.0, waveAge));
+    float afterglow = step(0.0, wake) * (1.0 - smoothstep(0.0, 4.0, wake));
+    float grain = 1.0 - step(1.0, mod(pixel.x + 2.0 * pixel.y, 4.0));
+    float field = plate * smoothstep(3.0, 10.0, radius);
+    vec3 surface = mix(charcoal, tint, field * (0.08 + 0.31 * wave + grain * afterglow * 0.22));
+
+    float horizontal = 12.0 + (pixel.y < 0.0 ? pixel.x : 60.0 - pixel.x);
+    float vertical = 42.0 + (pixel.x > 0.0 ? pixel.y : 60.0 - pixel.y);
+    float path = mix(vertical, horizontal, step(edge.y, edge.x));
+    float behind = mod(floor(cycle * 120.0) - path, 60.0);
+    float nearRail = 1.0 - step(1.5, abs(bevel));
+    float head = nearRail * (1.0 - step(2.0, behind));
+    float spine = step(1.0, bevel) * (1.0 - step(2.0, bevel));
+    float segments = (1.0 - step(3.0, mod(behind, 4.0))) * (1.0 - smoothstep(4.0, 21.0, behind));
+    float body = nearRail * segments * (1.0 - step(1.5, abs(depth - 0.5)));
+    float rails = max(spine * 0.36, max(head, body * 0.92));
+    vec3 stroke = mix(tint, paper, max(head, 0.45 * body));
+
+    float alpha = max(plate * 0.83, rails);
+    vec3 color = mix(surface, stroke, rails / max(alpha, 0.001));
+    return vec4(color, alpha * smoothstep(0.0, 1.0, focusParams.a) * opacity);
+  }
+}%

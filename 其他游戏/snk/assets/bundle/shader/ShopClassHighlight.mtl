@@ -1,0 +1,21 @@
+{
+  "__type__": "cc.Material",
+  "_name": "ShopClassHighlight",
+  "_objFlags": 0,
+  "__editorExtras__": {},
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "73b11cd9-5f90-4d36-92ab-0530ec31b32d",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": 0,
+  "_defines": [
+    {}
+  ],
+  "_states": [
+    {}
+  ],
+  "_props": [
+    {}
+  ]
+}

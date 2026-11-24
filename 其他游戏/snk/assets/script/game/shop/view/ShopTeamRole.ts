@@ -2,8 +2,8 @@ import { smc } from "../../common/SingletonModuleComp";
 import { ShopBll } from "../bll/ShopBll";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import type { IShopRoleData } from "../ShopEvent";
-import { ShopRoleKind } from "../ShopEvent";
-import { _decorator, Prefab, Node, instantiate, Label, Layout, Sprite } from "cc";
+import { ShopEvent, ShopRoleKind } from "../ShopEvent";
+import { _decorator, Prefab, Node, EventTouch, instantiate, Label, Layout, Sprite } from "cc";
 import type { IPlayerUnit } from "../../player/PlayerEvent";
 import { ShopTeamRoleItem } from "./ShopTeamRoleItem";
 import { TableRole } from "../../common/table/TableRole";
@@ -14,13 +14,25 @@ const { ccclass, property } = _decorator;
 export class ShopTeamRole extends GameComponent {
     @property(Prefab)
     private rolePrefab: Prefab;
+    private teamIndex = -1;
 
     private get business() {
         return smc.game.shop.getBusiness<ShopBll>(ShopBll);
     }
 
+    start() {
+        this.node.on(Node.EventType.TOUCH_START, this.startRowTouch, this, true);
+    }
+
+    private startRowTouch(event: EventTouch) {
+        if (this.teamIndex >= 0 && event.target.name !== "btnRole") {
+            this.dispatchEvent(ShopEvent.StartTeamDrag, this.teamIndex, event.getUILocation(), event.getID());
+        }
+    }
+
     setData(index: number, unit: IPlayerUnit, preview: boolean = false) {
         const visible = preview || index !== smc.game.shop.ShopModel.grabbedIndex;
+        this.teamIndex = visible && !preview ? index : -1;
         this.getComponent(Sprite).enabled = visible;
         this.getNode("lbtName").getComponent(Label).string = TableRole.getConfigById<TableRole>(unit.roleId).name;
         const top: IShopRoleData[] = [

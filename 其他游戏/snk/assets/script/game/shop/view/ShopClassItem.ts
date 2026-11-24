@@ -2,7 +2,7 @@ import { smc } from "../../common/SingletonModuleComp";
 import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
-import { _decorator, Color, Layout, Node, Sprite, instantiate } from "cc";
+import { _decorator, Color, Layout, Node, Sprite, Vec4, instantiate } from "cc";
 import { TableRoleClass } from "../../common/table/TableRoleClass";
 import { TableShopContent } from "../../common/table/TableShopContent";
 import { ColorConst } from "../../common/config/ColorConst";
@@ -26,6 +26,10 @@ const { ccclass } = _decorator;
 export class ShopClassItem extends GameComponent {
     private data: IShopClassData;
     private preview?: IClassPreview;
+    private readonly highlightParams = new Vec4();
+    private iconColor = ColorConst.shopTick;
+    private readonly litIconColor = new Color();
+    private readonly displayIconColor = new Color();
 
     private get blocked() {
         const model = smc.game.shop.ShopModel;
@@ -43,17 +47,35 @@ export class ShopClassItem extends GameComponent {
             this.preview = undefined;
         }
         this.data = data;
+        this.getNode("classHighlight").active = false;
         const content = TableShopContent.getRoleClass(data.classId);
         const thresholds = TableRoleClass.getConfigById<TableRoleClass>(data.classId).getActivationCounts();
         const color = new Color(content.color);
+        this.highlightParams.set(color.r / 255, color.g / 255, color.b / 255, 0);
         const active = data.count >= thresholds[0];
         this.getNode("background").getComponent(Sprite).color = active ? color : ColorConst.shopPanel;
         const icon = this.getNode("icon");
         this.setSprite(icon, ResPath.getClassSpriteItemIcon(content.id), "bundle");
-        icon.getComponent(Sprite).color = active ? ColorConst.getShopDarkAccentColor(color) : ColorConst.shopTick;
+        this.iconColor = active ? ColorConst.getShopDarkAccentColor(color) : ColorConst.shopTick;
+        Color.lerp(this.litIconColor, color, ColorConst.WHITE, 0.78);
+        icon.getComponent(Sprite).color = this.iconColor;
         this.updateProgressMarks(thresholds, data.count, color);
         if (this.preview) {
             this.schedule(this.togglePreview, 0.5);
+        }
+    }
+
+    setHighlight(classIds: ReadonlySet<number> | undefined, opacity: number) {
+        const highlight = this.getNode("classHighlight");
+        highlight.active = opacity > 0 && !!classIds?.has(this.data.classId);
+        const icon = this.getNode("icon").getComponent(Sprite);
+        if (highlight.active) {
+            Color.lerp(this.displayIconColor, this.iconColor, this.litIconColor, opacity);
+            icon.color = this.displayIconColor;
+            this.highlightParams.w = opacity;
+            highlight.getComponent(Sprite).getMaterialInstance(0).setProperty("focusParams", this.highlightParams);
+        } else {
+            icon.color = this.iconColor;
         }
     }
 
@@ -106,7 +128,7 @@ export class ShopClassItem extends GameComponent {
             const content = TableShopContent.getRoleClass(this.data.classId);
             const roleClass = TableRoleClass.getConfigById<TableRoleClass>(this.data.classId);
             const text = `<color=${content.color}>${roleClass.name}</color>[fg]（${this.data.count}人）\n\n${content.description1}`;
-            oops.gui.open(TooltipPanelView, { data: text });
+            oops.gui.open(TooltipPanelView, { data: { text } });
         }
     }
 }

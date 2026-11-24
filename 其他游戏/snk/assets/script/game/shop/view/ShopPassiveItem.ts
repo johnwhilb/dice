@@ -3,7 +3,9 @@ import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { ShopBll } from "../bll/ShopBll";
-import { _decorator, EventMouse, Node, Sprite, instantiate, Layout } from "cc";
+import { _decorator, Sprite, instantiate, Layout } from "cc";
+import { ShopTooltipSaleKind } from "../ShopEvent";
+import type { IShopTooltipData } from "../ShopEvent";
 import type { IShopItem } from "../model/ShopModel";
 import { ColorConst } from "../../common/config/ColorConst";
 import { TableShopContent } from "../../common/table/TableShopContent";
@@ -30,24 +32,12 @@ export class ShopPassiveItem extends GameComponent {
         return this.blocked || smc.game.shop.ShopModel.rightButtonDown;
     }
 
-    start() {
-        // 原版道具通过右键出售，价格与状态校验由 ShopBll.sellItem 处理。
-        this.getNode("btnItem").on(Node.EventType.MOUSE_UP, this.sellItem, this);
-    }
-
     setData(index: number, item: IShopItem) {
         this.index = index;
         this.item = item;
         this.setSprite(this.getNode("icon"), ResPath.getItemSpriteIcon(item.contentId), "bundle");
         const required = this.business.getItemXpNeeded(index);
         this.updateXpMarks(required, item.xp);
-    }
-
-    private sellItem(event: EventMouse) {
-        if (event.getButton() === EventMouse.BUTTON_RIGHT && !this.blocked) {
-            event.propagationStopped = true;
-            this.business.sellItem(this.index);
-        }
     }
 
     private updateXpMarks(required: number, xp: number) {
@@ -78,7 +68,11 @@ export class ShopPassiveItem extends GameComponent {
             const required = this.business.getItemXpNeeded(this.index);
             const rule = TableShopRule.getInitial();
             const text = `${content.name} · [yellow]${item.level}[fg]级${required ? `，经验 [yellow]${item.xp}/${required}[fg]，每点经验 [yellow]${rule.itemXpCost}[fg] 金币` : ""}\n${content.getDescription(item.level)}\n[fg]售价：[yellow]${item.level * rule.itemSalePerLevel}[fg] 金币`;
-            oops.gui.open(TooltipPanelView, { data: text });
+            const tooltip: IShopTooltipData = {
+                text,
+                sale: { kind: ShopTooltipSaleKind.Item, index: this.index, level: item.level },
+            };
+            oops.gui.open(TooltipPanelView, { data: tooltip });
         }
     }
 }

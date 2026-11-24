@@ -24,9 +24,11 @@ import { oops } from "db://oops-framework/core/Oops";
 import type { Shop } from "../Shop";
 import { ShopBll } from "../bll/ShopBll";
 import { ShopEvent } from "../ShopEvent";
+import type { IShopSaleEffectOrigin } from "../ShopEvent";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { TableShopRule } from "../../common/table/TableShopRule";
 import { TableShopLevel } from "../../common/table/TableShopLevel";
+import { TableRole } from "../../common/table/TableRole";
 import { ColorConst } from "../../common/config/ColorConst";
 import List from "../../ui/List";
 import type { IShopClassProgress } from "../model/ShopModel";
@@ -38,6 +40,14 @@ import { ShopPassiveItem } from "./ShopPassiveItem";
 import { UICommon } from "../../ui/UICommon";
 
 const { ccclass, property } = _decorator;
+const classFadeDuration = 0.3;
+
+interface IShopClassFocus {
+    classIds: ReadonlySet<number>;
+    touchId: number | null;
+    opacity: number;
+    released: boolean;
+}
 
 @ccclass("ShopView")
 @ecs.register("ShopView", false)
@@ -51,6 +61,7 @@ export class ShopView extends CCView<Shop> {
     private pendingDragIndex: number = -1;
     private dragStartPoint: Vec2 = new Vec2();
     private classProgress: IShopClassProgress[] = [];
+    private classFocus?: IShopClassFocus;
     private teamList: List;
     private offerEffect: ShopOfferEffect;
     private classList: List;
@@ -83,6 +94,7 @@ export class ShopView extends CCView<Shop> {
         this.offerEffect = effects.addComponent(ShopOfferEffect);
         this.on(ShopEvent.UpdateShopContent, this.refresh, this);
         this.on(ShopEvent.ShowOfferRemoval, this.showOfferRemoval, this);
+        this.on(ShopEvent.ShowRoleSaleEffect, this.showRoleSaleEffect, this);
         this.on(ShopEvent.UpdateTeamOrder, this.refreshTeamOrder, this);
         this.on(ShopEvent.StartTeamDrag, this.startDrag, this);
         this.teamList = this.getNode("teamList").getComponent(List);
@@ -95,13 +107,13 @@ export class ShopView extends CCView<Shop> {
         // 队员排序需要持续接收移动和松开事件；捕获 UI 事件避免拖动中途被按钮吞掉。
         input.on(Input.EventType.MOUSE_UP, this.releaseGrabbed, this);
         input.on(Input.EventType.TOUCH_MOVE, this.moveGrabbed, this);
-        input.on(Input.EventType.TOUCH_END, this.releaseGrabbed, this);
-        input.on(Input.EventType.TOUCH_CANCEL, this.releaseGrabbed, this);
+        input.on(Input.EventType.TOUCH_END, this.releaseTeamTouch, this);
+        input.on(Input.EventType.TOUCH_CANCEL, this.releaseTeamTouch, this);
         this.node.on(Node.EventType.MOUSE_UP, this.finishDrag, this, true);
         this.node.on(Node.EventType.TOUCH_MOVE, this.moveGrabbed, this, true);
         this.node.on(Node.EventType.TOUCH_END, this.finishDrag, this, true);
         this.node.on(Node.EventType.TOUCH_CANCEL, this.finishDrag, this, true);
-        // 屏蔽浏览器菜单，保留商店原版右键出售和降级操作。
+        // 屏蔽浏览器菜单，保留商店原版右键降级操作。
         game.canvas.addEventListener("contextmenu", this.preventContextMenu);
         this.model.guideOpen = false;
         this.getNode("guidePanel").active = false;
@@ -117,7 +129,10 @@ export class ShopView extends CCView<Shop> {
     }
 
     updateClassItem(node: Node, index: number) {
-        node.getComponent(ShopClassItem).setData(this.classProgress[index]);
+        const item = node.getComponent(ShopClassItem);
+        const focus = this.classFocus;
+        item.setData(this.classProgress[index]);
+        item.setHighlight(focus?.classIds, focus?.opacity ?? 0);
     }
 
     updatePassiveItem(node: Node, index: number) {
@@ -193,6 +208,10 @@ export class ShopView extends CCView<Shop> {
         });
     }
 
+    private showRoleSaleEffect(event: string, origin: IShopSaleEffectOrigin) {
+        this.offerEffect.playFromWorldPosition(origin.position, origin.color);
+    }
+
     private updateShopXpMarks(required: number) {
         const box = this.getNode("shopXpBox");
         const length = Math.max(box.children.length, required);
@@ -208,12 +227,37 @@ export class ShopView extends CCView<Shop> {
         box.getComponent(Layout).updateLayout();
     }
 
-    private startDrag(event: string, index: number, point: Vec2) {
-        if (this.blocked || !this.model.team[index]) {
+    private startDrag(event: string, index: number, point: Vec2, touchId: number | null) {
+        const unit = this.model.team[index];
+        if (this.blocked || !unit) {
             return;
         }
         this.pendingDragIndex = index;
         this.dragStartPoint.set(point);
+        const classIds = TableRole.getConfigById<TableRole>(unit.roleId).getClasses().map((roleClass) => {
+            return roleClass.id;
+        });
+        this.classFocus = { classIds: new Set(classIds), touchId, opacity: 1, released: false };
+        this.updateClassHighlights();
+    }
+
+    update(dt: number) {
+        const focus = this.classFocus;
+        if (!focus?.released) {
+            return;
+        }
+        focus.opacity = Math.max(0, focus.opacity - dt / classFadeDuration);
+        if (focus.opacity === 0) {
+            this.classFocus = undefined;
+        }
+        this.updateClassHighlights();
+    }
+
+    private updateClassHighlights() {
+        const focus = this.classFocus;
+        this.classList.content.children.forEach((node) => {
+            node.getComponent(ShopClassItem).setHighlight(focus?.classIds, focus?.opacity ?? 0);
+        });
     }
 
     private moveGrabbed(event: EventTouch) {
@@ -241,6 +285,10 @@ export class ShopView extends CCView<Shop> {
         this.model.rightButtonDown = event.getButton() === EventMouse.BUTTON_RIGHT;
         if (this.model.rightButtonDown) {
             this.pendingDragIndex = -1;
+            if (this.classFocus?.touchId === 0) {
+                this.classFocus = undefined;
+                this.updateClassHighlights();
+            }
         }
     }
 
@@ -306,7 +354,22 @@ export class ShopView extends CCView<Shop> {
         }
     }
 
+    private releaseClassFocus(event: EventTouch) {
+        const focus = this.classFocus;
+        if (focus && focus.touchId === event.getID()) {
+            focus.released = true;
+        }
+    }
+
+    private releaseTeamTouch(event: EventTouch) {
+        this.releaseClassFocus(event);
+        this.releaseGrabbed();
+    }
+
     private finishDrag(event: EventMouse | EventTouch) {
+        if (event instanceof EventTouch) {
+            this.releaseClassFocus(event);
+        }
         this.pendingDragIndex = -1;
         if (this.model.grabbedIndex >= 0) {
             event.propagationStopped = true;
@@ -319,17 +382,19 @@ export class ShopView extends CCView<Shop> {
 
     onDestroy() {
         this.off(ShopEvent.UpdateShopContent, this.refresh, this);
+        this.off(ShopEvent.ShowRoleSaleEffect, this.showRoleSaleEffect, this);
         this.off(ShopEvent.StartTeamDrag, this.startDrag, this);
         input.off(Input.EventType.MOUSE_UP, this.releaseGrabbed, this);
         input.off(Input.EventType.TOUCH_MOVE, this.moveGrabbed, this);
-        input.off(Input.EventType.TOUCH_END, this.releaseGrabbed, this);
-        input.off(Input.EventType.TOUCH_CANCEL, this.releaseGrabbed, this);
+        input.off(Input.EventType.TOUCH_END, this.releaseTeamTouch, this);
+        input.off(Input.EventType.TOUCH_CANCEL, this.releaseTeamTouch, this);
         game.canvas.removeEventListener("contextmenu", this.preventContextMenu);
         super.onDestroy();
     }
 
     reset() {
         this.pendingDragIndex = -1;
+        this.classFocus = undefined;
     }
 
     btnRefresh() {
@@ -362,7 +427,7 @@ export class ShopView extends CCView<Shop> {
                     return `${index + 1}阶：${weight}% → ${next ? `${next.getTierWeights()[index]}%` : "已满级"}`;
                 })
                 .join("\n")}\n\n[light_bg]右键降低一级（花费${rule.downgradeCost}金币，经验清零）`;
-            oops.gui.open(TooltipPanelView, { data: text });
+            oops.gui.open(TooltipPanelView, { data: { text } });
         }
     }
 

@@ -1,5 +1,5 @@
 ﻿import { _decorator, Component, Graphics, Sprite, UITransform, Vec2 } from "cc";
-import type { Color } from "cc";
+import type { Color, Vec3 } from "cc";
 import { ColorConst } from "../../common/config/ColorConst";
 import { ShopEffectBll, shopEffectColorTime, shopEffectScale } from "../bll/ShopEffectBll";
 import { ShopEffectModel } from "../model/ShopEffectModel";
@@ -18,8 +18,12 @@ export class ShopOfferEffect extends Component {
     }
 
     play(target: Sprite) {
-        const position = this.getComponent(UITransform).convertToNodeSpaceAR(target.node.worldPosition);
-        this.playAt(position.x, position.y - 4 * shopEffectScale, target.color);
+        this.playFromWorldPosition(target.node.worldPosition, target.color);
+    }
+
+    playFromWorldPosition(worldPosition: Readonly<Vec3>, color: Color) {
+        const position = this.getComponent(UITransform).convertToNodeSpaceAR(worldPosition);
+        this.playAt(position.x, position.y - 4 * shopEffectScale, color);
     }
 
     playAt(x: number, y: number, color: Color) {
