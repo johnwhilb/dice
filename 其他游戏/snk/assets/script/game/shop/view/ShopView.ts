@@ -73,15 +73,15 @@ export class ShopView extends CCView<Shop> {
     private dragStartPoint: Vec2 = new Vec2();
     private dragCurrentPoint: Vec2 = new Vec2();
     private classProgress: IShopClassProgress[] = [];
-    private activeSynergyLevels = new Map<number, number>();
+    private activeSynergyLevels: Map<number, number> = new Map<number, number>();
     private synergyInitialized: boolean = false;
     private classFocus?: IShopClassFocus;
     private teamList: List;
     private offerEffect: ShopOfferEffect;
     private classList: List;
     private passiveList: List;
-    private goldTitleBasePos = new Vec3();
-    private teamTitleBasePos = new Vec3();
+    private goldTitleBasePos: Vec3 = new Vec3();
+    private teamTitleBasePos: Vec3 = new Vec3();
     private goldPopLife: number = 0;
     private goldShakeLife: number = 0;
     private teamShakeLife: number = 0;
@@ -229,7 +229,6 @@ export class ShopView extends CCView<Shop> {
         this.classProgress = this.business.getClassProgress();
         const columns = this.classProgress.length <= 6 ? 2 : 3;
         // 按原版职业数量切换两列或三列，列表单元格位置由 List 计算。
-        this.getNode("classList").setPosition(columns === 2 ? 247 : 245, 300, 0);
         this.getNode("classList").getComponent(UITransform).width = columns * 56;
         this.getNode("classViewport").getComponent(UITransform).width = columns * 56;
         this.classList.content.getComponent(UITransform).width = columns * 56;
@@ -446,7 +445,8 @@ export class ShopView extends CCView<Shop> {
             }
             const node = box.children[index];
             node.active = index < required;
-            node.getComponent(Sprite).color = index < this.model.shopXp ? ColorConst.shopMergeButton : ColorConst.shopButton;
+            node.getComponent(Sprite).color =
+                index < this.model.shopXp ? ColorConst.shopMergeButton : ColorConst.shopButton;
         }
         box.getComponent(Layout).updateLayout();
     }
@@ -462,9 +462,11 @@ export class ShopView extends CCView<Shop> {
         this.pendingDragTouchId = touchId;
         this.dragStartPoint.set(point);
         this.dragCurrentPoint.set(point);
-        const classIds = TableRole.getConfigById<TableRole>(unit.roleId).getClasses().map((roleClass) => {
-            return roleClass.id;
-        });
+        const classIds = TableRole.getConfigById<TableRole>(unit.roleId)
+            .getClasses()
+            .map((roleClass) => {
+                return roleClass.id;
+            });
         this.classFocus = { classIds: new Set(classIds), touchId, opacity: 1, released: false };
         this.updateClassHighlights();
     }
