@@ -1,5 +1,4 @@
 import { smc } from "../../common/SingletonModuleComp";
-import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { ShopBll } from "../bll/ShopBll";
@@ -72,7 +71,7 @@ export class ShopPassiveItem extends GameComponent {
                 text,
                 sale: { kind: ShopTooltipSaleKind.Item, index: this.index, level: item.level },
             };
-            oops.gui.open(TooltipPanelView, { data: tooltip });
+            TooltipPanelView.show(tooltip);
         }
     }
 }

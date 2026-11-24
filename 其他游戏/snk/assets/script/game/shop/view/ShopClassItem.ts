@@ -1,5 +1,4 @@
 import { smc } from "../../common/SingletonModuleComp";
-import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { _decorator, Color, Layout, Node, Sprite, Vec4, instantiate } from "cc";
@@ -128,7 +127,7 @@ export class ShopClassItem extends GameComponent {
             const content = TableShopContent.getRoleClass(this.data.classId);
             const roleClass = TableRoleClass.getConfigById<TableRoleClass>(this.data.classId);
             const text = `<color=${content.color}>${roleClass.name}</color>[fg]（${this.data.count}人）\n\n${content.description1}`;
-            oops.gui.open(TooltipPanelView, { data: { text } });
+            TooltipPanelView.show({ text });
         }
     }
 }

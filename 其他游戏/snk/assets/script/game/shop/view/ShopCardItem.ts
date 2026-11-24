@@ -1,6 +1,5 @@
 import { smc } from "../../common/SingletonModuleComp";
 import { ShopBll } from "../bll/ShopBll";
-import { oops } from "db://oops-framework/core/Oops";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import type { TableRoleClass } from "../../common/table/TableRoleClass";
@@ -142,7 +141,7 @@ export class ShopCardItem extends GameComponent {
                 .join("、");
             const effect = UICommon.toText(content.effectDescription);
             const text = `<color=${content.color}>${role.name}</color>[fg] · 价格：[yellow]${role.price}[fg] 金币\n职业：${classes}\n\n${content.getDescription(1)}\n\n[light_bg]三级效果 · ${content.effectName}\n${effect}`;
-            oops.gui.open(TooltipPanelView, { data: { text } });
+            TooltipPanelView.show({ text });
         }
     }
 }

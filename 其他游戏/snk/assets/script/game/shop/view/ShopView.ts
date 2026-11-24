@@ -20,7 +20,6 @@ import { CCView } from "db://oops-framework/module/common/CCView";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { gui } from "db://oops-framework/core/gui/Gui";
 import { LayerType } from "db://oops-framework/core/gui/layer/LayerEnum";
-import { oops } from "db://oops-framework/core/Oops";
 import type { Shop } from "../Shop";
 import { ShopBll } from "../bll/ShopBll";
 import { ShopEvent } from "../ShopEvent";
@@ -427,7 +426,7 @@ export class ShopView extends CCView<Shop> {
                     return `${index + 1}阶：${weight}% → ${next ? `${next.getTierWeights()[index]}%` : "已满级"}`;
                 })
                 .join("\n")}\n\n[light_bg]右键降低一级（花费${rule.downgradeCost}金币，经验清零）`;
-            oops.gui.open(TooltipPanelView, { data: { text } });
+            TooltipPanelView.show({ text });
         }
     }
 
