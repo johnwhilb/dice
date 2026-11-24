@@ -1,0 +1,22 @@
+{
+  "__type__": "cc.Material",
+  "_name": "BattleBackground",
+  "_objFlags": 0,
+  "__editorExtras__": {},
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "7ec4da35-dfcb-4579-9684-5f44484f6caf",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": 0,
+  "_defines": [
+    {}
+  ],
+  "_states": [
+    {}
+  ],
+  "_props": [
+    {}
+  ]
+}
+

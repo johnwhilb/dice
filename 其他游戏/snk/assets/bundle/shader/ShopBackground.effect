@@ -47,54 +47,95 @@ CCProgram shop-background-fs %{
   in vec2 screenUv;
   in float opacity;
 
-  float cellSeed (vec2 cell) {
-    vec3 seed = fract(vec3(cell.xyx) * vec3(0.1031, 0.1030, 0.0973));
-    seed += dot(seed, seed.yzx + 33.33);
-    return fract((seed.x + seed.y) * seed.z);
+  vec2 hash22 (vec2 cell) {
+    vec3 value = fract(vec3(cell.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    value += dot(value, value.yzx + 33.33);
+    return fract((value.xx + value.yz) * value.zy);
   }
 
-  float driftingPixels (vec2 point, float cellSize, vec2 travel, float cycle, float trailLength) {
-    vec2 field = point / cellSize - travel * cycle;
-    float seed = cellSeed(mod(floor(field), travel));
-    vec2 center = 0.41 + 0.25 * fract(seed * vec2(19.0, 37.0));
-    vec2 delta = (fract(field) - center) * cellSize;
-    float size = mix(0.46, 0.94, seed);
-    float distance = max(abs(delta.x), abs(delta.y)) / 1.3;
-    float square = 1.0 - smoothstep(size * 0.52, size + 0.35, distance);
+  float ditherNoise (vec2 fragPos) {
+    vec3 p3 = fract(vec3(fragPos.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z) - 0.5;
+  }
 
-    float behind = max(0.0, -delta.x);
-    float trailHeight = abs(delta.y + floor(behind * travel.y / travel.x + 0.5));
-    float trail = (1.0 - smoothstep(0.18, 0.78, trailHeight))
-      * (1.0 - smoothstep(0.0, trailLength, behind)) * step(delta.x, 0.0);
-    float pulse = 0.68 + 0.32 * sin(cycle * 25.1327412 + seed * 61.0);
-    return step(0.81, seed) * max(square, trail * 0.52) * pulse;
+  float fireflies (vec2 point, float density, float riseSpeed, float time, float threshold) {
+    vec2 field = point * density;
+    field.y -= time * riseSpeed;
+    vec2 cellId = floor(field);
+    vec2 seed = hash22(cellId);
+
+    // 轻柔的横向暖风摆动，像深夜集市里缓缓升起的萤火微光
+    float sway = 0.15 * sin(time * (0.65 + seed.x * 0.85) + seed.y * 29.0);
+    vec2 center = vec2(0.5 + (seed.x - 0.5) * 0.42 + sway, 0.25 + seed.y * 0.50);
+    vec2 delta = fract(field) - center;
+
+    float dist = length(delta);
+    float radius = mix(0.036, 0.078, seed.x);
+    float core = 1.0 - smoothstep(radius * 0.35, radius * 1.4, dist);
+    float halo = 1.0 - smoothstep(radius * 0.7, radius * 4.2, dist);
+    float glowPulse = 0.56 + 0.44 * sin(time * (1.1 + seed.y * 1.6) + seed.x * 43.0);
+    return step(threshold, seed.y) * (core * 0.78 + halo * halo * 0.38) * glowPulse;
   }
 
   vec4 frag () {
     float aspect = cc_screenSize.x / max(cc_screenSize.y, 1.0);
-    vec2 point = (screenUv - 0.5) * vec2(aspect, 1.0);
-    vec2 pixelPoint = (point + vec2(aspect, 1.0) * 0.5) * 270.0;
-    vec2 grid = pixelPoint / 22.0;
-    vec2 tile = floor(grid);
+    vec2 uv = screenUv;
+    vec2 point = (uv - 0.5) * vec2(aspect, 1.0);
+    float time = cc_time.x;
+
+    // 温润暗暮暖棕基底（柔和天鹅绒暗角，与主界面冷紫青形成温暖对比）
+    float vignette = smoothstep(0.24, 1.08, length(point * vec2(0.76, 1.20)));
+    vec3 warmCenter = vec3(0.102, 0.084, 0.076);
+    vec3 deepDusk = vec3(0.044, 0.035, 0.036);
+    vec3 color = mix(warmCenter, deepDusk, vignette);
+
+    // 与主界面同源的干净柔和微棋盘，无砖缝无倒角无金属感
+    vec2 tileDrift = mod(vec2(0.22, 0.58) * time * 0.055, vec2(2.0));
+    vec2 tile = floor((point + vec2(0.015)) * 12.0 - tileDrift);
     float checker = mod(tile.x + tile.y, 2.0);
+    color += checker * vec3(0.011, 0.009, 0.007) * (1.0 - vignette * 0.56);
 
-    float edge = smoothstep(0.34, 0.95, length(point * vec2(0.8, 1.38)));
-    float brightness = mix(32.0, 47.0, screenUv.y) - edge * 7.0;
-    brightness += checker * 3.5;
+    // 双层柔和暖烛柔雾（蜂蜜暖琥珀 <-> 暮色玫瑰陶土），自然流淌无生硬边缘
+    float waveA = point.y - 0.13 * sin(point.x * 2.4 + time * 0.18)
+      - 0.045 * cos(point.x * 4.9 - time * 0.24) + 0.16 + point.x * 0.21;
+    float mistA = exp(-6.8 * waveA * waveA);
+    float silkA = exp(-32.0 * (waveA - 0.06) * (waveA - 0.06));
 
-    vec2 gridEdge = min(fract(grid), 1.0 - fract(grid)) * 22.0;
-    float seam = 1.0 - smoothstep(0.0, 0.76, min(gridEdge.x, gridEdge.y));
-    brightness -= seam * 2.0;
+    float waveB = point.y + 0.11 * sin(point.x * 3.0 - time * 0.21 + 1.9)
+      + 0.035 * sin(point.x * 6.0 + time * 0.29) - 0.15 + point.x * 0.14;
+    float mistB = exp(-8.2 * waveB * waveB);
+    float silkB = exp(-38.0 * (waveB + 0.04) * (waveB + 0.04));
 
-    float cycle = mod(cc_time.x, 28.0) / 28.0;
-    float openSpace = max(smoothstep(0.43, 0.78, screenUv.x), 1.0 - smoothstep(0.20, 0.51, screenUv.y));
-    float contentShade = 1.0 - smoothstep(0.77, 1.0, screenUv.y) * 0.65;
-    float activity = mix(0.23, 1.0, openSpace) * contentShade;
+    float softWave = 0.74 + 0.26 * sin(point.x * 6.2 - time * 0.34 + point.y * 3.4);
+    vec3 candleAmber = vec3(0.185, 0.116, 0.048);
+    vec3 duskRose = vec3(0.148, 0.068, 0.062);
+    vec3 warmToneA = mix(duskRose, candleAmber, smoothstep(0.18, 0.86, uv.x));
+    vec3 warmToneB = mix(candleAmber, duskRose, smoothstep(0.15, 0.85, uv.y));
 
-    float distant = driftingPixels(pixelPoint, 11.0, vec2(29.0, 9.0), cycle, 2.6);
-    float close = driftingPixels(pixelPoint + vec2(41.0, 19.0), 19.0, vec2(23.0, 13.0), cycle, 5.4);
-    brightness += distant * mix(5.0, 20.0, activity);
-    brightness += close * activity * 24.0;
-    return vec4(vec3(brightness / 255.0), opacity);
+    float openZone = max(smoothstep(0.40, 0.84, uv.x), 1.0 - smoothstep(0.18, 0.54, uv.y));
+    float mistVis = mix(0.45, 1.0, openZone) * (1.0 - vignette * 0.34);
+    color += warmToneA * (mistA * 0.38 + silkA * softWave * 0.24) * mistVis;
+    color += warmToneB * (mistB * 0.28 + silkB * (1.22 - softWave * 0.35) * 0.18) * mistVis;
+
+    // 温暖克制的柔和烛火光晕，缓慢呼吸
+    float candleBreath = 0.89 + 0.11 * sin(time * 0.68);
+    vec2 upperGlow = (uv - vec2(0.74, 0.66)) * vec2(2.6, 2.4);
+    vec2 lowerGlow = (uv - vec2(0.26, 0.24)) * vec2(2.9, 2.7);
+    color += vec3(0.058, 0.038, 0.018) * exp(-dot(upperGlow, upperGlow)) * candleBreath;
+    color += vec3(0.046, 0.025, 0.019) * exp(-dot(lowerGlow, lowerGlow)) * (1.78 - candleBreath);
+
+    // 两层缓慢摇曳上升的暖光萤火微尘
+    float farFirefly = fireflies(point, 36.0, 0.22, time, 0.83);
+    float nearFirefly = fireflies(point + vec2(4.7, 2.3), 18.0, 0.38, time, 0.87);
+    float flyVis = mix(0.38, 1.0, openZone) * (1.0 - vignette * 0.28);
+    color += flyVis * (
+      farFirefly * vec3(0.30, 0.23, 0.13)
+      + nearFirefly * vec3(0.46, 0.33, 0.15)
+    );
+
+    // 防暗部色带抖动
+    color += ditherNoise(gl_FragCoord.xy) / 255.0;
+    return vec4(max(color, vec3(0.0)), opacity);
   }
 }%

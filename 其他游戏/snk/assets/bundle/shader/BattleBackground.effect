@@ -1,0 +1,173 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: battle-background-vs:vert
+      frag: battle-background-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+}%
+
+CCProgram battle-background-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  in vec3 a_position;
+  in vec4 a_color;
+  out vec2 screenUv;
+  out float opacity;
+
+  vec4 vert () {
+    vec4 position = vec4(a_position, 1.0);
+    #if USE_LOCAL
+      position = cc_matWorld * position;
+    #endif
+    vec4 clip = cc_matViewProj * position;
+    screenUv = clip.xy / clip.w * 0.5 + 0.5;
+    opacity = a_color.a;
+    return clip;
+  }
+}%
+
+CCProgram battle-background-fs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec2 screenUv;
+  in float opacity;
+
+  vec2 hash22 (vec2 cell) {
+    vec3 value = fract(vec3(cell.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    value += dot(value, value.yzx + 33.33);
+    return fract((value.xx + value.yz) * value.zy);
+  }
+
+  float ditherNoise (vec2 fragPos) {
+    vec3 p3 = fract(vec3(fragPos.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z) - 0.5;
+  }
+
+  float duskMotes (vec2 point, float density, vec2 drift, float time, float threshold) {
+    vec2 field = point * density - drift * time;
+    vec2 cellId = floor(field);
+    vec2 seed = hash22(cellId);
+    vec2 center = 0.25 + 0.50 * seed;
+    vec2 delta = fract(field) - center;
+
+    float dist = length(delta);
+    float radius = mix(0.032, 0.072, seed.x);
+    float core = 1.0 - smoothstep(radius * 0.35, radius * 1.4, dist);
+    float halo = 1.0 - smoothstep(radius * 0.75, radius * 3.6, dist);
+    float pulse = 0.62 + 0.38 * sin(time * (0.95 + seed.y * 1.35) + seed.x * 31.0);
+    return step(threshold, seed.y) * (core * 0.78 + halo * halo * 0.30) * pulse;
+  }
+
+  vec4 frag () {
+    float aspect = cc_screenSize.x / max(cc_screenSize.y, 1.0);
+    vec2 uv = screenUv;
+    vec2 point = (uv - 0.5) * vec2(aspect, 1.0);
+    float time = cc_time.x;
+
+    // 与 BattleView 中 arena 节点四边留白（左右 57.2 / 上下 97.2，基准高 750）精确对齐
+    vec2 arenaHalf = vec2(max(aspect * 0.5 - 0.0763, 0.20), 0.3704);
+
+    #if ARENA_FLOOR
+      // ========== 内场极简柔雾暗格地板：纯粹耐看、极致弹幕可读性 ==========
+      vec2 normPos = point / max(arenaHalf, vec2(0.001));
+      float radialVignette = smoothstep(0.16, 1.14, length(normPos * vec2(0.84, 1.0)));
+
+      // 温润克制的深暗炭基底，亮度严格受控以衬托全部子弹与特效
+      vec3 color = mix(vec3(0.114, 0.112, 0.128), vec3(0.072, 0.070, 0.084), radialVignette);
+
+      // 与主界面同款的极低对比柔和暗棋盘（静止铺陈，无任何线条、圆环或铆钉）
+      vec2 tile = floor(point * 11.0);
+      float checker = mod(tile.x + tile.y, 2.0);
+      color += checker * vec3(0.009, 0.009, 0.011) * (1.0 - radialVignette * 0.45);
+
+      // 极轻柔的中心呼吸暗雾，让场内有细腻纵深而不抢视线
+      float breath = 0.90 + 0.10 * sin(time * 0.62);
+      float centerMist = exp(-2.2 * dot(normPos * vec2(0.92, 1.0), normPos * vec2(0.92, 1.0)));
+      color += vec3(0.014, 0.013, 0.020) * centerMist * breath;
+
+      // 四周贴边柔和自然暗影过渡 + 极淡暮红呼应四角
+      vec2 edgeDist = max(arenaHalf - abs(point), vec2(0.0));
+      float wallDist = min(edgeDist.x, edgeDist.y);
+      float wallShade = 1.0 - smoothstep(0.0, 0.085, wallDist);
+      color *= 1.0 - wallShade * 0.28;
+
+      float cornerSoft = smoothstep(0.54, 1.08, abs(normPos.x)) * smoothstep(0.46, 1.08, abs(normPos.y));
+      color += vec3(0.022, 0.009, 0.014) * cornerSoft * (0.86 + 0.14 * sin(time * 0.78));
+
+      color += ditherNoise(gl_FragCoord.xy) / 255.0;
+      return vec4(max(color, vec3(0.0)), opacity);
+    #else
+      // ========== 外围暗夜暮红薄雾背景：深沉氛围，无金属无科技 ==========
+      float vignette = smoothstep(0.24, 1.10, length(point * vec2(0.75, 1.18)));
+      vec3 color = mix(vec3(0.070, 0.058, 0.072), vec3(0.026, 0.022, 0.032), vignette);
+
+      // 同源极淡慢漂微棋盘
+      vec2 tileDrift = mod(vec2(0.45, 0.28) * time * 0.05, vec2(2.0));
+      vec2 tile = floor((point + vec2(0.015)) * 12.0 - tileDrift);
+      float checker = mod(tile.x + tile.y, 2.0);
+      color += checker * vec3(0.009, 0.008, 0.011) * (1.0 - vignette * 0.55);
+
+      // 双层缓慢涌动的暗绯红与暮紫薄雾丝带
+      float waveA = point.y - 0.14 * sin(point.x * 2.5 + time * 0.20)
+        - 0.045 * cos(point.x * 5.0 - time * 0.27) + 0.18 - point.x * 0.22;
+      float mistA = exp(-6.2 * waveA * waveA);
+      float silkA = exp(-30.0 * (waveA + 0.06) * (waveA + 0.06));
+
+      float waveB = point.y + 0.12 * sin(point.x * 3.1 - time * 0.24 + 1.2)
+        + 0.04 * sin(point.x * 6.0 + time * 0.30) - 0.16 + point.x * 0.16;
+      float mistB = exp(-7.5 * waveB * waveB);
+      float silkB = exp(-34.0 * (waveB - 0.05) * (waveB - 0.05));
+
+      float ripple = 0.75 + 0.25 * sin(point.x * 5.8 - time * 0.38 + point.y * 3.2);
+      vec3 duskCrimson = vec3(0.168, 0.042, 0.062);
+      vec3 nightPlum = vec3(0.092, 0.046, 0.128);
+      vec3 mistToneA = mix(nightPlum, duskCrimson, smoothstep(0.18, 0.85, uv.x));
+      vec3 mistToneB = mix(duskCrimson, nightPlum, smoothstep(0.15, 0.85, uv.y));
+
+      // 外围边缘与四周氛围更明显
+      float perimeterMask = max(
+        1.0 - smoothstep(0.0, 0.20, min(uv.y, 1.0 - uv.y)),
+        1.0 - smoothstep(0.0, 0.16, min(uv.x, 1.0 - uv.x))
+      );
+      float mistVis = mix(0.35, 1.0, perimeterMask);
+      color += mistToneA * (mistA * 0.38 + silkA * ripple * 0.24) * mistVis;
+      color += mistToneB * (mistB * 0.30 + silkB * (1.25 - ripple * 0.35) * 0.18) * mistVis;
+
+      // 贴近竞技场外围的极柔和暮色环境晕染（无硬边光条）
+      vec2 outside = max(abs(point) - arenaHalf, vec2(0.0));
+      float borderDist = length(outside);
+      float softHalo = exp(-14.0 * borderDist);
+      float breath = 0.86 + 0.14 * sin(time * 0.72);
+      color += vec3(0.052, 0.022, 0.036) * softHalo * 0.55 * breath;
+
+      // 外围稀疏飘浮的柔和暗红与暮紫光尘
+      float outerMask = smoothstep(0.0, 0.045, borderDist);
+      float farDust = duskMotes(point, 38.0, vec2(0.24, 0.14), time, 0.84);
+      float nearDust = duskMotes(point + vec2(5.1, 3.4), 20.0, vec2(0.36, 0.22), time, 0.88);
+      color += outerMask * (
+        farDust * vec3(0.24, 0.16, 0.28)
+        + nearDust * vec3(0.42, 0.18, 0.22)
+      );
+
+      color += ditherNoise(gl_FragCoord.xy) / 255.0;
+      return vec4(max(color, vec3(0.0)), opacity);
+    #endif
+  }
+}%
+
