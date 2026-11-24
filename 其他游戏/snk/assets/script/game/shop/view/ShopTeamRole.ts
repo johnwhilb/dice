@@ -15,6 +15,8 @@ export class ShopTeamRole extends GameComponent {
     @property(Prefab)
     private rolePrefab: Prefab;
     private teamIndex = -1;
+    private popLife: number = 0;
+    private popStrength: number = 0.14;
 
     private get business() {
         return smc.game.shop.getBusiness<ShopBll>(ShopBll);
@@ -27,6 +29,23 @@ export class ShopTeamRole extends GameComponent {
     private startRowTouch(event: EventTouch) {
         if (this.teamIndex >= 0 && event.target.name !== "btnRole") {
             this.dispatchEvent(ShopEvent.StartTeamDrag, this.teamIndex, event.getUILocation(), event.getID());
+        }
+    }
+
+    playPop(strength: number = 0.14) {
+        this.popStrength = strength;
+        this.popLife = 0.24;
+    }
+
+    update(deltaTime: number) {
+        if (this.popLife > 0) {
+            this.popLife = Math.max(0, this.popLife - deltaTime);
+            const t = this.popLife / 0.24;
+            const scale = 1 + this.popStrength * Math.sin(t * Math.PI);
+            this.node.setScale(scale, scale, 1);
+            if (this.popLife === 0) {
+                this.node.setScale(1, 1, 1);
+            }
         }
     }
 

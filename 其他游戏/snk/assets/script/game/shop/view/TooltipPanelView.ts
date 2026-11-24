@@ -126,15 +126,15 @@ export class TooltipPanelView extends GameComponent {
 
         this.sale = undefined;
         const business = smc.game.shop.getBusiness<ShopBll>(ShopBll);
-        let roleSold = false;
+        let sold = false;
         if (sale.kind === ShopTooltipSaleKind.Team) {
-            roleSold = business.sell(sale.index);
+            sold = business.sell(sale.index);
         } else if (sale.kind === ShopTooltipSaleKind.Reserve) {
-            roleSold = business.sellReserve(sale.index, sale.level);
+            sold = business.sellReserve(sale.index, sale.level);
         } else {
-            business.sellItem(sale.index);
+            sold = business.sellItem(sale.index);
         }
-        if (roleSold && sale.effectOrigin) {
+        if (sold && sale.effectOrigin) {
             this.dispatchEvent(ShopEvent.ShowRoleSaleEffect, sale.effectOrigin);
         }
         oops.gui.remove(TooltipPanelView);

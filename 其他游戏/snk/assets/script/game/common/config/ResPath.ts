@@ -10,4 +10,14 @@ export class ResPath {
     static getItemSpriteIcon(id: number): string {
         return `texture/item/${id}/spriteFrame`;
     }
+
+    /** 获取战斗音效资源路径。 */
+    static getBattleAudio(name: string): string {
+        return `audios/${name}`;
+    }
+
+    /** 获取商店音效资源路径。 */
+    static getShopAudio(name: string): string {
+        return `audios/${name}`;
+    }
 }

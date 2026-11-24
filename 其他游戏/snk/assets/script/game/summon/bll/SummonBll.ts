@@ -16,6 +16,7 @@ import { BuffKind } from "../../buff/BuffEvent";
 import { CombatCamp } from "../../combat/CombatEvent";
 import type { ISummonData } from "../SummonEvent";
 import { AreaFeedback } from "../../effect/EffectEvent";
+import { EffectBll } from "../../effect/bll/EffectBll";
 
 export class SummonBll extends CCBusiness<Summon> {
     /** 在 x、y 生成 source 所属的 typeId 造物，damage 为主人实时伤害快照。 */
@@ -29,17 +30,21 @@ export class SummonBll extends CCBusiness<Summon> {
         const data: ISummonData = { id: this.ent.SummonModel.nextId++, source, typeId, x, y, angle: Math.random() * Math.PI * 2, hp, life: config.life * conjurer,
             timer: 0, damage: damage * config.damage * conjurer, dead: false, createdAt: game.combat.CombatModel.elapsed };
         this.ent.SummonModel.summons.push(data);
+        const owner = game.player.PlayerModel.players[source];
+        game.effect.getBusiness<EffectBll>(EffectBll).showSpawnRing(x, y, critter ? 14 : 24, owner.roleId);
         return data;
     }
 
     /** 生成 count 个治疗球，治疗师羁绊可额外生成，随机位置由战场边界约束。 */
     orb(x: number, y: number, count: number) {
         const chance = this.ent.game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll).classValue(RoleClassKeyEnum.Healer);
+        const effects = this.ent.game.effect.getBusiness<EffectBll>(EffectBll);
         for (let index = 0; index < count; index++) {
             if (this.ent.SummonModel.orbs.length >= TableCombatRule.getCurrent().orbLimit) {
                 break;
             }
             this.ent.SummonModel.orbs.push({ x, y, dead: false });
+            effects.showSpawnRing(x, y, 20, RoleKeyEnum.Cleric);
             if (Math.random() < chance) {
                 this.ent.SummonModel.orbs.push({ x, y, dead: false });
             }
@@ -146,7 +151,7 @@ export class SummonBll extends CCBusiness<Summon> {
                     summon.timer = 0;
                 } else if (summon.typeId === SummonTypeKeyEnum.Volcano) {
                     summon.attackAt = game.combat.CombatModel.elapsed;
-                    combat.area(summon.source, skill.id, summon.x, summon.y, config.radius, summon.damage);
+                    combat.area(summon.source, skill.id, summon.x, summon.y, config.radius, summon.damage, true, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                     summon.timer = 0;
                 } else if (target) {
                     if (config.orbit || summon.typeId === SummonTypeKeyEnum.Critter || summon.typeId === SummonTypeKeyEnum.Pet) {
@@ -182,7 +187,7 @@ export class SummonBll extends CCBusiness<Summon> {
             if (summon.life <= 0 || summon.hp <= 0 || detonate) {
                 summon.dead = true;
                 if (config.explode || stats.item(ShopContentKeyEnum.ItemConstructInstability)) {
-                    combat.area(summon.source, skill.id, summon.x, summon.y, config.radius, summon.damage * (config.explode ? skill.damage : stats.item(ShopContentKeyEnum.ItemConstructInstability)), false);
+                    combat.area(summon.source, skill.id, summon.x, summon.y, config.radius, summon.damage * (config.explode ? skill.damage : stats.item(ShopContentKeyEnum.ItemConstructInstability)), false, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                 }
                 for (let shot = 0; shot < skill.deathShots; shot++) {
                     game.projectile.getBusiness<ProjectileBll>(ProjectileBll).fire(summon.source, skill.id, summon.x, summon.y, shot * Math.PI * 2 / skill.deathShots, summon.damage, 0, false);

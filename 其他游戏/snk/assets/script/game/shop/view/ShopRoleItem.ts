@@ -1,9 +1,10 @@
 import { smc } from "../../common/SingletonModuleComp";
-import { ShopEvent, ShopRoleKind, ShopTooltipSaleKind } from "../ShopEvent";
+import { ShopEvent, ShopRoleKind, ShopSound, ShopTooltipSaleKind } from "../ShopEvent";
 import type { IShopRoleData, IShopTooltipData } from "../ShopEvent";
 import { TooltipPanelView } from "./TooltipPanelView";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { ShopBll } from "../bll/ShopBll";
+import { ShopAudioBll } from "../bll/ShopAudioBll";
 import { _decorator, Color, Button, EventTouch, Label, Node, Sprite, UITransform } from "cc";
 import { TableRole } from "../../common/table/TableRole";
 import { TableShopContent } from "../../common/table/TableShopContent";
@@ -61,6 +62,7 @@ export class ShopRoleItem extends GameComponent {
         if (this.clickBlocked || this.data.kind === ShopRoleKind.Preview) {
             return;
         }
+        smc.game.shop.getBusiness<ShopAudioBll>(ShopAudioBll).play(ShopSound.Click);
         const data = this.data;
         const role = TableRole.getConfigById<TableRole>(data.roleId);
         const content = TableShopContent.getRole(data.roleId);

@@ -14,7 +14,7 @@ import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
 import { EnemyActionBll } from "../../enemy/bll/EnemyActionBll";
 import type { IEnemyData } from "../../enemy/EnemyEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
-import { AreaFeedback, EffectKind } from "../../effect/EffectEvent";
+import { AreaFeedback } from "../../effect/EffectEvent";
 import { ProjectileBll } from "../../projectile/bll/ProjectileBll";
 import { SummonBll } from "../../summon/bll/SummonBll";
 import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
@@ -149,7 +149,9 @@ export class CombatBll extends CCBusiness<Combat> {
         game.enemy.getBusiness<EnemyActionBll>(EnemyActionBll).applyDamage(enemy, amount);
         const effects = game.effect.getBusiness<EffectBll>(EffectBll);
         const roleId = source >= 0 ? game.player.PlayerModel.players[source].roleId : 0;
-        effects.show(EffectKind.Damage, enemy.x, enemy.y, 0, amount, roleId);
+        if (amount > 0) {
+            effects.showDamage(enemy.x, enemy.y, amount, roleId, critical, false);
+        }
         if (critical && amount > 0) {
             effects.showCritical(enemy.x, enemy.y, roleId, enemy.config.id);
         }
@@ -195,7 +197,12 @@ export class CombatBll extends CCBusiness<Combat> {
         const game = this.ent.game;
         const player = game.player.PlayerModel.players[index];
         const buffs = game.buff.getBusiness<BuffBll>(BuffBll);
-        if (player.hp <= 0 || buffs.get(CombatCamp.Player, index, BuffKind.Invulnerable) || buffs.get(CombatCamp.Player, index, BuffKind.Shield)) {
+        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+        if (player.hp <= 0 || buffs.get(CombatCamp.Player, index, BuffKind.Invulnerable)) {
+            return;
+        }
+        if (buffs.get(CombatCamp.Player, index, BuffKind.Shield)) {
+            effects.showShieldBlock(player.pose.x, player.pose.y, player.roleId);
             return;
         }
         const stats = game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll).stats(index);
@@ -203,21 +210,23 @@ export class CombatBll extends CCBusiness<Combat> {
         let hp = Math.max(0, player.hp - actual);
         if (hp <= 0 && buffs.consume(CombatCamp.Player, index, BuffKind.Revive)) {
             hp = stats.hp;
+            effects.showTagText(player.pose.x, player.pose.y, "REVIVE", player.roleId);
+            effects.showPickupRipple(player.pose.x, player.pose.y, false);
         }
         const action = game.player.getBusiness<PlayerActionBll>(PlayerActionBll);
         if (hp <= 0 && action.delayDeath(index)) {
             hp = stats.hp;
+            effects.showTagText(player.pose.x, player.pose.y, "LASTING", player.roleId);
         }
         game.player.getBusiness<PlayerBll>(PlayerBll).setHp(index, hp);
-        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
         if (actual > 0) {
             effects.showPlayerHurtShake();
             if (player.hp > 0) {
                 effects.showPlayerHurt(index);
             }
+            effects.showDamage(player.pose.x, player.pose.y, actual, player.roleId, false, true);
         }
         action.onHurt(index, actual);
-        effects.show(EffectKind.Damage, player.pose.x, player.pose.y, 0, actual, player.roleId);
         if (player.hp <= 0) {
             action.onPlayerDeath(index);
         }
@@ -233,7 +242,9 @@ export class CombatBll extends CCBusiness<Combat> {
         const power = 1 + game.player.getBusiness<PlayerBattleBll>(PlayerBattleBll).item(ShopContentKeyEnum.ItemBlessing);
         const healed = Math.min(player.stats.hp - player.hp, amount * power);
         game.player.getBusiness<PlayerBll>(PlayerBll).setHp(index, player.hp + healed);
-        game.effect.getBusiness<EffectBll>(EffectBll).show(EffectKind.Heal, player.pose.x, player.pose.y, 0, healed, player.roleId);
+        if (healed > 0) {
+            game.effect.getBusiness<EffectBll>(EffectBll).showHeal(player.pose.x, player.pose.y, healed, player.roleId);
+        }
     }
 
     /** 推进 delta 秒共用战斗模块，角色攻击先于弹丸命中，最后更新短时表现。 */

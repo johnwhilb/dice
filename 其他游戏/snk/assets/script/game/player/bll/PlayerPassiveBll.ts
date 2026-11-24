@@ -113,7 +113,13 @@ export class PlayerPassiveBll extends CCBusiness<Player> {
                 game.summon.getBusiness<SummonBll>(SummonBll).create(head, SummonTypeKeyEnum.PsykerOrb, player.pose.x, player.pose.y, stats.stats(head).damage);
             } else if (item.contentId === ShopContentKeyEnum.ItemDivinePunishment) {
                 const damage = stats.item(item.contentId) * stats.classCount(RoleClassKeyEnum.Mage);
-                game.enemy.EnemyModel.enemies.slice().forEach((enemy) => {
+                const enemies = game.enemy.EnemyModel.enemies.slice();
+                const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+                if (enemies.length) {
+                    effects.showThunderShake();
+                }
+                enemies.forEach((enemy) => {
+                    effects.showChain(enemy.x, enemy.y + 115, enemy.x, enemy.y, 0, true);
                     game.combat.getBusiness<CombatBll>(CombatBll).hitEnemy(enemy, damage, head, player.skill.id, false);
                 });
             } else if (item.contentId === ShopContentKeyEnum.ItemDeath6 && alive.length >= rule.deathPosition) {
@@ -134,6 +140,51 @@ export class PlayerPassiveBll extends CCBusiness<Player> {
         if (stats.hasClass(source, RoleClassKeyEnum.Ranger) && Math.random() < stats.classValue(RoleClassKeyEnum.Ranger)) {
             const player = this.ent.PlayerModel.players[source];
             this.barrage(source, TableCombatRule.getCurrent().barrageCount, false, player.pose.x, player.pose.y);
+        }
+    }
+
+    /** source 命中 enemy 后触发风暴编织者串联闪电链与闪电打击道具，副弹与召唤物弹丸也可调用。 */
+    triggerChainLightning(source: number, enemy: IEnemyData, damage: number) {
+        const game = this.ent.game;
+        const stats = this.ent.getBusiness<PlayerBattleBll>(PlayerBattleBll);
+        const combat = game.combat.getBusiness<CombatBll>(CombatBll);
+        const buff = game.buff.getBusiness<BuffBll>(BuffBll);
+        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+        const player = this.ent.PlayerModel.players[source];
+        const skill = player.skill;
+        const rule = TableCombatRule.getCurrent();
+        const infused = buff.get(CombatCamp.Player, source, BuffKind.Chain);
+        if (infused > 0) {
+            const weaver = game.player.PlayerModel.players.find((entry) => {
+                return entry.roleId === RoleKeyEnum.Stormweaver && entry.level === 3;
+            });
+            const hops = weaver ? Math.max(rule.chainInfusionCount, weaver.skill.shots) : rule.chainInfusionCount;
+            const range = weaver ? rule.chainRange : rule.lightningRange;
+            this.bouncePlasmaChain(enemy, damage * infused, source, skill.id, hops, range, combat, effects);
+        }
+        if (Math.random() < stats.item(ShopContentKeyEnum.ItemLightningStrike)) {
+            const scale = rule.lightningBase + rule.lightningStep * stats.itemLevel(ShopContentKeyEnum.ItemLightningStrike);
+            const hops = Math.max(3, rule.lightningCount);
+            this.bouncePlasmaChain(enemy, damage * scale * 0.34, source, skill.id, hops, rule.lightningRange, combat, effects);
+        }
+    }
+
+    /** 从 origin 敌人起连续弹射 hops 次电浆闪电链，每次寻找 range 范围内未命中的敌人。 */
+    private bouncePlasmaChain(origin: IEnemyData, damage: number, source: number, skillId: number, hops: number, range: number, combat: CombatBll, effects: EffectBll) {
+        const visited = new Set<number>([origin.id]);
+        let current = origin;
+        for (let step = 0; step < hops; step++) {
+            const candidates = combat.targets(current.x, current.y, range).filter((entry) => {
+                return !visited.has(entry.id);
+            });
+            if (!candidates.length) {
+                break;
+            }
+            const next = candidates[Math.floor(Math.random() * candidates.length)];
+            visited.add(next.id);
+            effects.showChain(current.x, current.y, next.x, next.y, 0, true);
+            combat.hitEnemy(next, damage, source, skillId, false);
+            current = next;
         }
     }
 
@@ -163,19 +214,7 @@ export class PlayerPassiveBll extends CCBusiness<Player> {
         if (ranger && Math.random() < stats.item(ShopContentKeyEnum.ItemExplosiveArrow)) {
             combat.area(source, skill.id, enemy.x, enemy.y, rule.fieldRadius, damage * stats.item(ShopContentKeyEnum.ItemExplosiveArrow), false);
         }
-        const infused = buff.get(CombatCamp.Player, source, BuffKind.Chain);
-        if (infused || Math.random() < stats.item(ShopContentKeyEnum.ItemLightningStrike)) {
-            const enhanced = infused > 0 && game.player.PlayerModel.players.some((entry) => {
-                return entry.roleId === RoleKeyEnum.Stormweaver && entry.level === 3;
-            });
-            const targets = combat.targets(enemy.x, enemy.y, enhanced ? rule.chainRange : rule.lightningRange).filter((entry) => {
-                return entry.id !== enemy.id;
-            }).slice(0, infused ? rule.chainInfusionCount : rule.lightningCount);
-            targets.forEach((target) => {
-                combat.hitEnemy(target, damage * (infused > 0 ? infused : rule.lightningBase + rule.lightningStep * stats.itemLevel(ShopContentKeyEnum.ItemLightningStrike)), source, skill.id, false);
-                game.effect.getBusiness<EffectBll>(EffectBll).showChain(enemy.x, enemy.y, target.x, target.y, player.roleId);
-            });
-        }
+        this.triggerChainLightning(source, enemy, damage);
         if (Math.random() < stats.item(ShopContentKeyEnum.ItemLuckyStrike)) {
             enemy.bonusGold = true;
         }
@@ -315,13 +354,20 @@ export class PlayerPassiveBll extends CCBusiness<Player> {
         }
     }
 
-    /** 术士 source 重复施法时在 x、y 附加道具区域。 */
+    /** 术士 source 重复施法时在 x、y 附加道具区域与对应视觉表现。 */
     onRepeat(source: number, x: number, y: number) {
         const game = this.ent.game;
         const stats = this.ent.getBusiness<PlayerBattleBll>(PlayerBattleBll);
+        const effects = game.effect.getBusiness<EffectBll>(EffectBll);
         const rule = TableCombatRule.getCurrent();
         const radius = rule.fieldRadius;
         const targets = game.combat.getBusiness<CombatBll>(CombatBll).targets(x, y, radius);
+        if (stats.item(ShopContentKeyEnum.ItemFreezingField)) {
+            effects.showArea(x, y, radius, RoleKeyEnum.Cryomancer, true, Math.random() * Math.PI);
+        }
+        if (stats.item(ShopContentKeyEnum.ItemBurningField)) {
+            effects.showArea(x, y, radius, RoleKeyEnum.Pyromancer, true, Math.random() * Math.PI);
+        }
         targets.forEach((enemy) => {
             if (stats.item(ShopContentKeyEnum.ItemFreezingField)) {
                 game.buff.getBusiness<BuffBll>(BuffBll).add(CombatCamp.Enemy, enemy.id, source, BuffKind.Slow, stats.item(ShopContentKeyEnum.ItemFreezingField), rule.fieldDuration);
@@ -331,6 +377,7 @@ export class PlayerPassiveBll extends CCBusiness<Player> {
             }
         });
         if (stats.item(ShopContentKeyEnum.ItemGravityField)) {
+            effects.showArea(x, y, radius, RoleKeyEnum.Psykino, false);
             game.combat.getBusiness<CombatBll>(CombatBll).pull(x, y, radius, rule.orbSpeed, stats.item(ShopContentKeyEnum.ItemGravityField));
         }
     }

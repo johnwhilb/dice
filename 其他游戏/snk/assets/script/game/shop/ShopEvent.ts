@@ -8,7 +8,7 @@ export enum ShopEvent {
     UpdateShopContent = "shop_update_content",
     /** 商品视觉消散；购买传移除槽位 index，手动刷新不传槽位。 */
     ShowOfferRemoval = "shop_show_offer_removal",
-    /** 角色出售成功后播放消散；参数为等级块的世界坐标与颜色。 */
+    /** 角色或道具出售成功后播放消散；参数为节点世界坐标与颜色。 */
     ShowRoleSaleEffect = "shop_show_role_sale_effect",
     /** 新局或读档成功后打开商店。 */
     OpenShop = "shop_open",
@@ -18,6 +18,56 @@ export enum ShopEvent {
     StartTeamDrag = "shop_start_team_drag",
     /** 队员交换位置后通知列表更新；参数 from、to 为交换前的两个队伍下标。 */
     UpdateTeamOrder = "shop_update_team_order",
+    /** 商店金币发生变化；参数为变化量 delta（正数为获得，负数为消耗）。 */
+    GoldChanged = "shop_gold_changed",
+    /** 成功购买或合成角色；参数为 IShopUnitBought。 */
+    UnitBought = "shop_unit_bought",
+    /** 商店刷新出新商品，无参数。 */
+    OffersRefreshed = "shop_offers_refreshed",
+    /** 商店等级或经验变动；参数为 IShopLevelChange。 */
+    ShopLevelChanged = "shop_level_changed",
+    /** 被动道具经验或等级提升；参数为 IShopItemUpgrade。 */
+    ItemUpgraded = "shop_item_upgraded",
+    /** 商店操作被拒绝（金币不足/队伍已满/已满级）；参数为 ShopDeniedReason。 */
+    ActionDenied = "shop_action_denied",
+    /** 临时预览高亮一组职业羁绊；参数为职业 ID 集合与触点 ID。 */
+    HighlightClasses = "shop_highlight_classes",
+}
+
+/** 商店音效标识。 */
+export enum ShopSound {
+    /** 购买角色。 */
+    Buy = "sfxShopBuy",
+    /** 出售角色或道具。 */
+    Sell = "sfxShopSell",
+    /** 角色升 2 级、商店或道具升级。 */
+    Upgrade = "sfxShopUpgrade",
+    /** 角色升至满级 3 级或高阶羁绊突破。 */
+    MaxUpgrade = "sfxShopMaxUpgrade",
+    /** 刷新商品。 */
+    Refresh = "sfxShopRefresh",
+    /** 锁定或解锁商店。 */
+    Lock = "sfxShopLock",
+    /** 拖拽队员换位。 */
+    Swap = "sfxShopSwap",
+    /** 打开详情或按钮点击。 */
+    Click = "sfxShopClick",
+    /** 职业羁绊激活或晋级。 */
+    Synergy = "sfxShopSynergy",
+    /** 出发进入战斗。 */
+    StartBattle = "sfxShopStartBattle",
+    /** 金币不足或操作被拒绝。 */
+    Error = "sfxShopError",
+}
+
+/** 商店操作被拒绝的具体原因。 */
+export enum ShopDeniedReason {
+    /** 金币不足。 */
+    GoldMissing,
+    /** 队伍人数已满。 */
+    TeamFull,
+    /** 角色已满级。 */
+    MaxLevel,
 }
 
 /** 回合结算转场展示的金币来源。 */
@@ -25,6 +75,28 @@ export interface IRoundGoldReward {
     roundGold: number;
     pickedUpGold: number;
     interest: number;
+}
+
+/** 购买角色后的反馈载荷。 */
+export interface IShopUnitBought {
+    teamIndex: number;
+    roleId: number;
+    level: number;
+    upgraded: boolean;
+}
+
+/** 商店等级或经验变动反馈载荷。 */
+export interface IShopLevelChange {
+    level: number;
+    leveledUp: boolean;
+    downgraded: boolean;
+}
+
+/** 被动道具经验或等级提升载荷。 */
+export interface IShopItemUpgrade {
+    index: number;
+    level: number;
+    leveledUp: boolean;
 }
 
 /**

@@ -4,6 +4,7 @@ import { PlayerBattleBll } from "./PlayerBattleBll";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 import { PlayerEvent } from "../PlayerEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { ArenaWallSide } from "../../effect/EffectEvent";
 
 export class PlayerMoveBll extends CCBusiness<Player> {
     /** 根据当前阵容重新计算跟随间距、转向速度、角色半径与平均移速。 */
@@ -60,9 +61,10 @@ export class PlayerMoveBll extends CCBusiness<Player> {
     /** 按 delta 秒转向并移动队首，使用 width、height 进行边界反弹。 */
     private moveHead(delta: number, width: number, height: number) {
         const model = this.ent.PlayerModel;
-        const head = model.players.find((player) => {
+        const headUnit = model.players.find((player) => {
             return player.hp > 0;
-        }).pose;
+        });
+        const head = headUnit.pose;
         const difference = Math.atan2(Math.sin(model.targetHeading - model.heading), Math.cos(model.targetHeading - model.heading));
         model.heading += Math.max(-model.turnSpeed * delta, Math.min(model.turnSpeed * delta, difference));
         head.x += Math.cos(model.heading) * model.speed * delta;
@@ -72,7 +74,24 @@ export class PlayerMoveBll extends CCBusiness<Player> {
         const hitHorizontal = Math.abs(head.x) > halfWidth;
         const hitVertical = Math.abs(head.y) > halfHeight;
         if (hitHorizontal || hitVertical) {
-            this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showPlayerWallShake(model.heading);
+            const effects = this.ent.game.effect.getBusiness<EffectBll>(EffectBll);
+            effects.showPlayerWallShake(model.heading);
+            const aliveIndices = model.players
+                .map((player, index) => {
+                    return player.hp > 0 ? index : -1;
+                })
+                .filter((index) => {
+                    return index >= 0;
+                });
+            effects.showWallRipple(aliveIndices, model.speed);
+            if (hitHorizontal) {
+                const side = head.x < 0 ? ArenaWallSide.Left : ArenaWallSide.Right;
+                effects.showWallImpact(Math.sign(head.x) * (width / 2), head.y, side, headUnit.roleId, false);
+            }
+            if (hitVertical) {
+                const side = head.y < 0 ? ArenaWallSide.Bottom : ArenaWallSide.Top;
+                effects.showWallImpact(head.x, Math.sign(head.y) * (height / 2), side, headUnit.roleId, false);
+            }
         }
         if (hitHorizontal) {
             head.x = Math.max(-halfWidth, Math.min(halfWidth, head.x));

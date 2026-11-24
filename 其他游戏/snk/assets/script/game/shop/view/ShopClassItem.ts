@@ -1,5 +1,7 @@
 import { smc } from "../../common/SingletonModuleComp";
 import { TooltipPanelView } from "./TooltipPanelView";
+import { ShopAudioBll } from "../bll/ShopAudioBll";
+import { ShopSound } from "../ShopEvent";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
 import { _decorator, Color, Layout, Node, Sprite, Vec4, instantiate } from "cc";
 import { TableRoleClass } from "../../common/table/TableRoleClass";
@@ -29,6 +31,7 @@ export class ShopClassItem extends GameComponent {
     private iconColor = ColorConst.shopTick;
     private readonly litIconColor = new Color();
     private readonly displayIconColor = new Color();
+    private popLife: number = 0;
 
     private get blocked() {
         const model = smc.game.shop.ShopModel;
@@ -122,8 +125,25 @@ export class ShopClassItem extends GameComponent {
         }
     }
 
+    playActivatePop() {
+        this.popLife = 0.28;
+    }
+
+    update(deltaTime: number) {
+        if (this.popLife > 0) {
+            this.popLife = Math.max(0, this.popLife - deltaTime);
+            const t = this.popLife / 0.28;
+            const scale = 1 + 0.28 * Math.sin(t * Math.PI) * t;
+            this.node.setScale(scale, scale, 1);
+            if (this.popLife === 0) {
+                this.node.setScale(1, 1, 1);
+            }
+        }
+    }
+
     protected btnClass() {
         if (!this.clickBlocked) {
+            smc.game.shop.getBusiness<ShopAudioBll>(ShopAudioBll).play(ShopSound.Click);
             const content = TableShopContent.getRoleClass(this.data.classId);
             const roleClass = TableRoleClass.getConfigById<TableRoleClass>(this.data.classId);
             const text = `<color=${content.color}>${roleClass.name}</color>[fg]（${this.data.count}人）\n\n${content.description1}`;

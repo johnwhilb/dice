@@ -18,6 +18,7 @@ import { PlayerPassiveBll } from "../../player/bll/PlayerPassiveBll";
 import { ShopContentKeyEnum } from "../../common/table/ShopContentKeyEnum";
 import { TableCombatRule } from "../../common/table/TableCombatRule";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { ArenaWallSide } from "../../effect/EffectEvent";
 
 export class EnemyActionBll extends CCBusiness<Enemy> {
     /** 推进 delta 秒的移动、技能、碰撞和战场对象，width、height 为战场尺寸。 */
@@ -173,12 +174,20 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
         const nextY = enemy.y + vy * delta * (1 - slow);
         enemy.x = Math.max(-width / 2 + config.width / 2, Math.min(width / 2 - config.width / 2, nextX));
         enemy.y = Math.max(-height / 2 + config.height / 2, Math.min(height / 2 - config.height / 2, nextY));
-        if (enemy.knockbackRemaining > 0 && (nextX !== enemy.x || nextY !== enemy.y) && enemy.wallSource >= 0) {
-            const source = enemy.wallSource;
-            enemy.wallSource = -1;
-            const player = this.ent.game.player.PlayerModel.players[source];
-            this.ent.game.combat.getBusiness<CombatBll>(CombatBll).hitEnemy(enemy, enemy.wallDamage, source, player.skill.id, false);
-            this.ent.game.player.getBusiness<PlayerPassiveBll>(PlayerPassiveBll).onWall(source, enemy);
+        if (enemy.knockbackRemaining > 0 && (nextX !== enemy.x || nextY !== enemy.y)) {
+            const side = nextX !== enemy.x
+                ? nextX < enemy.x ? ArenaWallSide.Left : ArenaWallSide.Right
+                : nextY < enemy.y ? ArenaWallSide.Bottom : ArenaWallSide.Top;
+            const heavy = enemy.wallSource >= 0;
+            const roleId = heavy ? this.ent.game.player.PlayerModel.players[enemy.wallSource].roleId : 0;
+            this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showWallImpact(enemy.x, enemy.y, side, roleId, heavy);
+            if (heavy) {
+                const source = enemy.wallSource;
+                enemy.wallSource = -1;
+                const player = this.ent.game.player.PlayerModel.players[source];
+                this.ent.game.combat.getBusiness<CombatBll>(CombatBll).hitEnemy(enemy, enemy.wallDamage, source, player.skill.id, false);
+                this.ent.game.player.getBusiness<PlayerPassiveBll>(PlayerPassiveBll).onWall(source, enemy);
+            }
         }
         if (vx || vy) {
             enemy.angle = Math.atan2(vy, vx) * 180 / Math.PI;
@@ -298,6 +307,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
             }
             contacts.add(index);
             if (this.ent.game.buff.getBusiness<BuffBll>(BuffBll).get(CombatCamp.Player, index, BuffKind.Shield)) {
+                this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showShieldBlock(player.pose.x, player.pose.y, player.roleId);
                 this.ent.game.combat.getBusiness<CombatBll>(CombatBll).push(enemy, Math.atan2(enemy.y - player.pose.y, enemy.x - player.pose.x), TableCombatRule.getCurrent().orbSpeed, index);
                 return;
             }
@@ -309,6 +319,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
             const multiplier = rule.doubleContactRoles.includes(player.roleId) ? rule.doubleContactMultiplier : 1;
             this.ent.game.combat.getBusiness<CombatBll>(CombatBll).hitEnemy(enemy, player.stats.damage * multiplier, index, player.skill.id, false);
             this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).hit(index, damage);
+            this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showBodyContact((player.pose.x + enemy.x) / 2, (player.pose.y + enemy.y) / 2, player.roleId, enemy.config.id);
             this.push(enemy, Math.atan2(enemy.y - player.pose.y, enemy.x - player.pose.x), this.randomRange(rule.knockbackMin, rule.knockbackMax), rule.knockbackDuration);
             enemy.chargeRemaining = 0;
         });
@@ -445,6 +456,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                 if (object.life <= 0) {
                     const config = TableEnemy.getConfigById<TableEnemy>(object.configId);
                     const source: IEnemySource = { id: object.id, config, x: object.x, y: object.y, damage: object.damage };
+                    this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showArea(object.x, object.y, 48, 0, true);
                     this.radial(source, config);
                     object.dead = true;
                 }
@@ -467,6 +479,7 @@ export class EnemyActionBll extends CCBusiness<Enemy> {
                     object.dead = true;
                     if (object.kind === EnemyObjectKind.Gold) {
                         model.pickedUpGold += rule.goldAmount;
+                        this.ent.game.effect.getBusiness<EffectBll>(EffectBll).showPickupRipple(object.x, object.y, true);
                         this.ent.game.player.getBusiness<PlayerActionBll>(PlayerActionBll).onGoldPickup(object.x, object.y);
                     }
                 }

@@ -6,6 +6,7 @@ import { PlayerEvent } from "../PlayerEvent";
 import type { IPlayerUnit } from "../PlayerEvent";
 import type { IPlayerData } from "../model/PlayerModel";
 import { TablePlayerSkill } from "../../common/table/TablePlayerSkill";
+import { SkillTypeKeyEnum } from "../../common/table/SkillTypeKeyEnum";
 import { CombatBll } from "../../combat/bll/CombatBll";
 import { PlayerMoveBll } from "./PlayerMoveBll";
 import { RoleKeyEnum } from "../../common/table/RoleKeyEnum";
@@ -51,6 +52,13 @@ export class PlayerBll extends CCBusiness<Player> {
         if (unit.roleId === RoleKeyEnum.Flagellant && skill.extraPower > 0) {
             stats.hp *= skill.extraPower;
         }
+        const quickSupport =
+            skill.interval >= 6 &&
+            (skill.kind === SkillTypeKeyEnum.ChainBuff ||
+                skill.kind === SkillTypeKeyEnum.Shield ||
+                skill.kind === SkillTypeKeyEnum.Fairy ||
+                skill.kind === SkillTypeKeyEnum.Sacrifice);
+        const initialTimer = skill.follow ? 0 : quickSupport ? Math.min(2, skill.interval) : skill.interval;
         const player: IPlayerData = {
             roleId: unit.roleId,
             level: unit.level,
@@ -60,7 +68,7 @@ export class PlayerBll extends CCBusiness<Player> {
             hp: stats.hp,
             pose: { x: 0, y: 0, angle: 0 },
             skill,
-            attackTimer: skill.follow ? 0 : skill.interval,
+            attackTimer: initialTimer,
             castCount: 0,
             repeatCount: 0,
             auxiliaryTimer: 0,

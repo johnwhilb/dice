@@ -1,4 +1,16 @@
-import { _decorator, EventTouch, Graphics, instantiate, Label, Layout, Node, Prefab, UITransform, Vec3 } from "cc";
+import {
+    _decorator,
+    EventTouch,
+    Graphics,
+    instantiate,
+    Label,
+    Layout,
+    Node,
+    Prefab,
+    UIOpacity,
+    UITransform,
+    Vec3,
+} from "cc";
 import { CCView } from "db://oops-framework/module/common/CCView";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { gui } from "db://oops-framework/core/gui/Gui";
@@ -21,6 +33,11 @@ import { ColorConst } from "../../common/config/ColorConst";
 
 const { ccclass, property } = _decorator;
 
+const bannerPopDuration = 0.14;
+const bannerHoldDuration = 0.88;
+const bannerFadeDuration = 0.28;
+const bannerTotalDuration = bannerPopDuration + bannerHoldDuration + bannerFadeDuration;
+
 @ccclass("BattleView")
 @ecs.register("BattleView", false)
 @gui.register("BattleView", { layer: LayerType.UI, prefab: "gui/battle/ui/BattleView" })
@@ -35,13 +52,30 @@ export class BattleView extends CCView<Battle> {
     private enemies: EnemyView[] = [];
     private objects: EnemyView[] = [];
     private combatTransform: UITransform;
+    private playerLayer: Node;
+    private floorGraphics: Graphics;
     private arenaCamera: Node;
     private effects: EffectView;
     private spawnBurst: ShopOfferEffect;
     private countdownLabel: Label;
+    private countdownPopLife: number = 0;
     private clearGlyphs: Node;
     private clearElapsed: number = 0;
     private revealedGlyphs: number = 0;
+    private glyphPopLives: number[] = [];
+    private waveBannerNode: Node;
+    private waveBannerGraphics: Graphics;
+    private waveBannerLabel: Label;
+    private waveBannerOpacity: UIOpacity;
+    private waveBannerElapsed: number = bannerTotalDuration;
+    private waveBannerBoss: boolean = false;
+    private streakNode: Node;
+    private streakLabel: Label;
+    private lastShownStreak: number = 0;
+    private streakPopLife: number = 0;
+    private resultSummaryLabel: Label;
+    private resultShown: boolean = false;
+    private resultPopLife: number = 0;
 
     get model() {
         return this.ent.game.player.PlayerModel;
@@ -58,13 +92,17 @@ export class BattleView extends CCView<Battle> {
         this.on(EnemyEvent.UpdateFrame, this.refreshEnemies, this);
         this.on(EnemyEvent.SpawnArrival, this.playEnemySpawnBurst, this);
         this.on(BattleEvent.UpdateState, this.refreshState, this);
+        this.on(BattleEvent.CountdownTick, this.playCountdownTick, this);
         this.on(BattleEvent.CountdownFinished, this.playCountdownBurst, this);
+        this.on(BattleEvent.WaveAnnounce, this.playWaveBanner, this);
         this.on(CombatEvent.UpdateFrame, this.refreshEffects, this);
+
         const arena = this.getNode("arena");
         this.countdownLabel = this.getNode("lbtBattleCountdown").getComponent(Label);
         this.clearGlyphs = this.getNode("battleClearGlyphs");
         const arenaTransform = arena.getComponent(UITransform);
         this.business.setArenaSize(arenaTransform.width, arenaTransform.height);
+
         const border = this.getNode("arenaBorder");
         const content = this.getNode("content");
         const borderIndex = border.getSiblingIndex();
@@ -74,6 +112,7 @@ export class BattleView extends CCView<Battle> {
         this.arenaCamera.setSiblingIndex(borderIndex);
         this.arenaCamera.addComponent(UITransform).setContentSize(content.getComponent(UITransform).contentSize);
         border.parent = this.arenaCamera;
+
         const model = this.ent.BattleModel;
         const combatLayer = new Node("combatLayer");
         combatLayer.layer = arena.layer;
@@ -82,25 +121,106 @@ export class BattleView extends CCView<Battle> {
         combatLayer.setScale(model.combatScale, model.combatScale, 1);
         this.combatTransform = combatLayer.addComponent(UITransform);
         this.combatTransform.setContentSize(model.combatWidth, model.combatHeight);
-        this.getNode("enemyLayer").parent = combatLayer;
+
+        const floorNode = new Node("combatFloor");
+        floorNode.layer = arena.layer;
+        floorNode.parent = combatLayer;
+        floorNode.addComponent(UITransform).setContentSize(this.combatTransform.contentSize);
+        this.floorGraphics = floorNode.addComponent(Graphics);
+
         this.getNode("enemyObjectLayer").parent = combatLayer;
+        this.getNode("enemyLayer").parent = combatLayer;
+
+        this.playerLayer = new Node("playerLayer");
+        this.playerLayer.layer = arena.layer;
+        this.playerLayer.parent = combatLayer;
+        this.playerLayer.addComponent(UITransform).setContentSize(this.combatTransform.contentSize);
+
         const effects = new Node("combatEffects");
         effects.layer = arena.layer;
         effects.parent = combatLayer;
         effects.addComponent(UITransform).setContentSize(this.combatTransform.contentSize);
         effects.addComponent(Graphics);
         this.effects = effects.addComponent(EffectView);
+
         const burst = new Node("spawnBurst");
         burst.layer = arena.layer;
         burst.parent = combatLayer;
         burst.addComponent(UITransform);
         this.spawnBurst = burst.addComponent(ShopOfferEffect);
+
+        this.createWaveBanner(content);
+        this.createStreakBadge(content);
+        this.createResultSummary();
+
         arena.on(Node.EventType.TOUCH_START, this.steer, this);
         arena.on(Node.EventType.TOUCH_MOVE, this.steer, this);
+        arena.on(Node.EventType.TOUCH_END, this.releaseSteer, this);
+        arena.on(Node.EventType.TOUCH_CANCEL, this.releaseSteer, this);
+
+        this.countdownPopLife = 0.24;
         this.refresh();
         this.refreshEnemies();
         this.refreshState();
         this.refreshEffects();
+    }
+
+    private createWaveBanner(content: Node) {
+        const banner = new Node("waveBanner");
+        banner.layer = content.layer;
+        banner.parent = content;
+        banner.setPosition(0, 215, 0);
+        banner.addComponent(UITransform).setContentSize(340, 44);
+        this.waveBannerOpacity = banner.addComponent(UIOpacity);
+        this.waveBannerGraphics = banner.addComponent(Graphics);
+
+        const labelNode = new Node("lbtWaveBanner");
+        labelNode.layer = content.layer;
+        labelNode.parent = banner;
+        labelNode.addComponent(UITransform).setContentSize(320, 32);
+        const label = labelNode.addComponent(Label);
+        label.fontSize = 24;
+        label.lineHeight = 26;
+        label.isBold = true;
+        label.enableOutline = true;
+        label.outlineColor = ColorConst.battleDamageOutline;
+        label.outlineWidth = 2;
+        this.waveBannerLabel = label;
+        this.waveBannerNode = banner;
+        this.waveBannerNode.active = false;
+    }
+
+    private createStreakBadge(content: Node) {
+        const node = new Node("streakBadge");
+        node.layer = content.layer;
+        node.parent = content;
+        node.setPosition(485, 226, 0);
+        node.addComponent(UITransform).setContentSize(200, 34);
+        const label = node.addComponent(Label);
+        label.fontSize = 24;
+        label.lineHeight = 26;
+        label.isBold = true;
+        label.color = ColorConst.battleCritGold;
+        label.enableOutline = true;
+        label.outlineColor = ColorConst.battleDamageOutline;
+        label.outlineWidth = 2;
+        this.streakNode = node;
+        this.streakLabel = label;
+        this.streakNode.active = false;
+    }
+
+    private createResultSummary() {
+        const resultNode = this.getNode("battleResult");
+        const summaryNode = new Node("lbtBattleSummary");
+        summaryNode.layer = resultNode.layer;
+        summaryNode.parent = resultNode;
+        summaryNode.setPosition(0, 4, 0);
+        summaryNode.addComponent(UITransform).setContentSize(480, 24);
+        const label = summaryNode.addComponent(Label);
+        label.fontSize = 18;
+        label.lineHeight = 20;
+        label.color = ColorConst.shopText;
+        this.resultSummaryLabel = label;
     }
 
     private refreshEffects() {
@@ -119,22 +239,43 @@ export class BattleView extends CCView<Battle> {
                 Math.sin(phase * 1.5) * amplitude * 0.65,
             0
         );
+        const elapsed = game.combat.CombatModel.elapsed;
         this.bodies.forEach((body, index) => {
             if (body.node.active) {
+                const player = this.model.players[index];
+                const lowHp = player.stats.hp > 0 && player.hp / player.stats.hp <= 0.3;
+                const lowHpPulse = lowHp ? 0.5 + 0.5 * Math.sin(elapsed * 12) : 0;
                 body.setFeedback(
                     (model.recoilLife.get(index) ?? 0) / recoilDuration,
-                    (model.hurtLife.get(index) ?? 0) / playerHurtDuration
+                    (model.hurtLife.get(index) ?? 0) / playerHurtDuration,
+                    lowHpPulse,
+                    player.lasting
                 );
             }
         });
-        this.effects.render(game);
+        this.updateStreakBadge(model.killStreak);
+        this.effects.render(game, this.floorGraphics);
+    }
+
+    private updateStreakBadge(streak: number) {
+        const visible = streak >= 5 && this.ent.BattleModel.state === BattleState.Running;
+        this.streakNode.active = visible;
+        if (!visible) {
+            this.lastShownStreak = 0;
+            return;
+        }
+        if (streak !== this.lastShownStreak) {
+            this.lastShownStreak = streak;
+            this.streakPopLife = 0.22;
+            this.streakLabel.string = `${streak} 连杀!`;
+            this.streakLabel.color = streak >= 12 ? ColorConst.battleDangerRed : ColorConst.battleCritGold;
+        }
     }
 
     refresh() {
-        const combatLayer = this.combatTransform.node;
         for (let index = this.bodies.length; index < this.model.players.length; index++) {
             const node = instantiate(this.playerPrefab);
-            node.parent = combatLayer;
+            node.parent = this.playerLayer;
             const body = node.getComponent(PlayerView);
             this.bodies.push(body);
         }
@@ -206,11 +347,11 @@ export class BattleView extends CCView<Battle> {
     private refreshState() {
         const model = this.ent.BattleModel;
         const enemy = this.ent.game.enemy.EnemyModel;
+        const effectModel = this.ent.game.effect.EffectModel;
         const victory = model.state === BattleState.Victory;
         const defeat = model.state === BattleState.Defeat;
         const ended = victory || defeat;
-        const showResult =
-            (defeat || (victory && model.victoryPanelDelay === 0)) && !this.ent.game.effect.EffectModel.slowLife;
+        const showResult = (defeat || (victory && model.victoryPanelDelay === 0)) && !effectModel.slowLife;
         const countdown = model.state === BattleState.Countdown ? Math.ceil(model.countdown) : 0;
         this.countdownLabel.node.active = countdown > 0;
         if (countdown > 0) {
@@ -220,23 +361,65 @@ export class BattleView extends CCView<Battle> {
         if (!victory && this.revealedGlyphs > 0) {
             this.clearElapsed = 0;
             this.revealedGlyphs = 0;
+            this.glyphPopLives = [];
             for (const glyph of this.clearGlyphs.children) {
                 glyph.active = false;
+                glyph.setScale(1, 1, 1);
             }
         }
-        this.getNode("battleResult").active = showResult;
-        this.getNode("lbtBattleResult").getComponent(Label).string = victory ? "关卡胜利" : "全队阵亡";
+        const resultNode = this.getNode("battleResult");
+        resultNode.active = showResult;
+        if (showResult && !this.resultShown) {
+            this.resultShown = true;
+            this.resultPopLife = 0.24;
+            const titleLabel = this.getNode("lbtBattleResult").getComponent(Label);
+            titleLabel.string = victory ? "关卡胜利" : "全队阵亡";
+            titleLabel.color = victory ? ColorConst.battleCritGold : ColorConst.battleDangerRed;
+            this.resultSummaryLabel.string = `用时 ${model.battleDuration.toFixed(1)}s  ·  击杀 ${effectModel.totalKills}  ·  暴击 ${effectModel.totalCrits}  ·  金币 +${enemy.pickedUpGold}`;
+        } else if (!showResult) {
+            this.resultShown = false;
+        }
+        const goldText = enemy.pickedUpGold > 0 ? ` · 金币 +${enemy.pickedUpGold}` : "";
         this.getNode("lbtBattleStatus").getComponent(Label).string =
             model.state === BattleState.Countdown
-                ? `第 ${model.level} 关`
+                ? `第 ${model.level} 关 · 准备迎战`
                 : ended
-                  ? `第 ${model.level} 关 · ${victory ? "胜利" : "失败"}`
-                  : `第 ${model.level} 关 · ${enemy.stage.bossId ? "首领战" : `波次 ${model.wave}/${enemy.stage.maxWaves}`} · 敌人 ${enemy.enemies.length}`;
+                  ? `第 ${model.level} 关 · ${victory ? "胜利" : "失败"} · 击杀 ${effectModel.totalKills}${goldText}`
+                  : `第 ${model.level} 关 · ${enemy.stage.bossId ? "首领战" : `波次 ${model.wave}/${enemy.stage.maxWaves}`} · 敌人 ${enemy.enemies.length} · 击杀 ${effectModel.totalKills}${goldText}`;
+    }
+
+    private playCountdownTick() {
+        this.countdownPopLife = 0.26;
     }
 
     private playCountdownBurst() {
         const position = this.combatTransform.convertToNodeSpaceAR(this.countdownLabel.node.worldPosition);
         this.spawnBurst.playAt(position.x, position.y, this.countdownLabel.color);
+    }
+
+    private playWaveBanner(event: string, title: string, boss: boolean) {
+        this.waveBannerBoss = boss;
+        this.waveBannerElapsed = 0;
+        this.waveBannerLabel.string = title;
+        this.waveBannerLabel.color = boss ? ColorConst.battleDangerRed : ColorConst.WHITE;
+        this.waveBannerNode.active = true;
+        this.drawWaveBannerBackdrop(boss);
+    }
+
+    private drawWaveBannerBackdrop(boss: boolean) {
+        const graphics = this.waveBannerGraphics;
+        graphics.clear();
+        const halfW = 160;
+        const halfH = 20;
+        graphics.fillColor = ColorConst.battleBannerBg;
+        graphics.rect(-halfW, -halfH, halfW * 2, halfH * 2);
+        graphics.fill();
+
+        const accent = boss ? ColorConst.battleDangerRed : ColorConst.battleCritGold;
+        graphics.fillColor = accent;
+        graphics.rect(-halfW, -halfH, 6, halfH * 2);
+        graphics.rect(halfW - 6, -halfH, 6, halfH * 2);
+        graphics.fill();
     }
 
     private playEnemySpawnBurst(event: string, x: number, y: number) {
@@ -245,19 +428,76 @@ export class BattleView extends CCView<Battle> {
 
     private updateAnnouncement(deltaTime: number) {
         const glyphs = this.clearGlyphs.children;
+        for (let index = 0; index < this.glyphPopLives.length; index++) {
+            if (this.glyphPopLives[index] > 0) {
+                this.glyphPopLives[index] = Math.max(0, this.glyphPopLives[index] - deltaTime);
+                const t = this.glyphPopLives[index] / 0.16;
+                const scale = 1 + 0.55 * t * t;
+                glyphs[index].setScale(scale, scale, 1);
+            }
+        }
         if (!this.clearGlyphs.active || this.ent.BattleModel.victoryPanelDelay !== undefined) {
             return;
         }
         this.clearElapsed += deltaTime;
         const visible = Math.min(glyphs.length, Math.floor(this.clearElapsed / 0.05) + 1);
         const effect = this.ent.game.effect.getBusiness<EffectBll>(EffectBll);
-        for (const glyph of glyphs.slice(this.revealedGlyphs, visible)) {
-            glyph.active = true;
+        for (let index = this.revealedGlyphs; index < visible; index++) {
+            glyphs[index].active = true;
+            glyphs[index].setScale(1.55, 1.55, 1);
+            this.glyphPopLives[index] = 0.16;
             effect.showVictoryAnnouncementShake();
         }
         this.revealedGlyphs = visible;
         if (visible === glyphs.length) {
             this.business.finishVictoryAnnouncement();
+        }
+    }
+
+    private updateHudAnimations(deltaTime: number) {
+        if (this.countdownPopLife > 0 && this.countdownLabel.node.active) {
+            this.countdownPopLife = Math.max(0, this.countdownPopLife - deltaTime);
+            const t = this.countdownPopLife / 0.26;
+            const scale = 2 * (1 + 0.55 * t * t);
+            this.countdownLabel.node.setScale(scale, scale, 1);
+        }
+        if (this.waveBannerNode.active) {
+            this.waveBannerElapsed += deltaTime;
+            if (this.waveBannerElapsed >= bannerTotalDuration) {
+                this.waveBannerNode.active = false;
+            } else if (this.waveBannerElapsed < bannerPopDuration) {
+                const progress = this.waveBannerElapsed / bannerPopDuration;
+                const scale = 0.72 + 0.36 * Math.sin(progress * Math.PI * 0.7);
+                this.waveBannerNode.setScale(scale, scale, 1);
+                this.waveBannerNode.setPosition(0, 215, 0);
+                this.waveBannerOpacity.opacity = Math.round(255 * progress);
+            } else if (this.waveBannerElapsed < bannerPopDuration + bannerHoldDuration) {
+                const pulse = this.waveBannerBoss ? 1 + 0.03 * Math.sin(this.waveBannerElapsed * 16) : 1;
+                this.waveBannerNode.setScale(pulse, pulse, 1);
+                this.waveBannerNode.setPosition(0, 215, 0);
+                this.waveBannerOpacity.opacity = 255;
+            } else {
+                const fadeProgress =
+                    (this.waveBannerElapsed - bannerPopDuration - bannerHoldDuration) / bannerFadeDuration;
+                this.waveBannerNode.setScale(1, 1, 1);
+                this.waveBannerNode.setPosition(0, 215 + 18 * fadeProgress, 0);
+                this.waveBannerOpacity.opacity = Math.round(255 * (1 - fadeProgress));
+            }
+        }
+        if (this.streakPopLife > 0 && this.streakNode.active) {
+            this.streakPopLife = Math.max(0, this.streakPopLife - deltaTime);
+            const t = this.streakPopLife / 0.22;
+            const scale = 1 + 0.45 * t * t;
+            this.streakNode.setScale(scale, scale, 1);
+        }
+        if (this.resultPopLife > 0 && this.resultShown) {
+            this.resultPopLife = Math.max(0, this.resultPopLife - deltaTime);
+            const progress = 1 - this.resultPopLife / 0.24;
+            const scale = progress < 0.7 ? 0.76 + 0.3 * (progress / 0.7) : 1.06 - 0.06 * ((progress - 0.7) / 0.3);
+            this.getNode("resultBackground").setScale(scale, scale, 1);
+            this.getNode("lbtBattleResult").setScale(scale, scale, 1);
+            this.resultSummaryLabel.node.setScale(scale, scale, 1);
+            this.getNode("btnBattleReturnShop").setScale(scale, scale, 1);
         }
     }
 
@@ -282,10 +522,15 @@ export class BattleView extends CCView<Battle> {
         this.business.steer(local.x, local.y);
     }
 
+    private releaseSteer() {
+        this.business.releaseSteer();
+    }
+
     update(deltaTime: number) {
         if (this.ent) {
             this.business.updateMovement(deltaTime);
             this.updateAnnouncement(deltaTime);
+            this.updateHudAnimations(deltaTime);
         }
     }
 
@@ -296,13 +541,21 @@ export class BattleView extends CCView<Battle> {
         this.off(EnemyEvent.UpdateFrame, this.refreshEnemies, this);
         this.off(EnemyEvent.SpawnArrival, this.playEnemySpawnBurst, this);
         this.off(BattleEvent.UpdateState, this.refreshState, this);
+        this.off(BattleEvent.CountdownTick, this.playCountdownTick, this);
         this.off(BattleEvent.CountdownFinished, this.playCountdownBurst, this);
+        this.off(BattleEvent.WaveAnnounce, this.playWaveBanner, this);
         this.off(CombatEvent.UpdateFrame, this.refreshEffects, this);
         this.bodies = [];
         this.enemies = [];
         this.objects = [];
         this.clearElapsed = 0;
         this.revealedGlyphs = 0;
+        this.glyphPopLives = [];
+        this.waveBannerElapsed = bannerTotalDuration;
+        this.lastShownStreak = 0;
+        this.streakPopLife = 0;
+        this.resultShown = false;
+        this.resultPopLife = 0;
     }
 
     getTransitionOrigin() {

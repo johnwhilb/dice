@@ -8,7 +8,7 @@ export enum EffectKind {
     Damage,
     /** 治疗飘字。 */
     Heal,
-    /** 连锁连线。 */
+    /** 连锁电弧与诅咒连线。 */
     Chain,
     /** 弹丸继续飞行时的命中短闪。 */
     ProjectileHit,
@@ -30,6 +30,20 @@ export enum EffectKind {
     Critical,
     /** 队员退场的角色色收束环。 */
     PlayerDeath,
+    /** 撞墙冲击波与墙面闪光。 */
+    WallImpact,
+    /** 拾取金币或治疗球时的涟漪。 */
+    PickupRipple,
+    /** 护盾格挡时的爆发脉冲。 */
+    ShieldBlock,
+    /** 特殊状态提示飘字（如金币、格挡、免死）。 */
+    TagText,
+    /** 召唤物或治疗球落点汇聚光环。 */
+    SpawnRing,
+    /** 角色施放充能、加速、献祭、护盾时的扩散光环。 */
+    BuffPulse,
+    /** 赌徒金币攻击的金色连线与砸落闪爆。 */
+    CoinStrike,
 }
 
 /** 范围伤害结算时使用的表现。 */
@@ -40,11 +54,71 @@ export enum AreaFeedback {
     Targets,
 }
 
+/** 竞技场墙面边标识，用于定向点亮撞击边界。 */
+export enum ArenaWallSide {
+    /** 左墙。 */
+    Left,
+    /** 右墙。 */
+    Right,
+    /** 上墙。 */
+    Top,
+    /** 下墙。 */
+    Bottom,
+}
+
+/** 战斗音效标识。 */
+export enum BattleSound {
+    /** 常规弹丸发射。 */
+    Shoot = "sfxShoot",
+    /** 飞刀类发射。 */
+    Knife = "sfxKnife",
+    /** 弓箭发射。 */
+    Arrow = "sfxArrow",
+    /** 重炮发射。 */
+    Cannon = "sfxCannon",
+    /** 魔法弹发射。 */
+    Magic = "sfxMagic",
+    /** 普通命中。 */
+    Hit = "sfxHit",
+    /** 暴击命中。 */
+    Crit = "sfxCrit",
+    /** 范围爆发。 */
+    Area = "sfxArea",
+    /** 连锁闪电。 */
+    Chain = "sfxChain",
+    /** 普通敌人死亡。 */
+    EnemyDeath = "sfxEnemyDeath",
+    /** 首领死亡。 */
+    BossDeath = "sfxBossDeath",
+    /** 敌人刷出。 */
+    Spawn = "sfxSpawn",
+    /** 撞墙反弹。 */
+    WallHit = "sfxWallHit",
+    /** 队员受伤。 */
+    PlayerHurt = "sfxPlayerHurt",
+    /** 队员阵亡。 */
+    PlayerDeath = "sfxPlayerDeath",
+    /** 护盾格挡。 */
+    Shield = "sfxShield",
+    /** 拾取金币。 */
+    Gold = "sfxGold",
+    /** 拾取治疗球。 */
+    Heal = "sfxHeal",
+    /** 倒计时滴答。 */
+    Countdown = "sfxCountdown",
+    /** 开战与首领警示。 */
+    BattleStart = "sfxBattleStart",
+    /** 关卡胜利。 */
+    Victory = "sfxVictory",
+    /** 关卡失败。 */
+    Defeat = "sfxDefeat",
+}
+
 /** 首领死亡慢放时长使用现实秒，其余效果时长使用战斗秒。 */
 export const bossSlowDuration = 0.65;
 export const bossSlowScale = 0.35;
 export const bossDeathDuration = 0.66;
-export const chainDuration = 0.16;
+export const chainDuration = 0.24;
 export const spawnArrivalDuration = 0.22;
 
 /** 发射短闪、出手回弹与镜头反馈的持续时间，单位为秒。 */
@@ -58,6 +132,16 @@ export const criticalDuration = 0.26;
 export const arrowResidueDuration = 1.75;
 export const knifeResidueDuration = 1.55;
 export const wallResidueBlinkDuration = 0.35;
+export const wallImpactDuration = 0.24;
+export const pickupRippleDuration = 0.28;
+export const shieldBlockDuration = 0.22;
+export const tagTextDuration = 0.62;
+export const screenHurtFlashDuration = 0.28;
+export const hitstopCooldownDuration = 0.09;
+export const spawnRingDuration = 0.28;
+export const buffPulseDuration = 0.34;
+export const coinStrikeDuration = 0.26;
+export const summonBlinkDuration = 0.35;
 
 /** 普通敌人死亡色环的持续时间，单位为秒。 */
 export const enemyDeathDuration = 0.24;
@@ -82,8 +166,25 @@ export interface IEffectData {
     amount: number;
     roleId: number;
     life: number;
+    /** 效果总持续时间，便于精确计算插值进度。 */
+    duration?: number;
     /** 方形范围的旋转角，未设置时使用通用爆发。 */
     squareAngle?: number;
+    /** 暴击伤害飘字标记。 */
+    critical?: boolean;
+    /** 玩家受击飘字标记。 */
+    playerHurt?: boolean;
+    /** 飘字水平初速度与垂直初速度。 */
+    vx?: number;
+    vy?: number;
+    /** 特殊状态或拾取文案。 */
+    tag?: string;
+    /** 撞墙表现对应的边界方向。 */
+    wallSide?: ArenaWallSide;
+    /** 电浆闪电标记，启用亮蓝辉光与分叉电弧。 */
+    plasma?: boolean;
+    /** 闪电抖动随机种子。 */
+    seed?: number;
 }
 
 /** 弹丸碎片的运动和绘制数据，duration 和 life 以秒计。 */

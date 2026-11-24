@@ -1,6 +1,7 @@
 import { CCBusiness } from "db://oops-framework/module/common/CCBusiness";
 import type { Shop } from "../Shop";
-import { ShopEvent } from "../ShopEvent";
+import { ShopDeniedReason, ShopEvent, ShopSound } from "../ShopEvent";
+import { ShopAudioBll } from "./ShopAudioBll";
 import { GamePhase } from "../../game/model/GameModel";
 import { ShopModel } from "../model/ShopModel";
 import type { IShopClassProgress, IShopSave } from "../model/ShopModel";
@@ -17,6 +18,38 @@ import { CommonStorageConfig } from "../../common/config/GameStorageConfig";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 
 export class ShopBll extends CCBusiness<Shop> {
+    /** 返回商店音效业务实例。 */
+    private get audio() {
+        return this.ent.getBusiness<ShopAudioBll>(ShopAudioBll);
+    }
+
+    /** 计算指定角色商品 roleId 的可购性、是否已拥有、以及买下后是否触发合成升级。 */
+    getOfferState(roleId: number) {
+        const model = this.ent.ShopModel;
+        const rule = TableShopRule.getInitial();
+        const role = TableRole.getConfigById<TableRole>(roleId);
+        const owned = model.team.find((unit) => {
+            return unit.roleId === roleId;
+        });
+        const levels = TableRoleLevel.getAllConfig<TableRoleLevel>().sort((left, right) => {
+            return left.level - right.level;
+        });
+        const maxLevel = levels[levels.length - 1].level;
+        const isMaxLevel = !!owned && owned.level >= maxLevel;
+        const teamFull = !owned && model.team.length >= this.getTeamCapacity();
+        const canAfford = model.gold >= role.price;
+        let nextLevel = 1;
+        let willUpgrade = false;
+        if (owned && !isMaxLevel) {
+            const nextCopies = owned.copies + 1;
+            nextLevel = levels.filter((level) => {
+                return nextCopies >= Math.pow(rule.copiesPerUpgrade, level.level - 1);
+            }).length;
+            willUpgrade = nextLevel > owned.level;
+        }
+        return { owned: !!owned, nextLevel, willUpgrade, isMaxLevel, teamFull, canAfford };
+    }
+
     /** 根据开局配置创建新一局，restart 表示已在商店遮罩内重开。 */
     newRun(restart: boolean = false) {
         const rule = TableShopRule.getInitial();
@@ -115,6 +148,8 @@ export class ShopBll extends CCBusiness<Shop> {
         }
         if (model.gold < rule.refreshCost) {
             this.toast("shop_gold_missing");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.GoldMissing);
             return;
         }
         const offers = this.rollOffers();
@@ -125,8 +160,11 @@ export class ShopBll extends CCBusiness<Shop> {
         model.gold -= rule.refreshCost;
         model.offers = offers;
         this.saveRun();
+        this.audio.play(ShopSound.Refresh);
         this.dispatchEvent(ShopEvent.ShowOfferRemoval);
+        this.dispatchEvent(ShopEvent.GoldChanged, -rule.refreshCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.dispatchEvent(ShopEvent.OffersRefreshed);
     }
 
     /** 购买指定商品槽位；同角色计入储备，达到合成份数后升级。参数 index 为零起始槽位。 */
@@ -149,36 +187,57 @@ export class ShopBll extends CCBusiness<Shop> {
         }
         if (model.gold < role.price) {
             this.toast("shop_gold_missing");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.GoldMissing);
             return;
         }
-        const owned = model.team.find((unit) => {
+        const ownedIndex = model.team.findIndex((unit) => {
             return unit.roleId === role.id;
         });
+        const owned = ownedIndex >= 0 ? model.team[ownedIndex] : undefined;
         const levels = TableRoleLevel.getAllConfig().sort((left, right) => {
             return left.level - right.level;
         });
         const maxLevel = levels[levels.length - 1].level;
         if (owned && owned.level >= maxLevel) {
             this.toast("shop_max_level");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.MaxLevel);
             return;
         }
         if (!owned && model.team.length >= this.getTeamCapacity()) {
             this.toast("shop_team_full");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.TeamFull);
             return;
         }
         model.gold -= role.price;
         model.offers[index] = 0;
+        let teamIndex = ownedIndex;
+        let newLevel = 1;
+        let upgraded = false;
         if (owned) {
+            const oldLevel = owned.level;
             owned.copies += 1;
             owned.level = levels.filter((level) => {
                 return owned.copies >= Math.pow(rule.copiesPerUpgrade, level.level - 1);
             }).length;
+            newLevel = owned.level;
+            upgraded = newLevel > oldLevel;
         } else {
             model.team.push({ roleId: role.id, level: 1, copies: 1 });
+            teamIndex = model.team.length - 1;
         }
         this.saveRun();
+        if (upgraded) {
+            this.audio.play(newLevel >= maxLevel ? ShopSound.MaxUpgrade : ShopSound.Upgrade);
+        } else {
+            this.audio.play(ShopSound.Buy);
+        }
         this.dispatchEvent(ShopEvent.ShowOfferRemoval, index);
+        this.dispatchEvent(ShopEvent.GoldChanged, -role.price);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.dispatchEvent(ShopEvent.UnitBought, { teamIndex, roleId: role.id, level: newLevel, upgraded });
     }
 
     /** 计算整名角色及其储备的原版出售价格。参数 index 为队伍槽位。 */
@@ -209,9 +268,12 @@ export class ShopBll extends CCBusiness<Shop> {
             this.toast("shop_config_missing");
             return false;
         }
-        model.gold += this.getSalePrice(index);
+        const gain = this.getSalePrice(index);
+        model.gold += gain;
         model.team.splice(index, 1);
         this.saveRun();
+        this.audio.play(ShopSound.Sell);
+        this.dispatchEvent(ShopEvent.GoldChanged, gain);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         return true;
     }
@@ -250,8 +312,11 @@ export class ShopBll extends CCBusiness<Shop> {
         const role = TableRole.getConfigById(unit.roleId);
         const config = TableRoleLevel.getConfigByLevel(level);
         unit.copies -= Math.pow(TableShopRule.getInitial().copiesPerUpgrade, level - 1);
-        model.gold += role.price * config.saleValueMultiplier;
+        const gain = role.price * config.saleValueMultiplier;
+        model.gold += gain;
         this.saveRun();
+        this.audio.play(ShopSound.Sell);
+        this.dispatchEvent(ShopEvent.GoldChanged, gain);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         return true;
     }
@@ -267,6 +332,7 @@ export class ShopBll extends CCBusiness<Shop> {
         team[from] = team[to];
         team[to] = unit;
         this.saveRun();
+        this.audio.play(ShopSound.Swap);
         this.dispatchEvent(ShopEvent.UpdateTeamOrder, from, to);
     }
 
@@ -280,13 +346,21 @@ export class ShopBll extends CCBusiness<Shop> {
         }
         if (!model.locked && model.gold < rule.lockCost) {
             this.toast("shop_gold_missing");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.GoldMissing);
             return;
         }
+        let delta = 0;
         if (!model.locked) {
             model.gold -= rule.lockCost;
+            delta = -rule.lockCost;
         }
         model.locked = !model.locked;
         this.saveRun();
+        this.audio.play(ShopSound.Lock);
+        if (delta !== 0) {
+            this.dispatchEvent(ShopEvent.GoldChanged, delta);
+        }
         this.dispatchEvent(ShopEvent.UpdateShopContent);
     }
 
@@ -304,12 +378,19 @@ export class ShopBll extends CCBusiness<Shop> {
         }
         if (model.gold < rule.xpPurchaseCost) {
             this.toast("shop_gold_missing");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.GoldMissing);
             return;
         }
+        const oldLevel = model.shopLevel;
         model.gold -= rule.xpPurchaseCost;
         this.gainShopXp();
+        const leveledUp = model.shopLevel > oldLevel;
         this.saveRun();
+        this.audio.play(leveledUp ? ShopSound.Upgrade : ShopSound.Buy);
+        this.dispatchEvent(ShopEvent.GoldChanged, -rule.xpPurchaseCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.dispatchEvent(ShopEvent.ShopLevelChanged, { level: model.shopLevel, leveledUp, downgraded: false });
     }
 
     /** 按原版右键规则付费降一级商店，清空经验且不刷新商品。 */
@@ -325,13 +406,18 @@ export class ShopBll extends CCBusiness<Shop> {
         }
         if (model.gold < rule.downgradeCost) {
             this.toast("shop_gold_missing");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.GoldMissing);
             return;
         }
         model.gold -= rule.downgradeCost;
         model.shopLevel -= 1;
         model.shopXp = 0;
         this.saveRun();
+        this.audio.play(ShopSound.Lock);
+        this.dispatchEvent(ShopEvent.GoldChanged, -rule.downgradeCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.dispatchEvent(ShopEvent.ShopLevelChanged, { level: model.shopLevel, leveledUp: false, downgraded: true });
     }
 
     /** 依据 ShopLevel 表增加一点经验并在到达阈值时升级。 */
@@ -421,16 +507,23 @@ export class ShopBll extends CCBusiness<Shop> {
         }
         if (model.gold < rule.itemXpCost) {
             this.toast("shop_gold_missing");
+            this.audio.play(ShopSound.Error);
+            this.dispatchEvent(ShopEvent.ActionDenied, ShopDeniedReason.GoldMissing);
             return;
         }
         model.gold -= rule.itemXpCost;
         item.xp += 1;
+        let leveledUp = false;
         if (item.xp >= required) {
             item.level += 1;
             item.xp = 0;
+            leveledUp = true;
         }
         this.saveRun();
+        this.audio.play(leveledUp ? (item.level >= 3 ? ShopSound.MaxUpgrade : ShopSound.Upgrade) : ShopSound.Buy);
+        this.dispatchEvent(ShopEvent.GoldChanged, -rule.itemXpCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.dispatchEvent(ShopEvent.ItemUpgraded, { index, level: item.level, leveledUp });
     }
 
     /** 出售道具并放回本局奖池，index 为道具下标。 */
@@ -439,13 +532,17 @@ export class ShopBll extends CCBusiness<Shop> {
         const item = model.items[index];
         if (!this.canEditShop() || !item) {
             this.toast("shop_config_missing");
-            return;
+            return false;
         }
-        model.gold += item.level * TableShopRule.getInitial().itemSalePerLevel;
+        const gain = item.level * TableShopRule.getInitial().itemSalePerLevel;
+        model.gold += gain;
         model.itemPool.push(item.contentId);
         model.items.splice(index, 1);
         this.saveRun();
+        this.audio.play(ShopSound.Sell);
+        this.dispatchEvent(ShopEvent.GoldChanged, gain);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        return true;
     }
 
     /** 由战斗奖励选择发放道具，contentId 必须来自当前本局奖池。 */

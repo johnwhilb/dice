@@ -13,6 +13,7 @@ import { EffectBll } from "../../effect/bll/EffectBll";
 import { AreaFeedback } from "../../effect/EffectEvent";
 import { PlayerBattleBll } from "../../player/bll/PlayerBattleBll";
 import { PlayerActionBll } from "../../player/bll/PlayerActionBll";
+import { PlayerPassiveBll } from "../../player/bll/PlayerPassiveBll";
 import { BuffBll } from "../../buff/bll/BuffBll";
 import { BuffKind } from "../../buff/BuffEvent";
 import { CombatCamp } from "../../combat/CombatEvent";
@@ -179,14 +180,17 @@ export class ProjectileBll extends CCBusiness<Projectile> {
                 if (skill.radius > 0 && !shot.generic) {
                     const x = explosive ? hitX : enemy.x;
                     const y = explosive ? hitY : enemy.y;
-                    combat.area(shot.source, shot.skillId, x, y, skill.radius, shot.damage, shot.proc);
+                    combat.area(shot.source, shot.skillId, x, y, skill.radius, shot.damage, shot.proc, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                 } else {
                     combat.hitEnemy(enemy, shot.damage, shot.source, shot.skillId, shot.proc);
+                }
+                if (!shot.proc) {
+                    game.player.getBusiness<PlayerPassiveBll>(PlayerPassiveBll).triggerChainLightning(shot.source, enemy, shot.damage);
                 }
                 if (shot.chains > 0) {
                     const next = combat.nearest(enemy.x, enemy.y, rule.projectileChainRange, shot.hitIds);
                     if (next) {
-                        effects.showChain(enemy.x, enemy.y, next.x, next.y, roleId);
+                        effects.showChain(enemy.x, enemy.y, next.x, next.y, roleId, roleId === RoleKeyEnum.Lich);
                         shot.chains -= 1;
                         shot.x = enemy.x;
                         shot.y = enemy.y;
@@ -235,7 +239,7 @@ export class ProjectileBll extends CCBusiness<Projectile> {
             if (wall || shot.life <= 0) {
                 shot.dead = true;
                 if (explosive) {
-                    combat.area(shot.source, shot.skillId, endX, endY, skill.radius, shot.damage, shot.proc);
+                    combat.area(shot.source, shot.skillId, endX, endY, skill.radius, shot.damage, shot.proc, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                     if (roleId === RoleKeyEnum.Cannoneer) {
                         game.player.getBusiness<PlayerActionBll>(PlayerActionBll).queueCannonAftershocks(shot.source, skill, endX, endY, shot.damage);
                     }

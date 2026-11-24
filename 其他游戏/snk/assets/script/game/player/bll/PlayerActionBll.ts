@@ -20,6 +20,7 @@ import { BuffKind } from "../../buff/BuffEvent";
 import type { IBuffData } from "../../buff/BuffEvent";
 import type { IEnemyData } from "../../enemy/EnemyEvent";
 import { EffectBll } from "../../effect/bll/EffectBll";
+import { AreaFeedback, BattleSound } from "../../effect/EffectEvent";
 
 export class PlayerActionBll extends CCBusiness<Player> {
     /** 推进 delta 秒角色技能和延迟指令，仅存活角色发动主动技能。 */
@@ -44,7 +45,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
                 return;
             }
             if (action.kind === PlayerActionKind.ProjectileArea) {
-                game.combat.getBusiness<CombatBll>(CombatBll).area(action.source, player.skill.id, action.x, action.y, player.skill.radius / 2, action.damage, false);
+                game.combat.getBusiness<CombatBll>(CombatBll).area(action.source, player.skill.id, action.x, action.y, player.skill.radius / 2, action.damage, false, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                 return;
             }
             if (player.hp <= 0) {
@@ -53,7 +54,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
             if (action.kind === PlayerActionKind.Repeat) {
                 this.cast(action.source, true);
             } else if (action.kind === PlayerActionKind.Area) {
-                game.combat.getBusiness<CombatBll>(CombatBll).area(action.source, player.skill.id, action.x, action.y, player.skill.radius, action.damage, action.proc);
+                game.combat.getBusiness<CombatBll>(CombatBll).area(action.source, player.skill.id, action.x, action.y, player.skill.radius, action.damage, action.proc, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
             } else {
                 this.fire(action.source, action.x, action.y, action.damage);
             }
@@ -75,8 +76,10 @@ export class PlayerActionBll extends CCBusiness<Player> {
                 game.summon.SummonModel.summons.forEach((summon) => {
                     if (summon.typeId === SummonTypeKeyEnum.Turret) {
                         summon.damage *= player.skill.extraPower;
+                        game.effect.getBusiness<EffectBll>(EffectBll).showChain(player.pose.x, player.pose.y, summon.x, summon.y, player.roleId, false);
                     }
                 });
+                game.effect.getBusiness<EffectBll>(EffectBll).showBuffPulse(player.pose.x, player.pose.y, 48, player.roleId, false);
             }
             const attack = [SkillTypeKeyEnum.Projectile, SkillTypeKeyEnum.Area, SkillTypeKeyEnum.Curse, SkillTypeKeyEnum.GoldHit, SkillTypeKeyEnum.DotArea, SkillTypeKeyEnum.Force].includes(player.skill.kind) && !player.skill.follow || player.roleId === RoleKeyEnum.Vulcanist;
             player.attackTimer -= delta * (attack ? stats.stats(index).attackSpeedMultiplier : 1);
@@ -102,6 +105,8 @@ export class PlayerActionBll extends CCBusiness<Player> {
                 return Math.random() - .5;
             }).slice(0, player.skill.extraShots).forEach((target) => {
                 buffs.add(CombatCamp.Player, target, index, BuffKind.Revive, 1, Number.MAX_SAFE_INTEGER, player.skill.id);
+                const ally = this.ent.PlayerModel.players[target];
+                game.effect.getBusiness<EffectBll>(EffectBll).showBuffPulse(ally.pose.x, ally.pose.y, 40, player.roleId, false);
             });
         }
         if (stats.hasClass(index, RoleClassKeyEnum.Psyker) && stats.classLevel(RoleClassKeyEnum.Psyker) > 0) {
@@ -192,7 +197,7 @@ export class PlayerActionBll extends CCBusiness<Player> {
             if (player.roleId === RoleKeyEnum.Elementor) {
                 combat.squareArea(index, skill.id, x, y, skill.radius, damage, player.pose.angle * Math.PI / 180);
             } else {
-                combat.area(index, skill.id, x, y, skill.radius, damage);
+                combat.area(index, skill.id, x, y, skill.radius, damage, true, false, false, AreaFeedback.Burst, Math.random() * Math.PI);
                 this.areaStatuses(index, skill.id, x, y, skill.radius);
             }
             for (let repeat = 1; repeat < skill.shots; repeat++) {
@@ -206,30 +211,49 @@ export class PlayerActionBll extends CCBusiness<Player> {
             }
         } else if (skill.kind === SkillTypeKeyEnum.HealOrb || skill.kind === SkillTypeKeyEnum.Fairy) {
             const arena = game.battle.BattleModel;
+            const effects = game.effect.getBusiness<EffectBll>(EffectBll);
             summon.orb((Math.random() - .5) * arena.combatWidth, (Math.random() - .5) * arena.combatHeight, skill.shots);
             if (skill.kind === SkillTypeKeyEnum.Fairy) {
+                effects.showBuffPulse(player.pose.x, player.pose.y, 44, player.roleId, false, BattleSound.Heal);
                 this.aliveIndices().slice().sort(() => {
                     return Math.random() - .5;
                 }).slice(0, skill.shots).forEach((targetIndex) => {
                     buffs.add(CombatCamp.Player, targetIndex, index, BuffKind.AttackSpeed, skill.power - 1, skill.duration, skill.id);
+                    const ally = this.ent.PlayerModel.players[targetIndex];
+                    effects.showBuffPulse(ally.pose.x, ally.pose.y, 38, player.roleId, false);
+                    if (targetIndex !== index) {
+                        effects.showChain(player.pose.x, player.pose.y, ally.pose.x, ally.pose.y, player.roleId, false);
+                    }
                 });
             }
         } else if (skill.kind === SkillTypeKeyEnum.ChainBuff || skill.kind === SkillTypeKeyEnum.Shield) {
-            const targets = skill.kind === SkillTypeKeyEnum.ChainBuff ? this.aliveIndices() : this.aliveIndices().slice().sort(() => {
+            const effects = game.effect.getBusiness<EffectBll>(EffectBll);
+            const isChain = skill.kind === SkillTypeKeyEnum.ChainBuff;
+            const targets = isChain ? this.aliveIndices() : this.aliveIndices().slice().sort(() => {
                 return Math.random() - .5;
             }).slice(0, skill.shots);
+            effects.showBuffPulse(player.pose.x, player.pose.y, 56, player.roleId, isChain, isChain ? BattleSound.Chain : BattleSound.Shield);
             targets.forEach((targetIndex) => {
-                buffs.add(CombatCamp.Player, targetIndex, index, skill.kind === SkillTypeKeyEnum.ChainBuff ? BuffKind.Chain : BuffKind.Shield, skill.kind === SkillTypeKeyEnum.ChainBuff ? skill.power : 1, skill.duration, skill.id);
+                buffs.add(CombatCamp.Player, targetIndex, index, isChain ? BuffKind.Chain : BuffKind.Shield, isChain ? skill.power : 1, skill.duration, skill.id);
+                const ally = this.ent.PlayerModel.players[targetIndex];
+                effects.showBuffPulse(ally.pose.x, ally.pose.y, 38, player.roleId, isChain);
+                if (isChain && targetIndex !== index) {
+                    effects.showChain(player.pose.x, player.pose.y, ally.pose.x, ally.pose.y, 0, true);
+                }
             });
         } else if (skill.kind === SkillTypeKeyEnum.Sacrifice) {
+            const effects = game.effect.getBusiness<EffectBll>(EffectBll);
             this.aliveIndices().forEach((targetIndex) => {
                 buffs.add(CombatCamp.Player, targetIndex, index, BuffKind.Damage, skill.power, Number.MAX_SAFE_INTEGER, skill.id, true);
+                const ally = this.ent.PlayerModel.players[targetIndex];
+                effects.showBuffPulse(ally.pose.x, ally.pose.y, 44, player.roleId, false);
             });
             combat.hitPlayer(index, damage);
         } else if (skill.kind === SkillTypeKeyEnum.GoldHit) {
             const all = combat.targets(x, y, Number.MAX_SAFE_INTEGER);
             const enemy = all[Math.floor(Math.random() * all.length)];
             if (enemy) {
+                game.effect.getBusiness<EffectBll>(EffectBll).showCoinStrike(player.pose.x, player.pose.y, enemy.x, enemy.y);
                 combat.hitEnemy(enemy, game.shop.ShopModel.gold * skill.damage, index, skill.id, true);
                 if (!repeated) {
                     for (let cast = 0; cast < skill.extraShots && Math.random() < (skill.extraShots - cast) / (skill.extraShots + 2); cast++) {
@@ -238,8 +262,10 @@ export class PlayerActionBll extends CCBusiness<Player> {
                 }
             }
         } else if (skill.kind === SkillTypeKeyEnum.Curse) {
+            const effects = game.effect.getBusiness<EffectBll>(EffectBll);
             const count = skill.targets + stats.item(ShopContentKeyEnum.ItemMalediction) + stats.classValue(RoleClassKeyEnum.Curser);
             combat.targets(x, y, skill.radius).slice(0, count).forEach((enemy) => {
+                effects.showChain(player.pose.x, player.pose.y, enemy.x, enemy.y, player.roleId, false);
                 buffs.add(CombatCamp.Enemy, enemy.id, index, BuffKind.Curse, 1, skill.duration, skill.id, player.roleId === RoleKeyEnum.Usurer);
                 if (skill.silence) {
                     buffs.add(CombatCamp.Enemy, enemy.id, index, BuffKind.Silence, 1, skill.silence, skill.id);

@@ -31,11 +31,35 @@ export class PlayerView extends GameComponent {
         this.shadow.angle = pose.angle;
     }
 
-    setFeedback(recoil: number, hurt: number) {
-        const progress = hurt || recoil;
-        const pulse = Math.cos((1 - progress) * Math.PI * 2) * progress ** 2;
-        const scale = 1 + (hurt > 0 ? 0.25 : 0.19) * pulse;
-        this.body.setScale(scale, scale, 1);
-        this.body.getComponent(Sprite).color = hurt > 0.55 ? ColorConst.WHITE : this.bodyColor;
+    setFeedback(recoil: number, hurt: number, lowHpPulse: number = 0, ghost: boolean = false) {
+        let scaleX = 1;
+        let scaleY = 1;
+        if (hurt > 0) {
+            const wave = Math.cos((1 - hurt) * Math.PI * 2.5) * hurt * hurt;
+            scaleX = 1 + 0.34 * wave;
+            scaleY = 1 - 0.22 * wave;
+        } else if (recoil > 0) {
+            const wave = Math.cos((1 - recoil) * Math.PI * 2) * recoil * recoil;
+            scaleX = 1 - 0.16 * wave;
+            scaleY = 1 + 0.24 * wave;
+        } else if (lowHpPulse > 0) {
+            const pulse = 1 + 0.06 * lowHpPulse;
+            scaleX = pulse;
+            scaleY = pulse;
+        }
+        this.body.setScale(scaleX, scaleY, 1);
+        this.shadow.setScale(scaleX, scaleY, 1);
+        const sprite = this.body.getComponent(Sprite);
+        if (hurt > 0.45) {
+            sprite.color = ColorConst.WHITE;
+        } else if (ghost) {
+            const translucent = this.bodyColor.clone().lerp(ColorConst.WHITE, 0.35);
+            translucent.a = 155;
+            sprite.color = translucent;
+        } else if (lowHpPulse > 0.5) {
+            sprite.color = this.bodyColor.clone().lerp(ColorConst.battleDangerRed, (lowHpPulse - 0.5) * 0.7);
+        } else {
+            sprite.color = this.bodyColor;
+        }
     }
 }
