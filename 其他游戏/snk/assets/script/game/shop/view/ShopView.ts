@@ -903,7 +903,6 @@ export class ShopView extends CCView<Shop> {
 
     btnMenu() {
         if (!this.clickBlocked) {
-            this.business.saveRun();
             this.ent.game.returnMenu();
         }
     }

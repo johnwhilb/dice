@@ -27,8 +27,9 @@ export class MainMenuView extends CCView<MainMenu> {
     start() {
         this.titleAni();
         this.createSnake();
-        this.ent.getBusiness<MainMenuBll>(MainMenuBll).refreshAudio();
-        this.ent.getBusiness<MainMenuBll>(MainMenuBll).playMenuMusic();
+        const business = this.ent.getBusiness<MainMenuBll>(MainMenuBll);
+        this.getNode("btnContinue").active = business.canContinue();
+        business.playMenuMusic();
         this.update(0);
     }
 

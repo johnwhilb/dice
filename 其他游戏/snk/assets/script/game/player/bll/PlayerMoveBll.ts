@@ -33,11 +33,15 @@ export class PlayerMoveBll extends CCBusiness<Player> {
         const head = model.players.find((player) => {
             return player.hp > 0;
         });
-        if (!head) {
-            return;
+        if (head) {
+            this.steerDirection(x - head.pose.x, y - head.pose.y);
         }
-        if (x !== head.pose.x || y !== head.pose.y) {
-            model.targetHeading = Math.atan2(y - head.pose.y, x - head.pose.x);
+    }
+
+    /** 根据非零方向向量 x、y 更新队首目标朝向。 */
+    steerDirection(x: number, y: number) {
+        if (x || y) {
+            this.ent.PlayerModel.targetHeading = Math.atan2(y, x);
         }
     }
 

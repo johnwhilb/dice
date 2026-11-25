@@ -225,17 +225,6 @@ export class ShopHexCard extends GameComponent {
         }
     }
 
-    onDestroy() {
-        Tween.stopAllByTarget(this.node);
-        Tween.stopAllByTarget(this.node.getComponent(UIOpacity));
-        Tween.stopAllByTarget(this.getNode("hexCardBody"));
-        Tween.stopAllByTarget(this.getNode("hexCardShadow"));
-        Tween.stopAllByTarget(this.getNode("hexIcon"));
-        Tween.stopAllByTarget(this.getNode("hexRerollIcon"));
-        Tween.stopAllByTarget(this.getNode("btnHexReroll").getComponent(UIOpacity));
-        super.onDestroy();
-    }
-
     private applyContent(contentId: number) {
         const content = TableShopContent.getConfigById<TableShopContent>(contentId);
         this.setSprite(this.getNode("hexIcon"), ResPath.getItemSpriteIcon(contentId), "bundle");

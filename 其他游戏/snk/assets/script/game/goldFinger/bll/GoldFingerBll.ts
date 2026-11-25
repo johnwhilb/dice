@@ -6,12 +6,12 @@ import { TableRoleLevel } from "../../common/table/TableRoleLevel";
 import { TableShopContent } from "../../common/table/TableShopContent";
 import { TableShopRule } from "../../common/table/TableShopRule";
 import { RoleLevelKeyEnum } from "../../common/table/RoleLevelKeyEnum";
+import { BattleState } from "../../battle/BattleEvent";
 import { TableBattleStage } from "../../common/table/TableBattleStage";
 import { TableBattleRule } from "../../common/table/TableBattleRule";
 import { GamePhase } from "../../game/model/GameModel";
 import { PlayerBll } from "../../player/bll/PlayerBll";
 import type { IPlayerUnit } from "../../player/PlayerEvent";
-import { ShopBll } from "../../shop/bll/ShopBll";
 import { ShopEvent } from "../../shop/ShopEvent";
 import type { GoldFinger } from "../GoldFinger";
 import { GoldFingerEvent } from "../GoldFingerEvent";
@@ -54,7 +54,7 @@ export class GoldFingerBll extends CCBusiness<GoldFinger> {
         this.dispatchEvent(GoldFingerEvent.UpdatePanel);
     }
 
-    /** 将输入 text 作为正整数金币数量加入本局，保存存档并通知商店刷新。 */
+    /** 将输入 text 作为正整数金币数量加入本局，并通知商店刷新。 */
     addGold(text: string) {
         if (this.ent.game.GameModel.transitioning) {
             this.setMessage("界面切换中，请稍后操作");
@@ -68,7 +68,6 @@ export class GoldFingerBll extends CCBusiness<GoldFinger> {
             return;
         }
         shop.ShopModel.gold += amount;
-        shop.getBusiness<ShopBll>(ShopBll).saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.setMessage(`已增加 ${amount} 金币`);
     }
@@ -102,9 +101,55 @@ export class GoldFingerBll extends CCBusiness<GoldFinger> {
         }
         game.shop.ShopModel.team.push(unit);
         game.shop.ShopModel.goldFingerEnabled = true;
-        game.shop.getBusiness<ShopBll>(ShopBll).saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.setMessage(`已在队尾加入 ${role.name}（${role.id}）`);
+    }
+
+    /** 保留原有队员并全部升满，从可招募角色中不重复地随机补齐初始队伍容量。 */
+    maxTeam() {
+        const game = this.ent.game;
+        if (game.GameModel.transitioning) {
+            this.setMessage("界面切换中，请稍后操作");
+            return;
+        }
+
+        const shop = game.shop;
+        const model = shop.ShopModel;
+        const rule = TableShopRule.getInitial();
+        const level = Math.max(...TableRoleLevel.getAllConfig<TableRoleLevel>().map((config) => {
+            return config.level;
+        }));
+        if (!Number.isFinite(level)) {
+            throw new Error("角色等级配置缺失");
+        }
+        const copies = Math.pow(rule.copiesPerUpgrade, level - 1);
+        const team = model.team.map((unit) => {
+            return { roleId: unit.roleId, level, copies };
+        });
+        const ownedRoles = new Set(team.map((unit) => {
+            return unit.roleId;
+        }));
+        const pool = TableRole.getAllConfig<TableRole>().filter((role) => {
+            return role.shopEnabled && !ownedRoles.has(role.id);
+        });
+        if (team.length + pool.length < rule.baseTeamSize) {
+            this.setMessage("可招募角色不足，无法补齐队伍");
+            return;
+        }
+        while (team.length < rule.baseTeamSize) {
+            const index = Math.floor(Math.random() * pool.length);
+            const [role] = pool.splice(index, 1);
+            team.push({ roleId: role.id, level, copies });
+        }
+
+        model.team = team;
+        model.goldFingerEnabled = true;
+        const state = game.battle.BattleModel.state;
+        if (game.GameModel.phase === GamePhase.Battle && (state === BattleState.Countdown || state === BattleState.Running)) {
+            game.player.getBusiness<PlayerBll>(PlayerBll).upgradeTeam(team);
+        }
+        this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.setMessage(`已将 ${team.length} 名队员升至 ${level} 级`);
     }
 
     /** 将输入 text 对应的海克斯配置加入本局；已拥有且可升级时直接升一级，并同步维护奖池与待选海克斯。 */
@@ -147,7 +192,6 @@ export class GoldFingerBll extends CCBusiness<GoldFinger> {
             existing.level += 1;
             existing.xp = 0;
             model.goldFingerEnabled = true;
-            shop.getBusiness<ShopBll>(ShopBll).saveRun();
             this.dispatchEvent(ShopEvent.UpdateShopContent);
             this.dispatchEvent(ShopEvent.ItemUpgraded, {
                 index: existingIndex,
@@ -189,7 +233,6 @@ export class GoldFingerBll extends CCBusiness<GoldFinger> {
             }
         }
 
-        shop.getBusiness<ShopBll>(ShopBll).saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         if (hexRewardCleared) {
             this.dispatchEvent(ShopEvent.HexRewardSelected);

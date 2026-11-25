@@ -7,6 +7,7 @@ import { uiConfigData } from './game/common/config/GameUIConfig';
 import { smc } from './game/common/SingletonModuleComp';
 import { Initialize } from './game/initialize/Initialize';
 import { MainMenu } from './game/mainManue/MainMenu';
+import { Setting } from './game/setting/Setting';
 
 const { ccclass, property } = _decorator;
 
@@ -31,6 +32,7 @@ export class Main extends Root {
 
     protected run() {
         smc.initialize = ecs.getEntity(Initialize);
+        smc.setting = ecs.getEntity(Setting);
         smc.mainMenu = ecs.getEntity(MainMenu);
         smc.initialize.load(this.initial);
     }

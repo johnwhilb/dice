@@ -80,7 +80,6 @@ export class ShopBll extends CCBusiness<Shop> {
             return item.id;
         });
         model.offers = offers;
-        this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         if (!restart) {
             this.dispatchEvent(ShopEvent.OpenShop);
@@ -160,7 +159,6 @@ export class ShopBll extends CCBusiness<Shop> {
         }
         model.gold -= rule.refreshCost;
         model.offers = offers;
-        this.saveRun();
         this.audio.play(ShopSound.Refresh);
         this.dispatchEvent(ShopEvent.ShowOfferRemoval);
         this.dispatchEvent(ShopEvent.GoldChanged, -rule.refreshCost);
@@ -229,7 +227,6 @@ export class ShopBll extends CCBusiness<Shop> {
             model.team.push({ roleId: role.id, level: 1, copies: 1 });
             teamIndex = model.team.length - 1;
         }
-        this.saveRun();
         this.audio.play(ShopSound.Buy);
         this.dispatchEvent(ShopEvent.ShowOfferRemoval, index);
         this.dispatchEvent(ShopEvent.GoldChanged, -role.price);
@@ -268,7 +265,6 @@ export class ShopBll extends CCBusiness<Shop> {
         const gain = this.getSalePrice(index);
         model.gold += gain;
         model.team.splice(index, 1);
-        this.saveRun();
         this.audio.play(ShopSound.Sell);
         this.dispatchEvent(ShopEvent.GoldChanged, gain);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
@@ -311,7 +307,6 @@ export class ShopBll extends CCBusiness<Shop> {
         unit.copies -= Math.pow(TableShopRule.getInitial().copiesPerUpgrade, level - 1);
         const gain = role.price * config.saleValueMultiplier;
         model.gold += gain;
-        this.saveRun();
         this.audio.play(ShopSound.Sell);
         this.dispatchEvent(ShopEvent.GoldChanged, gain);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
@@ -328,7 +323,6 @@ export class ShopBll extends CCBusiness<Shop> {
         const unit = team[from];
         team[from] = team[to];
         team[to] = unit;
-        this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateTeamOrder, from, to);
     }
 
@@ -352,7 +346,6 @@ export class ShopBll extends CCBusiness<Shop> {
             delta = -rule.lockCost;
         }
         model.locked = !model.locked;
-        this.saveRun();
         this.audio.play(ShopSound.Lock);
         if (delta !== 0) {
             this.dispatchEvent(ShopEvent.GoldChanged, delta);
@@ -382,7 +375,6 @@ export class ShopBll extends CCBusiness<Shop> {
         model.gold -= rule.xpPurchaseCost;
         this.gainShopXp();
         const leveledUp = model.shopLevel > oldLevel;
-        this.saveRun();
         this.audio.play(ShopSound.Experience);
         this.dispatchEvent(ShopEvent.GoldChanged, -rule.xpPurchaseCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
@@ -409,7 +401,6 @@ export class ShopBll extends CCBusiness<Shop> {
         model.gold -= rule.downgradeCost;
         model.shopLevel -= 1;
         model.shopXp = 0;
-        this.saveRun();
         this.audio.play(ShopSound.Experience);
         this.dispatchEvent(ShopEvent.GoldChanged, -rule.downgradeCost);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
@@ -532,7 +523,6 @@ export class ShopBll extends CCBusiness<Shop> {
             item.xp = 0;
             leveledUp = true;
         }
-        this.saveRun();
         this.audio.play(ShopSound.Experience);
         if (leveledUp) {
             this.audio.play(item.level >= 3 ? ShopSound.MaxUpgrade : ShopSound.Upgrade);
@@ -554,7 +544,6 @@ export class ShopBll extends CCBusiness<Shop> {
         model.gold += gain;
         model.itemPool.push(item.contentId);
         model.items.splice(index, 1);
-        this.saveRun();
         this.audio.play(ShopSound.Sell);
         this.dispatchEvent(ShopEvent.GoldChanged, gain);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
@@ -614,7 +603,6 @@ export class ShopBll extends CCBusiness<Shop> {
             hexReward.freeReroll = false;
         }
         model.gold -= cost;
-        this.saveRun();
         this.audio.play(ShopSound.Refresh);
         this.dispatchEvent(ShopEvent.UpdateHexReward, index);
         if (cost > 0) {
@@ -635,7 +623,6 @@ export class ShopBll extends CCBusiness<Shop> {
         model.itemPool.splice(poolIndex, 1);
         model.items.push({ contentId, level: 1, xp: 0 });
         model.hexReward = undefined;
-        this.saveRun();
         this.audio.play(ShopSound.Buy);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.dispatchEvent(ShopEvent.HexRewardSelected);
@@ -694,7 +681,6 @@ export class ShopBll extends CCBusiness<Shop> {
         model.offers = offers;
         model.battleLevel = Math.min(model.battleLevel + 1, TableBattleRule.getCurrent().maxLevel);
         model.loop = Math.floor((model.battleLevel - 1) / rule.roundsPerLoop);
-        this.saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.dispatchEvent(ShopEvent.RoundCompleted, { roundGold, pickedUpGold, interest });
     }
@@ -730,8 +716,13 @@ export class ShopBll extends CCBusiness<Shop> {
         oops.storage.set(CommonStorageConfig.ShopRun, save);
     }
 
-    /** 读取有效快照并恢复本局；缺失及结构错误时不修改当前状态。 */
-    loadRun() {
+    /** 判断最近的本地存档是否能恢复到商店或海克斯选择。 */
+    static hasSavedRun() {
+        return !!this.getSavedRun();
+    }
+
+    /** 读取并校验本地存档，缺失或无效时返回空值。 */
+    private static getSavedRun() {
         const data = oops.storage.getJson<IShopSave | null>(CommonStorageConfig.ShopRun, null);
         const rule = TableShopRule.getInitial();
         if (
@@ -749,8 +740,7 @@ export class ShopBll extends CCBusiness<Shop> {
             !Number.isInteger(data.battleLevel) ||
             data.battleLevel < 1
         ) {
-            this.toast("main_menu_save_unavailable");
-            return;
+            return null;
         }
         const goldFingerEnabled = data.goldFingerEnabled === true;
         const shopLevel = TableShopLevel.getConfigByLevel(data.shopLevel);
@@ -766,7 +756,7 @@ export class ShopBll extends CCBusiness<Shop> {
             (shopLevel.getNextLevel() ? data.shopXp >= shopLevel.xpToNextLevel : data.shopXp !== 0) ||
             (!goldFingerEnabled && data.team.length > capacity) ||
             !data.offers.every((id) => {
-                return id === 0 || !!TableRole.getConfigById(id).shopEnabled;
+                return id === 0 || !!TableRole.getConfigById(id)?.shopEnabled;
             }) ||
             !data.team.every((unit) => {
                 return this.isValidUnit(unit, goldFingerEnabled);
@@ -777,11 +767,12 @@ export class ShopBll extends CCBusiness<Shop> {
                 })
             ).size !== data.team.length) ||
             !data.items.every((item) => {
+                if (!item || !itemIds.includes(item.contentId)) {
+                    return false;
+                }
                 const content = TableShopContent.getConfigById(item.contentId);
                 const xpNeeded = item.level === 1 ? rule.itemLevel1Xp : item.level === 2 ? rule.itemLevel2Xp : 0;
                 return (
-                    !!item &&
-                    itemIds.includes(item.contentId) &&
                     Number.isInteger(item.level) &&
                     item.level >= 1 &&
                     item.level <= 3 &&
@@ -795,8 +786,7 @@ export class ShopBll extends CCBusiness<Shop> {
                 return itemIds.includes(id);
             })
         ) {
-            this.toast("main_menu_save_unavailable");
-            return;
+            return null;
         }
         const combinedIds = data.itemPool.concat(
             data.items.map((item) => {
@@ -825,9 +815,19 @@ export class ShopBll extends CCBusiness<Shop> {
                 })
             ))
         ) {
+            return null;
+        }
+        return data;
+    }
+
+    /** 恢复最近一次有效快照并通知游戏进入相应界面。 */
+    loadRun() {
+        const data = ShopBll.getSavedRun();
+        if (!data) {
             this.toast("main_menu_save_unavailable");
             return;
         }
+        const rule = TableShopRule.getInitial();
         const model = this.ent.ShopModel;
         model.reset();
         this.ent.game.GameModel.reset();
@@ -842,6 +842,7 @@ export class ShopBll extends CCBusiness<Shop> {
             return { ...item };
         });
         model.itemPool = data.itemPool.slice();
+        const hexReward = data.hexReward;
         if (hexReward) {
             const hexRule = TableShopHexRule.getCurrent();
             const candidates = hexReward.candidates.slice(0, hexRule.candidateCount);
@@ -862,13 +863,17 @@ export class ShopBll extends CCBusiness<Shop> {
         model.loop = data.loop;
         model.newGamePlus = data.newGamePlus;
         model.locked = data.locked;
-        model.goldFingerEnabled = goldFingerEnabled;
+        model.goldFingerEnabled = data.goldFingerEnabled === true;
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.dispatchEvent(ShopEvent.OpenShop);
     }
 
     /** 校验存档队员 unit 的角色、等级与份数，goldFingerEnabled 允许配置中的非招募角色。 */
-    private isValidUnit(unit: IPlayerUnit, goldFingerEnabled: boolean) {
+    private static isValidUnit(unit: IPlayerUnit, goldFingerEnabled: boolean) {
+        if (!unit) {
+            return false;
+        }
+        const role = TableRole.getConfigById(unit.roleId);
         const rule = TableShopRule.getInitial();
         const maxLevel = Math.max(
             ...TableRoleLevel.getAllConfig<TableRoleLevel>().map((config) => {
@@ -876,8 +881,8 @@ export class ShopBll extends CCBusiness<Shop> {
             })
         );
         return (
-            !!unit &&
-            (TableRole.getConfigById(unit.roleId).shopEnabled || goldFingerEnabled) &&
+            !!role &&
+            (role.shopEnabled || goldFingerEnabled) &&
             !!TableRoleLevel.getConfigByLevel(unit.level) &&
             Number.isInteger(unit.copies) &&
             unit.copies >= Math.pow(rule.copiesPerUpgrade, unit.level - 1) &&

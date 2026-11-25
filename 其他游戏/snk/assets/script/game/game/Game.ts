@@ -101,7 +101,9 @@ export class Game extends CCEntity {
                 if (!node) {
                     return false;
                 }
+                this.shop.getBusiness<ShopBll>(ShopBll).saveRun();
                 smc.mainMenu.removeUi(MainMenuView);
+                this.closeHexReward();
                 GameAudio.setMusic(0.2, 1, 1);
                 this.goldFinger.getBusiness<GoldFingerBll>(GoldFingerBll).show();
                 return true;
@@ -139,7 +141,7 @@ export class Game extends CCEntity {
     }
 
     returnShop(event?: string, reward?: IRoundGoldReward) {
-        if (this.GameModel.transitioning) {
+        if (this.GameModel.transitioning || this.shop.has(ShopView)) {
             return;
         }
         this.pendingRoundReward = reward ?? this.pendingRoundReward;
@@ -162,8 +164,10 @@ export class Game extends CCEntity {
                     return false;
                 }
                 this.getBusiness<GameBll>(GameBll).setPhase(GamePhase.Shop);
+                this.shop.getBusiness<ShopBll>(ShopBll).saveRun();
                 GameAudio.setMusic(0.2, 1, 1);
                 this.battle.removeUi(BattleView);
+                this.closeHexReward();
                 this.enemy.EnemyModel.reset();
                 this.combat.getBusiness<CombatBll>(CombatBll).reset();
                 this.pendingRoundReward = undefined;
@@ -179,18 +183,23 @@ export class Game extends CCEntity {
         oops.gui.open(ShopHexView).then((node) => {
             if (!node) {
                 oops.gui.toast(lang("shop_load_failed"));
+                return;
             }
+            this.shop.getBusiness<ShopBll>(ShopBll).saveRun();
         });
     }
 
     finishHexReward() {
-        if (oops.gui.has(ShopHexView)) {
-            oops.gui.remove(ShopHexView);
-        }
         if (this.GameModel.phase === GamePhase.Battle) {
             this.returnShop();
         } else {
             this.showShop();
+        }
+    }
+
+    private closeHexReward() {
+        if (oops.gui.has(ShopHexView)) {
+            oops.gui.remove(ShopHexView);
         }
     }
 
@@ -200,8 +209,10 @@ export class Game extends CCEntity {
         }
         GameAudio.playTransition(false);
         this.transition({ message: "正在重新开始…" }, () => {
-            const ready = this.shop.getBusiness<ShopBll>(ShopBll).newRun(true);
+            const shopBusiness = this.shop.getBusiness<ShopBll>(ShopBll);
+            const ready = shopBusiness.newRun(true);
             if (ready) {
+                shopBusiness.saveRun();
                 GameAudio.restartMusic();
             }
             return Promise.resolve(ready);
@@ -236,7 +247,6 @@ export class Game extends CCEntity {
         if (activeBattle) {
             this.battle.getBusiness<BattleBll>(BattleBll).setArenaSize(width, height);
         }
-        this.shop.getBusiness<ShopBll>(ShopBll).saveRun();
     }
 
     returnMenu() {

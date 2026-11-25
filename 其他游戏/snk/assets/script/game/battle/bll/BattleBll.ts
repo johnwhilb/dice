@@ -42,9 +42,17 @@ export class BattleBll extends CCBusiness<Battle> {
         this.ent.BattleModel.setArenaSize(width, height);
     }
 
+    /** 判断当前是否允许在准备或战斗阶段转向。 */
+    canSteer() {
+        const game = this.ent.game.GameModel;
+        const state = this.ent.BattleModel.state;
+        return !game.transitioning && game.phase === GamePhase.Battle
+            && (state === BattleState.Countdown || state === BattleState.Running);
+    }
+
     /** 战斗阶段根据局部触摸坐标 x、y 请求角色转向，并更新触摸引导点。 */
     steer(x: number, y: number) {
-        if (this.ent.game.GameModel.transitioning || this.ent.game.GameModel.phase !== GamePhase.Battle || this.ent.BattleModel.state === BattleState.Victory || this.ent.BattleModel.state === BattleState.Defeat) {
+        if (!this.canSteer()) {
             return;
         }
         const model = this.ent.BattleModel;
@@ -55,9 +63,20 @@ export class BattleBll extends CCBusiness<Battle> {
         this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).steer(x, y);
     }
 
-    /** 触摸结束时释放触摸引导点，使转向指示平滑淡出。 */
-    releaseSteer() {
-        this.ent.BattleModel.steerActive = false;
+    /** 按摇杆向量 x、y 转向，不创建跟随模式的触摸标记。 */
+    steerDirection(x: number, y: number) {
+        if (this.canSteer()) {
+            this.ent.game.player.getBusiness<PlayerBll>(PlayerBll).steerDirection(x, y);
+        }
+    }
+
+    /** 释放触摸引导点；clear 为真时直接清除，否则按原有节奏淡出。 */
+    releaseSteer(clear: boolean = false) {
+        const model = this.ent.BattleModel;
+        model.steerActive = false;
+        if (clear) {
+            model.steerFade = 0;
+        }
     }
 
     /** 播报最后一个字符显示后，开始胜利面板的半秒等待。 */

@@ -2,21 +2,17 @@ import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCEntity } from "db://oops-framework/module/common/CCEntity";
 import { MainMenuBll } from "./bll/MainMenuBll";
 import { MainMenuView } from "./view/MainMenuView";
-import { MainMenuOptionView } from "./view/MainMenuOptionView";
-import { MainMenuModel } from "./viewModel/MainMenuModel";
+import { smc } from "../common/SingletonModuleComp";
 
 @ecs.register("MainMenu")
 export class MainMenu extends CCEntity {
     MainMenuView: MainMenuView;
-    MainMenuOptionView: MainMenuOptionView;
-    MainMenuModel: MainMenuModel;
 
     static create(): MainMenu {
         return ecs.getEntity<MainMenu>(MainMenu);
     }
 
     init(): void {
-        this.add(MainMenuModel);
         this.addBusinesss(MainMenuBll);
     }
 
@@ -32,7 +28,7 @@ export class MainMenu extends CCEntity {
     }
 
     openOptions() {
-        this.addUi(MainMenuOptionView);
+        return smc.setting.open();
     }
 
     continueGame() {

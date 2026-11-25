@@ -31,6 +31,9 @@ import { playerHurtDuration, recoilDuration } from "../../effect/EffectEvent";
 import { CombatEvent } from "../../combat/CombatEvent";
 import { ColorConst } from "../../common/config/ColorConst";
 import { lang } from "../../common/Language";
+import { smc } from "../../common/SingletonModuleComp";
+import { ControlMode, SettingEvent } from "../../setting/SettingEvent";
+import { BattleJoystick } from "./BattleJoystick";
 
 const { ccclass, property } = _decorator;
 
@@ -97,6 +100,7 @@ export class BattleView extends CCView<Battle> {
         this.on(BattleEvent.CountdownFinished, this.playCountdownBurst, this);
         this.on(BattleEvent.WaveAnnounce, this.playWaveBanner, this);
         this.on(CombatEvent.UpdateFrame, this.refreshEffects, this);
+        this.on(SettingEvent.ControlModeChanged, this.refreshControlMode, this);
 
         const arena = this.getNode("arena");
         this.countdownLabel = this.getNode("lbtBattleCountdown").getComponent(Label);
@@ -158,6 +162,7 @@ export class BattleView extends CCView<Battle> {
         arena.on(Node.EventType.TOUCH_MOVE, this.steer, this);
         arena.on(Node.EventType.TOUCH_END, this.releaseSteer, this);
         arena.on(Node.EventType.TOUCH_CANCEL, this.releaseSteer, this);
+        this.getNode("battleJoystickInput").getComponent(BattleJoystick).bindBusiness(this.business);
 
         this.countdownPopLife = 0.24;
         this.refresh();
@@ -352,6 +357,7 @@ export class BattleView extends CCView<Battle> {
         const victory = model.state === BattleState.Victory;
         const defeat = model.state === BattleState.Defeat;
         const ended = victory || defeat;
+        this.refreshJoystick();
         const showResult = (defeat || (victory && model.victoryPanelDelay === 0)) && !effectModel.slowLife;
         const countdown = model.state === BattleState.Countdown ? Math.ceil(model.countdown) : 0;
         this.countdownLabel.node.active = countdown > 0;
@@ -513,8 +519,19 @@ export class BattleView extends CCView<Battle> {
         });
     }
 
+    private refreshJoystick() {
+        const state = this.ent.BattleModel.state;
+        this.getNode("battleJoystickInput").active = smc.setting.SettingModel.controlMode === ControlMode.Joystick
+            && (state === BattleState.Countdown || state === BattleState.Running);
+    }
+
+    private refreshControlMode() {
+        this.business.releaseSteer(true);
+        this.refreshJoystick();
+    }
+
     private steer(event: EventTouch) {
-        if (this.ent.game.GameModel.transitioning) {
+        if (this.ent.game.GameModel.transitioning || smc.setting.SettingModel.controlMode !== ControlMode.Follow) {
             return;
         }
         const point = event.getUILocation();
@@ -549,6 +566,7 @@ export class BattleView extends CCView<Battle> {
         this.off(BattleEvent.CountdownFinished, this.playCountdownBurst, this);
         this.off(BattleEvent.WaveAnnounce, this.playWaveBanner, this);
         this.off(CombatEvent.UpdateFrame, this.refreshEffects, this);
+        this.off(SettingEvent.ControlModeChanged, this.refreshControlMode, this);
         this.bodies = [];
         this.enemies = [];
         this.objects = [];

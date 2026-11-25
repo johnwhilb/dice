@@ -359,7 +359,7 @@
       "b": 218,
       "a": 255
     },
-    "_string": "选择一项海克斯强化",
+    "_string": "选择一项符文强化",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 36,
@@ -3380,6 +3380,10 @@
     "_enabled": true,
     "__prefab": {
       "__id__": 145
+    },
+    "cardPrefab": {
+      "__uuid__": "7681e7fe-b6d2-41cb-ada2-be6da74ac443",
+      "__expectedType__": "cc.Prefab"
     },
     "_id": ""
   },

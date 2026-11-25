@@ -32,6 +32,35 @@ export class PlayerBll extends CCBusiness<Player> {
 
     /** 将角色快照 unit 追加到战场队尾，保留原队员位置、朝向和跟随历史。 */
     append(unit: IPlayerUnit) {
+        this.appendToTail(unit);
+        this.refreshMovementStats();
+        this.dispatchEvent(PlayerEvent.UpdatePlayers);
+    }
+
+    /** 将保持原队员顺序的 team 同步至战场，保留已有队员的位置和血量比例，并追加新队员。 */
+    upgradeTeam(team: IPlayerUnit[]) {
+        const model = this.ent.PlayerModel;
+        team.forEach((unit, index) => {
+            const player = model.players[index];
+            if (!player) {
+                this.appendToTail(unit);
+                return;
+            }
+            player.copies = unit.copies;
+            if (player.level !== unit.level) {
+                const upgraded = this.createPlayer(unit);
+                player.hp = player.hp / player.stats.hp * upgraded.stats.hp;
+                player.level = unit.level;
+                player.stats = upgraded.stats;
+                player.skill = upgraded.skill;
+            }
+        });
+        this.refreshMovementStats();
+        this.dispatchEvent(PlayerEvent.UpdatePlayers);
+    }
+
+    /** 将角色快照 unit 放到战场队尾并延续当前跟随轨迹。 */
+    private appendToTail(unit: IPlayerUnit) {
         const model = this.ent.PlayerModel;
         const player = this.createPlayer(unit);
         if (model.history.length) {
@@ -39,8 +68,6 @@ export class PlayerBll extends CCBusiness<Player> {
         }
         model.players.push(player);
         model.history.push({ ...player.pose });
-        this.refreshMovementStats();
-        this.dispatchEvent(PlayerEvent.UpdatePlayers);
     }
 
     /** 将招募数据 unit 转为带配置、等级职业属性和初始位置的战场角色。 */
@@ -124,6 +151,11 @@ export class PlayerBll extends CCBusiness<Player> {
     /** 将战场触摸坐标 x、y 交给移动业务转向。 */
     steer(x: number, y: number) {
         this.ent.getBusiness<PlayerMoveBll>(PlayerMoveBll).steer(x, y);
+    }
+
+    /** 将摇杆的方向向量 x、y 传递给队首转向逻辑。 */
+    steerDirection(x: number, y: number) {
+        this.ent.getBusiness<PlayerMoveBll>(PlayerMoveBll).steerDirection(x, y);
     }
 
     /** 推进 deltaTime 秒的队伍移动，width、height 为战场尺寸。 */

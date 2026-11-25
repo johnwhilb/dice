@@ -1,4 +1,18 @@
-import { _decorator, Button, Label, Layout, Node, Prefab, Sprite, Tween, UIOpacity, UITransform, Vec3, instantiate, tween } from "cc";
+import {
+    _decorator,
+    Button,
+    Label,
+    Layout,
+    Node,
+    Prefab,
+    Sprite,
+    Tween,
+    UIOpacity,
+    UITransform,
+    Vec3,
+    instantiate,
+    tween,
+} from "cc";
 import { gui } from "db://oops-framework/core/gui/Gui";
 import { LayerType } from "db://oops-framework/core/gui/layer/LayerEnum";
 import { GameComponent } from "db://oops-framework/module/common/GameComponent";
@@ -112,13 +126,21 @@ export class ShopHexView extends GameComponent {
                 const card = node.getComponent(ShopHexCard);
                 card.setSelected(cardIndex === index, true, true);
                 if (cardIndex === index) {
-                    this.effects.playCelebrationFromWorld(card.getIconWorldPosition(), ColorConst.shopMergeButton, false);
+                    this.effects.playCelebrationFromWorld(
+                        card.getIconWorldPosition(),
+                        ColorConst.shopMergeButton,
+                        false
+                    );
                 }
             }
         });
         this.refreshConfirmButton(true);
         if (firstSelection) {
-            this.effects.playCelebrationFromWorld(this.getNode("btnHexConfirm").worldPosition, ColorConst.shopGreen, false);
+            this.effects.playCelebrationFromWorld(
+                this.getNode("btnHexConfirm").worldPosition,
+                ColorConst.shopGreen,
+                false
+            );
         }
     }
 
@@ -141,7 +163,9 @@ export class ShopHexView extends GameComponent {
         this.effects.playFloatingTextFromWorld(goldNode.worldPosition, text, color, false);
         Tween.stopAllByTarget(goldNode);
         goldNode.setScale(1.18, 1.18, 1);
-        tween(goldNode).to(0.18, { scale: new Vec3(1, 1, 1) }, { easing: "quadOut" }).start();
+        tween(goldNode)
+            .to(0.18, { scale: new Vec3(1, 1, 1) }, { easing: "quadOut" })
+            .start();
     }
 
     private refreshConfirmButton(animate: boolean) {
@@ -212,7 +236,7 @@ export class ShopHexView extends GameComponent {
                 textPos,
                 `${lang("shop_hex_acquired")} · ${content.name}`,
                 ColorConst.shopMergeButton,
-                true,
+                true
             );
         }, 0.2);
 
@@ -224,19 +248,6 @@ export class ShopHexView extends GameComponent {
         this.scheduleOnce(() => {
             smc.game.shop.getBusiness<ShopBll>(ShopBll).selectHexReward(contentId);
         }, 0.85);
-    }
-
-    onDestroy() {
-        this.unscheduleAllCallbacks();
-        for (const name of ["txtHexTitle", "lbtHexGold", "btnHexConfirm"]) {
-            const node = this.getNode(name);
-            Tween.stopAllByTarget(node);
-            const opacity = node.getComponent(UIOpacity);
-            if (opacity) {
-                Tween.stopAllByTarget(opacity);
-            }
-        }
-        super.onDestroy();
     }
 
     protected btnHexConfirm() {

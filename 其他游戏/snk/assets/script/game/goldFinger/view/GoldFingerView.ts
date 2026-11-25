@@ -119,6 +119,10 @@ export class GoldFingerView extends CCView<GoldFinger> {
         this.business.addRole(this.getNode("roleInput").getComponent(EditBox).string);
     }
 
+    btnMaxTeam() {
+        this.business.maxTeam();
+    }
+
     btnAddHex() {
         this.business.addHex(this.getNode("hexInput").getComponent(EditBox).string);
     }

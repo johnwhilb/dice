@@ -20,6 +20,8 @@
   "testRichText": "RichText<color=#00ff00>%{0}</color><color=#0fffff>%{1}</color>",
   "vmLabelLanguage": "RichText<color=#00ff00>{{0}}</color>-<color=#0fffff>{{1}}</color>",
   "main_menu_options": "Options",
+  "setting_control_follow": "Controls: Follow",
+  "setting_control_joystick": "Controls: Joystick",
   "main_menu_back": "Back",
   "main_menu_music_on": "Music: On",
   "main_menu_music_off": "Music: Off",
