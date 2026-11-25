@@ -1,0 +1,21 @@
+{
+  "__type__": "cc.Material",
+  "_name": "ShopHexBackground",
+  "_objFlags": 0,
+  "__editorExtras__": {},
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "ca83aaa4-aac0-4847-b641-cf1419dcc347",
+    "__expectedType__": "cc.EffectAsset"
+  },
+  "_techIdx": 0,
+  "_defines": [
+    {}
+  ],
+  "_states": [
+    {}
+  ],
+  "_props": [
+    {}
+  ]
+}

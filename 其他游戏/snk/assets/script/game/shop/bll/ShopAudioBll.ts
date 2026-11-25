@@ -14,6 +14,9 @@ export class ShopAudioBll extends CCBusiness<Shop> {
             case ShopSound.Sell:
                 GameAudio.playEffect(coinSounds);
                 break;
+            case ShopSound.Select:
+                GameAudio.playEffect(switchSound);
+                break;
             case ShopSound.Refresh:
             case ShopSound.Lock:
             case ShopSound.Experience:

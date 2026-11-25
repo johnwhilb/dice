@@ -41,7 +41,8 @@ export class GoldFingerView extends CCView<GoldFinger> {
         const shop = this.ent.game.shop.ShopModel;
         this.node.active = model.visible;
         this.getNode("panelRoot").active = model.panelOpen;
-        this.getNode("lbtStatus").getComponent(Label).string = `金币 ${shop.gold}    队伍 ${shop.team.length} 人    第 ${shop.battleLevel} 关`;
+        this.getNode("lbtStatus").getComponent(Label).string =
+            `金币 ${shop.gold}   队伍 ${shop.team.length} 人   海克斯 ${shop.items.length}   第 ${shop.battleLevel} 关`;
         this.getNode("lbtMessage").getComponent(Label).string = model.message;
     }
 
@@ -116,6 +117,10 @@ export class GoldFingerView extends CCView<GoldFinger> {
 
     btnAddRole() {
         this.business.addRole(this.getNode("roleInput").getComponent(EditBox).string);
+    }
+
+    btnAddHex() {
+        this.business.addHex(this.getNode("hexInput").getComponent(EditBox).string);
     }
 
     btnJumpLevel() {

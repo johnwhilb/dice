@@ -3,6 +3,7 @@ import { CCBusiness } from "db://oops-framework/module/common/CCBusiness";
 import { lang } from "../../common/Language";
 import { TableRole } from "../../common/table/TableRole";
 import { TableRoleLevel } from "../../common/table/TableRoleLevel";
+import { TableShopContent } from "../../common/table/TableShopContent";
 import { TableShopRule } from "../../common/table/TableShopRule";
 import { RoleLevelKeyEnum } from "../../common/table/RoleLevelKeyEnum";
 import { TableBattleStage } from "../../common/table/TableBattleStage";
@@ -104,6 +105,98 @@ export class GoldFingerBll extends CCBusiness<GoldFinger> {
         game.shop.getBusiness<ShopBll>(ShopBll).saveRun();
         this.dispatchEvent(ShopEvent.UpdateShopContent);
         this.setMessage(`已在队尾加入 ${role.name}（${role.id}）`);
+    }
+
+    /** 将输入 text 对应的海克斯配置加入本局；已拥有且可升级时直接升一级，并同步维护奖池与待选海克斯。 */
+    addHex(text: string) {
+        const game = this.ent.game;
+        if (game.GameModel.transitioning) {
+            this.setMessage("界面切换中，请稍后操作");
+            return;
+        }
+        const value = text.trim();
+        const contentId = Number(value);
+        if (!/^\d+$/.test(value) || !Number.isSafeInteger(contentId)) {
+            this.setMessage("请输入有效的海克斯配置 ID");
+            return;
+        }
+        const content = TableShopContent.getConfigById<TableShopContent>(contentId);
+        if (!content || content.roleId || content.classId) {
+            this.setMessage(`海克斯配置 ID ${contentId} 不存在`);
+            return;
+        }
+        if (!content.enabled) {
+            this.setMessage(`海克斯 ${content.name}（${content.id}）未启用`);
+            return;
+        }
+        const shop = game.shop;
+        const model = shop.ShopModel;
+        const existingIndex = model.items.findIndex((item) => {
+            return item.contentId === content.id;
+        });
+        if (existingIndex >= 0) {
+            const existing = model.items[existingIndex];
+            if (!content.canLevel) {
+                this.setMessage(`海克斯 ${content.name}（${content.id}）已拥有且不可升级`);
+                return;
+            }
+            if (existing.level >= 3) {
+                this.setMessage(`海克斯 ${content.name}（${content.id}）已达满级`);
+                return;
+            }
+            existing.level += 1;
+            existing.xp = 0;
+            model.goldFingerEnabled = true;
+            shop.getBusiness<ShopBll>(ShopBll).saveRun();
+            this.dispatchEvent(ShopEvent.UpdateShopContent);
+            this.dispatchEvent(ShopEvent.ItemUpgraded, {
+                index: existingIndex,
+                level: existing.level,
+                leveledUp: true,
+            });
+            this.setMessage(`已将海克斯 ${content.name}（${content.id}）升至 ${existing.level} 级`);
+            return;
+        }
+
+        const poolIndex = model.itemPool.indexOf(content.id);
+        if (poolIndex >= 0) {
+            model.itemPool.splice(poolIndex, 1);
+        }
+        model.items.push({ contentId: content.id, level: 1, xp: 0 });
+        model.goldFingerEnabled = true;
+
+        const reward = model.hexReward;
+        let hexRewardCleared = false;
+        if (reward) {
+            const candidateIndex = reward.candidates.indexOf(content.id);
+            if (candidateIndex >= 0) {
+                const replacements = model.itemPool.filter((id) => {
+                    return !reward.candidates.includes(id);
+                });
+                if (replacements.length) {
+                    const replacement = replacements[Math.floor(Math.random() * replacements.length)];
+                    reward.candidates[candidateIndex] = replacement;
+                } else {
+                    reward.candidates.splice(candidateIndex, 1);
+                    if (reward.slotFreeRerolls) {
+                        reward.slotFreeRerolls.splice(candidateIndex, 1);
+                    }
+                    if (!reward.candidates.length) {
+                        model.hexReward = undefined;
+                        hexRewardCleared = true;
+                    }
+                }
+            }
+        }
+
+        shop.getBusiness<ShopBll>(ShopBll).saveRun();
+        this.dispatchEvent(ShopEvent.UpdateShopContent);
+        if (hexRewardCleared) {
+            this.dispatchEvent(ShopEvent.HexRewardSelected);
+        } else if (reward) {
+            this.dispatchEvent(ShopEvent.UpdateHexReward);
+        }
+        this.setMessage(`已添加海克斯 ${content.name}（${content.id}）`);
     }
 
     /** 保存操作反馈 message，并通过事件通知界面更新。 */

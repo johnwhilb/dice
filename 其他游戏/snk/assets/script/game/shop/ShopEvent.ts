@@ -12,8 +12,16 @@ export enum ShopEvent {
     ShowRoleSaleEffect = "shop_show_role_sale_effect",
     /** 新局或读档成功后打开商店。 */
     OpenShop = "shop_open",
-    /** 回合结算成功后返回商店，并携带金币结算明细。 */
+    /** 回合结算成功后继续结算流程，携带金币结算明细。 */
     RoundCompleted = "shop_round_completed",
+    /** 海克斯候选与刷新费用变化后更新选择界面；单槽刷新时携带被刷新的槽位下标。 */
+    UpdateHexReward = "shop_update_hex_reward",
+    /** 点击海克斯卡片切换选中项；参数为槽位下标 index 与强化配置 ID contentId。 */
+    SelectHexCandidate = "shop_select_hex_candidate",
+    /** 海克斯单张卡横向翻牌换卡到达中点揭晓新内容；参数为槽位下标 index。 */
+    HexCardFlipped = "shop_hex_card_flipped",
+    /** 海克斯奖励已领取，关闭选择界面并进入商店，无参数。 */
+    HexRewardSelected = "shop_hex_reward_selected",
     /** 记录队员拖拽起点并高亮羁绊；参数为队伍下标、触摸 UI 坐标和触点 ID。 */
     StartTeamDrag = "shop_start_team_drag",
     /** 队员交换位置后通知列表更新；参数 from、to 为交换前的两个队伍下标。 */
@@ -46,6 +54,8 @@ export enum ShopSound {
     MaxUpgrade = "sfxShopMaxUpgrade",
     /** 刷新商品。 */
     Refresh = "sfxShopRefresh",
+    /** 选中海克斯强化卡。 */
+    Select = "sfxShopSelect",
     /** 锁定或解锁商店。 */
     Lock = "sfxShopLock",
     /** 成功购买或降低商店经验，或购买道具经验。 */
@@ -133,10 +143,11 @@ export interface IShopSaleEffectOrigin {
     color: Color;
 }
 
-/** 商店提示面板的内容以及可选的出售目标。 */
+/** 商店提示面板的内容、可选出售目标以及可选被动道具升级下标。 */
 export interface IShopTooltipData {
     text: string;
     sale?: IShopTooltipSale;
+    upgradeItemIndex?: number;
 }
 
 /**

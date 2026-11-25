@@ -9,6 +9,7 @@ export class GameBll extends CCBusiness<Game> {
     protected init() {
         this.on(ShopEvent.OpenShop, this.ent.showShop, this.ent);
         this.on(ShopEvent.RoundCompleted, this.ent.returnShop, this.ent);
+        this.on(ShopEvent.HexRewardSelected, this.ent.finishHexReward, this.ent);
         this.on(BattleEvent.OpenBattle, this.ent.showBattle, this.ent);
     }
 

@@ -75,6 +75,9 @@ export class ColorConst {
     static readonly shopGoldGain: Color = new Color("#facf00");
     static readonly shopGoldSpend: Color = new Color("#f07021");
     static readonly shopShadow: Color = new Color(26, 26, 26, 128);
+    static readonly shopHexCardBorder: Color = new Color("#50504e");
+    static readonly shopHexCardSurface: Color = new Color("#2a2a29");
+    static readonly shopHexCardSurfaceSelected: Color = new Color("#33322e");
     static readonly shopTags: Map<string, string> = new Map<string, string>([
         ["fg", "#dadada"],
         ["bg10", "#707070"],

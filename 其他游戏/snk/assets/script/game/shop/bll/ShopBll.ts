@@ -10,6 +10,7 @@ import { oops } from "db://oops-framework/core/Oops";
 import { TableRole } from "../../common/table/TableRole";
 import { TableRoleLevel } from "../../common/table/TableRoleLevel";
 import { TableShopRule } from "../../common/table/TableShopRule";
+import { TableShopHexRule } from "../../common/table/TableShopHexRule";
 import { TableShopLevel } from "../../common/table/TableShopLevel";
 import { TableShopContent } from "../../common/table/TableShopContent";
 import { TableRoundReward } from "../../common/table/TableRoundReward";
@@ -487,6 +488,23 @@ export class ShopBll extends CCBusiness<Shop> {
             : 0;
     }
 
+    /** 拼装指定槽位被动道具的详情描述文本，index 为道具下标；不存在时返回空字符串。 */
+    getItemTooltipText(index: number) {
+        const item = this.ent.ShopModel.items[index];
+        if (!item) {
+            return "";
+        }
+        const content = TableShopContent.getConfigById<TableShopContent>(item.contentId);
+        const required = this.getItemXpNeeded(index);
+        const rule = TableShopRule.getInitial();
+        const xpInfo = required
+            ? `，经验 [yellow]${item.xp}/${required}[fg]，每点经验 [yellow]${rule.itemXpCost}[fg] 金币`
+            : content.canLevel
+              ? "，[yellow]已满级[fg]"
+              : "";
+        return `${content.name} · [yellow]${item.level}[fg]级${xpInfo}\n${content.getDescription(item.level)}\n[fg]售价：[yellow]${item.level * rule.itemSalePerLevel}[fg] 金币`;
+    }
+
     /** 购买一点道具经验，index 为道具下标；不可升级或已满级时不扣费。 */
     buyItemXp(index: number) {
         const model = this.ent.ShopModel;
@@ -543,18 +561,84 @@ export class ShopBll extends CCBusiness<Shop> {
         return true;
     }
 
-    /** 由战斗奖励选择发放道具，contentId 必须来自当前本局奖池。 */
-    gainItem(contentId: number) {
+    /** 从本局奖池抽取 count 个候选道具，excluded 为本次抽取应排除的道具 ID。 */
+    private drawHexCandidates(count: number, excluded: readonly number[] = []) {
+        const pool = this.ent.ShopModel.itemPool.filter((contentId) => {
+            return !excluded.includes(contentId);
+        });
+        const candidates: number[] = [];
+        while (candidates.length < count && pool.length) {
+            const index = Math.floor(Math.random() * pool.length);
+            const [contentId] = pool.splice(index, 1);
+            candidates.push(contentId);
+        }
+        return candidates;
+    }
+
+    /** 返回槽位 index 的刷新费用，优先使用该槽位或本轮共享的免费资格。 */
+    getHexRerollCost(index: number) {
+        const reward = this.ent.ShopModel.hexReward;
+        return reward?.slotFreeRerolls?.[index] || reward?.freeReroll ? 0 : TableShopHexRule.getCurrent().rerollCost;
+    }
+
+    /** 判断奖池中是否有当前候选以外的强化可用于刷新。 */
+    hasHexRerollCandidate() {
         const model = this.ent.ShopModel;
+        const reward = model.hexReward;
+        return !!reward && model.itemPool.some((contentId) => {
+            return !reward.candidates.includes(contentId);
+        });
+    }
+
+    /** 替换槽位 index 当前显示的强化，成功后结算费用并保存。 */
+    rerollHexReward(index: number, contentId: number) {
+        const model = this.ent.ShopModel;
+        const hexReward = model.hexReward;
+        if (!hexReward || !contentId || hexReward.candidates[index] !== contentId || this.ent.game.GameModel.transitioning) {
+            return;
+        }
+        const cost = this.getHexRerollCost(index);
+        if (model.gold < cost) {
+            this.toast("shop_gold_missing");
+            this.audio.play(ShopSound.Error);
+            return;
+        }
+        const [replacement] = this.drawHexCandidates(1, hexReward.candidates);
+        if (!replacement) {
+            return;
+        }
+        hexReward.candidates[index] = replacement;
+        if (hexReward.slotFreeRerolls?.[index]) {
+            hexReward.slotFreeRerolls[index] = false;
+        } else {
+            hexReward.freeReroll = false;
+        }
+        model.gold -= cost;
+        this.saveRun();
+        this.audio.play(ShopSound.Refresh);
+        this.dispatchEvent(ShopEvent.UpdateHexReward, index);
+        if (cost > 0) {
+            this.dispatchEvent(ShopEvent.GoldChanged, -cost);
+        }
+    }
+
+    /** 领取候选中的一级被动道具，contentId 为选中的道具 ID。 */
+    selectHexReward(contentId: number) {
+        const model = this.ent.ShopModel;
+        if (this.ent.game.GameModel.transitioning || !model.hexReward?.candidates.includes(contentId)) {
+            return;
+        }
         const poolIndex = model.itemPool.indexOf(contentId);
-        if (this.ent.game.GameModel.transitioning || poolIndex < 0) {
-            this.toast("shop_config_missing");
+        if (poolIndex < 0) {
             return;
         }
         model.itemPool.splice(poolIndex, 1);
         model.items.push({ contentId, level: 1, xp: 0 });
+        model.hexReward = undefined;
         this.saveRun();
+        this.audio.play(ShopSound.Buy);
         this.dispatchEvent(ShopEvent.UpdateShopContent);
+        this.dispatchEvent(ShopEvent.HexRewardSelected);
     }
 
     /** 真正获胜后结算奖励、利息与自动经验，pickedUpGold 为战斗实际拾取金币；普通返回不调用。 */
@@ -564,6 +648,7 @@ export class ShopBll extends CCBusiness<Shop> {
         if (
             this.ent.game.GameModel.transitioning ||
             this.ent.game.GameModel.phase !== GamePhase.Battle ||
+            model.hexReward ||
             !Number.isInteger(pickedUpGold) ||
             pickedUpGold < 0
         ) {
@@ -576,6 +661,7 @@ export class ShopBll extends CCBusiness<Shop> {
             this.toast("shop_config_missing");
             return;
         }
+        const hexRule = TableShopHexRule.getCurrent();
         const oldLevel = model.shopLevel;
         const oldXp = model.shopXp;
         if (model.battleLevel % rule.autoXpRoundInterval === 0) {
@@ -591,6 +677,19 @@ export class ShopBll extends CCBusiness<Shop> {
         const gold = reward.minGold + Math.floor(Math.random() * (reward.maxGold - reward.minGold + 1));
         const roundGold = gold * Math.max(1, Math.floor(model.battleLevel / rule.roundsPerLoop));
         const interest = this.getInterest();
+        if (hexRule.triggerRounds.includes(round) && model.items.length < hexRule.ownedLimit && model.itemPool.length) {
+            const merchantFreeRerolls = model.team.some((unit) => {
+                return unit.roleId === RoleKeyEnum.Merchant && unit.level === hexRule.merchantFreeRerollLevel;
+            });
+            const candidates = this.drawHexCandidates(hexRule.candidateCount);
+            model.hexReward = {
+                candidates,
+                freeReroll: !merchantFreeRerolls && model.battleLevel === hexRule.freeRerollStage,
+                slotFreeRerolls: candidates.map(() => {
+                    return merchantFreeRerolls;
+                }),
+            };
+        }
         model.gold += roundGold + pickedUpGold + interest;
         model.offers = offers;
         model.battleLevel = Math.min(model.battleLevel + 1, TableBattleRule.getCurrent().maxLevel);
@@ -619,6 +718,7 @@ export class ShopBll extends CCBusiness<Shop> {
                 return { ...item };
             }),
             itemPool: model.itemPool.slice(),
+            hexReward: model.hexReward,
             shopLevel: model.shopLevel,
             shopXp: model.shopXp,
             battleLevel: model.battleLevel,
@@ -703,7 +803,28 @@ export class ShopBll extends CCBusiness<Shop> {
                 return item.contentId;
             })
         );
-        if (combinedIds.length !== itemIds.length || new Set(combinedIds).size !== itemIds.length) {
+        const hexReward = data.hexReward;
+        if (
+            combinedIds.length !== itemIds.length ||
+            new Set(combinedIds).size !== itemIds.length ||
+            (hexReward !== undefined && (
+                !hexReward ||
+                typeof hexReward.freeReroll !== "boolean" ||
+                !Array.isArray(hexReward.candidates) ||
+                !hexReward.candidates.length ||
+                (hexReward.slotFreeRerolls !== undefined && (
+                    !Array.isArray(hexReward.slotFreeRerolls) ||
+                    hexReward.slotFreeRerolls.length !== hexReward.candidates.length ||
+                    !hexReward.slotFreeRerolls.every((available) => {
+                        return typeof available === "boolean";
+                    })
+                )) ||
+                new Set(hexReward.candidates).size !== hexReward.candidates.length ||
+                !hexReward.candidates.every((id) => {
+                    return data.itemPool.includes(id);
+                })
+            ))
+        ) {
             this.toast("main_menu_save_unavailable");
             return;
         }
@@ -721,6 +842,20 @@ export class ShopBll extends CCBusiness<Shop> {
             return { ...item };
         });
         model.itemPool = data.itemPool.slice();
+        if (hexReward) {
+            const hexRule = TableShopHexRule.getCurrent();
+            const candidates = hexReward.candidates.slice(0, hexRule.candidateCount);
+            const legacyMerchantFreeRerolls = !hexReward.slotFreeRerolls && hexReward.freeReroll && model.team.some((unit) => {
+                return unit.roleId === RoleKeyEnum.Merchant && unit.level === hexRule.merchantFreeRerollLevel;
+            });
+            model.hexReward = {
+                candidates,
+                freeReroll: hexReward.freeReroll && !legacyMerchantFreeRerolls,
+                slotFreeRerolls: candidates.map((contentId, index) => {
+                    return hexReward.slotFreeRerolls?.[index] ?? legacyMerchantFreeRerolls;
+                }),
+            };
+        }
         model.shopLevel = data.shopLevel;
         model.shopXp = data.shopXp;
         model.battleLevel = data.battleLevel;

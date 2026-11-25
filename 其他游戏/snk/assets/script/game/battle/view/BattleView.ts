@@ -30,6 +30,7 @@ import { ShopOfferEffect } from "../../effect/view/ShopOfferEffect";
 import { playerHurtDuration, recoilDuration } from "../../effect/EffectEvent";
 import { CombatEvent } from "../../combat/CombatEvent";
 import { ColorConst } from "../../common/config/ColorConst";
+import { lang } from "../../common/Language";
 
 const { ccclass, property } = _decorator;
 
@@ -375,6 +376,9 @@ export class BattleView extends CCView<Battle> {
             const titleLabel = this.getNode("lbtBattleResult").getComponent(Label);
             titleLabel.string = victory ? "关卡胜利" : "全队阵亡";
             titleLabel.color = victory ? ColorConst.battleCritGold : ColorConst.battleDangerRed;
+            this.getNode("txtBattleReturnShop").getComponent(Label).string = lang(
+                victory ? "battle_result_continue" : "battle_result_return_shop"
+            );
             this.resultSummaryLabel.string = `用时 ${model.battleDuration.toFixed(1)}s  ·  击杀 ${effectModel.totalKills}  ·  暴击 ${effectModel.totalCrits}  ·  金币 +${enemy.pickedUpGold}`;
         } else if (!showResult) {
             this.resultShown = false;

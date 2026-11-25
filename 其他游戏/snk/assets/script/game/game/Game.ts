@@ -10,6 +10,7 @@ import { Battle } from "../battle/Battle";
 import { BattleBll } from "../battle/bll/BattleBll";
 import { BattleView } from "../battle/view/BattleView";
 import { ShopView } from "../shop/view/ShopView";
+import { ShopHexView } from "../shop/view/ShopHexView";
 import { ShopBll } from "../shop/bll/ShopBll";
 import { Shop } from "../shop/Shop";
 import { Player } from "../player/Player";
@@ -76,7 +77,7 @@ export class Game extends CCEntity {
     }
 
     openShop(continueRun: boolean = false) {
-        if (this.GameModel.transitioning || this.shop.has(ShopView)) {
+        if (this.GameModel.transitioning || this.shop.has(ShopView) || oops.gui.has(ShopHexView)) {
             return;
         }
         const bll = this.shop.getBusiness<ShopBll>(ShopBll);
@@ -89,6 +90,10 @@ export class Game extends CCEntity {
 
     showShop() {
         if (this.shop.has(ShopView)) {
+            return;
+        }
+        if (this.shop.ShopModel.hexReward) {
+            this.showHexReward();
             return;
         }
         this.transition({ message: "正在开始…" }, () => {
@@ -138,6 +143,10 @@ export class Game extends CCEntity {
             return;
         }
         this.pendingRoundReward = reward ?? this.pendingRoundReward;
+        if (this.shop.ShopModel.hexReward) {
+            this.showHexReward();
+            return;
+        }
         if (this.pendingRoundReward) {
             GameAudio.playEffect("Wind Bolt 12");
         } else {
@@ -161,6 +170,28 @@ export class Game extends CCEntity {
                 return true;
             });
         });
+    }
+
+    private showHexReward() {
+        if (oops.gui.has(ShopHexView)) {
+            return;
+        }
+        oops.gui.open(ShopHexView).then((node) => {
+            if (!node) {
+                oops.gui.toast(lang("shop_load_failed"));
+            }
+        });
+    }
+
+    finishHexReward() {
+        if (oops.gui.has(ShopHexView)) {
+            oops.gui.remove(ShopHexView);
+        }
+        if (this.GameModel.phase === GamePhase.Battle) {
+            this.returnShop();
+        } else {
+            this.showShop();
+        }
     }
 
     restartShop() {

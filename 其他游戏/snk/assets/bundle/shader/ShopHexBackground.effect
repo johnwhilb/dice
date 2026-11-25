@@ -1,0 +1,142 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: shop-hex-background-vs:vert
+      frag: shop-hex-background-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+}%
+
+CCProgram shop-hex-background-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+
+  in vec3 a_position;
+  in vec4 a_color;
+  out vec2 screenUv;
+  out float opacity;
+
+  vec4 vert () {
+    vec4 position = vec4(a_position, 1.0);
+    #if USE_LOCAL
+      position = cc_matWorld * position;
+    #endif
+    vec4 clip = cc_matViewProj * position;
+    screenUv = clip.xy / clip.w * 0.5 + 0.5;
+    opacity = a_color.a;
+    return clip;
+  }
+}%
+
+CCProgram shop-hex-background-fs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+
+  in vec2 screenUv;
+  in float opacity;
+
+  vec2 hash22 (vec2 cell) {
+    vec3 value = fract(vec3(cell.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    value += dot(value, value.yzx + 33.33);
+    return fract((value.xx + value.yz) * value.zy);
+  }
+
+  float ditherNoise (vec2 fragPos) {
+    vec3 p3 = fract(vec3(fragPos.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z) - 0.5;
+  }
+
+  float sanctumMotes (vec2 point, float density, float riseSpeed, float time, float threshold) {
+    vec2 field = point * density;
+    field.y -= time * riseSpeed;
+    vec2 cellId = floor(field);
+    vec2 seed = hash22(cellId);
+
+    // 轻缓横向微风摇曳，像秘境夜空中升起的星尘与微金萤火
+    float sway = 0.14 * sin(time * (0.62 + seed.x * 0.80) + seed.y * 27.0);
+    vec2 center = vec2(0.5 + (seed.x - 0.5) * 0.42 + sway, 0.25 + seed.y * 0.50);
+    vec2 delta = fract(field) - center;
+
+    float dist = length(delta);
+    float radius = mix(0.032, 0.074, seed.x);
+    float core = 1.0 - smoothstep(radius * 0.35, radius * 1.40, dist);
+    float halo = 1.0 - smoothstep(radius * 0.72, radius * 4.0, dist);
+    float pulse = 0.58 + 0.42 * sin(time * (1.05 + seed.y * 1.45) + seed.x * 39.0);
+    return step(threshold, seed.y) * (core * 0.78 + halo * halo * 0.36) * pulse;
+  }
+
+  vec4 frag () {
+    float aspect = cc_screenSize.x / max(cc_screenSize.y, 1.0);
+    vec2 uv = screenUv;
+    vec2 point = (uv - 0.5) * vec2(aspect, 1.0);
+    float time = cc_time.x;
+
+    // 深暮紫暗炭秘境基底，四周天鹅绒柔和压暗，自然聚焦中景三张强化卡
+    float vignette = smoothstep(0.20, 1.08, length(point * vec2(0.75, 1.18)));
+    vec3 centerBase = vec3(0.088, 0.068, 0.114);
+    vec3 edgeBase = vec3(0.030, 0.022, 0.044);
+    vec3 color = mix(centerBase, edgeBase, vignette);
+
+    // 与全游同源的极简柔和微棋盘，无科技圆环、无六边形线框、无金属感
+    vec2 tileDrift = mod(vec2(0.32, 0.48) * time * 0.055, vec2(2.0));
+    vec2 tile = floor((point + vec2(0.015)) * 12.0 - tileDrift);
+    float checker = mod(tile.x + tile.y, 2.0);
+    color += checker * vec3(0.010, 0.008, 0.014) * (1.0 - vignette * 0.56);
+
+    // 双层有机交织的暮紫与暖金柔雾丝带
+    float waveA = point.y - 0.12 * sin(point.x * 2.2 + time * 0.19)
+      - 0.045 * cos(point.x * 4.6 - time * 0.25) + 0.14 - point.x * 0.18;
+    float mistA = exp(-6.2 * waveA * waveA);
+    float silkA = exp(-30.0 * (waveA + 0.05) * (waveA + 0.05));
+
+    float waveB = point.y + 0.11 * sin(point.x * 2.8 - time * 0.22 + 1.5)
+      + 0.035 * sin(point.x * 5.6 + time * 0.28) - 0.13 + point.x * 0.16;
+    float mistB = exp(-7.6 * waveB * waveB);
+    float silkB = exp(-36.0 * (waveB - 0.04) * (waveB - 0.04));
+
+    float shimmer = 0.75 + 0.25 * sin(point.x * 5.8 - time * 0.35 + point.y * 3.2);
+    vec3 duskViolet = vec3(0.142, 0.064, 0.208);
+    vec3 warmGold = vec3(0.196, 0.126, 0.046);
+    vec3 ribbonToneA = mix(duskViolet, warmGold, smoothstep(0.14, 0.86, uv.x));
+    vec3 ribbonToneB = mix(warmGold, duskViolet, smoothstep(0.14, 0.86, uv.x));
+
+    float mistMask = 1.0 - vignette * 0.32;
+    color += ribbonToneA * (mistA * 0.38 + silkA * shimmer * 0.24) * mistMask;
+    color += ribbonToneB * (mistB * 0.30 + silkB * (1.24 - shimmer * 0.34) * 0.19) * mistMask;
+
+    // 卡片后方柔和的暖金与暮紫呼吸秘境光晕，营造抉择仪式感
+    float breath = 0.88 + 0.12 * sin(time * 0.65);
+    vec2 centerHalo = (uv - vec2(0.50, 0.50)) * vec2(2.15, 2.55);
+    vec2 leftViolet = (uv - vec2(0.20, 0.64)) * vec2(2.75, 2.50);
+    vec2 rightGold = (uv - vec2(0.80, 0.34)) * vec2(2.75, 2.50);
+    color += vec3(0.058, 0.040, 0.024) * exp(-dot(centerHalo, centerHalo)) * breath;
+    color += vec3(0.052, 0.024, 0.088) * exp(-dot(leftViolet, leftViolet)) * (1.76 - breath);
+    color += vec3(0.062, 0.040, 0.018) * exp(-dot(rightGold, rightGold)) * breath;
+
+    // 双层缓慢上升的淡紫星尘与暖金微尘
+    float farLavender = sanctumMotes(point, 42.0, 0.18, time, 0.82);
+    float nearGold = sanctumMotes(point + vec2(4.3, 2.9), 20.0, 0.34, time, 0.86);
+    float dustVis = 1.0 - vignette * 0.28;
+    color += dustVis * (
+      farLavender * vec3(0.28, 0.22, 0.42)
+      + nearGold * vec3(0.48, 0.35, 0.16)
+    );
+
+    // 防暗部色带抖动
+    color += ditherNoise(gl_FragCoord.xy) / 255.0;
+    return vec4(max(color, vec3(0.0)), opacity);
+  }
+}%

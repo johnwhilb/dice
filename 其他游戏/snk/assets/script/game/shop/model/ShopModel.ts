@@ -7,6 +7,13 @@ export interface IShopItem {
     xp: number;
 }
 
+/** 待领取的海克斯候选、共享免费资格，以及各槽位的商人免费资格。 */
+export interface IShopHexReward {
+    candidates: number[];
+    freeReroll: boolean;
+    slotFreeRerolls?: boolean[];
+}
+
 export interface IShopSave {
     version: number;
     gold: number;
@@ -14,6 +21,7 @@ export interface IShopSave {
     team: IPlayerUnit[];
     items: IShopItem[];
     itemPool: number[];
+    hexReward?: IShopHexReward;
     shopLevel: number;
     shopXp: number;
     battleLevel: number;
@@ -47,10 +55,11 @@ export class ShopModel extends ecs.Comp {
     rightButtonDown: boolean = false;
     items: IShopItem[] = [];
     itemPool: number[] = [];
+    hexReward?: IShopHexReward;
     offers: number[] = [];
     team: IPlayerUnit[] = [];
 
-    /** 清空金币、商品、商店等级、队伍、道具数据和本局金手指标记。 */
+    /** 清空金币、商品、商店等级、队伍、道具、待领取海克斯和本局金手指标记。 */
     reset() {
         this.gold = 0;
         this.shopLevel = 1;
@@ -65,6 +74,7 @@ export class ShopModel extends ecs.Comp {
         this.rightButtonDown = false;
         this.items = [];
         this.itemPool = [];
+        this.hexReward = undefined;
         this.offers = [];
         this.team = [];
     }
