@@ -59,5 +59,21 @@
         }
       }
     }
+  },
+  "splash-setting": {
+    "background": {
+      "type": "custom",
+      "color": {
+        "x": 1,
+        "y": 1,
+        "z": 1,
+        "w": 1
+      },
+      "image": "project://settings/蛇蛇突击队：炫彩蛇链出击.png"
+    },
+    "logo": {
+      "type": "none",
+      "image": "project://settings/蛇蛇突击队：炫彩蛇链出击.png"
+    }
   }
 }
