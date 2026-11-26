@@ -29,6 +29,30 @@
             "overwriteSettings": {
               "wechatgame": {
                 "compressionType": "subpackage"
+              },
+              "alipay-mini-game": {
+                "compressionType": "subpackage"
+              },
+              "bytedance-mini-game": {
+                "compressionType": "subpackage"
+              },
+              "fb-instant-games": {
+                "compressionType": "merge_all_json"
+              },
+              "honor-mini-game": {
+                "compressionType": "subpackage"
+              },
+              "huawei-quick-game": {
+                "compressionType": "subpackage"
+              },
+              "oppo-mini-game": {
+                "compressionType": "subpackage"
+              },
+              "taobao-mini-game": {
+                "compressionType": "subpackage"
+              },
+              "vivo-mini-game": {
+                "compressionType": "subpackage"
               }
             }
           }

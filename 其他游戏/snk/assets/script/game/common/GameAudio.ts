@@ -1,13 +1,13 @@
-import { AudioClip, AudioSource, Node, Tween, tween } from "cc";
+import { assetManager, AudioClip, AudioSource, Node, Tween, tween } from "cc";
 import { oops } from "db://oops-framework/core/Oops";
 
 const soundBundle = "bundle";
+const musicBundle = "bgm";
 const masterGain = 0.5;
+const startupTrack = "Kubbi - Ember - 01 Pathfinder";
 const tracks = [
-    "Kubbi - Ember - 01 Pathfinder",
+    startupTrack,
     "Kubbi - Ember - 02 Ember",
-    "Kubbi - Ember - 03 Firelight",
-    "Kubbi - Ember - 04 Cascade",
     "Kubbi - Ember - 05 Compass",
 ];
 const importedNames = new Map<string, string>([
@@ -50,6 +50,13 @@ export class GameAudio {
     private static musicRequest = 0;
     private static playingTrack = "";
     private static effectGeneration = 0;
+
+    /** 主菜单显示后在后台请求额外的音乐分包。 */
+    static preloadMusicBundle() {
+        oops.res.loadBundle(musicBundle).then(undefined, (error: unknown) => {
+            console.warn("加载背景音乐分包失败", error);
+        });
+    }
 
     /** 预加载菜单或战斗入口指定的常用采样 names，降低首次播放延迟。 */
     static preloadEffects(names: readonly string[]) {
@@ -172,12 +179,18 @@ export class GameAudio {
         source.volume = oops.audio.music.getSwitch() ? masterGain * gain * oops.audio.music.getVolume() : 0;
     }
 
-    private static playNextTrack() {
-        const name = tracks[Math.floor(Math.random() * tracks.length)];
+    private static playNextTrack(name = this.pickMusicTrack()) {
         const request = ++this.musicRequest;
-        this.loadClip(name).then((asset) => {
+        const bundle = name === startupTrack ? soundBundle : musicBundle;
+        this.loadClip(name, bundle).then((asset) => {
             const source = this.music;
-            if (!source || this.musicRequest !== request || !asset) {
+            if (!source || this.musicRequest !== request) {
+                return;
+            }
+            if (!asset) {
+                if (name !== startupTrack) {
+                    this.playNextTrack(startupTrack);
+                }
                 return;
             }
             const previousClip = source.clip;
@@ -194,13 +207,20 @@ export class GameAudio {
         });
     }
 
-    private static loadClip(name: string) {
+    private static pickMusicTrack() {
+        if (!this.playingTrack || !assetManager.getBundle(musicBundle)) {
+            return startupTrack;
+        }
+        return tracks[Math.floor(Math.random() * tracks.length)];
+    }
+
+    private static loadClip(name: string, bundle = soundBundle) {
         const cached = this.clips.get(name);
         if (cached) {
             return cached;
         }
-        const path = importedNames.get(name) ?? name;
-        const pending = oops.res.load(soundBundle, `audios/${path}`, AudioClip).then((asset) => {
+        const path = bundle === musicBundle ? name : `audios/${importedNames.get(name) ?? name}`;
+        const pending = oops.res.load(bundle, path, AudioClip).then((asset) => {
             if (!asset) {
                 this.clips.delete(name);
             }

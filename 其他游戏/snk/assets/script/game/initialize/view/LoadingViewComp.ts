@@ -4,6 +4,7 @@ import { gui } from "db://oops-framework/core/gui/Gui";
 import { LayerType } from "db://oops-framework/core/gui/layer/LayerEnum";
 import { ecs } from "db://oops-framework/libs/ecs/ECS";
 import { CCView } from "db://oops-framework/module/common/CCView";
+import { GameAudio } from "../../common/GameAudio";
 import type { Initialize } from "../Initialize";
 import { smc } from "../../common/SingletonModuleComp";
 import { TransitionView } from "./TransitionView";
@@ -31,7 +32,9 @@ export class LoadingViewComp extends CCView<Initialize> {
         }).then((ready) => {
             if (!ready) {
                 oops.gui.toast(oops.language.getLangByID("shop_load_failed"));
+                return;
             }
+            GameAudio.preloadMusicBundle();
         });
     }
 

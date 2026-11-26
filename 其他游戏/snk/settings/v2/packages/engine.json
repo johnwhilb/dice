@@ -21,7 +21,7 @@
             "_value": true
           },
           "skeletal-animation": {
-            "_value": true
+            "_value": false
           },
           "3d": {
             "_value": false
@@ -131,7 +131,7 @@
             "_value": true
           },
           "websocket": {
-            "_value": true
+            "_value": false
           },
           "websocket-server": {
             "_value": false
@@ -211,14 +211,12 @@
           "procedural-animation",
           "profiler",
           "rich-text",
-          "skeletal-animation",
           "spine-3.8",
           "tiled-map",
           "tween",
           "ui",
           "ui-skew",
           "video",
-          "websocket",
           "webview"
         ],
         "noDeprecatedFeatures": {

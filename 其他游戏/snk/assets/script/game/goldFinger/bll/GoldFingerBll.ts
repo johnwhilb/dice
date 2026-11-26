@@ -21,7 +21,7 @@ export class GoldFingerBll extends CCBusiness<GoldFinger> {
     /** 显示本局悬浮入口，首次显示时等待框架加载预制体，完成后通过事件刷新。 */
     show() {
         const model = this.ent.GoldFingerModel;
-        model.visible = true;
+        model.visible = false;
         if (this.ent.has(GoldFingerView)) {
             this.dispatchEvent(GoldFingerEvent.UpdatePanel);
             return;

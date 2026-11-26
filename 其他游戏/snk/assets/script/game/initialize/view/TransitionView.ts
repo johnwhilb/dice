@@ -48,6 +48,13 @@ export class TransitionView extends Component {
     private font?: TTFFont;
     private rewardText: boolean = false;
 
+    static showFloatingLabel(label: Label) {
+        const view = label.node.addComponent(TransitionView);
+        view.title = label.node;
+        view.setLine(0, label.string, false, label.color);
+        label.enabled = false;
+    }
+
     static play(options: ITransitionOptions, open: () => Promise<boolean>) {
         const root = oops.gui.root;
         const node = new Node("gameTransition");
@@ -167,7 +174,7 @@ export class TransitionView extends Component {
         }
     }
 
-    private setLine(index: number, value: string, nudge: boolean = false) {
+    private setLine(index: number, value: string, nudge: boolean = false, color: Color = ColorConst.shopItemXpEmpty) {
         const previous = this.lines[index];
         if (previous) {
             previous.node.active = false;
@@ -187,7 +194,7 @@ export class TransitionView extends Component {
             const label = node.addComponent(Label);
             label.fontSize = this.fontSize;
             label.lineHeight = this.fontSize + 2;
-            label.color = ColorConst.shopItemXpEmpty;
+            label.color = color;
             if (this.font) {
                 label.font = this.font;
             }
