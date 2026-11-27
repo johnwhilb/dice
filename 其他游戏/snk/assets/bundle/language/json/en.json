@@ -37,6 +37,7 @@
   "shop_offer_missing": "This offer or character is unavailable.",
   "shop_team_empty": "Buy at least one character first.",
   "shop_load_failed": "Unable to load the screen. Please retry.",
+  "shop_guide_content": "<color=#dadada>Shop and Party Guide\n\nTap Buy to recruit a hero. Tap the hero icon to see their abilities.\nTap a hero, reserve, or item for details. Tap Sell there, or buy XP for an item.\nHold and drag a party member to reorder. The top hero leads the snake.\nTap the shop level to buy XP. Refresh changes offers. Lock keeps offers and empty slots.\n\nRecruit 3 copies to reach level 2, or 9 to reach level 3 and unlock a special effect.\nClass bonuses need distinct heroes of the same class. Reserves do not count.\n\nHeroes attack and use abilities automatically. In Follow mode, drag in the arena to steer.\nSwitch to Joystick in the main menu Options, then drag the joystick to steer.\n\nAfter each round, earn 1 interest per 5 gold, up to 5. The Merchant can grant extra.\nThe shop gains 1 XP every two stages cleared.</color>",
   "shop_gold": "Gold",
   "shop_hex_title": "Choose an Augment",
   "shop_hex_reroll": "Reroll",

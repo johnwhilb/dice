@@ -62,18 +62,19 @@
   },
   "splash-setting": {
     "background": {
-      "type": "custom",
+      "image": "project://settings/蛇蛇突击队：炫彩蛇链出击 (2).png",
+      "type": "color",
       "color": {
-        "x": 1,
-        "y": 1,
-        "z": 1,
+        "x": 0.4666666666666667,
+        "y": 0.27058823529411763,
+        "z": 0.615686274509804,
         "w": 1
-      },
-      "image": "project://settings/蛇蛇突击队：炫彩蛇链出击.png"
+      }
     },
     "logo": {
-      "type": "none",
-      "image": "project://settings/蛇蛇突击队：炫彩蛇链出击.png"
-    }
+      "type": "custom",
+      "image": "project://settings/蛇蛇突击队-炫彩蛇链出击-透明.png"
+    },
+    "displayRatio": 5
   }
 }

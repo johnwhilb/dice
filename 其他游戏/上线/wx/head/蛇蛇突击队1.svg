@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-labelledby="title">
+  <title id="title">蛇蛇突击队 · 街机编队头像</title>
+  <defs>
+    <radialGradient id="arena" cx="52%" cy="48%" r="70%">
+      <stop offset="0" stop-color="#1d2130"/>
+      <stop offset="1" stop-color="#10111a"/>
+    </radialGradient>
+    <radialGradient id="grid-fade">
+      <stop offset="0" stop-color="#fff" stop-opacity=".45"/>
+      <stop offset=".62" stop-color="#fff" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="grid-mask">
+      <rect width="1080" height="1080" fill="url(#grid-fade)"/>
+    </mask>
+    <pattern id="grid" width="108" height="108" patternUnits="userSpaceOnUse">
+      <path d="M0 108V0H108" fill="none" stroke="#46506a" stroke-width="3"/>
+    </pattern>
+  </defs>
+  <style>
+    .c-red { fill: #ed5369 }
+    .c-orange { fill: #f18a5b }
+    .c-gold { fill: #ffd24d }
+    .c-cobalt { fill: #7485e9 }
+    .c-blue { fill: #4eabf0 }
+    .c-cyan { fill: #46d2d7 }
+    .c-lime { fill: #b4eb71 }
+  </style>
+
+  <rect width="1080" height="1080" fill="url(#arena)"/>
+  <rect width="1080" height="1080" fill="url(#grid)" mask="url(#grid-mask)"/>
+
+  <g id="squad" transform="translate(15 -34)">
+    <rect id="rear" class="c-red" x="154" y="677" width="104" height="104" rx="25" transform="rotate(32 206 729)"/>
+    <rect id="rear-guard" class="c-orange" x="268" y="734" width="112" height="112" rx="27" transform="rotate(14 324 790)"/>
+    <rect id="guard" class="c-gold" x="412" y="713" width="122" height="122" rx="29" transform="rotate(-22 473 774)"/>
+    <rect id="support" class="c-cobalt" x="506" y="575" width="126" height="126" rx="30" transform="rotate(-5 569 638)"/>
+    <rect id="midfield" class="c-blue" x="482" y="424" width="128" height="128" rx="30" transform="rotate(10 546 488)"/>
+    <rect id="vanguard" class="c-cyan" x="554" y="273" width="132" height="132" rx="31" transform="rotate(-20 620 339)"/>
+    <rect id="lead" class="c-lime" x="704" y="233" width="146" height="146" rx="34" transform="rotate(-12 777 306)"/>
+    <path id="heading" d="m877 248 25 15-15 25" fill="none" stroke="#dde9d8" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

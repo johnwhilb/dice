@@ -42,6 +42,7 @@ import { ShopOfferEffect } from "../../effect/view/ShopOfferEffect";
 import { ShopClassItem } from "./ShopClassItem";
 import { ShopPassiveItem } from "./ShopPassiveItem";
 import { UICommon } from "../../ui/UICommon";
+import { lang } from "../../common/Language";
 
 const { ccclass, property } = _decorator;
 const classFadeDuration = 0.3;
@@ -880,6 +881,7 @@ export class ShopView extends CCView<Shop> {
 
     btnGuide() {
         if (!this.clickBlocked) {
+            this.getNode("txtGuideContent").getComponent(RichText).string = lang("shop_guide_content");
             this.model.guideOpen = true;
             this.guideOpening = true;
             this.guideProgress = 0;

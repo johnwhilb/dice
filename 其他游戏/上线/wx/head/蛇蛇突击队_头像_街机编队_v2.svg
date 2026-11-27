@@ -1,0 +1,634 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-labelledby="title">
+  <title id="title">蛇蛇突击队 · 街机编队头像 v2.0</title>
+  <defs>
+    <!-- ========== 1. MainMenuBackground.effect 深邃黑曜紫基底 ========== -->
+    <radialGradient id="obsidian-bg" cx="55%" cy="46%" r="74%">
+      <stop offset="0%" stop-color="#191e33"/>
+      <stop offset="46%" stop-color="#101322"/>
+      <stop offset="82%" stop-color="#090b14"/>
+      <stop offset="100%" stop-color="#06070d"/>
+    </radialGradient>
+
+    <!-- 四周柔和天鹅绒暗角 -->
+    <radialGradient id="vignette-shade" cx="50%" cy="50%" r="69%">
+      <stop offset="54%" stop-color="#05060b" stop-opacity="0"/>
+      <stop offset="88%" stop-color="#05060b" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#030408" stop-opacity="0.68"/>
+    </radialGradient>
+
+    <!-- 右上冰川青深空柔辉光 (MainMenuBackground focusDelta) -->
+    <radialGradient id="leader-zone-glow" cx="74%" cy="28%" r="46%">
+      <stop offset="0%" stop-color="#18b4e0" stop-opacity="0.28"/>
+      <stop offset="46%" stop-color="#2268ad" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#0b0d18" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 左下电光紫雾深空补光 -->
+    <radialGradient id="tail-zone-glow" cx="24%" cy="72%" r="44%">
+      <stop offset="0%" stop-color="#842ac2" stop-opacity="0.26"/>
+      <stop offset="54%" stop-color="#481c7a" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#0b0d18" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- ========== 2. 双层流动霓虹极光丝带 (电光紫 <-> 冰川青) ========== -->
+    <linearGradient id="aurora-grad-a" x1="6%" y1="78%" x2="94%" y2="18%">
+      <stop offset="0%" stop-color="#6c23b8" stop-opacity="0"/>
+      <stop offset="18%" stop-color="#7f2cd6" stop-opacity="0.66"/>
+      <stop offset="50%" stop-color="#286ad0" stop-opacity="0.56"/>
+      <stop offset="80%" stop-color="#06bee3" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#2ce8ff" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="aurora-filament-a" x1="10%" y1="76%" x2="92%" y2="20%">
+      <stop offset="0%" stop-color="#b86bff" stop-opacity="0"/>
+      <stop offset="22%" stop-color="#a855ff" stop-opacity="0.80"/>
+      <stop offset="54%" stop-color="#3ea6ff" stop-opacity="0.72"/>
+      <stop offset="82%" stop-color="#38f0ff" stop-opacity="0.90"/>
+      <stop offset="100%" stop-color="#9cfaff" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="aurora-grad-b" x1="12%" y1="20%" x2="90%" y2="86%">
+      <stop offset="0%" stop-color="#1494cc" stop-opacity="0"/>
+      <stop offset="24%" stop-color="#12a2d4" stop-opacity="0.48"/>
+      <stop offset="56%" stop-color="#5835b8" stop-opacity="0.46"/>
+      <stop offset="84%" stop-color="#802bc2" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#802bc2" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="aurora-seam-grad" x1="10%" y1="80%" x2="92%" y2="18%">
+      <stop offset="0%" stop-color="#9d58ff" stop-opacity="0.08"/>
+      <stop offset="34%" stop-color="#8f52ff" stop-opacity="0.48"/>
+      <stop offset="68%" stop-color="#1acae8" stop-opacity="0.52"/>
+      <stop offset="100%" stop-color="#48e8ff" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <!-- ========== 3. 同源微棋盘地板与微光接缝 ========== -->
+    <pattern id="checker-tiles" width="144" height="144" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="72" height="72" fill="#232944" fill-opacity="0.38"/>
+      <rect x="72" y="72" width="72" height="72" fill="#232944" fill-opacity="0.38"/>
+      <path d="M0 72 H144 M72 0 V144 M0 0 H144 V144" fill="none" stroke="#070810" stroke-opacity="0.52" stroke-width="2.2"/>
+    </pattern>
+
+    <pattern id="checker-seams" width="72" height="72" patternUnits="userSpaceOnUse">
+      <path d="M0 72 V0 H72" fill="none" stroke="#ffffff" stroke-width="1.8"/>
+    </pattern>
+
+    <radialGradient id="checker-fade" cx="52%" cy="48%" r="62%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="66%" stop-color="#ffffff" stop-opacity="0.44"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.04"/>
+    </radialGradient>
+    <mask id="checker-mask">
+      <rect width="1080" height="1080" fill="url(#checker-fade)"/>
+    </mask>
+
+    <mask id="seam-glint-mask">
+      <rect width="1080" height="1080" fill="#000"/>
+      <path d="M -80 860 C 210 660, 420 560, 620 420 C 800 294, 930 220, 1160 110"
+            fill="none" stroke="#ffffff" stroke-width="270" stroke-linecap="round" filter="url(#aurora-blur-lg)" opacity="0.88"/>
+      <path d="M 40 310 C 290 430, 520 520, 760 660 C 900 740, 1020 810, 1140 870"
+            fill="none" stroke="#ffffff" stroke-width="175" stroke-linecap="round" filter="url(#aurora-blur-lg)" opacity="0.44"/>
+    </mask>
+
+    <!-- ========== 4. 像素星尘尾迹渐变 ========== -->
+    <linearGradient id="dust-trail-fade" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- ========== 5. 高速甩尾尾迹与分段精准彩虹能量脊柱渐变 ========== -->
+    <linearGradient id="tail-ribbon-grad" x1="92%" y1="92%" x2="8%" y2="8%">
+      <stop offset="0%" stop-color="#ff3f5e" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#e91d39" stop-opacity="0.64"/>
+      <stop offset="68%" stop-color="#9e35d1" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#6b28b8" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="tail-core-grad" x1="95%" y1="95%" x2="12%" y2="12%">
+      <stop offset="0%" stop-color="#ffd9e0" stop-opacity="0.96"/>
+      <stop offset="46%" stop-color="#ff6b84" stop-opacity="0.54"/>
+      <stop offset="100%" stop-color="#c678ff" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="tail-aura-grad" x1="92%" y1="92%" x2="6%" y2="6%">
+      <stop offset="0%" stop-color="#f07021" stop-opacity="0.26"/>
+      <stop offset="40%" stop-color="#e91d39" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#7c28b8" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="tail-slip-grad" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ff7a92" stop-opacity="0.60"/>
+      <stop offset="55%" stop-color="#b85ce6" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#8b42d6" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="spine-seg-1-grad" gradientUnits="userSpaceOnUse" x1="205.51" y1="755.54" x2="318.18" y2="818.7">
+      <stop offset="0%" stop-color="#f52d4b"/>
+      <stop offset="100%" stop-color="#f57828"/>
+    </linearGradient>
+    <linearGradient id="spine-seg-2-grad" gradientUnits="userSpaceOnUse" x1="318.18" y1="818.7" x2="455.37" y2="803.91">
+      <stop offset="0%" stop-color="#f57828"/>
+      <stop offset="100%" stop-color="#fad314"/>
+    </linearGradient>
+    <linearGradient id="spine-seg-3-grad" gradientUnits="userSpaceOnUse" x1="455.37" y1="803.91" x2="536.27" y2="685.32">
+      <stop offset="0%" stop-color="#fad314"/>
+      <stop offset="100%" stop-color="#a25ade"/>
+    </linearGradient>
+    <linearGradient id="spine-seg-4-grad" gradientUnits="userSpaceOnUse" x1="536.27" y1="685.32" x2="525.15" y2="527.08">
+      <stop offset="0%" stop-color="#a25ade"/>
+      <stop offset="100%" stop-color="#3c86f0"/>
+    </linearGradient>
+    <linearGradient id="spine-seg-5-grad" gradientUnits="userSpaceOnUse" x1="525.15" y1="527.08" x2="546.26" y2="363.32">
+      <stop offset="0%" stop-color="#3c86f0"/>
+      <stop offset="100%" stop-color="#12c4f0"/>
+    </linearGradient>
+    <linearGradient id="spine-seg-6-grad" gradientUnits="userSpaceOnUse" x1="546.26" y1="363.32" x2="700.32" y2="285.91">
+      <stop offset="0%" stop-color="#12c4f0"/>
+      <stop offset="100%" stop-color="#9be83c"/>
+    </linearGradient>
+
+    <linearGradient id="drift-arc-warm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff5c77" stop-opacity="0"/>
+      <stop offset="44%" stop-color="#ff9947" stop-opacity="0.60"/>
+      <stop offset="100%" stop-color="#facf00" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="drift-arc-cool" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#327be6" stop-opacity="0"/>
+      <stop offset="52%" stop-color="#48e8ff" stop-opacity="0.68"/>
+      <stop offset="100%" stop-color="#bef752" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="heading-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f6ffe0"/>
+      <stop offset="55%" stop-color="#d4ff8f"/>
+      <stop offset="100%" stop-color="#7ef7da"/>
+    </linearGradient>
+
+    <!-- ========== 6. 7 节精密街机微哑光圆角方块渐变 ========== -->
+    <linearGradient id="grad-rear" x1="12%" y1="6%" x2="88%" y2="94%">
+      <stop offset="0%" stop-color="#f73955"/>
+      <stop offset="52%" stop-color="#e91d39"/>
+      <stop offset="100%" stop-color="#bd102a"/>
+    </linearGradient>
+    <linearGradient id="side-rear" x1="12%" y1="12%" x2="88%" y2="92%">
+      <stop offset="0%" stop-color="#9c0d23"/>
+      <stop offset="100%" stop-color="#630716"/>
+    </linearGradient>
+    <linearGradient id="sheen-rear" x1="14%" y1="6%" x2="72%" y2="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim-rear" x1="10%" y1="4%" x2="90%" y2="96%">
+      <stop offset="0%" stop-color="#ff99a9" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#ff99a9" stop-opacity="0.28"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="grad-rear-guard" x1="12%" y1="6%" x2="88%" y2="94%">
+      <stop offset="0%" stop-color="#ff8a3b"/>
+      <stop offset="52%" stop-color="#f07021"/>
+      <stop offset="100%" stop-color="#c84b0c"/>
+    </linearGradient>
+    <linearGradient id="side-rear-guard" x1="12%" y1="12%" x2="88%" y2="92%">
+      <stop offset="0%" stop-color="#a63a07"/>
+      <stop offset="100%" stop-color="#6e2403"/>
+    </linearGradient>
+    <linearGradient id="sheen-rear-guard" x1="14%" y1="6%" x2="72%" y2="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim-rear-guard" x1="10%" y1="4%" x2="90%" y2="96%">
+      <stop offset="0%" stop-color="#ffc491" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#ffc491" stop-opacity="0.28"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="grad-guard" x1="12%" y1="6%" x2="88%" y2="94%">
+      <stop offset="0%" stop-color="#ffe23d"/>
+      <stop offset="52%" stop-color="#facf00"/>
+      <stop offset="100%" stop-color="#d69c00"/>
+    </linearGradient>
+    <linearGradient id="side-guard" x1="12%" y1="12%" x2="88%" y2="92%">
+      <stop offset="0%" stop-color="#b07c00"/>
+      <stop offset="100%" stop-color="#7a5300"/>
+    </linearGradient>
+    <linearGradient id="sheen-guard" x1="14%" y1="6%" x2="72%" y2="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim-guard" x1="10%" y1="4%" x2="90%" y2="96%">
+      <stop offset="0%" stop-color="#fff3a6" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#fff3a6" stop-opacity="0.28"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="grad-support" x1="12%" y1="6%" x2="88%" y2="94%">
+      <stop offset="0%" stop-color="#b870ed"/>
+      <stop offset="52%" stop-color="#954ece"/>
+      <stop offset="100%" stop-color="#6d2ea3"/>
+    </linearGradient>
+    <linearGradient id="side-support" x1="12%" y1="12%" x2="88%" y2="92%">
+      <stop offset="0%" stop-color="#5b248c"/>
+      <stop offset="100%" stop-color="#3a145e"/>
+    </linearGradient>
+    <linearGradient id="sheen-support" x1="14%" y1="6%" x2="72%" y2="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim-support" x1="10%" y1="4%" x2="90%" y2="96%">
+      <stop offset="0%" stop-color="#e4bfff" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#e4bfff" stop-opacity="0.28"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="grad-midfield" x1="12%" y1="6%" x2="88%" y2="94%">
+      <stop offset="0%" stop-color="#549eff"/>
+      <stop offset="52%" stop-color="#327be6"/>
+      <stop offset="100%" stop-color="#1b55b8"/>
+    </linearGradient>
+    <linearGradient id="side-midfield" x1="12%" y1="12%" x2="88%" y2="92%">
+      <stop offset="0%" stop-color="#19479e"/>
+      <stop offset="100%" stop-color="#0c2b69"/>
+    </linearGradient>
+    <linearGradient id="sheen-midfield" x1="14%" y1="6%" x2="72%" y2="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim-midfield" x1="10%" y1="4%" x2="90%" y2="96%">
+      <stop offset="0%" stop-color="#b0d6ff" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#b0d6ff" stop-opacity="0.28"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="grad-vanguard" x1="12%" y1="6%" x2="88%" y2="94%">
+      <stop offset="0%" stop-color="#3ee0ff"/>
+      <stop offset="52%" stop-color="#04b5e3"/>
+      <stop offset="100%" stop-color="#0082b0"/>
+    </linearGradient>
+    <linearGradient id="side-vanguard" x1="12%" y1="12%" x2="88%" y2="92%">
+      <stop offset="0%" stop-color="#006d96"/>
+      <stop offset="100%" stop-color="#004666"/>
+    </linearGradient>
+    <linearGradient id="sheen-vanguard" x1="14%" y1="6%" x2="72%" y2="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim-vanguard" x1="10%" y1="4%" x2="90%" y2="96%">
+      <stop offset="0%" stop-color="#b3f2ff" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#b3f2ff" stop-opacity="0.28"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="grad-lead" x1="12%" y1="6%" x2="88%" y2="94%">
+      <stop offset="0%" stop-color="#bef752"/>
+      <stop offset="52%" stop-color="#8ed932"/>
+      <stop offset="100%" stop-color="#63ab16"/>
+    </linearGradient>
+    <linearGradient id="side-lead" x1="12%" y1="12%" x2="88%" y2="92%">
+      <stop offset="0%" stop-color="#518f10"/>
+      <stop offset="100%" stop-color="#335e08"/>
+    </linearGradient>
+    <linearGradient id="sheen-lead" x1="14%" y1="6%" x2="72%" y2="68%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rim-lead" x1="10%" y1="4%" x2="90%" y2="96%">
+      <stop offset="0%" stop-color="#ebffb3" stop-opacity="0.92"/>
+      <stop offset="34%" stop-color="#ebffb3" stop-opacity="0.28"/>
+      <stop offset="68%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.34"/>
+    </linearGradient>
+
+    <!-- ========== 7. 柔和光影滤镜 ========== -->
+    <filter id="aurora-blur-xl" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="54"/>
+    </filter>
+    <filter id="aurora-blur-lg" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <filter id="bounce-blur" x="-70%" y="-70%" width="240%" height="240%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="36"/>
+    </filter>
+    <filter id="shadow-blur" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="soft-blur-sm" x="-80%" y="-80%" width="260%" height="260%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="soft-blur-xs" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+  </defs>
+
+  <!-- ==================== LAYER 1: 深邃黑曜紫基底 ==================== -->
+  <g id="layer-backdrop">
+    <rect width="1080" height="1080" fill="url(#obsidian-bg)"/>
+    <rect width="1080" height="1080" fill="url(#tail-zone-glow)"/>
+    <rect width="1080" height="1080" fill="url(#leader-zone-glow)"/>
+  </g>
+
+  <!-- ==================== LAYER 2: 极简微斜棋盘地板 ==================== -->
+  <g id="layer-checker-floor" mask="url(#checker-mask)">
+    <g transform="translate(540 540) rotate(-14) translate(-540 -540)">
+      <rect x="-260" y="-260" width="1600" height="1600" fill="url(#checker-tiles)"/>
+    </g>
+  </g>
+
+  <!-- ==================== LAYER 3: 流动霓虹极光丝带与地板接缝反光 ==================== -->
+  <g id="layer-aurora">
+    <!-- 主幕帘 A（电光紫 -> 冰川青） -->
+    <path d="M -110 880 C 170 670, 390 610, 610 430 C 780 290, 940 215, 1190 95"
+          fill="none" stroke="url(#aurora-grad-a)" stroke-width="245" stroke-linecap="round"
+          filter="url(#aurora-blur-xl)" opacity="0.64"/>
+    <!-- 主极光高光丝带 A -->
+    <path d="M -80 830 C 190 620, 415 575, 625 395 C 795 250, 955 185, 1170 80"
+          fill="none" stroke="url(#aurora-filament-a)" stroke-width="56" stroke-linecap="round"
+          filter="url(#aurora-blur-lg)" opacity="0.54"/>
+
+    <!-- 次级交错幕帘 B（深海冰青 -> 靛紫） -->
+    <path d="M -60 245 C 215 375, 455 455, 705 620 C 885 735, 1020 820, 1160 905"
+          fill="none" stroke="url(#aurora-grad-b)" stroke-width="205" stroke-linecap="round"
+          filter="url(#aurora-blur-xl)" opacity="0.54"/>
+    <path d="M -10 290 C 265 420, 490 500, 740 655 C 905 755, 1025 830, 1140 895"
+          fill="none" stroke="url(#aurora-grad-b)" stroke-width="42" stroke-linecap="round"
+          filter="url(#aurora-blur-lg)" opacity="0.48"/>
+
+    <!-- 极光微弱照亮棋盘地板接缝 (seamGlint) -->
+    <g mask="url(#seam-glint-mask)" opacity="0.40">
+      <g transform="translate(540 540) rotate(-14) translate(-540 -540)">
+        <rect x="-260" y="-260" width="1600" height="1600" fill="url(#checker-seams)" opacity="0.46"/>
+      </g>
+      <rect width="1080" height="1080" fill="url(#aurora-seam-grad)" style="mix-blend-mode:multiply"/>
+    </g>
+
+    <!-- 四周柔和天鹅绒暗角 -->
+    <rect width="1080" height="1080" fill="url(#vignette-shade)"/>
+  </g>
+
+  <!-- ==================== LAYER 4: 三层视差 SNKRX 像素光尘 ==================== -->
+  <g id="layer-dust">
+    <g transform="translate(138 176) rotate(-27.5)" opacity="0.44">
+      <rect x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#687fc4"/>
+    </g>
+    <g transform="translate(304 126) rotate(-27.5)" opacity="0.48">
+      <rect x="-14" y="-1.5" width="14" height="3" rx="1.2" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3" y="-3" width="6" height="6" rx="1.2" fill="#7f96db"/>
+    </g>
+    <g transform="translate(468 162) rotate(-27.5)" opacity="0.45">
+      <rect x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#5cb8d8"/>
+    </g>
+    <g transform="translate(896 120) rotate(-27.5)" opacity="0.58">
+      <rect x="-16" y="-1.5" width="16" height="3" rx="1.2" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3" y="-3" width="6" height="6" rx="1.2" fill="#60ddf5"/>
+    </g>
+    <g transform="translate(966 374) rotate(-27.5)" opacity="0.5">
+      <rect x="-12" y="-1.25" width="12" height="2.5" rx="1" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#4cc8e6"/>
+    </g>
+    <g transform="translate(928 636) rotate(-27.5)" opacity="0.46">
+      <rect x="-14" y="-1.5" width="14" height="3" rx="1.2" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3" y="-3" width="6" height="6" rx="1.2" fill="#52b4de"/>
+    </g>
+    <g transform="translate(818 842) rotate(-27.5)" opacity="0.38">
+      <rect x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#6d80c4"/>
+    </g>
+    <g transform="translate(644 932) rotate(-27.5)" opacity="0.42">
+      <rect x="-12" y="-1.5" width="12" height="3" rx="1.2" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3" y="-3" width="6" height="6" rx="1.2" fill="#916bc4"/>
+    </g>
+    <g transform="translate(146 382) rotate(-27.5)" opacity="0.46">
+      <rect x="-10" y="-1.25" width="10" height="2.5" rx="1" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#9370cc"/>
+    </g>
+    <g transform="translate(118 888) rotate(-27.5)" opacity="0.4">
+      <rect x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#a560ad"/>
+    </g>
+    <g transform="translate(410 952) rotate(-27.5)" opacity="0.38">
+      <rect x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#806bbd"/>
+    </g>
+    <g transform="translate(242 266) rotate(-27.5)" opacity="0.64">
+      <rect x="-28" y="-2" width="28" height="4" rx="1.6" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-4" y="-4" width="8" height="8" rx="1.6" fill="#a375ed"/>
+    </g>
+    <g transform="translate(386 236) rotate(-27.5)" opacity="0.58">
+      <rect x="-24" y="-1.75" width="24" height="3.5" rx="1.4" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3.5" y="-3.5" width="7" height="7" rx="1.4" fill="#72cceb"/>
+    </g>
+    <g transform="translate(848 474) rotate(-27.5)" opacity="0.68">
+      <rect x="-30" y="-2" width="30" height="4" rx="1.6" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-4" y="-4" width="8" height="8" rx="1.6" fill="#3ad4f7"/>
+    </g>
+    <g transform="translate(752 682) rotate(-27.5)" opacity="0.56">
+      <rect x="-24" y="-1.75" width="24" height="3.5" rx="1.4" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3.5" y="-3.5" width="7" height="7" rx="1.4" fill="#4cbce8"/>
+    </g>
+    <g transform="translate(294 504) rotate(-27.5)" opacity="0.58">
+      <rect x="-22" y="-1.75" width="22" height="3.5" rx="1.4" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3.5" y="-3.5" width="7" height="7" rx="1.4" fill="#ad72e6"/>
+    </g>
+    <g transform="translate(938 514) rotate(-27.5)" opacity="0.58">
+      <rect x="-24" y="-1.75" width="24" height="3.5" rx="1.4" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-3.5" y="-3.5" width="7" height="7" rx="1.4" fill="#4adcf5"/>
+    </g>
+    <g transform="translate(670 134) rotate(-27.5)" opacity="0.68">
+      <rect x="-28" y="-2" width="28" height="4" rx="1.6" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-4" y="-4" width="8" height="8" rx="1.6" fill="#5ce4f7"/>
+    </g>
+    <g transform="translate(186 326) rotate(-27.5)" opacity="0.78">
+      <circle cx="0" cy="0" r="17.5" fill="#ba84ff" opacity="0.22" filter="url(#soft-blur-sm)"/><rect x="-42" y="-2.5" width="42" height="5" rx="2" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-5" y="-5" width="10" height="10" rx="2" fill="#ba84ff"/>
+    </g>
+    <g transform="translate(904 396) rotate(-27.5)" opacity="0.84">
+      <circle cx="0" cy="0" r="17.5" fill="#4ee6ff" opacity="0.22" filter="url(#soft-blur-sm)"/><rect x="-44" y="-2.5" width="44" height="5" rx="2" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-5" y="-5" width="10" height="10" rx="2" fill="#4ee6ff"/>
+    </g>
+    <g transform="translate(704 774) rotate(-27.5)" opacity="0.72">
+      <circle cx="0" cy="0" r="15.75" fill="#4ad0f2" opacity="0.22" filter="url(#soft-blur-sm)"/><rect x="-36" y="-2.25" width="36" height="4.5" rx="1.8" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-4.5" y="-4.5" width="9" height="9" rx="1.8" fill="#4ad0f2"/>
+    </g>
+    <g transform="translate(342 382) rotate(-27.5)" opacity="0.68">
+      <circle cx="0" cy="0" r="15.75" fill="#8f94ff" opacity="0.22" filter="url(#soft-blur-sm)"/><rect x="-34" y="-2.25" width="34" height="4.5" rx="1.8" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-4.5" y="-4.5" width="9" height="9" rx="1.8" fill="#8f94ff"/>
+    </g>
+    <g transform="translate(828 146) rotate(-27.5)" opacity="0.72">
+      <circle cx="0" cy="0" r="15.75" fill="#99f58c" opacity="0.22" filter="url(#soft-blur-sm)"/><rect x="-34" y="-2.25" width="34" height="4.5" rx="1.8" fill="url(#dust-trail-fade)" opacity="0.50"/><rect x="-4.5" y="-4.5" width="9" height="9" rx="1.8" fill="#99f58c"/>
+    </g>
+  </g>
+
+  <!-- ==================== LAYER 5: 蛇队地面克制彩色溢光 ==================== -->
+  <g id="layer-floor-bounce">
+    <circle cx="210.51" cy="765.54" r="71" fill="#e91d39" opacity="0.17" filter="url(#bounce-blur)"/>
+    <circle cx="323.18" cy="828.7" r="78" fill="#f07021" opacity="0.17" filter="url(#bounce-blur)"/>
+    <circle cx="460.37" cy="813.91" r="84" fill="#facf00" opacity="0.17" filter="url(#bounce-blur)"/>
+    <circle cx="541.27" cy="695.32" r="90" fill="#954ece" opacity="0.17" filter="url(#bounce-blur)"/>
+    <circle cx="530.15" cy="537.08" r="96" fill="#327be6" opacity="0.17" filter="url(#bounce-blur)"/>
+    <circle cx="551.26" cy="373.32" r="103" fill="#04b5e3" opacity="0.17" filter="url(#bounce-blur)"/>
+    <circle cx="705.32" cy="295.91" r="125" fill="#8ed932" opacity="0.22" filter="url(#bounce-blur)"/>
+  </g>
+
+  <!-- ==================== LAYER 6: 高速甩尾尾迹与分段精准能量脊柱 ==================== -->
+  <g id="layer-trail-and-spine">
+    <!-- 队尾柔雾推进光带 -->
+    <path d="M199.08 807.46 L196.23 802.85 L193.08 798.74 L189.87 794.76 L186.64 790.83 L183.41 786.94 L180.19 783.08 L176.97 779.23 L173.77 775.38 L170.58 771.54 L167.4 767.68 L163.95 763.54 L160.59 759.35 L157.35 755.14 L154.2 750.91 L151.16 746.65 L148.22 742.38 L145.36 738.09 L142.6 733.78 L139.91 729.47 L137.31 725.14 L134.79 720.8 L132.33 716.45 L129.95 712.1 L127.63 707.74 L125.37 703.37 L123.17 699.01 L121.02 694.63 L118.92 690.26 L116.87 685.88 L114.87 681.5 L112.91 677.12 L110.98 672.74 L109.1 668.36 L107.24 663.98 L105.42 659.6 L103.62 655.22 L101.85 650.85 L100.1 646.47 L98.36 642.1 L96.65 637.73 L94.94 633.36 L93.25 629 L91.56 624.64 L89.88 620.28 L88.19 615.93 L86.5 611.58 L91.69 608.56 L94.64 612.17 L97.59 615.79 L100.55 619.39 L103.51 622.99 L106.48 626.58 L109.46 630.15 L112.44 633.71 L115.44 637.25 L118.46 640.76 L121.49 644.25 L124.53 647.72 L127.6 651.15 L130.69 654.55 L133.79 657.92 L136.92 661.25 L140.07 664.54 L143.25 667.78 L146.45 670.98 L149.68 674.13 L152.94 677.22 L156.22 680.26 L159.53 683.24 L162.87 686.15 L166.24 689 L169.63 691.78 L173.06 694.48 L176.51 697.1 L179.99 699.64 L183.49 702.09 L187.02 704.45 L190.58 706.71 L194.16 708.87 L197.76 710.92 L201.38 712.86 L205.01 714.68 L208.68 716.38 L212.71 718.27 L216.77 720.12 L220.87 721.91 L224.99 723.63 L229.15 725.29 L233.34 726.86 L237.58 728.34 L241.88 729.7 L246.27 730.88 L251.01 731.51 Z" fill="url(#tail-aura-grad)" filter="url(#soft-blur-sm)"/>
+    <path d="M181.36 777.42 L178.73 773.85 L175.97 770.47 L173.19 767.14 L170.39 763.82 L167.38 760.3 L164.43 756.75 L161.56 753.18 L158.77 749.59 L156.04 745.99 L153.38 742.37 L150.8 738.73 L148.27 735.08 L145.81 731.42 L143.41 727.74 L141.07 724.05 L138.79 720.35 L136.56 716.63 L134.38 712.91 L132.25 709.18 L130.17 705.44 L128.13 701.7 L126.14 697.95 L124.18 694.19 L122.27 690.43 L120.39 686.66 L118.55 682.89 L116.74 679.12 L114.96 675.34 L113.21 671.56 L111.48 667.78 L109.78 663.99 L108.11 660.21 L106.45 656.42 L104.82 652.63 L103.2 648.84 L101.6 645.05 L100.02 641.27 L98.44 637.48 L96.88 633.69 L95.32 629.9 L93.77 626.12 L92.23 622.33 L90.68 618.55 L89.14 614.77 L87.59 611 L86.04 607.22 L88.11 606.01 L90.64 609.22 L93.17 612.43 L95.69 615.64 L98.22 618.84 L100.75 622.04 L103.28 625.24 L105.82 628.43 L108.37 631.6 L110.92 634.77 L113.49 637.92 L116.06 641.05 L118.65 644.17 L121.25 647.27 L123.87 650.36 L126.5 653.42 L129.14 656.45 L131.81 659.46 L134.49 662.45 L137.19 665.4 L139.91 668.33 L142.65 671.22 L145.41 674.08 L148.19 676.9 L150.99 679.68 L153.82 682.42 L156.67 685.12 L159.55 687.77 L162.44 690.38 L165.36 692.93 L168.31 695.43 L171.28 697.88 L174.28 700.26 L177.3 702.59 L180.34 704.85 L183.41 707.04 L186.5 709.16 L189.62 711.2 L192.76 713.16 L195.92 715.04 L199.11 716.83 L202.32 718.53 L205.56 720.14 L209.08 721.86 L212.65 723.53 L216.28 725.11 L220.08 726.46 Z" fill="url(#tail-ribbon-grad)"/>
+    <path d="M196.71 763.95 L193.79 761.23 L190.85 758.53 L187.91 755.83 L184.99 753.12 L182.09 750.39 L179.13 747.58 L176.22 744.71 L173.36 741.8 L170.56 738.86 L167.81 735.87 L165.12 732.85 L162.47 729.8 L159.88 726.71 L157.34 723.6 L154.85 720.45 L152.4 717.28 L150 714.09 L147.64 710.87 L145.32 707.63 L143.04 704.37 L140.81 701.09 L138.61 697.78 L136.44 694.47 L134.31 691.13 L132.21 687.78 L130.15 684.42 L128.11 681.04 L126.11 677.65 L124.13 674.25 L122.17 670.84 L120.24 667.42 L118.34 663.98 L116.45 660.54 L114.58 657.1 L112.74 653.64 L110.91 650.18 L109.09 646.71 L107.29 643.23 L105.51 639.75 L103.73 636.27 L104.76 635.65 L106.98 638.87 L109.2 642.08 L111.44 645.28 L113.69 648.47 L115.95 651.65 L118.23 654.81 L120.52 657.96 L122.84 661.09 L125.16 664.21 L127.51 667.31 L129.88 670.39 L132.27 673.45 L134.68 676.49 L137.12 679.5 L139.57 682.49 L142.06 685.46 L144.57 688.39 L147.1 691.3 L149.67 694.18 L152.26 697.02 L154.88 699.83 L157.53 702.61 L160.21 705.34 L162.92 708.04 L165.66 710.69 L168.43 713.3 L171.24 715.86 L174.08 718.37 L176.95 720.84 L179.86 723.24 L182.8 725.6 L185.77 727.89 L188.78 730.13 L191.82 732.29 L194.91 734.41 L198.1 736.55 L201.32 738.65 L204.55 740.73 L207.81 742.77 L211.11 744.74 Z" fill="url(#tail-core-grad)"/>
+    <path d="M171.36 769.66 L167.59 765.8 L163.61 761.62 L159.76 757.39 L156.04 753.09 L152.43 748.75 L148.95 744.36 L145.57 739.93 L142.31 735.47 L139.14 730.97 L136.08 726.45 L133.1 721.9 L130.22 717.32 L127.42 712.73 L124.71 708.12 L122.06 703.5 L119.49 698.87 L116.99 694.22 L114.55 689.56 L112.16 684.9 L109.84 680.23 L107.56 675.55 L105.34 670.87 L103.15 666.19 L101.01 661.5 L98.91 656.82 L96.84 652.13 L94.8 647.45 L92.78 642.77 L90.79 638.09 L88.82 633.41" fill="none" stroke="url(#tail-slip-grad)" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M214.35 724.58 L210.49 722.42 L206.66 720.22 L203.09 718.17 L199.61 716.08 L196.14 713.89 L192.69 711.61 L189.26 709.24 L185.85 706.78 L182.47 704.24 L179.11 701.63 L175.78 698.94 L172.47 696.17 L169.19 693.34 L165.93 690.45 L162.7 687.49 L159.5 684.47 L156.31 681.4 L153.16 678.28 L150.03 675.1 L146.92 671.88 L143.83 668.62 L140.77 665.31 L137.72 661.96 L134.7 658.58 L131.7 655.17 L128.71 651.72 L125.74 648.25 L122.79 644.74 L119.85 641.22 L116.92 637.67" fill="none" stroke="url(#tail-slip-grad)" stroke-width="3.0" stroke-linecap="round"/>
+
+    <!-- 队尾迸发出的微像素加速粒 -->
+    <g transform="translate(121.07 721.89) rotate(51.44)" opacity="0.78">
+      <rect x="-4.5" y="-4.5" width="9" height="9" rx="2.16" fill="#ff5c77"/>
+    </g>
+    <g transform="translate(144.56 657.2) rotate(56.45)" opacity="0.65">
+      <rect x="-3.5" y="-3.5" width="7" height="7" rx="1.68" fill="#f07021"/>
+    </g>
+    <g transform="translate(93.13 654.38) rotate(58.82)" opacity="0.58">
+      <rect x="-3" y="-3" width="6" height="6" rx="1.44" fill="#c26bff"/>
+    </g>
+    <g transform="translate(191.08 692.97) rotate(46.99)" opacity="0.56">
+      <rect x="-3" y="-3" width="6" height="6" rx="1.44" fill="#ff7a92"/>
+    </g>
+
+    <!-- S 弯外侧轻盈速度气流弧线 -->
+    <path d="M114.85 778.14 L123.16 786.6 L131.95 794.88 L141.03 802.76 L148.92 809.31 L156.88 815.72 L164.93 822 L173.09 828.17 L181.35 834.23 L189.74 840.18 L198.27 846.02 L206.96 851.76 L215.81 857.38 L224.86 862.89 L234.11 868.27 L243.61 873.52 L253.39 878.62 L263.48 883.55 L273.93 888.28 L284.82 892.8 L296.2 897.04 L308.19 900.94 L320.89 904.41 L334.46 907.33 L349.05 909.48 L364.84 910.57 L379.83 910.44 L393.71 909.44 L407.05 907.75 L419.93 905.45 L432.45 902.61 L444.65 899.29 L456.59 895.49 L468.29 891.23 L479.8 886.52 L491.14 881.34 L502.31 875.68 L513.34 869.51 L524.22 862.79" fill="none" stroke="url(#drift-arc-warm)" stroke-width="4.5" stroke-linecap="round" opacity="0.64"/>
+    <path d="M437.21 547.8 L436.69 536.11 L436.57 523.77 L437 510.67 L437.67 500.15 L438.13 491.66 L438.56 482.94 L438.98 474 L439.41 464.87 L439.87 455.54 L440.38 446.01 L440.96 436.29 L441.63 426.35 L442.44 416.19 L443.4 405.78 L444.58 395.1 L446.01 384.11 L447.76 372.77 L449.93 361.03 L452.61 348.82 L455.96 336.06 L460.19 322.68 L465.57 308.59 L472.48 293.76 L481.39 278.25 L492.86 262.31 L507.92 246.1 L524.77 232.26 L541.93 221.38 L558.58 213.14 L574.27 207 L588.9 202.42 L602.5 198.98 L615.16 196.33 L626.98 194.25 L638.06 192.57 L648.45 191.15 L658.2 189.9 L667.34 188.75" fill="none" stroke="url(#drift-arc-cool)" stroke-width="4.5" stroke-linecap="round" opacity="0.72"/>
+
+    <!-- 分段精准配色的节间脉冲能量脊柱 -->
+    <path d="M205.51 755.54 L210.73 759.39 L215.99 763.17 L221.3 766.9 L226.64 770.57 L232.02 774.18 L237.45 777.73 L242.91 781.22 L248.42 784.64 L253.97 787.98 L259.56 791.26 L265.2 794.46 L270.89 797.57 L276.62 800.6 L282.4 803.53 L288.23 806.37 L294.11 809.09 L300.05 811.7 L306.04 814.18 L312.08 816.52 L318.18 818.7" fill="none" stroke="url(#spine-seg-1-grad)" stroke-width="40" stroke-linecap="round" opacity="0.30" filter="url(#soft-blur-sm)"/>
+    <path d="M318.18 818.7 L324.95 820.9 L331.79 822.88 L338.7 824.59 L345.67 826 L352.71 827.08 L359.79 827.77 L366.9 828.01 L374.02 827.8 L381.11 827.23 L388.17 826.35 L395.19 825.17 L402.16 823.73 L409.07 822.03 L415.92 820.09 L422.7 817.92 L429.4 815.53 L436.03 812.94 L442.57 810.13 L449.02 807.12 L455.37 803.91" fill="none" stroke="url(#spine-seg-2-grad)" stroke-width="40" stroke-linecap="round" opacity="0.30" filter="url(#soft-blur-sm)"/>
+    <path d="M455.37 803.91 L462.05 800.26 L468.59 796.37 L474.99 792.25 L481.24 787.9 L487.31 783.31 L493.18 778.47 L498.84 773.38 L504.25 768.03 L509.39 762.42 L514.22 756.54 L518.69 750.38 L522.76 743.95 L526.37 737.25 L529.35 730.25 L531.66 723 L533.39 715.59 L534.65 708.09 L535.51 700.52 L536.03 692.93 L536.27 685.32" fill="none" stroke="url(#spine-seg-3-grad)" stroke-width="40" stroke-linecap="round" opacity="0.30" filter="url(#soft-blur-sm)"/>
+    <path d="M536.27 685.32 L536.27 677.39 L536.06 669.45 L535.68 661.52 L535.15 653.6 L534.52 645.69 L533.79 637.79 L532.99 629.89 L532.15 621.99 L531.28 614.1 L530.39 606.22 L529.51 598.33 L528.65 590.44 L527.84 582.54 L527.08 574.64 L526.41 566.73 L525.83 558.81 L525.39 550.89 L525.11 542.95 L525.01 535.02 L525.15 527.08" fill="none" stroke="url(#spine-seg-4-grad)" stroke-width="40" stroke-linecap="round" opacity="0.30" filter="url(#soft-blur-sm)"/>
+    <path d="M525.15 527.08 L525.58 518.82 L526.34 510.58 L527.11 502.35 L527.83 494.11 L528.52 485.86 L529.2 477.62 L529.87 469.38 L530.56 461.13 L531.28 452.89 L532.05 444.66 L532.87 436.43 L533.77 428.2 L534.76 419.99 L535.86 411.79 L537.1 403.61 L538.49 395.46 L540.07 387.34 L541.87 379.27 L543.92 371.25 L546.26 363.32" fill="none" stroke="url(#spine-seg-5-grad)" stroke-width="40" stroke-linecap="round" opacity="0.30" filter="url(#soft-blur-sm)"/>
+    <path d="M546.26 363.32 L549.33 354.47 L552.93 345.83 L557.15 337.47 L562.1 329.52 L567.87 322.15 L574.55 315.6 L582.08 310.03 L590.22 305.42 L598.81 301.68 L607.68 298.68 L616.73 296.28 L625.9 294.36 L635.13 292.82 L644.41 291.56 L653.72 290.5 L663.04 289.57 L672.37 288.71 L681.69 287.85 L691.02 286.94 L700.32 285.91" fill="none" stroke="url(#spine-seg-6-grad)" stroke-width="40" stroke-linecap="round" opacity="0.30" filter="url(#soft-blur-sm)"/>
+    <path d="M205.51 755.54 L210.73 759.39 L215.99 763.17 L221.3 766.9 L226.64 770.57 L232.02 774.18 L237.45 777.73 L242.91 781.22 L248.42 784.64 L253.97 787.98 L259.56 791.26 L265.2 794.46 L270.89 797.57 L276.62 800.6 L282.4 803.53 L288.23 806.37 L294.11 809.09 L300.05 811.7 L306.04 814.18 L312.08 816.52 L318.18 818.7" fill="none" stroke="url(#spine-seg-1-grad)" stroke-width="21" stroke-linecap="round" opacity="0.86"/>
+    <path d="M318.18 818.7 L324.95 820.9 L331.79 822.88 L338.7 824.59 L345.67 826 L352.71 827.08 L359.79 827.77 L366.9 828.01 L374.02 827.8 L381.11 827.23 L388.17 826.35 L395.19 825.17 L402.16 823.73 L409.07 822.03 L415.92 820.09 L422.7 817.92 L429.4 815.53 L436.03 812.94 L442.57 810.13 L449.02 807.12 L455.37 803.91" fill="none" stroke="url(#spine-seg-2-grad)" stroke-width="21" stroke-linecap="round" opacity="0.86"/>
+    <path d="M455.37 803.91 L462.05 800.26 L468.59 796.37 L474.99 792.25 L481.24 787.9 L487.31 783.31 L493.18 778.47 L498.84 773.38 L504.25 768.03 L509.39 762.42 L514.22 756.54 L518.69 750.38 L522.76 743.95 L526.37 737.25 L529.35 730.25 L531.66 723 L533.39 715.59 L534.65 708.09 L535.51 700.52 L536.03 692.93 L536.27 685.32" fill="none" stroke="url(#spine-seg-3-grad)" stroke-width="21" stroke-linecap="round" opacity="0.86"/>
+    <path d="M536.27 685.32 L536.27 677.39 L536.06 669.45 L535.68 661.52 L535.15 653.6 L534.52 645.69 L533.79 637.79 L532.99 629.89 L532.15 621.99 L531.28 614.1 L530.39 606.22 L529.51 598.33 L528.65 590.44 L527.84 582.54 L527.08 574.64 L526.41 566.73 L525.83 558.81 L525.39 550.89 L525.11 542.95 L525.01 535.02 L525.15 527.08" fill="none" stroke="url(#spine-seg-4-grad)" stroke-width="21" stroke-linecap="round" opacity="0.86"/>
+    <path d="M525.15 527.08 L525.58 518.82 L526.34 510.58 L527.11 502.35 L527.83 494.11 L528.52 485.86 L529.2 477.62 L529.87 469.38 L530.56 461.13 L531.28 452.89 L532.05 444.66 L532.87 436.43 L533.77 428.2 L534.76 419.99 L535.86 411.79 L537.1 403.61 L538.49 395.46 L540.07 387.34 L541.87 379.27 L543.92 371.25 L546.26 363.32" fill="none" stroke="url(#spine-seg-5-grad)" stroke-width="21" stroke-linecap="round" opacity="0.86"/>
+    <path d="M546.26 363.32 L549.33 354.47 L552.93 345.83 L557.15 337.47 L562.1 329.52 L567.87 322.15 L574.55 315.6 L582.08 310.03 L590.22 305.42 L598.81 301.68 L607.68 298.68 L616.73 296.28 L625.9 294.36 L635.13 292.82 L644.41 291.56 L653.72 290.5 L663.04 289.57 L672.37 288.71 L681.69 287.85 L691.02 286.94 L700.32 285.91" fill="none" stroke="url(#spine-seg-6-grad)" stroke-width="21" stroke-linecap="round" opacity="0.86"/>
+    <path d="M205.51 755.54 L213.38 761.3 L221.34 766.93 L229.39 772.42 L237.53 777.78 L245.76 783 L254.09 788.06 L262.52 792.95 L271.06 797.66 L279.7 802.18 L288.45 806.47 L297.31 810.52 L306.3 814.28 L315.42 817.73 L324.66 820.82 L334.04 823.47 L343.55 825.61 L353.18 827.14 L362.89 827.93 L372.63 827.87 L382.35 827.1 L392 825.74 L401.56 823.86 L411.02 821.5 L420.35 818.7 L429.55 815.48 L438.6 811.86 L447.49 807.86 L456.19 803.48 L464.7 798.72 L472.98 793.58 L481.02 788.06 L488.76 782.15 L496.18 775.83 L503.22 769.09 L509.82 761.92 L515.9 754.31 L521.38 746.24 L526.13 737.74 L529.88 728.75 L532.57 719.38 L534.4 709.81 L535.54 700.13 L536.13 690.41 L536.29 680.66 L536.11 670.92 L535.66 661.18 L534.99 651.46 L534.16 641.74 L533.22 632.04 L532.19 622.35 L531.11 612.66 L530.03 602.98 L528.96 593.29 L527.94 583.59 L527.01 573.89 L526.21 564.18 L525.57 554.45 L525.15 544.71 L525.01 534.97 L525.22 525.22 L525.86 515.5 L526.79 505.79 L527.66 496.09 L528.48 486.37 L529.28 476.66 L530.08 466.94 L530.9 457.23 L531.77 447.52 L532.72 437.82 L533.77 428.13 L534.95 418.46 L536.3 408.8 L537.84 399.18 L539.61 389.59 L541.68 380.07 L544.09 370.63 L546.92 361.3 L550.24 352.14 L554.16 343.22 L558.79 334.64 L564.25 326.57 L570.63 319.21 L578.01 312.85 L586.18 307.56 L594.92 303.26 L604.04 299.82 L613.4 297.1 L622.9 294.94 L632.5 293.23 L642.15 291.84 L651.83 290.7 L661.52 289.71 L671.23 288.81 L680.93 287.92 L690.64 286.98 L700.32 285.91" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" opacity="0.66"/>
+  </g>
+
+  <!-- ==================== LAYER 7: 蛇队落地投影 (SnakeShadow.mtl) ==================== -->
+  <g id="layer-shadows">
+    <g transform="translate(215.51 772.54) rotate(36.66)">
+      <rect x="-48" y="-48" width="96" height="96" rx="26" fill="#04050a" opacity="0.62" filter="url(#shadow-blur)"/>
+      <rect x="-45" y="-45" width="90" height="90" rx="24" fill="#06070d" opacity="0.38"/>
+    </g>
+    <g transform="translate(328.18 835.7) rotate(18.93)">
+      <rect x="-52.5" y="-52.5" width="105" height="105" rx="28" fill="#04050a" opacity="0.62" filter="url(#shadow-blur)"/>
+      <rect x="-49.5" y="-49.5" width="99" height="99" rx="26" fill="#06070d" opacity="0.38"/>
+    </g>
+    <g transform="translate(465.37 820.91) rotate(-27.72)">
+      <rect x="-57" y="-57" width="114" height="114" rx="31" fill="#04050a" opacity="0.62" filter="url(#shadow-blur)"/>
+      <rect x="-54" y="-54" width="108" height="108" rx="29" fill="#06070d" opacity="0.38"/>
+    </g>
+    <g transform="translate(546.27 702.32) rotate(-89.13)">
+      <rect x="-61" y="-61" width="122" height="122" rx="33" fill="#04050a" opacity="0.62" filter="url(#shadow-blur)"/>
+      <rect x="-58" y="-58" width="116" height="116" rx="31" fill="#06070d" opacity="0.38"/>
+    </g>
+    <g transform="translate(535.15 544.08) rotate(-88.09)">
+      <rect x="-65" y="-65" width="130" height="130" rx="35" fill="#04050a" opacity="0.62" filter="url(#shadow-blur)"/>
+      <rect x="-62" y="-62" width="124" height="124" rx="33" fill="#06070d" opacity="0.38"/>
+    </g>
+    <g transform="translate(556.26 380.32) rotate(-72.36)">
+      <rect x="-69.5" y="-69.5" width="139" height="139" rx="38" fill="#04050a" opacity="0.62" filter="url(#shadow-blur)"/>
+      <rect x="-66.5" y="-66.5" width="133" height="133" rx="36" fill="#06070d" opacity="0.38"/>
+    </g>
+    <g transform="translate(712.32 305.91) rotate(-6.82)">
+      <rect x="-78" y="-78" width="156" height="156" rx="42" fill="#04050a" opacity="0.62" filter="url(#shadow-blur)"/>
+      <rect x="-75" y="-75" width="150" height="150" rx="40" fill="#06070d" opacity="0.38"/>
+    </g>
+  </g>
+
+  <!-- ==================== LAYER 8: 7 节纯粹街机圆角方块编队 ==================== -->
+  <g id="layer-squad">
+    <g id="rear">
+      <g transform="translate(207.31 761.54) rotate(36.66)">
+        <rect x="-48" y="-48" width="96" height="96" rx="26" fill="url(#side-rear)"/>
+      </g>
+      <g transform="translate(205.51 755.54) rotate(36.66)">
+        <rect x="-48" y="-48" width="96" height="96" rx="26" fill="url(#grad-rear)"/>
+        <rect x="-48" y="-48" width="96" height="96" rx="26" fill="url(#sheen-rear)"/>
+        <rect x="-45.4" y="-45.4" width="90.8" height="90.8" rx="23.4" fill="none" stroke="url(#rim-rear)" stroke-width="2.9"/>
+        <rect x="-47.2" y="-47.2" width="94.4" height="94.4" rx="25.2" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.35"/>
+      </g>
+    </g>
+    <g id="rear-guard">
+      <g transform="translate(319.98 824.7) rotate(18.93)">
+        <rect x="-52.5" y="-52.5" width="105" height="105" rx="28" fill="url(#side-rear-guard)"/>
+      </g>
+      <g transform="translate(318.18 818.7) rotate(18.93)">
+        <rect x="-52.5" y="-52.5" width="105" height="105" rx="28" fill="url(#grad-rear-guard)"/>
+        <rect x="-52.5" y="-52.5" width="105" height="105" rx="28" fill="url(#sheen-rear-guard)"/>
+        <rect x="-49.9" y="-49.9" width="99.8" height="99.8" rx="25.4" fill="none" stroke="url(#rim-rear-guard)" stroke-width="2.9"/>
+        <rect x="-51.7" y="-51.7" width="103.4" height="103.4" rx="27.2" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.35"/>
+      </g>
+    </g>
+    <g id="guard">
+      <g transform="translate(457.17 809.91) rotate(-27.72)">
+        <rect x="-57" y="-57" width="114" height="114" rx="31" fill="url(#side-guard)"/>
+      </g>
+      <g transform="translate(455.37 803.91) rotate(-27.72)">
+        <rect x="-57" y="-57" width="114" height="114" rx="31" fill="url(#grad-guard)"/>
+        <rect x="-57" y="-57" width="114" height="114" rx="31" fill="url(#sheen-guard)"/>
+        <rect x="-54.4" y="-54.4" width="108.8" height="108.8" rx="28.4" fill="none" stroke="url(#rim-guard)" stroke-width="2.9"/>
+        <rect x="-56.2" y="-56.2" width="112.4" height="112.4" rx="30.2" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.35"/>
+      </g>
+    </g>
+    <g id="support">
+      <g transform="translate(538.07 691.32) rotate(-89.13)">
+        <rect x="-61" y="-61" width="122" height="122" rx="33" fill="url(#side-support)"/>
+      </g>
+      <g transform="translate(536.27 685.32) rotate(-89.13)">
+        <rect x="-61" y="-61" width="122" height="122" rx="33" fill="url(#grad-support)"/>
+        <rect x="-61" y="-61" width="122" height="122" rx="33" fill="url(#sheen-support)"/>
+        <rect x="-58.4" y="-58.4" width="116.8" height="116.8" rx="30.4" fill="none" stroke="url(#rim-support)" stroke-width="2.9"/>
+        <rect x="-60.2" y="-60.2" width="120.4" height="120.4" rx="32.2" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.35"/>
+      </g>
+    </g>
+    <g id="midfield">
+      <g transform="translate(526.95 533.08) rotate(-88.09)">
+        <rect x="-65" y="-65" width="130" height="130" rx="35" fill="url(#side-midfield)"/>
+      </g>
+      <g transform="translate(525.15 527.08) rotate(-88.09)">
+        <rect x="-65" y="-65" width="130" height="130" rx="35" fill="url(#grad-midfield)"/>
+        <rect x="-65" y="-65" width="130" height="130" rx="35" fill="url(#sheen-midfield)"/>
+        <rect x="-62.4" y="-62.4" width="124.8" height="124.8" rx="32.4" fill="none" stroke="url(#rim-midfield)" stroke-width="2.9"/>
+        <rect x="-64.2" y="-64.2" width="128.4" height="128.4" rx="34.2" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.35"/>
+      </g>
+    </g>
+    <g id="vanguard">
+      <g transform="translate(548.06 369.32) rotate(-72.36)">
+        <rect x="-69.5" y="-69.5" width="139" height="139" rx="38" fill="url(#side-vanguard)"/>
+      </g>
+      <g transform="translate(546.26 363.32) rotate(-72.36)">
+        <rect x="-69.5" y="-69.5" width="139" height="139" rx="38" fill="url(#grad-vanguard)"/>
+        <rect x="-69.5" y="-69.5" width="139" height="139" rx="38" fill="url(#sheen-vanguard)"/>
+        <rect x="-66.9" y="-66.9" width="133.8" height="133.8" rx="35.4" fill="none" stroke="url(#rim-vanguard)" stroke-width="2.9"/>
+        <rect x="-68.7" y="-68.7" width="137.4" height="137.4" rx="37.2" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="1.35"/>
+      </g>
+    </g>
+    <g id="lead">
+      <g transform="translate(702.12 293.11) rotate(-6.82)">
+        <rect x="-78" y="-78" width="156" height="156" rx="42" fill="url(#side-lead)"/>
+      </g>
+      <g transform="translate(700.32 285.91) rotate(-6.82)">
+      <rect x="-81" y="-81" width="162" height="162" rx="45" fill="none" stroke="#c8ff6b" stroke-width="3.6" opacity="0.34" filter="url(#soft-blur-sm)"/>
+        <rect x="-78" y="-78" width="156" height="156" rx="42" fill="url(#grad-lead)"/>
+        <rect x="-78" y="-78" width="156" height="156" rx="42" fill="url(#sheen-lead)"/>
+        <rect x="-75.4" y="-75.4" width="150.8" height="150.8" rx="39.4" fill="none" stroke="url(#rim-lead)" stroke-width="2.9"/>
+        <rect x="-77.2" y="-77.2" width="154.4" height="154.4" rx="41.2" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.35"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ==================== LAYER 9: 领队锐利光感朝向标 ==================== -->
+  <g id="layer-heading">
+    <!-- 冲刺速度叠影 -->
+    <g transform="translate(797.6 263.81) rotate(-14.3)" opacity="0.48">
+      <path d="M -9 -17.5 L 13.5 0 L -9 17.5" fill="none" stroke="#6ef2d6" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- 落地投影 -->
+    <g transform="translate(829.78 270.64) rotate(-14.33)" opacity="0.54">
+      <path d="M -14 -25 L 19 0 L -14 25" fill="none" stroke="#04050a" stroke-width="13.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#soft-blur-xs)"/>
+    </g>
+    <!-- 主方向标（克制锋利微光 + 清脆亮白内核） -->
+    <g transform="translate(821.78 257.64) rotate(-14.33)">
+      <path d="M -14 -25 L 19 0 L -14 25" fill="none" stroke="#a6ff78" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="0.30" filter="url(#soft-blur-sm)"/>
+      <path d="M -14 -25 L 19 0 L -14 25" fill="none" stroke="url(#heading-grad)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M -14 -25 L 19 0 L -14 25" fill="none" stroke="#ffffff" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.96"/>
+    </g>
+  </g>
+</svg>
